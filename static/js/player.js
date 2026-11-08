@@ -240,7 +240,7 @@
                         },
                         url: new URL(track.src, location.origin).href,
                     };
-                    if (typeof track.duration === "number") && (track.duration > 0) {
+                    if (typeof track.duration === "number" && track.duration > 0) {
                         entry.duration = track.duration;
                     }
                     return entry;   
