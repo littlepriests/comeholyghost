@@ -45,11 +45,25 @@
 }
 
 .home-footer {
-    max-width: 38rem;
     margin: 0 auto;
     padding-top: 1.5rem;
     border-top: 1px solid var(--muted);
     text-align: center;
+}
+
+.home-dock {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.75rem;
+    margin-top: 0.75rem;
+}
+
+.home-player-slot {
+    width: var(--skin-box-width, var(--skin-width));
+    height: var(--skin-box-height, var(--skin-height));
+    flex: none;
+    anchor-name: --home-player-slot;
 }
 
 .ticker {
