@@ -1,0 +1,13 @@
+---
+description: Private maintainer notes for the cursor, banner, player, and playlist. Not for the public site.
+alwaysApply: true
+---
+
+# Site resources
+
+Maintainer notes live in `docs/resources.md`. Never copy them into `content/`, `static/`, a Hugo page, or a commit message that restates secrets. Hugo publishes `content/` and `static/` only.
+
+- Cursor: `[params.cursor]` in `hugo.toml` and `static/images/cursor.png` (32×32). `x` and `y` are the hotspot. Delete `image` to use the normal pointer.
+- Banner: `[params.home]` `banner` and `bannerAlt`. Path is under `static/`. Markup is `layouts/index.html`.
+- Player: `layouts/partials/player.html`, `static/js/player.js`, `static/css/player.css`. Music keeps playing only when the layout wraps the page in `#page-root` and includes the player partial after it.
+- Playlist: `static/audio/playlist.json` is the local test list (`title`, `src`). The fetch URL is in `static/js/player.js`. A remote folder works only as HTTP URLs plus that JSON file and CORS. Do not call a Plex or Symphony library, a drive path, or put an API token in the site.
