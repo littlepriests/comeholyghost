@@ -1,0 +1,88 @@
+/*
+  Horizontal strip sprite animations (pixel-art sheets).
+  Set --sprite-frames, --sprite-fw, --sprite-fh, --sprite-fps, and background-image.
+*/
+
+.sprite-anim {
+    display: inline-block;
+    width: calc(var(--sprite-fw, 32) * 1px);
+    height: calc(var(--sprite-fh, 32) * 1px);
+    flex-shrink: 0;
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    background-size: calc(var(--sprite-fw, 32) * var(--sprite-frames, 1) * 1px) calc(var(--sprite-fh, 32) * 1px);
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    animation-name: sprite-anim-play;
+    animation-duration: calc(var(--sprite-frames, 1) / var(--sprite-fps, 8) * 1s);
+    animation-timing-function: steps(var(--sprite-frames, 1));
+    animation-iteration-count: infinite;
+    vertical-align: bottom;
+}
+
+.sprite-anim.is-scale-2 {
+    transform: scale(2);
+    transform-origin: bottom center;
+}
+
+.sprite-anim.is-scale-3 {
+    transform: scale(3);
+    transform-origin: bottom center;
+}
+
+@keyframes sprite-anim-play {
+    from {
+        background-position: 0 0;
+    }
+    to {
+        background-position: calc(var(--sprite-fw, 32) * var(--sprite-frames, 1) * -1px) 0;
+    }
+}
+
+/* Home nav button: floating Misdreavus (or any logoSprite) */
+.page__logo--sprite {
+    line-height: 0;
+    list-style: none;
+}
+
+.page__logo--sprite .page__logo {
+    margin: 0;
+    display: flex;
+    align-items: flex-end;
+}
+
+.page__logo-inner--sprite {
+    position: relative;
+    display: block;
+    /* Native Misdreavus strip: 52×108 */
+    width: 52px;
+    height: 108px;
+    background: transparent !important;
+    opacity: 1 !important;
+    padding: 0 !important;
+    line-height: 0;
+    overflow: visible;
+}
+
+.page__logo-inner--sprite::before,
+.page__logo-inner--sprite::after {
+    content: none !important;
+}
+
+.page__logo-inner--sprite .sprite-anim {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    /* Play forward then reverse so the bob eases up/down with no snap */
+    animation-direction: alternate;
+}
+
+.page__logo-inner--sprite:hover .sprite-anim {
+    filter: brightness(1.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sprite-anim {
+        animation: none;
+    }
+}

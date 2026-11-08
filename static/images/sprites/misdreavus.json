@@ -1,0 +1,9 @@
+{
+  "src": "images/sprites/misdreavus.png",
+  "frameWidth": 52,
+  "frameHeight": 108,
+  "frames": 10,
+  "fps": 5,
+  "alt": "Misdreavus",
+  "note": "Front hover loop only (no shiny / back). TSR #35479. Fan-use test."
+}

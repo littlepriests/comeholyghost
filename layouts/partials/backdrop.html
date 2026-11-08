@@ -1,6 +1,6 @@
 {{ $backdrop := .Site.Params.backdrop }}
 {{ if $backdrop }}
-<link rel="stylesheet" href="{{ "css/backdrop.css" | relURL }}?v=3">
+<link rel="stylesheet" href="{{ "css/backdrop.css" | relURL }}?v=11">
 {{ range $name := slice "bottom-right" "bottom-left" "top-right" "top-left" }}
     {{ with index $backdrop $name }}
         {{ $image := strings.TrimSpace (printf "%s" (.image | default "")) }}

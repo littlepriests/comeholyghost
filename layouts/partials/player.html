@@ -1,7 +1,18 @@
 <div id="site-player">
-    <p data-player-title>Playlist</p>
-    <button type="button" data-player-toggle>Play</button>
-    <button type="button" data-player-skip>Skip</button>
+    <div class="player-chrome" data-player-chrome>
+        <p class="player-title" data-player-title><span data-player-title-text>Playlist</span></p>
+        <div class="player-chrome__buttons">
+            <button type="button" data-player-toggle aria-label="Play">
+                <i class="fa-solid fa-play" aria-hidden="true"></i>
+            </button>
+            <button type="button" data-player-stop aria-label="Stop">
+                <i class="fa-solid fa-stop" aria-hidden="true"></i>
+            </button>
+            <button type="button" data-player-skip aria-label="Skip">
+                <i class="fa-solid fa-forward" aria-hidden="true"></i>
+            </button>
+        </div>
+    </div>
     <div id="winamp-host"></div>
 </div>
-<script src="{{ "js/player.js" | relURL }}?v=3"></script>
+<script src="{{ "js/player.js" | relURL }}?v=13"></script>

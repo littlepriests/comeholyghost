@@ -1,0 +1,89 @@
+/*
+  GeoCities vibe, modern restraint.
+  Twinkling corner sparkles on media only — no chrome border, no purple wash.
+  Stars live in home.css / home.js.
+*/
+
+.retro-media,
+.home-banner,
+.gallery a,
+.content__body p:has(> img:only-child),
+.page__body p:has(> img:only-child) {
+    position: relative;
+    display: block;
+    max-width: 100%;
+    isolation: isolate;
+    overflow: hidden;
+}
+
+.retro-media > img,
+.home-banner > img,
+.gallery a > img,
+.content__body p:has(> img:only-child) > img,
+.page__body p:has(> img:only-child) > img {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    filter: contrast(1.04) saturate(1.06) brightness(1.01);
+}
+
+.gallery a {
+    background: var(--inner-bg, #44355B);
+}
+
+/* Twinkling corner sparkles */
+.retro-media::before,
+.home-banner::before,
+.gallery a::before,
+.content__body p:has(> img:only-child)::before,
+.page__body p:has(> img:only-child)::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    background:
+        radial-gradient(circle at 7px 7px, #fff 0 2.25px, transparent 4px),
+        radial-gradient(circle at calc(100% - 9px) 9px, var(--highlight, #18FF6D) 0 2.75px, transparent 4.5px),
+        radial-gradient(circle at 10px calc(100% - 10px), var(--muted, #7cafc2) 0 2.25px, transparent 4px),
+        radial-gradient(circle at calc(100% - 11px) calc(100% - 11px), #fff 0 2px, transparent 4px),
+        radial-gradient(circle at 50% 8px, rgb(255 255 255 / 0.7) 0 1.25px, transparent 2.75px),
+        radial-gradient(circle at calc(100% - 28px) calc(100% - 22px), var(--highlight, #18FF6D) 0 1.5px, transparent 3px);
+    animation: retro-sparkle 5.5s ease-in-out infinite;
+}
+
+@keyframes retro-sparkle {
+    0%,
+    100% {
+        opacity: 0.4;
+        filter: brightness(0.9);
+    }
+    35% {
+        opacity: 1;
+        filter: brightness(1.55);
+    }
+    60% {
+        opacity: 0.55;
+        filter: brightness(1.05);
+    }
+    80% {
+        opacity: 0.9;
+        filter: brightness(1.35);
+    }
+}
+
+body.home .site-backdrop img {
+    filter: saturate(1.05) brightness(1.01);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .retro-media::before,
+    .home-banner::before,
+    .gallery a::before,
+    .content__body p:has(> img:only-child)::before,
+    .page__body p:has(> img:only-child)::before {
+        animation: none;
+        opacity: 0.85;
+    }
+}

@@ -1,0 +1,20 @@
+{{- /*
+  Renders one CSS sprite strip animation.
+  Pass a dict with: src, frameWidth, frameHeight, frames, fps, alt, scale (optional 2|3).
+*/ -}}
+{{- $src := .src -}}
+{{- $fw := .frameWidth | default 32 -}}
+{{- $fh := .frameHeight | default 32 -}}
+{{- $frames := .frames | default 1 -}}
+{{- $fps := .fps | default 8 -}}
+{{- $alt := .alt | default "" -}}
+{{- $scale := .scale | default "" -}}
+{{- $class := "sprite-anim" -}}
+{{- if eq (printf "%v" $scale) "2" }}{{ $class = print $class " is-scale-2" }}{{ end -}}
+{{- if eq (printf "%v" $scale) "3" }}{{ $class = print $class " is-scale-3" }}{{ end -}}
+<span
+    class="{{ $class }}"
+    role="img"
+    aria-label="{{ $alt }}"
+    style="--sprite-fw: {{ $fw }}; --sprite-fh: {{ $fh }}; --sprite-frames: {{ $frames }}; --sprite-fps: {{ $fps }}; background-image: url('{{ $src | relURL }}');"
+></span>

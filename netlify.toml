@@ -1,0 +1,13 @@
+[build]
+  command = "hugo --minify --baseURL $URL"
+  publish = "public"
+
+[build.environment]
+  HUGO_VERSION = "0.167.0"
+  HUGO_ENABLEGITINFO = "true"
+
+[context.deploy-preview]
+  command = "hugo --minify --baseURL $DEPLOY_PRIME_URL"
+
+[context.branch-deploy]
+  command = "hugo --minify --baseURL $DEPLOY_PRIME_URL"
