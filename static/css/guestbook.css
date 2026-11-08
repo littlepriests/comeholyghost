@@ -4,6 +4,30 @@
     padding: 0 1.25rem;
 }
 
+@media (min-width: 45rem) {
+    .guestbook-wrap {
+        max-width: 64rem;
+        padding-right: 0;
+        padding-left: 0;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) var(--skin-width);
+        column-gap: 2rem;
+        align-items: start;
+    }
+
+    .guestbook-header,
+    .guestbook-wrap > main {
+        grid-column: 1;
+        min-width: 0;
+    }
+}
+
+@media (max-width: 44.99rem) {
+    .guestbook-wrap {
+        padding-bottom: calc(var(--skin-height) + 2rem);
+    }
+}
+
 .guestbook-header {
     margin-bottom: 2rem;
 }

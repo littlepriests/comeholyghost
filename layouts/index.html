@@ -31,10 +31,13 @@
         </main>
 
         <footer class="home-footer">
-            <section class="ticker" aria-label="Visitor count">
-                <p class="ticker__label">Visitors</p>
-                <p class="ticker__count" data-visitor-count>000000</p>
-            </section>
+            <div class="home-dock">
+                <section class="ticker" aria-label="Visitor count">
+                    <p class="ticker__label">Visitors</p>
+                    <p class="ticker__count" data-visitor-count>000000</p>
+                </section>
+                <div class="home-player-slot"></div>
+            </div>
 
             {{ with .Site.Params.home.footer }}
             <div class="home-footer__extra">
