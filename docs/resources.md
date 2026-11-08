@@ -4,6 +4,55 @@ Private notes for the site owner and agents. This file is not a Hugo page. Do no
 
 The dev server is `hugo server -D --disableFastRender --navigateToChanged` from the repo root, at http://localhost:1313/.
 
+## Color palette
+
+The active palette is `base16-dark`. Switch the whole set by changing the name in `hugo.toml`:
+
+```toml
+[params.theme]
+palette = "base16-dark"
+```
+
+The name is a file in `themes/risotto/assets/css/palettes/`, without `.css`. The choices on disk are `apprentice`, `base16-dark`, `base16-light`, `catppuccin-frappe`, `catppuccin-latte`, `catppuccin-macchiato`, `catppuccin-mocha`, `dracula`, `gruvbox-dark`, `gruvbox-light`, `material`, `papercolor-dark`, `papercolor-light`, `solarized-dark`, `solarized-light`, `tender`, `tokyo-night-dark`, `tokyo-night-light`, `windows-95`, and `windows-95-light`. `themes/risotto/layouts/partials/head.html` loads that file. Save `hugo.toml` and reload the site.
+
+To change one color and keep the rest, edit the hex in `themes/risotto/assets/css/palettes/base16-dark.css`. The page does not use those hex values directly. `themes/risotto/assets/css/colours.css` gives each one a job. Change the job there if, for example, links should use a different base color than `--base0D`.
+
+What the current dark palette paints:
+
+| Token | Hex now | Where it shows |
+| --- | --- | --- |
+| `--bg` (`--base00`) | `#181818` | Page background |
+| `--off-bg` (`--base01`) | `#282828` | Article panel, guestbook entries, the fallback player box |
+| `--inner-bg` (`--base02`) | `#383838` | Banner frame, form fields, code blocks, gallery tile backing |
+| `--muted` (`--base03`) | `#585858` | Borders, timestamps, empty-state text |
+| `--off-fg` (`--base04`) | `#b8b8b8` | Aside, footer, intro text, code text |
+| `--fg` (`--base05`) | `#d8d8d8` | Body text |
+| `--base06` | `#e8e8e8` | Syntax highlighting |
+| `--base07` | `#f8f8f8` | Syntax highlighting |
+| `--base08` | `#ab4642` | Guestbook error text |
+| `--base09` | `#dc9656` | Syntax highlighting |
+| `--highlight` (`--base0A`) | `#f7ca88` | Visitor-count digits, selected text |
+| `--logo` (`--base0B`) | `#a1b56c` | Site-title chip |
+| `--hover` (`--base0C`) | `#86c1b9` | Link hover |
+| `--link` (`--base0D`) | `#7cafc2` | Links |
+| `--base0E` | `#ba8baf` | Syntax highlighting |
+| `--base0F` | `#a16946` | Syntax highlighting |
+
+Two paints are not in the palette. The visitor-count background is `#111` in `assets/css/home.css`. The starter banner SVG has its own fills (`#282828` frame, `#7cafc2` dashed stroke, `#f8f8f8` title, `#b8b8b8` caption). Replacing the SVG replaces those colors. Editing the palette does not.
+
+## Dimensions
+
+Sizes the layout actually uses. `1rem` is 16px unless the browser's default font size has been changed.
+
+- Cursor image: 32×32. Hotspot `x` and `y` are pixels from the top left. The starter arrow is `0` `0`.
+- Banner file: the starter SVG is 1200×280. On the page it fills the homepage column, which is at most 46rem wide, and its height follows the picture, capped at 16rem. The empty frame is at least 8rem tall.
+- Homepage writing column: at most 38rem wide, centered under the banner.
+- Inner pages: the page is at most 64rem wide. At 45rem and wider, the right column is 15rem with a 2rem gap. The skin sits in that column. Below 45rem the column stacks under the article and the skin sits at the bottom right.
+- Gallery tiles: 9.5rem square. Each thumb is cropped to 600×600 before it is shown.
+- Guestbook: below 45rem the column is at most 40rem. At 45rem and wider the page is 64rem with the same 15rem right column as the other inner pages, so the form stays to the left of the skin.
+- Winamp skin: a classic main window is 275×116. This site stacks the main window, the equalizer, and the playlist, so the unscaled stack is 275×348. On screen the width is 15rem, or the viewport minus 2rem when that is smaller, and the height scales with the width. After the skin loads, `static/js/player.js` measures the open windows and writes `--skin-box-width` and `--skin-box-height`. The homepage visitor count centers on that measured box, so a different skin does not need a new offset.
+- Favicon slots the theme already looks for, if you add the files under `static/`: `favicon.ico`, `favicon-32x32.png` (32×32), `favicon-16x16.png` (16×16), and `apple-touch-icon.png` (180×180 is the usual size). None of those files are in the repo right now.
+
 ## Cursor
 
 The pointer is an image when `hugo.toml` names a file that exists under `static/`.
@@ -36,7 +85,7 @@ bannerAlt = "Site banner"
 
 ## Player
 
-Fixed Play/Pause and Skip buttons, bottom right, on every page. The audio element lives outside `#page-root`. Same-site link clicks swap `#page-root` and leave the audio element in place, so the track keeps playing. A new tab, an external link, or a page with no `#page-root` loads a fresh document and the music stops.
+The player is a Winamp skin. On the homepage it sits in the footer, beside the visitor count, and the count is centered on the skin's measured height. On every other page it sits in the right column. The audio element lives outside `#page-root`. Same-site link clicks swap `#page-root` and leave the audio element in place, so the track keeps playing. A new tab, an external link, or a page with no `#page-root` loads a fresh document and the music stops.
 
 Files:
 
