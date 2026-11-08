@@ -2,6 +2,7 @@
     <h1 id="{{ .Title | urlize }}">{{ .Title | markdownify }}</h1>
 
     {{ .Content }}
+    {{- partial "page-buttons.html" . -}}
 
     {{ with .Pages }}
     <ul>

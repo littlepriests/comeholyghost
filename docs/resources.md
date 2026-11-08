@@ -45,13 +45,14 @@ Two paints are not in the palette. The visitor-count background is `#111` in `as
 Sizes the layout actually uses. `1rem` is 16px unless the browser's default font size has been changed.
 
 - Cursor image: 32×32. Hotspot `x` and `y` are pixels from the top left. The starter arrow is `0` `0`.
-- Banner file: the starter SVG is 1200×280. On the page it fills the homepage column, which is at most 46rem wide, and its height follows the picture, capped at 16rem. The empty frame is at least 8rem tall.
-- Homepage writing column: at most 38rem wide, centered under the banner.
-- Inner pages: the page is at most 64rem wide. At 45rem and wider, the right column is 15rem with a 2rem gap. The skin sits in that column. Below 45rem the column stacks under the article and the skin sits at the bottom right.
+- Banner file: the starter SVG is 1200×280. On the page it fills the homepage column, which is at most 40rem wide, and its height follows the picture, capped at 16rem. The empty frame is at least 8rem tall.
+- Homepage writing column: at most 38rem wide, centered under the banner. That is about 60 characters of the monospace face, which is the reading width the column keeps.
+- Inner pages: the page is at most 53rem wide, so it stays between the corner pictures. At 45rem and wider, the right column is 15rem with a 2rem gap, which leaves the article about 36rem. The skin sits in that column. Below 45rem the column stacks under the article and the skin sits at the bottom right.
 - Gallery tiles: 9.5rem square. Each thumb is cropped to 600×600 before it is shown.
-- Guestbook: below 45rem the column is at most 40rem. At 45rem and wider the page is 64rem with the same 15rem right column as the other inner pages, so the form stays to the left of the skin.
+- Guestbook: below 45rem the column is at most 40rem. At 45rem and wider the page uses the same 53rem middle column as the other inner pages, with the 15rem right column, so the form stays to the left of the skin and between the corner pictures.
 - Winamp skin: a classic main window is 275×116. This site stacks the main window, the equalizer, and the playlist, so the unscaled stack is 275×348. On screen the width is 15rem, or the viewport minus 2rem when that is smaller, and the height scales with the width. After the skin loads, `static/js/player.js` measures the open windows and writes `--skin-box-width` and `--skin-box-height`. The homepage visitor count centers on that measured box, so a different skin does not need a new offset.
 - Favicon slots the theme already looks for, if you add the files under `static/`: `favicon.ico`, `favicon-32x32.png` (32×32), `favicon-16x16.png` (16×16), and `apple-touch-icon.png` (180×180 is the usual size). None of those files are in the repo right now.
+- Backdrop: each corner's cap is `maxwidth` and `maxheight`, both `24rem` (384px) right now. On screen the picture is smaller whenever it needs to stay outside the middle column. Each starter file is drawn at the cap, 384×384: `static/images/backdrop-bottom-right.svg`, `backdrop-bottom-left.svg`, `backdrop-top-right.svg`, and `backdrop-top-left.svg`. A replacement can be any size up to that corner's cap. A larger file is shrunk to fit. A smaller file stays at its own pixel size.
 
 ## Cursor
 
@@ -82,6 +83,105 @@ bannerAlt = "Site banner"
 - `banner` is a path under `static/`. The starter is `static/images/banner.svg`.
 - `bannerAlt` is the image description.
 - The markup is in `layouts/index.html`. If the file is missing, the page shows an empty frame that names the path it expected.
+
+## Social links
+
+The icons under the site title in the right column come from `hugo.toml`. They show on every page that uses the standard layout: blog, posts, and About. The homepage, the gallery, and the guestbook do not render that column.
+
+```toml
+[[params.socialLinks]]
+icon = "fa-brands fa-github"
+title = "GitHub"
+url = "https://github.com/"
+```
+
+Add another block for another icon. The fields are `icon`, `title`, and `url`.
+
+- `icon` is a Font Awesome 6 class (`fa-brands fa-github`, `fa-solid fa-envelope`) or an Academicons class (`ai ai-orcid`). Both stylesheets are already loaded from the theme head.
+- `title` is the tooltip and the accessible name. The icon itself is hidden from assistive tech.
+- `url` is the destination. Use a full `https://` address, or `mailto:you@example.com`.
+- The markup is `themes/risotto/layouts/partials/about.html`. The list style is `themes/risotto/assets/css/about.css`.
+
+To put a social link on one page only, including the homepage, gallery, or guestbook, use a button on that page (next section) and set `icon` to the same class.
+
+## Buttons
+
+A button is a labeled link. Three places accept them.
+
+On one page, add `buttons` to that page's front matter. This works on a post, About, the homepage (`content/_index.md`), the blog list, the gallery, and the guestbook.
+
+```yaml
+---
+title: About
+buttons:
+  - title: GitHub
+    url: https://github.com/
+    icon: fa-brands fa-github
+  - title: Notes
+    url: /blog/
+---
+```
+
+`icon` is optional. The row is rendered by `layouts/partials/page-buttons.html` after the page's own text.
+
+Inside the page's markdown, a shortcode places a button in the paragraph where you write it:
+
+```
+{{< button text="GitHub" url="https://github.com/" icon="fa-brands fa-github" >}}
+```
+
+`icon` is optional. The shortcode is `layouts/shortcodes/button.html`.
+
+On the homepage footer, under the visitor count and the player, uncomment or add a block in `hugo.toml`:
+
+```toml
+[[params.home.footer]]
+kind = "button"
+title = "GitHub"
+url = "https://github.com/"
+icon = "fa-brands fa-github"
+```
+
+The same footer list also takes `kind = "text"` (`text`) and `kind = "image"` (`src`, `alt`, and an optional `url`). Those are rendered in `layouts/index.html`.
+
+The look is `static/css/buttons.css`, linked from `themes/risotto/layouts/partials/head.html`.
+
+## Background image
+
+Each corner of the window can hold its own picture. The pictures stay fixed while you move between pages. The middle column is held between them: the homepage stack is at most 40rem, and inner pages are at most 53rem (`--middle-column` in `static/css/player.css`). Corner pictures use the space outside that column. They also shrink on a short window so about 20rem of vertical room stays between the top and bottom pictures. They never grow past `maxwidth` and `maxheight`, and a file smaller than the slot stays at its own size.
+
+The article on an inner page stays about 36rem beside the 15rem right column. That is a normal line length for the monospace face. The homepage writing stays 38rem. When the window is too narrow for both the column and the pictures, the pictures shrink first. The column keeps its width until the window itself is narrower.
+
+The banner, the header, the writing column, the right column, and the footer are painted solid. Where a picture still meets one of those panels, the panel covers it. Text is drawn on those solid panels.
+
+The four blocks are `[params.backdrop.bottom-right]`, `[params.backdrop.bottom-left]`, `[params.backdrop.top-right]`, and `[params.backdrop.top-left]`. They use the same fields. This is the bottom-right block; the other three match it.
+
+```toml
+[params.backdrop.bottom-right]
+image = "images/backdrop-bottom-right.svg"
+alt = ""
+x = "1.5rem"
+y = "1.5rem"
+maxwidth = "24rem"
+maxheight = "24rem"
+```
+
+- `image` is a path under `static/`. The starters are `static/images/backdrop-bottom-right.svg`, `backdrop-bottom-left.svg`, `backdrop-top-right.svg`, and `backdrop-top-left.svg`. Each is 384×384, the same size as that corner's cap. Replacing one file changes only the corner that points at it.
+- `alt` is the description. Leave it empty when the picture is decoration. An empty `alt` still shows the picture.
+- `x` and `y` are the distance from that corner. Any CSS length works (`1.5rem`, `24px`). A blank `x` or `y` uses `1.5rem`.
+- `maxwidth` and `maxheight` are the largest that corner's picture is allowed to be. The layout also keeps the picture outside the middle column, so the size you see is the smaller of that cap and the free space in the corner. A file smaller than the slot stays at its own size. A larger file is shrunk to fit, keeping its proportions. The picture is never scaled up. A blank `maxwidth` or `maxheight` uses `24rem`.
+- The elements are `layouts/partials/backdrop.html`. The rules are `static/css/backdrop.css`. They sit outside `#page-root`, next to the player, so same-site navigation leaves them in place. Include that partial after `#page-root` on any new layout, the same way the player partial is included.
+
+A blank corner draws nothing. The other corners stay as they are. Leaving `image` blank means either of these:
+
+```toml
+[params.backdrop.top-left]
+image = ""
+```
+
+or deleting the `image` line and keeping the rest of that corner's block. Deleting the whole corner block does the same thing. A path that does not match a file under `static/` is also blank, so a typo leaves that corner empty too. To keep a corner empty on purpose, set `image = ""` and leave the block in `hugo.toml`. The size lines can stay; they have no effect until `image` names a file that exists.
+
+The player stays above the pictures. On a short window the skin can cover the corner it sits in.
 
 ## Player
 

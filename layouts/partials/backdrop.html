@@ -1,0 +1,15 @@
+{{ $backdrop := .Site.Params.backdrop }}
+{{ if $backdrop }}
+<link rel="stylesheet" href="{{ "css/backdrop.css" | relURL }}?v=3">
+{{ range $name := slice "bottom-right" "bottom-left" "top-right" "top-left" }}
+    {{ with index $backdrop $name }}
+        {{ $image := strings.TrimSpace (printf "%s" (.image | default "")) }}
+        {{ $path := printf "static/%s" (strings.TrimPrefix "/" $image) }}
+        {{ if and $image (fileExists $path) }}
+<div class="site-backdrop" data-anchor="{{ $name }}" style="--backdrop-x: {{ .x | default "1.5rem" }}; --backdrop-y: {{ .y | default "1.5rem" }}; --backdrop-max-w: {{ .maxwidth | default "24rem" }}; --backdrop-max-h: {{ .maxheight | default "24rem" }};">
+    <img src="{{ $image | relURL }}" alt="{{ .alt }}">
+</div>
+        {{ end }}
+    {{ end }}
+{{ end }}
+{{ end }}

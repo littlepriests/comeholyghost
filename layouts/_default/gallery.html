@@ -14,6 +14,7 @@
         <main>
             <h1>{{ .Title }}</h1>
             {{ with .Content }}<div class="gallery-intro">{{ . }}</div>{{ end }}
+            {{- partial "page-buttons.html" . -}}
 
             {{ $items := slice }}
             {{ range where site.RegularPages "Section" "blog" }}
@@ -45,6 +46,7 @@
         </main>
     </div>
     </div>
+    {{ partial "backdrop.html" . }}
     {{ partial "player.html" . }}
 </body>
 </html>

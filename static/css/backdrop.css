@@ -1,0 +1,65 @@
+.site-backdrop {
+    position: fixed;
+    z-index: 0;
+    pointer-events: none;
+    line-height: 0;
+}
+
+.site-backdrop[data-anchor="bottom-right"] {
+    right: var(--backdrop-x);
+    bottom: var(--backdrop-y);
+}
+
+.site-backdrop[data-anchor="bottom-left"] {
+    left: var(--backdrop-x);
+    bottom: var(--backdrop-y);
+}
+
+.site-backdrop[data-anchor="top-right"] {
+    right: var(--backdrop-x);
+    top: var(--backdrop-y);
+}
+
+.site-backdrop[data-anchor="top-left"] {
+    left: var(--backdrop-x);
+    top: var(--backdrop-y);
+}
+
+.site-backdrop img {
+    display: block;
+    width: auto;
+    height: auto;
+    /* Stay outside the middle column, and inside this corner's own cap.
+       A smaller file is not scaled up. A short window shrinks the picture
+       so a band of the page remains between the top and bottom corners. */
+    max-width: min(var(--backdrop-max-w), max(0px, calc((100vw - var(--middle-column) - 5rem) / 2 - var(--backdrop-x, 1.5rem))));
+    max-height: min(var(--backdrop-max-h), max(0px, calc((100vh - 20rem) / 2 - var(--backdrop-y, 1.5rem))));
+}
+
+.page,
+.gallery-wrap,
+.guestbook-wrap {
+    max-width: var(--middle-column);
+}
+
+.home-page {
+    max-width: min(40rem, 100%);
+}
+
+#page-root {
+    position: relative;
+    z-index: 1;
+}
+
+.page__header,
+.page__aside,
+.page__footer,
+.home-header,
+.home-main,
+.home-footer,
+.guestbook-header,
+.guestbook-wrap > main,
+.gallery-header,
+.gallery-wrap > main {
+    background-color: var(--bg);
+}
