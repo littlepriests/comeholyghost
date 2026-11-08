@@ -234,10 +234,16 @@
             var webamp = new Webamp({
                 initialTracks: list.map(function (track) {
                     return {
-                        metaData: { artist: "", title: track.title },
+                        metaData: { 
+                            artist: track.artist || "",
+                            title: track.title || "",
+                        },
                         url: new URL(track.src, location.origin).href,
-                        duration: 8
                     };
+                    if (typeof track.duration === "number") && (track.duration > 0) {
+                        entry.duration = track.duration;
+                    }
+                    return entry;   
                 }),
                 initialSkin: { url: new URL("/skins/Opaline.wsz", location.origin).href },
                 windowLayout: {
