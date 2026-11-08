@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="{{- site.Language.Lang -}}">
+<head>
+    {{- partial "head.html" . -}}
+    <link rel="stylesheet" href="{{ "css/guestbook.css" | relURL }}">
+</head>
+<body class="guestbook-page">
+    <div id="page-root">
+    <div class="guestbook-wrap">
+        <header class="guestbook-header">
+            {{- partial "header.html" . -}}
+        </header>
+
+        <main>
+            <h1>{{ .Title }}</h1>
+            <div class="guestbook-intro">{{ .Content }}</div>
+
+            <form class="guestbook__form" data-guestbook-form>
+                <label>Name
+                    <input type="text" name="name" maxlength="80" autocomplete="nickname">
+                </label>
+                <label>Comment
+                    <textarea name="message" maxlength="500" rows="4"></textarea>
+                </label>
+                <p class="guestbook__error" data-guestbook-error hidden>Write a name, a comment, or both.</p>
+                <button type="submit">Sign</button>
+            </form>
+
+            <section aria-label="Guestbook entries">
+                <h2>Entries</h2>
+                <ol class="guestbook__entries" data-guestbook-list></ol>
+            </section>
+        </main>
+    </div>
+    <script src="{{ "js/guestbook.js" | relURL }}"></script>
+    </div>
+    {{ partial "player.html" . }}
+</body>
+</html>

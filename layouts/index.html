@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="{{- site.Language.Lang -}}">
+<head>
+    {{- partial "head.html" . -}}
+    {{ $home := resources.Get "css/home.css" | minify | fingerprint }}
+    <link rel="stylesheet" href="{{ $home.RelPermalink }}" integrity="{{ $home.Data.Integrity }}">
+</head>
+<body class="home">
+    <div id="page-root">
+    <div class="home-page">
+
+        <div class="home-banner">
+            {{ $banner := .Site.Params.home.banner | default "images/banner.svg" }}
+            {{ $bannerPath := printf "static/%s" (strings.TrimPrefix "/" $banner) }}
+            {{ if fileExists $bannerPath }}
+            <img src="{{ $banner | relURL }}" alt="{{ .Site.Params.home.bannerAlt | default "Site banner" }}">
+            {{ else }}
+            <div class="home-banner__empty">
+                <p>Banner image</p>
+                <p>Add a file at <code>static/{{ strings.TrimPrefix "/" $banner }}</code></p>
+            </div>
+            {{ end }}
+        </div>
+
+        <header class="home-header">
+            {{- partial "header.html" . -}}
+        </header>
+
+        <main class="home-main">
+            {{ .Content }}
+        </main>
+
+        <footer class="home-footer">
+            <section class="ticker" aria-label="Visitor count">
+                <p class="ticker__label">Visitors</p>
+                <p class="ticker__count" data-visitor-count>000000</p>
+            </section>
+
+            {{ with .Site.Params.home.footer }}
+            <div class="home-footer__extra">
+                {{ range . }}
+                {{ if eq .kind "image" }}
+                {{ if .url }}
+                <a href="{{ .url | relURL }}"><img src="{{ .src | relURL }}" alt="{{ .alt }}"></a>
+                {{ else }}
+                <img src="{{ .src | relURL }}" alt="{{ .alt }}">
+                {{ end }}
+                {{ else if eq .kind "text" }}
+                <p>{{ .text | markdownify }}</p>
+                {{ end }}
+                {{ end }}
+            </div>
+            {{ end }}
+        </footer>
+    </div>
+    <script src="{{ "js/home.js" | relURL }}"></script>
+    </div>
+    {{ partial "player.html" . }}
+</body>
+</html>

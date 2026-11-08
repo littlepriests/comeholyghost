@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="{{- site.Language.Lang -}}">
+<head>
+    {{- partial "head.html" . -}}
+    <link rel="stylesheet" href="{{ "css/gallery.css" | relURL }}">
+</head>
+<body class="gallery-page">
+    <div id="page-root">
+    <div class="gallery-wrap">
+        <header class="gallery-header">
+            {{- partial "header.html" . -}}
+        </header>
+
+        <main>
+            <h1>{{ .Title }}</h1>
+            {{ with .Content }}<div class="gallery-intro">{{ . }}</div>{{ end }}
+
+            {{ $items := slice }}
+            {{ range where site.RegularPages "Section" "blog" }}
+                {{ $post := . }}
+                {{ range .Resources.ByType "image" }}
+                    {{ $items = $items | append (dict "post" $post "img" .) }}
+                {{ end }}
+            {{ end }}
+
+            {{ with $items }}
+            <ul class="gallery">
+                {{ range . }}
+                {{ $img := .img }}
+                {{ $post := .post }}
+                {{ $thumb := $img }}
+                {{ if ne $img.MediaType.SubType "svg" }}
+                    {{ $thumb = $img.Fill "600x600" }}
+                {{ end }}
+                <li>
+                    <a href="{{ $post.RelPermalink }}#{{ $img.Name | anchorize }}">
+                        <img src="{{ $thumb.RelPermalink }}" alt="{{ with $img.Title }}{{ . }}{{ else }}{{ $post.Title }}{{ end }}" width="{{ $thumb.Width }}" height="{{ $thumb.Height }}">
+                    </a>
+                </li>
+                {{ end }}
+            </ul>
+            {{ else }}
+            <p class="gallery-empty">No images yet. Add pictures next to a post in <code>content/blog</code>.</p>
+            {{ end }}
+        </main>
+    </div>
+    </div>
+    {{ partial "player.html" . }}
+</body>
+</html>
