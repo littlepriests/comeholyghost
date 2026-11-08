@@ -1,0 +1,26 @@
+#site-player {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0.4rem 0.55rem;
+    background: var(--off-bg);
+    border: 2px outset var(--muted);
+}
+
+#site-player p {
+    margin: 0;
+    min-width: 4.5rem;
+}
+
+#site-player button {
+    font: inherit;
+    color: var(--fg);
+    background: var(--inner-bg);
+    border: 2px outset var(--muted);
+    padding: 0.2rem 0.55rem;
+}

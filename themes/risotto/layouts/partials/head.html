@@ -53,3 +53,13 @@
 {{ end }}
 {{ with .Site.Language.Locale }}<meta property="og:locale" content="{{ . }}" />{{ end }}
 {{ with .Site.Params.about }}<meta property="og:image" content="{{ with .logo_image }}{{ . | absURL }}{{ end }}" />{{ end }}
+<link rel="stylesheet" href="{{ "css/player.css" | relURL }}">
+{{/* Custom cursor image, when static/ holds the file named in params.cursor.image. */}}
+{{ $cursor := .Site.Params.cursor.image }}
+{{ if and $cursor (os.FileExists (printf "static/%s" (strings.TrimPrefix "/" $cursor))) }}
+<style>
+  :root { --site-cursor: url("{{ $cursor | relURL }}") {{ .Site.Params.cursor.x | default 0 }} {{ .Site.Params.cursor.y | default 0 }}, auto; }
+  * { cursor: var(--site-cursor) !important; }
+  input, textarea, [contenteditable="true"] { cursor: text !important; }
+</style>
+{{ end }}

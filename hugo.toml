@@ -25,6 +25,29 @@ title = "personal-development"
 description = "Notes and experiments in personal development."
 logo = "🍚"
 
+# Custom cursor. Delete image, or point it at a missing file, to use the normal pointer.
+# x and y are the click point, in pixels from the top left of the image. Keep the image at 32×32.
+[params.cursor]
+image = "images/cursor.png"
+x = 0
+y = 0
+
+# Homepage banner. Swap the file, or point banner at a different path under static/.
+[params.home]
+banner = "images/banner.svg"
+bannerAlt = "Site banner"
+
+# Optional homepage footer items, under the visitor counter. Repeat a block to add more.
+# kind is "text" or "image". For an image, url is optional.
+# [[params.home.footer]]
+# kind = "text"
+# text = "A line of footer text."
+# [[params.home.footer]]
+# kind = "image"
+# src = "images/badge.png"
+# alt = "Badge"
+# url = "/about/"
+
 [[params.socialLinks]]
 icon = "fa-brands fa-github"
 title = "GitHub"
@@ -33,10 +56,28 @@ url = "https://github.com/"
 [menu]
 
   [[menu.main]]
+    identifier = "blog"
+    name = "Blog"
+    url = "/blog/"
+    weight = 5
+
+  [[menu.main]]
+    identifier = "gallery"
+    name = "Gallery"
+    url = "/gallery/"
+    weight = 6
+
+  [[menu.main]]
     identifier = "about"
     name = "About"
     url = "/about/"
     weight = 10
+
+  [[menu.main]]
+    identifier = "guestbook"
+    name = "Guestbook"
+    url = "/guestbook/"
+    weight = 20
 
 [taxonomies]
 category = "categories"
