@@ -89,7 +89,7 @@
                         duration: 8
                     };
                 }),
-                initialSkin: { url: new URL("/skins/obi-wan.wsz", location.origin).href },
+                initialSkin: { url: new URL("/skins/Opaline.wsz", location.origin).href },
                 windowLayout: {
                     main: { position: { left: 0, top: 0 } },
                     equalizer: { position: { left: 0, top: 116 } },

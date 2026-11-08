@@ -1,3 +1,8 @@
+.body.home {
+    background-color: var(--bg);
+    background-image: linear-gradient(160deg, var (--base00) 0%, var(--base01) 45%, #31263E 100%;
+    background-attachment: fixed;
+}
 .home-page {
     max-width: 46rem;
     margin: 1.5rem auto 3rem;
@@ -60,8 +65,8 @@
 }
 
 .home-player-slot {
-    width: var(--skin-box-width, var(--skin-width));
-    height: var(--skin-box-height, var(--skin-height));
+    width: 12.5rem;   /* or auto / min-content once you see it */
+    height: 1.5rem; /* roughly one button row */
     flex: none;
     anchor-name: --home-player-slot;
 }

@@ -102,7 +102,23 @@ body.home #site-player.site-player--skin {
     left: anchor(center);
     right: auto;
     bottom: auto;
-    width: var(--skin-box-width, var(--skin-width));
-    height: var(--skin-box-height, var(--skin-height));
+    width: auto;
+    height: auto;
     transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.55rem;
+    background: var(--off-bg);
+    border: 2px outset var(--muted);
+}
+
+body.home #site-player.site-player--skin > p,
+body.home #site-player.site-player--skin > button {
+    display: revert; /* overrides the global hide under .site-player--skin */
+}
+
+body.home #site-player.site-player--skin #winamp-host,
+body.home #site-player.site-player--skin #webamp {
+    display: none !important;
 }

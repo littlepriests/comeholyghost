@@ -1,6 +1,6 @@
 baseURL = "http://localhost:1313/"
 theme = "risotto"
-title = "personal-development"
+title = "꒰ঌᐢ.ˬ.ᐢ໒꒱"
 locale = "en-us"
 DefaultContentLanguage = "en"
 enableInlineShortcodes = true
@@ -21,9 +21,9 @@ noindex = true
 palette = "base16-dark"
 
 [params.about]
-title = "personal-development"
-description = "Notes and experiments in personal development."
-logo = "🍚"
+title = "👼"
+description = ""
+logo = ""
 
 # Custom cursor. Delete image, or point it at a missing file, to use the normal pointer.
 # x and y are the click point, in pixels from the top left of the image. Keep the image at 32×32.
@@ -34,7 +34,7 @@ y = 0
 
 # Homepage banner. Swap the file, or point banner at a different path under static/.
 [params.home]
-banner = "images/banner.svg"
+banner = "images/banner.png"
 bannerAlt = "Site banner"
 
 # One picture per corner, fixed behind the page. Panels cover them.
@@ -42,23 +42,23 @@ bannerAlt = "Site banner"
 # x and y are the distance from that corner. maxwidth and maxheight cap the picture;
 # a smaller file stays at its own size.
 [params.backdrop.bottom-right]
-image = "images/backdrop-bottom-right.svg"
+image = "images/backdrop-bottom-right.png"
 alt = ""
 x = "1.5rem"
 y = "1.5rem"
 maxwidth = "24rem"
 maxheight = "24rem"
 
-[params.backdrop.bottom-left]
-image = "images/backdrop-bottom-left.svg"
-alt = ""
-x = "1.5rem"
-y = "1.5rem"
-maxwidth = "24rem"
-maxheight = "24rem"
+# [params.backdrop.bottom-left]
+# image = "images/backdrop-bottom-left.png"
+# alt = ""
+# x = "1.5rem"
+# y = "1.5rem"
+# maxwidth = "24rem"
+# maxheight = "24rem"
 
 [params.backdrop.top-right]
-image = "images/backdrop-top-right.svg"
+image = "images/backdrop-top-right.png"
 alt = ""
 x = "1.5rem"
 y = "1.5rem"
@@ -66,7 +66,7 @@ maxwidth = "24rem"
 maxheight = "24rem"
 
 [params.backdrop.top-left]
-image = "images/backdrop-top-left.svg"
+image = "images/backdrop-top-left.png"
 alt = ""
 x = "1.5rem"
 y = "1.5rem"
@@ -89,11 +89,6 @@ maxheight = "24rem"
 # title = "GitHub"
 # url = "https://github.com/"
 # icon = "fa-brands fa-github"
-
-[[params.socialLinks]]
-icon = "fa-brands fa-github"
-title = "GitHub"
-url = "https://github.com/"
 
 [menu]
 

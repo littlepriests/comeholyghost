@@ -63,3 +63,7 @@
 .gallery-wrap > main {
     background-color: var(--bg);
 }
+
+body:not(.home) .site-backdrop {
+    display: none;
+}
