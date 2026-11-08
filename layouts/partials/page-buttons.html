@@ -1,0 +1,7 @@
+{{ with .Params.buttons }}
+<p class="site-buttons">
+    {{ range . }}
+    <a class="site-button" href="{{ .url | safeURL }}">{{ with .icon }}<i class="{{ . }}" aria-hidden="true"></i>{{ end }}{{ .title }}</a>
+    {{ end }}
+</p>
+{{ end }}

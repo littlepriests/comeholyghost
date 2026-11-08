@@ -28,6 +28,7 @@
 
         <main class="home-main">
             {{ .Content }}
+            {{- partial "page-buttons.html" . -}}
         </main>
 
         <footer class="home-footer">
@@ -50,6 +51,8 @@
                 {{ end }}
                 {{ else if eq .kind "text" }}
                 <p>{{ .text | markdownify }}</p>
+                {{ else if eq .kind "button" }}
+                <a class="site-button" href="{{ .url | safeURL }}">{{ with .icon }}<i class="{{ . }}" aria-hidden="true"></i>{{ end }}{{ .title }}</a>
                 {{ end }}
                 {{ end }}
             </div>
@@ -58,6 +61,7 @@
     </div>
     <script src="{{ "js/home.js" | relURL }}"></script>
     </div>
+    {{ partial "backdrop.html" . }}
     {{ partial "player.html" . }}
 </body>
 </html>

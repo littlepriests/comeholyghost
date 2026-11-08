@@ -37,8 +37,45 @@ y = 0
 banner = "images/banner.svg"
 bannerAlt = "Site banner"
 
+# One picture per corner, fixed behind the page. Panels cover them.
+# Leave image blank ("") to keep that corner empty. A missing file does the same.
+# x and y are the distance from that corner. maxwidth and maxheight cap the picture;
+# a smaller file stays at its own size.
+[params.backdrop.bottom-right]
+image = "images/backdrop-bottom-right.svg"
+alt = ""
+x = "1.5rem"
+y = "1.5rem"
+maxwidth = "24rem"
+maxheight = "24rem"
+
+[params.backdrop.bottom-left]
+image = "images/backdrop-bottom-left.svg"
+alt = ""
+x = "1.5rem"
+y = "1.5rem"
+maxwidth = "24rem"
+maxheight = "24rem"
+
+[params.backdrop.top-right]
+image = "images/backdrop-top-right.svg"
+alt = ""
+x = "1.5rem"
+y = "1.5rem"
+maxwidth = "24rem"
+maxheight = "24rem"
+
+[params.backdrop.top-left]
+image = "images/backdrop-top-left.svg"
+alt = ""
+x = "1.5rem"
+y = "1.5rem"
+maxwidth = "24rem"
+maxheight = "24rem"
+
 # Optional homepage footer items, under the visitor counter. Repeat a block to add more.
-# kind is "text" or "image". For an image, url is optional.
+# kind is "text", "image", or "button". For an image, url is optional.
+# A button uses title and url. icon is optional (a Font Awesome or Academicons class).
 # [[params.home.footer]]
 # kind = "text"
 # text = "A line of footer text."
@@ -47,6 +84,11 @@ bannerAlt = "Site banner"
 # src = "images/badge.png"
 # alt = "Badge"
 # url = "/about/"
+# [[params.home.footer]]
+# kind = "button"
+# title = "GitHub"
+# url = "https://github.com/"
+# icon = "fa-brands fa-github"
 
 [[params.socialLinks]]
 icon = "fa-brands fa-github"

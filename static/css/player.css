@@ -31,13 +31,15 @@
 }
 
 :root {
+    /* Center band the writing sits in. Corner pictures stay outside it. */
+    --middle-column: min(53rem, calc(100vw - 2.5rem));
     --skin-width: min(15rem, calc(100vw - 2rem));
     --skin-height: calc(var(--skin-width) * 348 / 275);
 }
 
 #site-player.site-player--skin {
     top: 5.5rem;
-    right: max(1rem, calc((100% - 64rem) / 2));
+    right: max(1rem, calc((100% - var(--middle-column)) / 2));
     bottom: auto;
     left: auto;
     transform: none;

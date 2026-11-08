@@ -1,0 +1,25 @@
+.site-button {
+    display: inline-block;
+    margin: 0.35rem 0.5rem 0.35rem 0;
+    padding: 0.35rem 0.8rem;
+    color: var(--fg);
+    background: var(--off-bg);
+    border: 2px outset var(--muted);
+    text-decoration: none;
+}
+
+.site-button:hover {
+    color: var(--hover);
+}
+
+.site-button:active {
+    border-style: inset;
+}
+
+.site-button i {
+    margin-right: 0.35rem;
+}
+
+.site-buttons {
+    margin: 1.25rem 0 0;
+}

@@ -53,7 +53,8 @@
 {{ end }}
 {{ with .Site.Language.Locale }}<meta property="og:locale" content="{{ . }}" />{{ end }}
 {{ with .Site.Params.about }}<meta property="og:image" content="{{ with .logo_image }}{{ . | absURL }}{{ end }}" />{{ end }}
-<link rel="stylesheet" href="{{ "css/player.css" | relURL }}?v=6">
+<link rel="stylesheet" href="{{ "css/player.css" | relURL }}?v=7">
+<link rel="stylesheet" href="{{ "css/buttons.css" | relURL }}">
 {{/* Custom cursor image, when static/ holds the file named in params.cursor.image. */}}
 {{ $cursor := .Site.Params.cursor.image }}
 {{ if and $cursor (os.FileExists (printf "static/%s" (strings.TrimPrefix "/" $cursor))) }}
