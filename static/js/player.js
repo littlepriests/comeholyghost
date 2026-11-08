@@ -139,7 +139,7 @@
         load(index + 1, true);
     });
 
-    fetch("/audio/playlist.json")
+    fetch("https://orbit-meet-dentists-compiled.trycloudflare.com/playlist.json")
         .then(function (response) { return response.json(); })
         .then(function (list) {
             tracks = Array.isArray(list) ? list : [];
