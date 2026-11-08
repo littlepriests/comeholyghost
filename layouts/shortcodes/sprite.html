@@ -1,0 +1,20 @@
+{{- $id := .Get 0 | default (.Get "id") -}}
+{{- $scale := .Get "scale" | default "" -}}
+{{- $match := false -}}
+{{- range site.Params.sprites -}}
+  {{- if and (not $match) (eq .id $id) -}}
+    {{- $match = true -}}
+    {{- partial "sprite.html" (dict
+      "src" .src
+      "frameWidth" .frameWidth
+      "frameHeight" .frameHeight
+      "frames" .frames
+      "fps" .fps
+      "alt" (.alt | default .id)
+      "scale" ($scale | default .scale)
+    ) -}}
+  {{- end -}}
+{{- end -}}
+{{- if not $match -}}
+<span class="sprite-anim sprite-anim--missing">{{ $id }}</span>
+{{- end -}}

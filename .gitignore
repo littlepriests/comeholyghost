@@ -3,6 +3,9 @@
 /resources/_gen/
 .hugo_build.lock
 
+# Sprite slicer deps
+/scripts/node_modules/
+
 # OS / editor
 .DS_Store
 Thumbs.db

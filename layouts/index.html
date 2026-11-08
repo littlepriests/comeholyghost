@@ -7,6 +7,7 @@
 </head>
 <body class="home">
     <div id="page-root">
+    <div class="home-stars" aria-hidden="true"></div>
     <div class="home-page">
 
         <div class="home-banner">
@@ -34,8 +35,8 @@
         <footer class="home-footer">
             <div class="home-dock">
                 <section class="ticker" aria-label="Visitor count">
-                    <p class="ticker__label">Visitors</p>
                     <p class="ticker__count" data-visitor-count>000000</p>
+                    <span class="ticker__pop" data-visitor-pop hidden aria-hidden="true">+1</span>
                 </section>
                 <div class="home-player-slot"></div>
             </div>
@@ -59,7 +60,7 @@
             {{ end }}
         </footer>
     </div>
-    <script src="{{ "js/home.js" | relURL }}"></script>
+    <script src="{{ "js/home.js" | relURL }}?v=6"></script>
     </div>
     {{ partial "backdrop.html" . }}
     {{ partial "player.html" . }}

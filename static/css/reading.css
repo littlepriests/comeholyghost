@@ -1,0 +1,25 @@
+/*
+  Inner pages share the homepage look: text on the open gradient, no pane.
+  Kill the theme's solid body plate / halo so nothing boxes the prose.
+*/
+body:not(.home) .page__body,
+body:not(.home) .guestbook-wrap > main,
+body:not(.home) .gallery-wrap > main {
+    background: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    max-width: none;
+    width: auto;
+    margin: 0;
+    padding: 0;
+}
+
+body:not(.home) .page__header,
+body:not(.home) .page__aside,
+body:not(.home) .page__footer,
+body:not(.home) .guestbook-header,
+body:not(.home) .gallery-header {
+    background: transparent !important;
+    box-shadow: none !important;
+}

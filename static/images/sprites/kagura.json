@@ -1,0 +1,29 @@
+[
+  {
+    "id": "kagura-walk",
+    "src": "images/sprites/kagura-walk.png",
+    "frameWidth": 25,
+    "frameHeight": 42,
+    "frames": 6,
+    "fps": 4,
+    "alt": "Kagura walk"
+  },
+  {
+    "id": "kagura-down",
+    "src": "images/sprites/kagura-down.png",
+    "frameWidth": 40,
+    "frameHeight": 41,
+    "frames": 8,
+    "fps": 5,
+    "alt": "Kagura down"
+  },
+  {
+    "id": "kagura-attack",
+    "src": "images/sprites/kagura-attack.png",
+    "frameWidth": 33,
+    "frameHeight": 45,
+    "frames": 8,
+    "fps": 5,
+    "alt": "Kagura attack"
+  }
+]

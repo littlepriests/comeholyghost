@@ -36,6 +36,13 @@
     max-height: min(var(--backdrop-max-h), max(0px, calc((100vh - 20rem) / 2 - var(--backdrop-y, 1.5rem))));
 }
 
+/* Homepage: corner art stays fully visible; size against the ~40rem stack
+   so the pictures still show when the 53rem gutter math would collapse them. */
+body.home .site-backdrop img {
+    max-width: min(var(--backdrop-max-w), max(0px, calc((100vw - min(40rem, 100%) - 3rem) / 2)));
+    max-height: min(var(--backdrop-max-h), max(0px, calc((100vh - 16rem) / 2)));
+}
+
 .page,
 .gallery-wrap,
 .guestbook-wrap {
@@ -51,17 +58,38 @@
     z-index: 1;
 }
 
+/*
+  Sitewide vertical gradient:
+  top = charcoal near-black, easing into the palette purple (--bg / #31263E)
+  and a touch of --inner-bg / #44355B at the bottom.
+*/
+body {
+    --grad-charcoal: #121014;
+    --grad-purple: var(--bg);
+    --grad-purple-lit: var(--inner-bg);
+    background-color: var(--grad-charcoal);
+    background-image: linear-gradient(
+        to bottom,
+        var(--grad-charcoal) 0%,
+        color-mix(in srgb, var(--grad-charcoal) 70%, var(--grad-purple)) 28%,
+        color-mix(in srgb, var(--grad-charcoal) 35%, var(--grad-purple)) 55%,
+        var(--grad-purple) 78%,
+        color-mix(in srgb, var(--grad-purple) 55%, var(--grad-purple-lit)) 100%
+    );
+    background-attachment: fixed;
+}
+
 .page__header,
 .page__aside,
 .page__footer,
-.home-header,
-.home-main,
-.home-footer,
 .guestbook-header,
 .guestbook-wrap > main,
 .gallery-header,
-.gallery-wrap > main {
-    background-color: var(--bg);
+.gallery-wrap > main,
+.home-header,
+.home-main,
+.home-footer {
+    background-color: transparent;
 }
 
 body:not(.home) .site-backdrop {

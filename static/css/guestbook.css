@@ -11,7 +11,7 @@
         padding-left: 0;
         display: grid;
         grid-template-columns: minmax(0, 1fr) var(--skin-width);
-        column-gap: 2rem;
+        column-gap: var(--skin-gap, 1.5rem);
         align-items: start;
     }
 
@@ -19,6 +19,7 @@
     .guestbook-wrap > main {
         grid-column: 1;
         min-width: 0;
+        overflow-x: clip;
     }
 }
 

@@ -4,6 +4,29 @@ Private notes for the site owner and agents. This file is not a Hugo page. Do no
 
 The dev server is `hugo server -D --disableFastRender --navigateToChanged` from the repo root, at http://localhost:1313/.
 
+## Design direction
+
+Old-school GeoCities personal homepage energy with modern restraint: playful atmosphere (stars, visitor counter personality, music player, guestbook, corner art, framed pictures, sprite pets), clear readable layout, palette-driven color. Not CRT scanlines, not film-grain “cinematic” overlays, not chaotic 1999 clutter. Custom fun cursor is planned by the owner later — leave `[params.cursor]` alone unless they ask.
+
+## Sprite animations (test)
+
+Horizontal strip sheets under `static/images/sprites/`, driven by CSS `steps()` in `static/css/sprites.css`. Config is `[[params.sprites]]` in `hugo.toml` (`id`, `src`, `frameWidth`, `frameHeight`, `frames`, `fps`, `alt`, optional `scale`). Use in content with `{{< sprite "kagura-walk" >}}` or `{{< sprite id="misdreavus" scale="3" >}}`.
+
+Home nav button: set `[params.home] logoSprite = "misdreavus"` (a sprite `id`). That replaces the green `[title] $` chip with the floating strip; clear `logoSprite` to get the chip back. Markup is `layouts/partials/header.html`.
+
+Refresh strips from source sheets (fan-use test assets; Nintendo / game publishers own the art):
+
+- Misdreavus: `node scripts/slice-misdreavus.mjs` (needs `misdreavus-sheet.png`; front hover loop only, no shiny/back)
+- Kagura rows: `node scripts/slice-kagura.mjs` (needs `kagura-sheet.png`; each row → `kagura-walk`, `kagura-down`, `kagura-attack`)
+
+`pngjs` for the slicers lives under `scripts/node_modules` (`npm install pngjs --prefix scripts`).
+
+## Deploy (Netlify)
+
+Build settings live in `netlify.toml` at the repo root. Netlify runs Hugo `0.167.0`, publishes `public/`, and sets `--baseURL` from `$URL` (production) or `$DEPLOY_PRIME_URL` (previews). Leave `baseURL` in `hugo.toml` as localhost for local work.
+
+Connect the GitHub repo in Netlify (Import an existing project). No custom domain is required: use the free `*.netlify.app` name under Domain management, and add a real domain later. Keep `noindex = true` in `hugo.toml` until the site should be searchable.
+
 ## Color palette
 
 The active palette is `base16-dark`. Switch the whole set by changing the name in `hugo.toml`:
@@ -21,24 +44,24 @@ What the current dark palette paints:
 
 | Token | Hex now | Where it shows |
 | --- | --- | --- |
-| `--bg` (`--base00`) | `#181818` | Page background |
-| `--off-bg` (`--base01`) | `#282828` | Article panel, guestbook entries, the fallback player box |
-| `--inner-bg` (`--base02`) | `#383838` | Banner frame, form fields, code blocks, gallery tile backing |
-| `--muted` (`--base03`) | `#585858` | Borders, timestamps, empty-state text |
+| `--bg` (`--base00`) | `#31263E` | Flat background on inner pages; base of the homepage gradient |
+| `--off-bg` (`--base01`) | `#31263E` | Article panel, guestbook entries, simple-player glass |
+| `--inner-bg` (`--base02`) | `#44355B` | Banner frame, form fields, code blocks, gallery tile backing, gradient highlights |
+| `--muted` (`--base03`) | `#7cafc2` | Borders, timestamps, empty-state text |
 | `--off-fg` (`--base04`) | `#b8b8b8` | Aside, footer, intro text, code text |
 | `--fg` (`--base05`) | `#d8d8d8` | Body text |
 | `--base06` | `#e8e8e8` | Syntax highlighting |
 | `--base07` | `#f8f8f8` | Syntax highlighting |
 | `--base08` | `#ab4642` | Guestbook error text |
 | `--base09` | `#dc9656` | Syntax highlighting |
-| `--highlight` (`--base0A`) | `#f7ca88` | Visitor-count digits, selected text |
-| `--logo` (`--base0B`) | `#a1b56c` | Site-title chip |
-| `--hover` (`--base0C`) | `#86c1b9` | Link hover |
+| `--highlight` (`--base0A`) | `#18FF6D` | Visitor-count digits, selected text |
+| `--logo` (`--base0B`) | `#18FF6D` | Site-title chip |
+| `--hover` (`--base0C`) | `#f27e57` | Link hover |
 | `--link` (`--base0D`) | `#7cafc2` | Links |
 | `--base0E` | `#ba8baf` | Syntax highlighting |
 | `--base0F` | `#a16946` | Syntax highlighting |
 
-Two paints are not in the palette. The visitor-count background is `#111` in `assets/css/home.css`. The starter banner SVG has its own fills (`#282828` frame, `#7cafc2` dashed stroke, `#f8f8f8` title, `#b8b8b8` caption). Replacing the SVG replaces those colors. Editing the palette does not.
+Every page uses a vertical linear gradient in `static/css/backdrop.css`: charcoal near-black at the top (`#121014`), easing into the palette purple (`--bg` / `#31263E`) and a touch of `--inner-bg` / `#44355B` at the bottom. Inner pages match the homepage content look — prose sits directly on the gradient (`static/css/reading.css` clears the theme body plate). Corner art is homepage-only.
 
 ## Dimensions
 
@@ -47,10 +70,13 @@ Sizes the layout actually uses. `1rem` is 16px unless the browser's default font
 - Cursor image: 32×32. Hotspot `x` and `y` are pixels from the top left. The starter arrow is `0` `0`.
 - Banner file: the starter SVG is 1200×280. On the page it fills the homepage column, which is at most 40rem wide, and its height follows the picture, capped at 16rem. The empty frame is at least 8rem tall.
 - Homepage writing column: at most 38rem wide, centered under the banner. That is about 60 characters of the monospace face, which is the reading width the column keeps.
-- Inner pages: the page is at most 53rem wide, so it stays between the corner pictures. At 45rem and wider, the right column is 15rem with a 2rem gap, which leaves the article about 36rem. The skin sits in that column. Below 45rem the column stacks under the article and the skin sits at the bottom right.
+- Inner pages: the page is at most 53rem wide. At 45rem and wider the aside column is exactly `--skin-width` (275px) with `--skin-gap` (1.5rem) padding from the body; the Opaline skin sits in that column and sidebar matter (date, etc.) stacks under it. Body is clipped so images can’t spill into the skin. Below 45rem the skin drops to the bottom right.
 - Gallery tiles: 9.5rem square. Each thumb is cropped to 600×600 before it is shown.
 - Guestbook: below 45rem the column is at most 40rem. At 45rem and wider the page uses the same 53rem middle column as the other inner pages, with the 15rem right column, so the form stays to the left of the skin and between the corner pictures.
-- Winamp skin: a classic main window is 275×116. This site stacks the main window, the equalizer, and the playlist, so the unscaled stack is 275×348. On screen the width is 15rem, or the viewport minus 2rem when that is smaller, and the height scales with the width. After the skin loads, `static/js/player.js` measures the open windows and writes `--skin-box-width` and `--skin-box-height`. The homepage visitor count centers on that measured box, so a different skin does not need a new offset.
+- Winamp skin (inner pages only): a classic main window is 275×116. This site stacks the main window, the equalizer, and the playlist, so the unscaled stack is 275×348. On screen the width is 15rem, or the viewport minus 2rem when that is smaller, and the height scales with the width. After the skin loads, `static/js/player.js` measures the open windows and writes `--skin-box-width` and `--skin-box-height`.
+- Homepage player: a compact icon bar (play/pause, stop, skip) sits in `.home-player-slot` beside the visitor-count digits (no “Visitors” label). JS measures it into `--simple-player-width` and `--simple-player-height` so the dock stays vertically centered as a pair.
+- Homepage atmosphere: `.home-stars` (in `layouts/index.html` / `static/js/home.js`) sprinkles subtle twinkles on the gradient. A new session bumps the counter with a small scale flash and a floating `+1`; counts 10 / 100 / 1000 also get a green milestone glow.
+- Media polish: `static/css/retro.css` adds twinkling corner sparkles on banner / post / gallery images — no border, no purple wash, no scanlines. Homepage starfield is denser (`static/js/home.js`, ~180 stars).
 - Favicon slots the theme already looks for, if you add the files under `static/`: `favicon.ico`, `favicon-32x32.png` (32×32), `favicon-16x16.png` (16×16), and `apple-touch-icon.png` (180×180 is the usual size). None of those files are in the repo right now.
 - Backdrop: each corner's cap is `maxwidth` and `maxheight`, both `24rem` (384px) right now. On screen the picture is smaller whenever it needs to stay outside the middle column. Each starter file is drawn at the cap, 384×384: `static/images/backdrop-bottom-right.svg`, `backdrop-bottom-left.svg`, `backdrop-top-right.svg`, and `backdrop-top-left.svg`. A replacement can be any size up to that corner's cap. A larger file is shrunk to fit. A smaller file stays at its own pixel size.
 
@@ -148,11 +174,11 @@ The look is `static/css/buttons.css`, linked from `themes/risotto/layouts/partia
 
 ## Background image
 
-Each corner of the window can hold its own picture. The pictures stay fixed while you move between pages. The middle column is held between them: the homepage stack is at most 40rem, and inner pages are at most 53rem (`--middle-column` in `static/css/player.css`). Corner pictures use the space outside that column. They also shrink on a short window so about 20rem of vertical room stays between the top and bottom pictures. They never grow past `maxwidth` and `maxheight`, and a file smaller than the slot stays at its own size.
+Each corner of the window can hold its own picture. The pictures stay fixed on the homepage only (`body:not(.home) .site-backdrop` hides them on inner pages). The middle column is held between them: the homepage stack is at most 40rem, and inner pages are at most 53rem (`--middle-column` in `static/css/player.css`). Corner pictures use the space outside that column. They also shrink on a short window so about 20rem of vertical room stays between the top and bottom pictures. They never grow past `maxwidth` and `maxheight`, and a file smaller than the slot stays at its own size.
 
 The article on an inner page stays about 36rem beside the 15rem right column. That is a normal line length for the monospace face. The homepage writing stays 38rem. When the window is too narrow for both the column and the pictures, the pictures shrink first. The column keeps its width until the window itself is narrower.
 
-The banner, the header, the writing column, the right column, and the footer are painted solid. Where a picture still meets one of those panels, the panel covers it. Text is drawn on those solid panels.
+On the homepage, the header, writing column, and footer are transparent so the mesh gradient shows through behind the writing. Corner pictures stay fully opaque; homepage sizing uses the ~40rem stack width so they still appear when a 53rem gutter would collapse them. Inner pages paint the header, aside, and footer solid `var(--bg)`.
 
 The four blocks are `[params.backdrop.bottom-right]`, `[params.backdrop.bottom-left]`, `[params.backdrop.top-right]`, and `[params.backdrop.top-left]`. They use the same fields. This is the bottom-right block; the other three match it.
 
@@ -185,15 +211,16 @@ The player stays above the pictures. On a short window the skin can cover the co
 
 ## Player
 
-The player is a Winamp skin. On the homepage it sits in the footer, beside the visitor count, and the count is centered on the skin's measured height. On every other page it sits in the right column. The audio element lives outside `#page-root`. Same-site link clicks swap `#page-root` and leave the audio element in place, so the track keeps playing. A new tab, an external link, or a page with no `#page-root` loads a fresh document and the music stops.
+Two looks, one player. The homepage shows a simple icon bar (play/pause, stop, skip) in the footer dock beside Visitors — no outer player border, button borders stay. Long titles scroll right-to-left inside a fixed 4.75rem slot (`is-marquee` when the text overflows). Inner pages show the Winamp skin in the right column. On the homepage the icon player stays in simple mode while Webamp mounts off-screen, and CSS anchor positioning pins it to `.home-player-slot` beside Visitors (JS placement is the fallback). On first load of an inner page the icon chrome stays hidden (`site-player--booting`) until the skin frame is ready. Webamp still boots once and stays mounted; `applyPlayerChrome()` swaps `site-player--simple` and `site-player--skin` when same-site navigation changes `body.home`. The icon buttons call the Webamp API when it is ready, and fall back to the HTML audio element before that. The player lives outside `#page-root`. Same-site link clicks swap `#page-root` and leave the player in place, so the track keeps playing. A new tab, an external link, or a page with no `#page-root` loads a fresh document and the music stops.
 
 Files:
 
-- `layouts/partials/player.html` — the buttons
-- `static/css/player.css` — position and look
-- `static/js/player.js` — playlist load, playback, and the page swap
+- `layouts/partials/player.html` — the icon buttons and Winamp host
+- `static/css/player.css` — position and look for both modes
+- `static/js/player.js` — playlist load, playback, chrome swap, and the page swap
 - `static/audio/playlist.json` — the current list
 - `static/audio/tone-a.wav` and `tone-b.wav` — dummy tones for local testing
+- `static/skins/Opaline.wsz` — the skin used on inner pages
 
 Every layout that should keep music playing must wrap its page in `<div id="page-root">` and include `{{ partial "player.html" . }}` after that wrapper. Those layouts today are `layouts/index.html`, `layouts/_default/baseof.html`, `layouts/_default/gallery.html`, and `layouts/_default/guestbook.html`.
 
