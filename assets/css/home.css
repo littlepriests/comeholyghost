@@ -1,118 +1,298 @@
-/* Subtle twinkles on the homepage gradient, behind content. */
-body:not(.home) .home-stars {
-    display: none;
+/* Starfield CSS lives in static/css/stars.css (sitewide). */
+
+/* Left gutter | middle stack | right gutter. Moon sits centered in the left column. */
+.home-root {
+    position: relative;
+    display: grid;
+    /* Narrow left pocket so the moon sits beside the stack, not stranded in a wide gutter. */
+    grid-template-columns: minmax(0, 9.5rem) minmax(0, 46rem) minmax(0, 1fr);
+    justify-content: center;
+    align-items: start;
+    column-gap: 0.75rem;
+    padding: 1.5rem 0.75rem 3rem;
 }
 
-.home-stars {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    overflow: hidden;
-}
-
-.home-stars__star {
+/* Small clouds from emojicombos.com/cloud-ascii-art (top entry). Placed by home.js. */
+.home-clouds {
     position: absolute;
-    width: var(--star-size, 1px);
-    height: var(--star-size, 1px);
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    overflow: visible;
+}
+
+body.home pre.ascii-cloud {
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0;
+    background: transparent !important;
+    color: color-mix(in srgb, #e8f4ff 70%, var(--muted)) !important;
+    font-family: ui-monospace, "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, monospace;
+    font-size: 0.48rem;
+    line-height: 1.05 !important;
+    letter-spacing: 0;
+    white-space: pre;
+    overflow: visible !important;
+    pointer-events: none;
+    user-select: none;
+    opacity: 0.8;
+    text-shadow: 0 0 12px color-mix(in srgb, #9ec9ff 35%, transparent);
+    transform: translateZ(0);
+}
+
+/* Top cluster: heart is foreground; gap-b stays behind. */
+body.home pre.ascii-cloud[data-cloud="heart"] {
+    z-index: 5;
+    opacity: 0.9;
+    /* Compact so it fits the strip between # ♡ and the cat halo. */
+    font-size: 0.28rem;
+    line-height: 1.02 !important;
+    background: transparent !important;
+}
+
+body.home pre.ascii-cloud[data-cloud="gap-a"] {
+    z-index: 3;
+    opacity: 0.72;
+    font-size: 0.2rem;
+}
+
+body.home pre.ascii-cloud[data-cloud="gap-b"] {
+    z-index: 2;
+    opacity: 0.55;
+    font-size: 0.17rem;
+}
+
+/* Right flank stays behind the nest cloud. */
+body.home pre.ascii-cloud[data-cloud="mid"] {
+    z-index: 1;
+    font-size: 0.34rem;
+    opacity: 0.62;
+}
+
+body.home pre.ascii-cloud[data-cloud="below"] {
+    z-index: 2;
+    opacity: 0.7;
+    font-size: 0.34rem;
+}
+
+/* Nest = foreground guestbook cloud; interior stays open to the page background. */
+body.home .ascii-cloud-nest {
+    --nest-sx: 2.05;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 6;
+    pointer-events: none;
+    transform: scaleX(var(--nest-sx));
+    transform-origin: center center;
+    background: transparent;
+}
+
+body.home .ascii-cloud-nest .ascii-cloud[data-cloud="nest"] {
+    position: relative;
+    left: auto !important;
+    top: auto !important;
+    z-index: 1;
+    opacity: 0.92;
+    font-size: 0.42rem;
+    transform: none;
+    background: transparent !important;
+}
+
+body.home .ascii-cloud__guest {
+    --guest-sx: calc(1 / var(--nest-sx));
+    position: absolute;
+    left: 50%;
+    top: 52%;
+    z-index: 2;
+    width: max-content;
+    max-width: none;
     margin: 0;
-    border-radius: 50%;
-    background: color-mix(in srgb, var(--fg) 55%, white);
-    box-shadow:
-        0 0 5px color-mix(in srgb, var(--fg) 45%, transparent),
-        0 0 10px color-mix(in srgb, var(--muted) 25%, transparent);
+    padding: 0.2rem 0.65rem;
+    /* Rest above the cloud (falls in on hover). */
+    transform: translate(-50%, calc(-50% - 3.4rem)) scaleX(var(--guest-sx));
+    color: color-mix(in srgb, #ffe0ef 55%, #fff1c2);
+    font-family: var(--font-monospace, ui-monospace, "Cascadia Mono", "Fira Mono", monospace);
+    font-size: 0.76rem;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    text-align: center;
+    text-shadow:
+        0 0 10px color-mix(in srgb, #ff69b4 35%, transparent),
+        0 0 16px color-mix(in srgb, #ffd27a 40%, transparent);
+    white-space: nowrap;
     opacity: 0;
-    animation: home-star-twinkle var(--star-duration, 7s) ease-in-out infinite;
-    animation-delay: var(--star-delay, 0s);
+    pointer-events: none;
+    will-change: transform, opacity;
 }
 
-.home-stars__star.is-bright {
-    background: color-mix(in srgb, var(--highlight) 45%, white);
-    box-shadow:
-        0 0 5px color-mix(in srgb, var(--highlight) 40%, transparent),
-        0 0 10px color-mix(in srgb, var(--fg) 25%, transparent);
-    animation-name: home-star-twinkle-bright;
+/* Fall into the nest on angel hover. */
+body.home .ascii-cloud-nest.is-guest .ascii-cloud__guest,
+body.home .home-root.is-angel-hover .ascii-cloud__guest,
+body.home .home-root:has(.ascii-angel:hover) .ascii-cloud__guest,
+body.home .home-root:has(.ascii-angel:focus-within) .ascii-cloud__guest {
+    opacity: 1 !important;
+    transform: translate(-50%, -50%) scaleX(var(--guest-sx));
+    animation: ascii-guest-fall 0.65s cubic-bezier(0.2, 0.85, 0.25, 1) both;
 }
 
-@keyframes home-star-twinkle {
-    0%,
+/* Fade out in place when the cursor leaves (no reverse fall). */
+body.home .ascii-cloud-nest.is-guest-out .ascii-cloud__guest {
+    opacity: 0 !important;
+    transform: translate(-50%, -50%) scaleX(var(--guest-sx));
+    animation: none;
+    transition: opacity 0.45s ease;
+}
+
+@keyframes ascii-guest-fall {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, calc(-50% - 3.6rem)) scaleX(var(--guest-sx));
+    }
+    70% {
+        opacity: 1;
+    }
     100% {
-        opacity: 0.05;
-        transform: scale(0.55);
-    }
-    18% {
-        opacity: var(--star-opacity, 0.5);
-        transform: scale(1.15);
-    }
-    36% {
-        opacity: 0.12;
-        transform: scale(0.7);
-    }
-    55% {
-        opacity: calc(var(--star-opacity, 0.5) * 0.85);
-        transform: scale(1.05);
-    }
-    72% {
-        opacity: 0.08;
-        transform: scale(0.65);
+        opacity: 1;
+        transform: translate(-50%, -50%) scaleX(var(--guest-sx));
     }
 }
 
-@keyframes home-star-twinkle-bright {
-    0%,
-    100% {
-        opacity: 0.08;
-        transform: scale(0.5);
-    }
-    12% {
-        opacity: var(--star-opacity, 0.75);
-        transform: scale(1.35);
-    }
-    28% {
-        opacity: 0.15;
-        transform: scale(0.7);
-    }
-    48% {
-        opacity: calc(var(--star-opacity, 0.75) * 0.9);
-        transform: scale(1.2);
-    }
-    64% {
-        opacity: 0.1;
-        transform: scale(0.6);
-    }
-    82% {
-        opacity: calc(var(--star-opacity, 0.75) * 0.55);
-        transform: scale(1);
+/* Guestbook copy lives in the nest cloud under the cat. */
+body.home .ascii-angel__cta-art {
+    opacity: 0 !important;
+}
+
+@media (max-width: 52rem) {
+    .home-clouds {
+        display: none;
     }
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .home-stars__star {
-        animation: none;
-        opacity: 0.25;
-    }
+.home-moon-col {
+    grid-column: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    /* padding-top is set by home.js so the moon sits midway Misdreavus → ASCII angel */
+    padding-top: 0;
+    min-width: 0;
 }
 
 .home-page {
     position: relative;
     z-index: 1;
+    grid-column: 2;
     max-width: 46rem;
-    margin: 2rem auto 3rem;
+    width: 100%;
+    margin: 0 auto;
     padding: 0 1.25rem;
+    overflow: visible;
 }
 
 .home-banner {
-    margin-bottom: -1rem;
+    position: relative;
+    margin-bottom: 0;
+    min-height: 8rem;
+    /* Frame / sparkle come from static/css/retro.css */
 }
 
 .home-banner img {
     display: block;
+    width: 100%;
+    height: auto;
+    max-height: 280px;
+    object-fit: cover;
+}
+
+/* Homepage-only stable title under the banner.
+   Font / colors: [params.home] titleFont, titleColor, titleHighlight (or edit the vars below). */
+.home-site-title {
+    --home-title-color: #A80874; /* text (blazing flame) */
+    --home-title-highlight: #5EF38C; /* background behind the title */
+
+    /* Left-flush with the nav / page column (not centered). */
+    display: inline-block;
+    width: fit-content;
+    max-width: 100%;
+    margin: 2.5rem 0 0;
+    padding: 0.12rem 0.4rem;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    color: var(--home-title-color);
+    background-color: var(--home-title-highlight);
+    font-size: clamp(1.65rem, 4.2vw, 2.35rem);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    line-height: 1.15;
+    text-align: left;
+    text-shadow:
+        0 0 18px color-mix(in srgb, #ff69b4 22%, transparent),
+        0 0 28px color-mix(in srgb, #9ec9ff 16%, transparent);
+}
+
+/* "man in the moon" by Joan G. Stark (jgs / Spunk) — keep the signature.
+   Scrolls with the page; centered in .home-moon-col. Smaller for depth vs the ASCII angel. */
+body.home pre.ascii-moon {
+    position: static;
+    left: auto;
+    top: auto;
+    z-index: 1;
+    box-sizing: border-box;
     width: auto;
     height: auto;
-    max-width: 100%;
-    max-height: none;
-    object-fit: unset;
-    margin: 0 auto;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0;
+    overflow: hidden !important;
+    overflow-x: hidden !important;
+    overflow-y: hidden !important;
+    background: transparent !important;
+    color: color-mix(in srgb, #fff1c2 82%, #ffd27a) !important;
+    font-family: ui-monospace, "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, monospace;
+    font-size: 0.42rem;
+    line-height: 1.05 !important;
+    letter-spacing: 0;
+    white-space: pre;
+    pointer-events: none;
+    user-select: none;
+    scrollbar-width: none;
+    opacity: 0.92;
+    text-shadow:
+        0 0 6px color-mix(in srgb, #ffd27a 45%, transparent),
+        0 0 12px color-mix(in srgb, #ff69b4 22%, transparent);
+}
+
+body.home pre.ascii-moon::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+@media (max-width: 70rem) {
+    body.home pre.ascii-moon {
+        font-size: 0.36rem;
+        opacity: 0.88;
+    }
+}
+
+@media (max-width: 52rem) {
+    .home-root {
+        display: block;
+        padding: 1.5rem 0 3rem;
+    }
+
+    .home-moon-col {
+        display: none;
+    }
+
+    .home-page {
+        max-width: 46rem;
+        margin: 0 auto;
+    }
 }
 
 .home-banner__empty {
@@ -132,7 +312,8 @@ body:not(.home) .home-stars {
 }
 
 .home-header {
-    margin-bottom: 2rem;
+    margin-top: 0.15rem;
+    margin-bottom: .5rem;
 }
 
 .home-main {
@@ -140,19 +321,511 @@ body:not(.home) .home-stars {
     margin: 0 auto 3rem;
 }
 
+/* Braille angel: transparent stage, pink wing/halo glow, gold halo sparkles.
+   Theme `pre` paints a solid --inner-bg !important — kill that on .ascii-art. */
+.home-main .ascii-angel {
+    --ascii-pink: #ff69b4;
+    --ascii-mauve: #ba8baf;
+    --ascii-gold: #ffd27a;
+    --ascii-gold-hot: #fff1c2;
+    position: relative;
+    isolation: isolate;
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    /* Extra top margin leaves a pocket for the hovering cloud above the halo. */
+    margin: 2.1rem auto 2.75rem;
+    padding: 1.75rem 0.35rem 3.25rem;
+    overflow: visible;
+}
+
+.home-main .ascii-art {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    border: 0;
+    background: transparent !important;
+    color: color-mix(in srgb, #ffe6f2 40%, var(--fg, #d8d8d8)) !important;
+    font-family: var(--font-monospace, ui-monospace, "Cascadia Mono", "Fira Mono", monospace);
+    font-size: 0.85rem;
+    line-height: 1.15;
+    white-space: pre;
+    text-shadow:
+        0 0 10px color-mix(in srgb, var(--ascii-pink) 22%, transparent),
+        0 0 1px color-mix(in srgb, var(--ascii-mauve) 35%, transparent);
+}
+
+.home-main .ascii-angel__fx {
+    display: contents;
+}
+
+/* Soft pink aura hugging the wing span (mid band, left + right). */
+.home-main .ascii-angel__wing {
+    position: absolute;
+    z-index: 0;
+    top: 28%;
+    width: 42%;
+    height: 48%;
+    pointer-events: none;
+    filter: blur(26px);
+    opacity: 0.8;
+    background:
+        radial-gradient(
+            ellipse 80% 70% at 50% 50%,
+            color-mix(in srgb, var(--ascii-pink) 58%, transparent) 0%,
+            color-mix(in srgb, var(--ascii-mauve) 28%, transparent) 45%,
+            transparent 72%
+        );
+}
+
+.home-main .ascii-angel__wing--left {
+    left: -2%;
+    transform: rotate(-8deg);
+}
+
+.home-main .ascii-angel__wing--right {
+    right: -2%;
+    transform: rotate(8deg);
+}
+
+/* Halo ring glow — sits on the braille halo (top center of the figure). */
+.home-main .ascii-angel__halo {
+    position: absolute;
+    z-index: 2;
+    left: 50%;
+    top: calc(1.75rem + 0.15rem);
+    width: 22%;
+    height: 1.85rem;
+    transform: translateX(-50%);
+    pointer-events: none;
+    filter: blur(6px);
+    opacity: 1;
+    mix-blend-mode: screen;
+    background:
+        radial-gradient(
+            ellipse 95% 70% at 50% 50%,
+            color-mix(in srgb, var(--ascii-gold-hot) 70%, transparent) 0%,
+            color-mix(in srgb, var(--ascii-gold) 52%, transparent) 34%,
+            color-mix(in srgb, var(--ascii-pink) 30%, transparent) 58%,
+            transparent 80%
+        );
+}
+
+/* Gold sparkles along the halo. */
+.home-main .ascii-angel__sparkle {
+    position: absolute;
+    z-index: 3;
+    left: var(--x, 50%);
+    top: var(--y, calc(1.75rem + 0.4rem));
+    width: var(--s, 2px);
+    height: var(--s, 2px);
+    margin: 0;
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    background: var(--ascii-gold-hot);
+    box-shadow:
+        0 0 4px color-mix(in srgb, var(--ascii-gold) 90%, white),
+        0 0 10px color-mix(in srgb, var(--ascii-gold) 55%, transparent),
+        0 0 16px color-mix(in srgb, var(--ascii-pink) 30%, transparent);
+    opacity: 0;
+    animation: ascii-halo-twinkle 3.6s ease-in-out infinite;
+    animation-delay: var(--d, 0s);
+}
+
+.home-main .ascii-angel__sparkle.is-bright {
+    background: #fff8e7;
+    box-shadow:
+        0 0 5px #fff,
+        0 0 12px var(--ascii-gold),
+        0 0 20px color-mix(in srgb, var(--ascii-gold) 50%, transparent);
+    animation-name: ascii-halo-twinkle-bright;
+}
+
+@keyframes ascii-halo-twinkle {
+    0%,
+    100% {
+        opacity: 0.15;
+        transform: translate(-50%, -50%) scale(0.55);
+    }
+    40% {
+        opacity: 0.95;
+        transform: translate(-50%, -50%) scale(1.25);
+    }
+    70% {
+        opacity: 0.35;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+}
+
+@keyframes ascii-halo-twinkle-bright {
+    0%,
+    100% {
+        opacity: 0.2;
+        transform: translate(-50%, -50%) scale(0.5) rotate(0deg);
+    }
+    30% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.45) rotate(20deg);
+    }
+    55% {
+        opacity: 0.4;
+        transform: translate(-50%, -50%) scale(0.75) rotate(40deg);
+    }
+    80% {
+        opacity: 0.85;
+        transform: translate(-50%, -50%) scale(1.15) rotate(10deg);
+    }
+}
+
+/* Falling gold stars from under the angel — only while hovered. */
+.home-main .ascii-angel__fall {
+    position: absolute;
+    z-index: 2;
+    left: var(--fx, 50%);
+    top: 72%;
+    width: var(--fs, 2px);
+    height: var(--fs, 2px);
+    margin: 0;
+    border-radius: 50%;
+    pointer-events: none;
+    background: var(--ascii-gold-hot);
+    box-shadow:
+        0 0 3px color-mix(in srgb, var(--ascii-gold) 85%, white),
+        0 0 8px color-mix(in srgb, var(--ascii-gold) 50%, transparent),
+        0 0 14px color-mix(in srgb, var(--ascii-pink) 22%, transparent);
+    opacity: 0;
+    transform: translate(-50%, 0) scale(0.4);
+}
+
+.home-main .ascii-angel__fall.is-glimmer {
+    background: #fff8e7;
+    box-shadow:
+        0 0 4px #fff,
+        0 0 10px var(--ascii-gold),
+        0 0 18px color-mix(in srgb, var(--ascii-gold) 45%, transparent);
+}
+
+.home-main .ascii-angel:hover .ascii-angel__fall,
+.home-main .ascii-angel:focus-within .ascii-angel__fall {
+    animation: ascii-fall-glimmer var(--ffall, 2.5s) ease-in var(--fd, 0s) infinite;
+}
+
+.home-main .ascii-angel__cta {
+    position: absolute;
+    z-index: 4;
+    left: 50%;
+    bottom: 0.15rem;
+    display: block;
+    width: max-content;
+    min-width: 16rem;
+    max-width: 100%;
+    padding: 1.1rem 0.75rem 0.2rem;
+    transform: translate(-50%, 0.35rem);
+    text-decoration: none;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.home-main .ascii-angel:hover .ascii-angel__cta,
+.home-main .ascii-angel:focus-within .ascii-angel__cta {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, 0);
+}
+
+.home-main .ascii-angel__cta-art {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    padding: 0.35rem 0.5rem;
+    overflow: visible;
+    border: 0;
+    background: transparent !important;
+    color: color-mix(in srgb, #ffe0ef 55%, var(--ascii-gold-hot, #fff1c2)) !important;
+    font-family: var(--font-monospace, ui-monospace, "Cascadia Mono", "Fira Mono", monospace);
+    font-size: 0.78rem;
+    line-height: 1.25;
+    white-space: pre;
+    text-align: center;
+    text-shadow:
+        0 0 10px color-mix(in srgb, var(--ascii-pink, #ff69b4) 35%, transparent),
+        0 0 16px color-mix(in srgb, var(--ascii-gold, #ffd27a) 40%, transparent);
+}
+
+.home-main .ascii-angel__cta:hover .ascii-angel__cta-art,
+.home-main .ascii-angel__cta:focus-visible .ascii-angel__cta-art {
+    color: var(--ascii-gold-hot, #fff1c2) !important;
+}
+
+/* Falling ♡ around the guestbook CTA (gold glimmer). */
+.home-main .ascii-angel__heart {
+    position: absolute;
+    z-index: 0;
+    left: var(--hx, 50%);
+    top: 0;
+    margin: 0;
+    pointer-events: none;
+    font-family: var(--font-monospace, ui-monospace, "Cascadia Mono", "Fira Mono", monospace);
+    font-size: 0.7rem;
+    line-height: 1;
+    color: var(--ascii-gold-hot, #fff1c2);
+    text-shadow:
+        0 0 4px color-mix(in srgb, var(--ascii-gold, #ffd27a) 90%, white),
+        0 0 10px color-mix(in srgb, var(--ascii-gold, #ffd27a) 55%, transparent),
+        0 0 16px color-mix(in srgb, var(--ascii-pink, #ff69b4) 35%, transparent);
+    opacity: 0;
+    transform: translate(-50%, 0) scale(0.5);
+}
+
+.home-main .ascii-angel__heart.is-glimmer {
+    color: #fff8e7;
+    text-shadow:
+        0 0 5px #fff,
+        0 0 12px var(--ascii-gold, #ffd27a),
+        0 0 18px color-mix(in srgb, var(--ascii-gold, #ffd27a) 50%, transparent);
+}
+
+.home-main .ascii-angel:hover .ascii-angel__heart,
+.home-main .ascii-angel:focus-within .ascii-angel__heart {
+    animation: ascii-heart-fall var(--hfall, 2.5s) ease-in var(--hd, 0s) infinite;
+}
+
+@keyframes ascii-heart-fall {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -0.2rem) scale(0.4) rotate(-8deg);
+        filter: brightness(1);
+    }
+    14% {
+        opacity: 1;
+        transform: translate(calc(-50% + var(--hdrift, 0px) * 0.2), 0.35rem) scale(1.1) rotate(6deg);
+        filter: brightness(1.4);
+    }
+    48% {
+        opacity: 0.9;
+        transform: translate(calc(-50% + var(--hdrift, 0px) * 0.6), 1.35rem) scale(0.95) rotate(-4deg);
+        filter: brightness(1.15);
+    }
+    78% {
+        opacity: 0.4;
+        transform: translate(calc(-50% + var(--hdrift, 0px)), 2.15rem) scale(0.75) rotate(10deg);
+        filter: brightness(1.35);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--hdrift, 0px) * 1.15), 2.85rem) scale(0.4) rotate(-6deg);
+        filter: brightness(0.95);
+    }
+}
+
+@keyframes ascii-fall-glimmer {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, 0) scale(0.35);
+        filter: brightness(1);
+    }
+    12% {
+        opacity: 1;
+        transform: translate(calc(-50% + var(--fdrift, 0px) * 0.15), 0.4rem) scale(1.15);
+        filter: brightness(1.35);
+    }
+    45% {
+        opacity: 0.85;
+        transform: translate(calc(-50% + var(--fdrift, 0px) * 0.55), 1.6rem) scale(0.95);
+        filter: brightness(1.1);
+    }
+    75% {
+        opacity: 0.45;
+        transform: translate(calc(-50% + var(--fdrift, 0px)), 2.6rem) scale(0.7);
+        filter: brightness(1.4);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--fdrift, 0px) * 1.1), 3.4rem) scale(0.35);
+        filter: brightness(0.9);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.home .ascii-cloud-nest.is-guest .ascii-cloud__guest,
+    body.home .home-root.is-angel-hover .ascii-cloud__guest,
+    body.home .home-root:has(.ascii-angel:hover) .ascii-cloud__guest,
+    body.home .home-root:has(.ascii-angel:focus-within) .ascii-cloud__guest {
+        animation: none;
+        opacity: 1 !important;
+        transform: translate(-50%, -50%) scaleX(var(--guest-sx));
+    }
+
+    .home-main .ascii-angel__sparkle {
+        animation: none;
+        opacity: 0.7;
+    }
+
+    .home-main .ascii-angel:hover .ascii-angel__fall,
+    .home-main .ascii-angel:focus-within .ascii-angel__fall {
+        animation: none;
+        opacity: 0.55;
+        transform: translate(-50%, 1.2rem) scale(1);
+    }
+
+    .home-main .ascii-angel__cta {
+        transition: none;
+    }
+
+    .home-main .ascii-angel:hover .ascii-angel__heart,
+    .home-main .ascii-angel:focus-within .ascii-angel__heart {
+        animation: none;
+        opacity: 0.65;
+        transform: translate(-50%, 0.8rem) scale(1);
+    }
+}
+
 .home-footer {
+    position: relative;
     margin: 0 auto;
     padding-top: 1.5rem;
     border-top: 1px solid color-mix(in srgb, var(--muted) 35%, transparent);
     text-align: center;
+    overflow: visible;
+}
+
+/*
+  Sword figure: whole image visible in the right gutter.
+  Head sits on the blue footer hairline (translateY tuned to ~head in the PNG).
+  Width tracks remaining viewport beside the ~40rem home column — shrinks to 0
+  instead of covering the article when the window is narrow.
+*/
+.home-sword {
+    /* Pin to the dock / ticker band (not the footer hairline). */
+    --home-sword-align: 48%;
+    position: absolute;
+    top: calc(1.5rem + 3.1rem);
+    right: calc(50% - 50vw + 0.5rem);
+    z-index: 5;
+    width: clamp(0px, calc((100vw - 42rem) / 2 - 0.75rem), 15rem);
+    line-height: 0;
+    /* Whole figure must receive hover — parent pointer-events:none made only a
+       ~30×25px wound target clickable, so hovering the art did nothing. */
+    pointer-events: auto;
+    cursor: crosshair;
+    overflow: visible;
+    transform: translateY(calc(var(--home-sword-align) * -1));
+    transform-origin: top center;
+}
+
+.home-sword img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: none;
+    max-height: none;
+    pointer-events: none;
+}
+
+/* Particle origin at blade exit through her upper back (not a hit-target). */
+.home-sword__wound {
+    position: absolute;
+    left: 38%;
+    top: 45%;
+    width: 0;
+    height: 0;
+    overflow: visible;
+    pointer-events: none;
+}
+
+.home-sword__heart {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 6;
+    margin: 0;
+    pointer-events: none;
+    font-family: var(--font-monospace, ui-monospace, "Cascadia Mono", "Fira Mono", monospace);
+    font-size: 0.95rem;
+    line-height: 1;
+    color: #ff2a4a;
+    text-shadow:
+        0 0 4px #ff6b81,
+        0 0 10px #ff1744,
+        0 0 18px rgb(255 20 60 / 0.75);
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.35);
+}
+
+.home-sword__heart.is-bright {
+    color: #ff4d6d;
+    text-shadow:
+        0 0 5px #fff,
+        0 0 10px #ff2a4a,
+        0 0 18px #ff1744,
+        0 0 26px rgb(255 20 60 / 0.85);
+    font-size: 1.15rem;
+}
+
+.home-sword:hover .home-sword__heart,
+.home-sword:focus-within .home-sword__heart {
+    animation: home-sword-spurt var(--hspurt, 1s) cubic-bezier(0.12, 0.7, 0.25, 1) var(--hd, 0s) infinite;
+}
+
+@keyframes home-sword-spurt {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.25) rotate(0deg);
+        filter: brightness(1.1);
+    }
+    8% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2) rotate(calc(var(--rot, 0deg) * 0.25));
+        filter: brightness(1.55);
+    }
+    55% {
+        opacity: 0.85;
+        transform:
+            translate(
+                calc(-50% + var(--dx, -1rem) * 0.75),
+                calc(-50% + var(--dy, -2rem) * 0.75)
+            )
+            scale(0.95)
+            rotate(var(--rot, 0deg));
+        filter: brightness(1.25);
+    }
+    100% {
+        opacity: 0;
+        transform:
+            translate(
+                calc(-50% + var(--dx, -1rem)),
+                calc(-50% + var(--dy, -2rem))
+            )
+            scale(0.4)
+            rotate(calc(var(--rot, 0deg) * 1.35));
+        filter: brightness(0.95);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .home-sword:hover .home-sword__heart,
+    .home-sword:focus-within .home-sword__heart {
+        animation: none;
+        opacity: 0.75;
+        transform: translate(
+            calc(-50% + var(--dx, -1rem) * 0.35),
+            calc(-50% + var(--dy, -2rem) * 0.35)
+        ) scale(1);
+    }
 }
 
 .home-dock {
+    position: relative;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: center;
     gap: 1.25rem;
     margin-top: 0.75rem;
+    min-height: 4.5rem;
 }
 
 .home-player-slot {
@@ -160,14 +833,237 @@ body:not(.home) .home-stars {
     height: var(--simple-player-height, 1.75rem);
     flex: none;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
+}
+
+/* Park pads: left = Sango, right = Kagura after the slash. */
+.home-dock__pet {
+    position: relative;
+    flex: none;
+    width: calc(25px * 2.1);
+    height: calc(42px * 2.1);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    overflow: visible;
+}
+
+.home-dock__pet--left {
+    width: calc(48px * 2.1);
+    height: calc(47px * 2.1);
+}
+
+.home-dock__pet[hidden] {
+    display: none !important;
 }
 
 .ticker {
     position: relative;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     line-height: 1;
+    overflow: visible;
+    z-index: 1;
+}
+
+.ticker.is-attacking .ticker__count {
+    box-shadow: 0 0 14px color-mix(in srgb, var(--highlight) 45%, transparent);
+}
+
+/* Kagura walks on the dock baseline (feet share the player/ticker ground). */
+.dock-kagura {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    top: auto;
+    z-index: 5;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    will-change: transform, opacity;
+    line-height: 0;
+}
+
+.dock-kagura .sprite-anim.is-scale-3 {
+    transform-origin: bottom center;
+}
+
+/* Attack / travel: full size. Idle walk: ~30% smaller. */
+.dock-kagura.is-traveling .sprite-anim.is-scale-3,
+.dock-kagura.is-attacking .sprite-anim.is-scale-3 {
+    transform: scale(3);
+}
+
+.dock-kagura.is-traveling,
+.dock-kagura.is-attacking,
+.dock-kagura.is-idle,
+.dock-kagura.is-down {
+    opacity: 1;
+    visibility: visible;
+}
+
+.dock-kagura.is-attacking {
+    /* Duration is set inline to match slashMs; this is the fallback curve. */
+    transition: transform 2.6s cubic-bezier(0.33, 0.12, 0.2, 1);
+    filter: drop-shadow(0 0 8px color-mix(in srgb, #fff 35%, var(--highlight) 45%));
+}
+
+.dock-kagura.is-idle {
+    position: relative;
+    left: auto;
+    top: auto;
+    bottom: auto;
+    transform: none !important;
+    filter: none;
+    transition: none;
+}
+
+.dock-kagura__strip {
+    display: none;
+    line-height: 0;
+}
+
+.dock-kagura__strip.is-active {
+    display: block;
+}
+
+.dock-kagura__strip--attack .sprite-anim {
+    /* Loop the wind slash for the whole travel; last frame stays real (not blank). */
+    animation-iteration-count: infinite;
+    /* Prefer the vortex frames so the gust reads while she crosses. */
+    animation-duration: 1.1s;
+}
+
+.dock-kagura:not(.is-attacking):not(.is-idle):not(.is-down) .dock-kagura__strip--attack .sprite-anim {
+    animation-play-state: paused;
+}
+
+.dock-kagura.is-idle .dock-kagura__strip--walk .sprite-anim {
+    animation-iteration-count: infinite;
+    animation-timing-function: steps(var(--sprite-steps, 5), end);
+}
+
+.dock-kagura.is-down .dock-kagura__strip--down .sprite-anim {
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+}
+
+.dock-kagura.is-down {
+    position: relative;
+    left: auto;
+    top: auto;
+    bottom: auto;
+    transform: none !important;
+    filter: none;
+    transition: none;
+    opacity: 1;
+    visibility: visible;
+}
+
+.dock-kagura.is-idle .sprite-anim.is-scale-3,
+.dock-kagura.is-down .sprite-anim.is-scale-3 {
+    transform: scale(2.1);
+}
+
+/* Sango parks left of the ticker; click to fling Hiraikotsu at Kagura. */
+.dock-sango {
+    position: relative;
+    display: block;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    line-height: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.dock-sango:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--highlight) 70%, transparent);
+    outline-offset: 3px;
+}
+
+.dock-sango .sprite-anim.is-scale-3 {
+    transform: scale(2.1);
+    transform-origin: bottom center;
+}
+
+.dock-sango.is-attacking .sprite-anim.is-scale-3 {
+    transform: scale(2.4);
+}
+
+.dock-sango__strip {
+    display: none;
+    line-height: 0;
+}
+
+.dock-sango__strip.is-active {
+    display: block;
+}
+
+.dock-sango.is-idle .dock-sango__strip--idle .sprite-anim {
+    animation-iteration-count: infinite;
+}
+
+.dock-sango.is-hurt .dock-sango__strip--hurt .sprite-anim {
+    filter: brightness(1.15);
+}
+
+.dock-sango.is-hurt {
+    animation: sango-flinch 0.35s ease;
+}
+
+.dock-sango.is-attacking .dock-sango__strip--attack .sprite-anim {
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+}
+
+.dock-sango.is-busy {
+    pointer-events: none;
+    cursor: default;
+}
+
+/* Flying Hiraikotsu (spinning projectile cells from the Sango sheet). */
+.dock-boomerang {
+    position: absolute;
+    left: 0;
+    bottom: 0.35rem;
+    z-index: 6;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    line-height: 0;
+    will-change: transform, opacity;
+}
+
+.dock-boomerang.is-flying {
+    opacity: 1;
+    visibility: visible;
+    transition: transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.dock-boomerang.is-returning {
+    opacity: 1;
+    visibility: visible;
+    transition: transform 0.65s cubic-bezier(0.33, 0.12, 0.2, 1);
+}
+
+.dock-boomerang .sprite-anim.is-scale-2 {
+    transform: scale(2);
+    transform-origin: bottom center;
+}
+
+@keyframes sango-flinch {
+    0% {
+        transform: translateX(0);
+    }
+    35% {
+        transform: translateX(-6px);
+    }
+    100% {
+        transform: translateX(0);
+    }
 }
 
 .ticker__count {
@@ -244,6 +1140,20 @@ body:not(.home) .home-stars {
 
     .ticker__pop.is-show {
         opacity: 1;
+    }
+
+    .dock-kagura,
+    .dock-sango,
+    .dock-boomerang {
+        display: none;
+    }
+
+    .dock-sango.is-hurt {
+        animation: none;
+    }
+
+    body.home pre.ascii-moon {
+        text-shadow: none;
     }
 }
 

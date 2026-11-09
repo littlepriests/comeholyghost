@@ -9,12 +9,14 @@
 {{- $fps := .fps | default 8 -}}
 {{- $alt := .alt | default "" -}}
 {{- $scale := .scale | default "" -}}
+{{- $steps := cond (gt (int $frames) 1) (sub (int $frames) 1) 1 -}}
 {{- $class := "sprite-anim" -}}
+{{- if le (int $frames) 1 }}{{ $class = print $class " is-static" }}{{ end -}}
 {{- if eq (printf "%v" $scale) "2" }}{{ $class = print $class " is-scale-2" }}{{ end -}}
 {{- if eq (printf "%v" $scale) "3" }}{{ $class = print $class " is-scale-3" }}{{ end -}}
 <span
     class="{{ $class }}"
     role="img"
     aria-label="{{ $alt }}"
-    style="--sprite-fw: {{ $fw }}; --sprite-fh: {{ $fh }}; --sprite-frames: {{ $frames }}; --sprite-fps: {{ $fps }}; background-image: url('{{ $src | relURL }}');"
+    style="--sprite-fw: {{ $fw }}; --sprite-fh: {{ $fh }}; --sprite-frames: {{ $frames }}; --sprite-steps: {{ $steps }}; --sprite-fps: {{ $fps }}; background-image: url('{{ $src | relURL }}');"
 ></span>

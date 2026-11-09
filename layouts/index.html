@@ -4,24 +4,70 @@
     {{- partial "head.html" . -}}
     {{ $home := resources.Get "css/home.css" | minify | fingerprint }}
     <link rel="stylesheet" href="{{ $home.RelPermalink }}" integrity="{{ $home.Data.Integrity }}">
+    {{- with .Site.Params.home.titleFontUrl }}
+    <link rel="stylesheet" href="{{ . | relURL }}">
+    {{- end }}
+    {{- $homeTitle := .Site.Params.home -}}
+    {{- if or $homeTitle.titleFont $homeTitle.titleColor $homeTitle.titleHighlight }}
+    <style>
+      body.home .home-site-title {
+        {{- with $homeTitle.titleFont }}font-family: {{ . | safeCSS }};{{ end }}
+        {{- with $homeTitle.titleColor }}--home-title-color: {{ . | safeCSS }};{{ end }}
+        {{- with $homeTitle.titleHighlight }}--home-title-highlight: {{ . | safeCSS }};{{ end }}
+      }
+    </style>
+    {{- end }}
 </head>
 <body class="home">
-    <div id="page-root">
-    <div class="home-stars" aria-hidden="true"></div>
+    <div id="page-root" class="home-root">
+        <aside class="home-moon-col" aria-hidden="true">
+            {{- /* "man in the moon" by Joan G. Stark (jgs / Spunk). Keep the signature. */ -}}
+            <pre class="ascii-moon">          ______          \'/
+      .-'` .    `'-.    -= * =-
+    .'  '    .---.  '.    /.\
+   /  '    .'     `'. \
+  ;  '    /          \|
+ :  '  _ ;            `
+;  :  /(\ \
+|  .       '.
+|  ' /     --'
+|  .   '.__\
+;  :       /
+ ;  .     |            ,
+  ;  .    \           /|
+   \  .    '.       .'/
+    '.  '  . `'---'`.'
+jgs   `'-..._____.-`</pre>
+        </aside>
     <div class="home-page">
-
-        <div class="home-banner">
-            {{ $banner := .Site.Params.home.banner | default "images/banner.svg" }}
-            {{ $bannerPath := printf "static/%s" (strings.TrimPrefix "/" $banner) }}
-            {{ if fileExists $bannerPath }}
-            <img src="{{ $banner | relURL }}" alt="{{ .Site.Params.home.bannerAlt | default "Site banner" }}">
-            {{ else }}
-            <div class="home-banner__empty">
-                <p>Banner image</p>
-                <p>Add a file at <code>static/{{ strings.TrimPrefix "/" $banner }}</code></p>
-            </div>
-            {{ end }}
+        {{- /* Banner pool from bannerDir (under static/); JS picks one on each page load. */ -}}
+        {{- $banner := .Site.Params.home.banner | default "images/banner.svg" -}}
+        {{- $bannerDir := .Site.Params.home.bannerDir | default "" -}}
+        {{- $bannerAlt := .Site.Params.home.bannerAlt | default "Site banner" -}}
+        {{- $pool := slice -}}
+        {{- if $bannerDir -}}
+            {{- $dirPath := printf "static/%s" (strings.TrimPrefix "/" $bannerDir) -}}
+            {{- if fileExists $dirPath -}}
+                {{- range readDir $dirPath -}}
+                    {{- $n := .Name | lower -}}
+                    {{- if or (strings.HasSuffix $n ".png") (strings.HasSuffix $n ".jpg") (strings.HasSuffix $n ".jpeg") (strings.HasSuffix $n ".webp") (strings.HasSuffix $n ".gif") -}}
+                        {{- $pool = $pool | append ((path.Join $bannerDir .Name) | relURL) -}}
+                    {{- end -}}
+                {{- end -}}
+            {{- end -}}
+        {{- end -}}
+        {{- if eq (len $pool) 0 -}}
+            {{- $pool = $pool | append ($banner | relURL) -}}
+        {{- end -}}
+        <div class="home-banner" data-banner-pool="{{ delimit $pool "," }}" data-banner-alt="{{ $bannerAlt }}">
+            {{- $first := index $pool 0 -}}
+            <img src="{{ $first }}" alt="{{ $bannerAlt }}" data-home-banner>
         </div>
+
+        {{- $homeTitle := .Site.Params.home.displayTitle | default .Site.Title -}}
+        {{- with $homeTitle }}
+        <p class="home-site-title">{{ . }}</p>
+        {{- end }}
 
         <header class="home-header">
             {{- partial "header.html" . -}}
@@ -33,12 +79,71 @@
         </main>
 
         <footer class="home-footer">
-            <div class="home-dock">
-                <section class="ticker" aria-label="Visitor count">
+            {{- partial "home-sword.html" . -}}
+            <div class="home-dock" data-home-dock>
+                {{- $kAttack := dict -}}
+                {{- $kWalk := dict -}}
+                {{- $kDown := dict -}}
+                {{- $sIdle := dict -}}
+                {{- $sHurt := dict -}}
+                {{- $sAttack := dict -}}
+                {{- $sBoom := dict -}}
+                {{- range .Site.Params.sprites -}}
+                {{- if eq .id "kagura-attack" }}{{ $kAttack = . }}{{ end -}}
+                {{- if eq .id "kagura-walk" }}{{ $kWalk = . }}{{ end -}}
+                {{- if eq .id "kagura-down" }}{{ $kDown = . }}{{ end -}}
+                {{- if eq .id "sango-idle" }}{{ $sIdle = . }}{{ end -}}
+                {{- if eq .id "sango-hurt" }}{{ $sHurt = . }}{{ end -}}
+                {{- if eq .id "sango-attack" }}{{ $sAttack = . }}{{ end -}}
+                {{- if eq .id "sango-boomerang" }}{{ $sBoom = . }}{{ end -}}
+                {{- end -}}
+                <div class="home-dock__pet home-dock__pet--left" data-dock-pet="left">
+                    <button type="button" class="dock-sango is-idle" data-dock-sango aria-label="Sango">
+                        {{- with $sIdle -}}
+                        <span class="dock-sango__strip dock-sango__strip--idle is-active">
+                            {{- partial "sprite.html" (dict "src" .src "frameWidth" .frameWidth "frameHeight" .frameHeight "frames" .frames "fps" .fps "alt" "" "scale" "3") -}}
+                        </span>
+                        {{- end -}}
+                        {{- with $sHurt -}}
+                        <span class="dock-sango__strip dock-sango__strip--hurt">
+                            {{- partial "sprite.html" (dict "src" .src "frameWidth" .frameWidth "frameHeight" .frameHeight "frames" .frames "fps" .fps "alt" "" "scale" "3") -}}
+                        </span>
+                        {{- end -}}
+                        {{- with $sAttack -}}
+                        <span class="dock-sango__strip dock-sango__strip--attack">
+                            {{- partial "sprite.html" (dict "src" .src "frameWidth" .frameWidth "frameHeight" .frameHeight "frames" .frames "fps" .fps "alt" "" "scale" "3") -}}
+                        </span>
+                        {{- end -}}
+                    </button>
+                </div>
+                {{- with $sBoom -}}
+                <span class="dock-boomerang" data-dock-boomerang aria-hidden="true">
+                    {{- partial "sprite.html" (dict "src" .src "frameWidth" .frameWidth "frameHeight" .frameHeight "frames" .frames "fps" .fps "alt" "" "scale" "2") -}}
+                </span>
+                {{- end -}}
+                <section class="ticker" aria-label="Visitor count" data-visitor-ticker>
                     <p class="ticker__count" data-visitor-count>000000</p>
                     <span class="ticker__pop" data-visitor-pop hidden aria-hidden="true">+1</span>
                 </section>
                 <div class="home-player-slot"></div>
+                <div class="home-dock__pet home-dock__pet--right" data-dock-pet="right" aria-hidden="true"></div>
+                <span class="dock-kagura" data-visitor-kagura aria-hidden="true">
+                    {{- with $kAttack -}}
+                    <span class="dock-kagura__strip dock-kagura__strip--attack is-active">
+                        {{- partial "sprite.html" (dict "src" .src "frameWidth" .frameWidth "frameHeight" .frameHeight "frames" .frames "fps" .fps "alt" "" "scale" "3") -}}
+                    </span>
+                    {{- end -}}
+                    {{- with $kWalk -}}
+                    <span class="dock-kagura__strip dock-kagura__strip--walk">
+                        {{- partial "sprite.html" (dict "src" .src "frameWidth" .frameWidth "frameHeight" .frameHeight "frames" .frames "fps" .fps "alt" "" "scale" "3") -}}
+                    </span>
+                    {{- end -}}
+                    {{- with $kDown -}}
+                    <span class="dock-kagura__strip dock-kagura__strip--down">
+                        {{- partial "sprite.html" (dict "src" .src "frameWidth" .frameWidth "frameHeight" .frameHeight "frames" .frames "fps" .fps "alt" "" "scale" "3") -}}
+                    </span>
+                    {{- end -}}
+                </span>
             </div>
 
             {{ with .Site.Params.home.footer }}
@@ -60,8 +165,10 @@
             {{ end }}
         </footer>
     </div>
-    <script src="{{ "js/home.js" | relURL }}?v=6"></script>
+    {{- partial "home-clouds.html" . -}}
+    <script src="{{ "js/home.js" | relURL }}?v=38"></script>
     </div>
+    {{ partial "stars.html" . }}
     {{ partial "backdrop.html" . }}
     {{ partial "player.html" . }}
     {{ partial "cursor-effects.html" . }}

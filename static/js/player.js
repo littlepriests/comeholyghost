@@ -12,13 +12,39 @@
     var playing = false;
     var trackTitle = "";
     var slotObserver = null;
+    var chromeClosed = false;
+    var skinUnavailable = false;
+    var syncingWebampClose = false;
+    var mobileQuery = window.matchMedia("(max-width: 44.99rem)");
+    var playlistRemote = "https://orbit-meet-dentists-compiled.trycloudflare.com/playlist.json";
+    var playlistLocal = "/audio/playlist.json";
     var toggle = player.querySelector("[data-player-toggle]");
     var skip = player.querySelector("[data-player-skip]");
     var stop = player.querySelector("[data-player-stop]");
+    var closeBtn = player.querySelector("[data-player-close]");
+    var reopenBtn = player.querySelector("[data-player-reopen]");
     var label = player.querySelector("[data-player-title]");
     var labelText = player.querySelector("[data-player-title-text]");
     var toggleIcon = toggle ? toggle.querySelector("i") : null;
     var supportsAnchor = typeof CSS !== "undefined" && CSS.supports && CSS.supports("anchor-name", "--home-player-slot");
+
+    function isMobileViewport() {
+        return mobileQuery.matches;
+    }
+
+    function loadPlaylist() {
+        return fetch(playlistRemote)
+            .then(function (response) {
+                if (!response.ok) throw new Error("remote playlist " + response.status);
+                return response.json();
+            })
+            .catch(function () {
+                return fetch(playlistLocal).then(function (response) {
+                    if (!response.ok) throw new Error("local playlist " + response.status);
+                    return response.json();
+                });
+            });
+    }
 
     function currentTitle() {
         if (trackTitle) return trackTitle;
@@ -124,6 +150,56 @@
         });
     }
 
+    function setChromeClosed(closed) {
+        chromeClosed = !!closed;
+        syncClosedChrome();
+        syncWebampClosedState();
+        measureSimplePlayer();
+        placeHomePlayer();
+        placeSkinPlayer();
+    }
+
+    function syncClosedChrome() {
+        var canClose = player.classList.contains("site-player--simple")
+            || player.classList.contains("site-player--skin");
+        var closed = canClose && chromeClosed;
+        player.classList.toggle("site-player--closed", closed);
+        if (reopenBtn) {
+            if (closed) reopenBtn.removeAttribute("hidden");
+            else reopenBtn.setAttribute("hidden", "");
+        }
+    }
+
+    function syncWebampClosedState() {
+        if (!window.__webamp || syncingWebampClose) return;
+        var skinMode = player.classList.contains("site-player--skin");
+        syncingWebampClose = true;
+        try {
+            if (skinMode && chromeClosed) {
+                if (typeof window.__webamp.close === "function") window.__webamp.close();
+            } else if (typeof window.__webamp.reopen === "function") {
+                // Simple mode parks an open skin off-screen; skin reopen restores Winamp.
+                window.__webamp.reopen();
+            }
+        } catch (error) {
+        } finally {
+            syncingWebampClose = false;
+        }
+    }
+
+    if (closeBtn) {
+        closeBtn.addEventListener("click", function () {
+            // Hide chrome only — leave play/pause where it is.
+            setChromeClosed(true);
+        });
+    }
+
+    if (reopenBtn) {
+        reopenBtn.addEventListener("click", function () {
+            setChromeClosed(false);
+        });
+    }
+
     audio.addEventListener("play", function () {
         if (window.__webamp) return;
         playing = true;
@@ -139,8 +215,7 @@
         load(index + 1, true);
     });
 
-    fetch("https://orbit-meet-dentists-compiled.trycloudflare.com/playlist.json")
-        .then(function (response) { return response.json(); })
+    loadPlaylist()
         .then(function (list) {
             tracks = Array.isArray(list) ? list : [];
             show();
@@ -149,6 +224,9 @@
         })
         .catch(function (error) {
             console.error(error);
+            skinUnavailable = true;
+            player.classList.remove("site-player--booting");
+            applyPlayerChrome();
         });
 
     function loadScript(src, globalName) {
@@ -208,12 +286,18 @@
 
     function bootSkin(list) {
         var host = document.getElementById("winamp-host");
-        if (!host || !list.length) return Promise.resolve();
+        if (!host || !list.length) {
+            skinUnavailable = true;
+            player.classList.remove("site-player--booting");
+            applyPlayerChrome();
+            return Promise.resolve();
+        }
         var isHome = document.body.classList.contains("home");
+        var useSimple = isHome || isMobileViewport() || skinUnavailable;
 
-        // Keep homepage icons put. On inner pages, mount in the real skin
-        // frame (hidden via --booting) so geometry matches a hard refresh.
-        if (isHome) {
+        // Keep simple icons put on home and mobile. Desktop inner pages mount
+        // in the real skin frame (hidden via --booting) so geometry matches a hard refresh.
+        if (useSimple) {
             player.classList.add("site-player--simple");
             player.classList.remove("site-player--skin", "site-player--booting");
         } else {
@@ -227,23 +311,24 @@
         return import("https://unpkg.com/webamp@2.3.1/built/webamp.bundle.min.mjs").then(function (mod) {
             var Webamp = mod.default;
             if (!Webamp.browserIsSupported()) {
+                skinUnavailable = true;
                 player.classList.remove("site-player--booting");
                 applyPlayerChrome();
                 return;
             }
             var webamp = new Webamp({
                 initialTracks: list.map(function (track) {
-                    return {
-                        metaData: { 
+                    var entry = {
+                        metaData: {
                             artist: track.artist || "",
-                            title: track.title || "",
+                            title: track.title || ""
                         },
-                        url: new URL(track.src, location.origin).href,
+                        url: new URL(track.src, location.origin).href
                     };
                     if (typeof track.duration === "number" && track.duration > 0) {
                         entry.duration = track.duration;
                     }
-                    return entry;   
+                    return entry;
                 }),
                 initialSkin: { url: new URL("/skins/Opaline.wsz", location.origin).href },
                 windowLayout: {
@@ -275,6 +360,15 @@
                     show();
                 });
             }
+            if (typeof webamp.onClose === "function") {
+                webamp.onClose(function () {
+                    if (syncingWebampClose) return;
+                    // Winamp's own × — leave playback alone, show the reopen heart.
+                    chromeClosed = true;
+                    syncClosedChrome();
+                    placeSkinPlayer();
+                });
+            }
             return webamp.renderInto(host).then(function () {
                 audio.pause();
                 revealSkin();
@@ -283,33 +377,44 @@
             });
         }).catch(function (error) {
             console.error(error);
+            skinUnavailable = true;
             player.classList.remove("site-player--booting");
             applyPlayerChrome();
         });
     }
 
     function applyPlayerChrome() {
-        if (player.classList.contains("site-player--booting")) return;
         var isHome = document.body.classList.contains("home");
-        if (!isHome && !window.__webamp) {
-            player.classList.remove("site-player--simple");
+        var mobile = !isHome && isMobileViewport();
+        var useSimple = isHome || mobile || skinUnavailable;
+        // Simple chrome can show while Webamp is still mounting; only the
+        // desktop skin waits behind site-player--booting.
+        if (player.classList.contains("site-player--booting") && !useSimple && !window.__webamp) return;
+        if (!useSimple && !window.__webamp) {
+            player.classList.remove("site-player--simple", "site-player--mobile");
             player.classList.add("site-player--skin", "site-player--booting");
             clearInlinePlacement();
+            syncClosedChrome();
             return;
         }
-        player.classList.toggle("site-player--simple", isHome);
-        player.classList.toggle("site-player--skin", !isHome);
+        player.classList.toggle("site-player--simple", useSimple);
+        player.classList.toggle("site-player--skin", !useSimple);
+        player.classList.toggle("site-player--mobile", mobile);
+        if (useSimple) player.classList.remove("site-player--booting");
         if (isHome) {
             if (!supportsAnchor) player.classList.add("site-player--home-pending");
             else player.classList.remove("site-player--home-pending");
         } else {
             player.classList.remove("site-player--home-pending");
-            clearInlinePlacement();
-            clearForcedWindowStyles();
+            if (useSimple) clearInlinePlacement();
+            else clearForcedWindowStyles();
         }
+        syncClosedChrome();
+        syncWebampClosedState();
         watchHomeSlot();
         measureSimplePlayer();
         placeHomePlayer();
+        placeSkinPlayer();
     }
 
     function measureSimplePlayer() {
@@ -346,7 +451,6 @@
     function placeHomePlayer() {
         var slot = document.querySelector(".home-player-slot");
         if (!document.body.classList.contains("home") || !slot || !player.classList.contains("site-player--simple")) {
-            if (!document.body.classList.contains("home")) clearInlinePlacement();
             return;
         }
         measureSimplePlayer();
@@ -368,6 +472,83 @@
         player.classList.remove("site-player--home-pending");
     }
 
+    function normalizeText(value) {
+        return String(value || "")
+            .replace(/\s+/g, " ")
+            .replace(/[.\s]+$/g, "")
+            .trim()
+            .toLowerCase();
+    }
+
+    function skinVerticalAnchor() {
+        // Blog articles: flush with the first real body prose (skip a lede that
+        // only repeats the title), so the skin sits beside where text appears.
+        var contentBody = document.querySelector(".page__body .content__body")
+            || document.querySelector(".content__body");
+        if (contentBody) {
+            var title = normalizeText(
+                (document.querySelector(".content__header h1, .page__body h1") || {}).textContent
+            );
+            var blocks = contentBody.querySelectorAll(":scope > p, :scope > ul, :scope > ol, :scope > blockquote");
+            for (var i = 0; i < blocks.length; i++) {
+                var block = blocks[i];
+                if (block.querySelector("img, picture, video, .retro-media")) continue;
+                var text = normalizeText(block.textContent);
+                if (!text) continue;
+                if (title && text === title) continue;
+                return block;
+            }
+            if (blocks.length) return blocks[0];
+            return contentBody;
+        }
+        return document.querySelector(".page__body")
+            || document.querySelector(".gallery-wrap > main")
+            || document.querySelector(".guestbook-wrap > main")
+            || document.querySelector(".page");
+    }
+
+    function skinHorizontalAnchor() {
+        return document.querySelector(".page__aside")
+            || document.querySelector(".page__body")
+            || document.querySelector(".gallery-wrap > main")
+            || document.querySelector(".guestbook-wrap > main");
+    }
+
+    function placeSkinPlayer() {
+        if (!player.classList.contains("site-player--skin")) return;
+        var vertical = skinVerticalAnchor();
+        var horizontal = skinHorizontalAnchor();
+        if (!vertical) return;
+        // Position relative to body (position: relative) so the skin scrolls
+        // with the page, top-aligned to the article content start.
+        var vRect = vertical.getBoundingClientRect();
+        var bodyRect = document.body.getBoundingClientRect();
+        var gap = 24;
+        try {
+            var gapRaw = getComputedStyle(document.documentElement).getPropertyValue("--skin-gap").trim();
+            if (gapRaw) gap = Math.round(parseFloat(gapRaw) * (gapRaw.indexOf("rem") >= 0 ? 16 : 1)) || 24;
+        } catch (error) {}
+        player.style.top = Math.round(vRect.top - bodyRect.top) + "px";
+        if (horizontal && horizontal.classList.contains("page__aside")) {
+            var aRect = horizontal.getBoundingClientRect();
+            player.style.left = Math.round(aRect.left - bodyRect.left) + "px";
+            player.style.right = "auto";
+            document.documentElement.style.setProperty(
+                "--skin-offset-top",
+                Math.max(0, Math.round(vRect.top - aRect.top)) + "px"
+            );
+        } else if (horizontal) {
+            var hRect = horizontal.getBoundingClientRect();
+            player.style.left = Math.round(hRect.right - bodyRect.left + gap) + "px";
+            player.style.right = "auto";
+            document.documentElement.style.removeProperty("--skin-offset-top");
+        } else {
+            player.style.removeProperty("left");
+            player.style.removeProperty("right");
+            document.documentElement.style.removeProperty("--skin-offset-top");
+        }
+    }
+
     function watchHomeSlot() {
         if (slotObserver) {
             slotObserver.disconnect();
@@ -384,8 +565,19 @@
     }
 
     function onViewportChange() {
-        if (player.classList.contains("site-player--skin")) fitSkinBox();
-        else placeHomePlayer();
+        applyPlayerChrome();
+        if (player.classList.contains("site-player--skin")) {
+            fitSkinBox();
+            placeSkinPlayer();
+        } else {
+            placeHomePlayer();
+        }
+    }
+
+    if (typeof mobileQuery.addEventListener === "function") {
+        mobileQuery.addEventListener("change", onViewportChange);
+    } else if (typeof mobileQuery.addListener === "function") {
+        mobileQuery.addListener(onViewportChange);
     }
 
     function adopt(href, fromPop) {
@@ -418,9 +610,17 @@
                     created.src = new URL(old.getAttribute("src"), href).href;
                     document.body.appendChild(created);
                 });
+                // Homepage always opens on the minimalist chrome.
+                if (document.body.classList.contains("home")) chromeClosed = false;
                 applyPlayerChrome();
+                if (typeof window.refreshStarReadingVoids === "function") {
+                    requestAnimationFrame(window.refreshStarReadingVoids);
+                }
                 if (player.classList.contains("site-player--skin")) {
-                    requestAnimationFrame(fitSkinBox);
+                    requestAnimationFrame(function () {
+                        fitSkinBox();
+                        placeSkinPlayer();
+                    });
                 }
                 if (!fromPop) history.pushState({ player: true }, "", href);
                 if (location.hash) {

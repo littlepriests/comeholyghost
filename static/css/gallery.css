@@ -4,6 +4,32 @@
     padding: 0 1.25rem;
 }
 
+/* Same content + skin column pattern as guestbook / blog aside. */
+@media (min-width: 45rem) {
+    .gallery-wrap {
+        max-width: var(--middle-column);
+        padding-right: 0;
+        padding-left: 0;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) var(--skin-width);
+        column-gap: var(--skin-gap, 1.5rem);
+        align-items: start;
+    }
+
+    .gallery-header,
+    .gallery-wrap > main {
+        grid-column: 1;
+        min-width: 0;
+        overflow-x: clip;
+    }
+}
+
+@media (max-width: 44.99rem) {
+    .gallery-wrap {
+        padding-bottom: calc(var(--simple-player-height, 1.75rem) + 2rem);
+    }
+}
+
 .gallery-header {
     margin-bottom: 2rem;
 }

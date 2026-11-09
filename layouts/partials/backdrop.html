@@ -1,7 +1,10 @@
 {{ $backdrop := .Site.Params.backdrop }}
 {{ if $backdrop }}
-<link rel="stylesheet" href="{{ "css/backdrop.css" | relURL }}?v=11">
+<link rel="stylesheet" href="{{ "css/backdrop.css" | relURL }}?v=16">
 {{ range $name := slice "bottom-right" "bottom-left" "top-right" "top-left" }}
+    {{/* Homepage bottom-right is the footer-anchored .home-sword figure instead. */}}
+    {{ if and $.IsHome (eq $name "bottom-right") }}
+    {{ else }}
     {{ with index $backdrop $name }}
         {{ $image := strings.TrimSpace (printf "%s" (.image | default "")) }}
         {{ $path := printf "static/%s" (strings.TrimPrefix "/" $image) }}
@@ -10,6 +13,7 @@
     <img src="{{ $image | relURL }}" alt="{{ .alt }}">
 </div>
         {{ end }}
+    {{ end }}
     {{ end }}
 {{ end }}
 {{ end }}

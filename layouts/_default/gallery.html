@@ -2,7 +2,7 @@
 <html lang="{{- site.Language.Lang -}}">
 <head>
     {{- partial "head.html" . -}}
-    <link rel="stylesheet" href="{{ "css/gallery.css" | relURL }}">
+    <link rel="stylesheet" href="{{ "css/gallery.css" | relURL }}?v=2">
 </head>
 <body class="gallery-page">
     <div id="page-root">
@@ -46,7 +46,9 @@
         </main>
     </div>
     </div>
+    {{ partial "stars.html" . }}
     {{ partial "backdrop.html" . }}
     {{ partial "player.html" . }}
+    {{ partial "cursor-effects.html" . }}
 </body>
 </html>

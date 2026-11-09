@@ -5,6 +5,8 @@
     line-height: 0;
 }
 
+/* Homepage sword figure lives in home.css (.home-sword), not the fixed corner. */
+
 .site-backdrop[data-anchor="bottom-right"] {
     right: var(--backdrop-x);
     bottom: var(--backdrop-y);

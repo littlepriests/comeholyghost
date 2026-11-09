@@ -53,10 +53,11 @@
 {{ end }}
 {{ with .Site.Language.Locale }}<meta property="og:locale" content="{{ . }}" />{{ end }}
 {{ with .Site.Params.about }}<meta property="og:image" content="{{ with .logo_image }}{{ . | absURL }}{{ end }}" />{{ end }}
-<link rel="stylesheet" href="{{ "css/player.css" | relURL }}?v=19">
+<link rel="stylesheet" href="{{ "css/player.css" | relURL }}?v=25">
 <link rel="stylesheet" href="{{ "css/reading.css" | relURL }}?v=4">
 <link rel="stylesheet" href="{{ "css/retro.css" | relURL }}?v=10">
-<link rel="stylesheet" href="{{ "css/sprites.css" | relURL }}?v=4">
+<link rel="stylesheet" href="{{ "css/stars.css" | relURL }}?v=8">
+<link rel="stylesheet" href="{{ "css/sprites.css" | relURL }}?v=5">
 <link rel="stylesheet" href="{{ "css/buttons.css" | relURL }}">
 {{/* Custom cursor image, when static/ holds the file named in params.cursor.image. */}}
 {{ $cursor := .Site.Params.cursor.image }}

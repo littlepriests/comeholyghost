@@ -12,17 +12,17 @@
       <li class="nomarker{{ with $logoSprite }} page__logo--sprite{{ end }}">
         <h1 class="page__logo">
           {{ if $logoSprite }}
-          <a href="{{ .Site.BaseURL }}" class="page__logo-inner page__logo-inner--sprite" aria-label="Home">
+          <a href="{{ "/" | relURL }}" class="page__logo-inner page__logo-inner--sprite" aria-label="Home">
             {{- partial "sprite.html" (merge $logoSprite (dict "scale" "")) -}}
           </a>
           {{ else }}
-          <a href="{{ .Site.BaseURL }}" class="page__logo-inner">{{ .Site.Title }}</a>
+          <a href="{{ "/" | relURL }}" class="page__logo-inner">{{ .Site.Title }}</a>
           {{ end }}
         </h1>
       </li>
     {{ $currentPage := . }}
     {{ range .Site.Menus.main }}
-    <li class="main-nav__item"><a class="nav-main-item{{ if or ($currentPage.IsMenuCurrent "main" .) ($currentPage.HasMenuCurrent "main" .) (eq ($currentPage.Permalink) (.URL | absLangURL)) }} active{{end}}" href="{{ .URL | absLangURL }}" title="{{ .Title }}">{{ .Name }}</a></li>
+    <li class="main-nav__item"><a class="nav-main-item{{ if or ($currentPage.IsMenuCurrent "main" .) ($currentPage.HasMenuCurrent "main" .) (eq ($currentPage.RelPermalink) (.URL | relLangURL)) }} active{{end}}" href="{{ .URL | relLangURL }}" title="{{ .Title }}">{{ .Name }}</a></li>
     {{ end }}
     </ul>
 </nav>

@@ -1,0 +1,12 @@
+/* Homepage title face only (.home-site-title). Drop your licensed files in static/fonts/. */
+@font-face {
+    font-family: "FF Dot Matrix";
+    src:
+        url("/fonts/FFDotMatrix.woff2") format("woff2"),
+        url("/fonts/FFDotMatrix.woff") format("woff"),
+        url("/fonts/FFDotMatrix.ttf") format("truetype"),
+        url("/fonts/FFDotMatrix.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
