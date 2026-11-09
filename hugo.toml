@@ -40,14 +40,16 @@ bannerDir = "images/banners"
 banner = "images/banner.png"
 bannerAlt = "Site banner"
 # Text under the banner only (.home-site-title). Independent of the tab `title` above.
-displayTitle = "notes from cornfields"
+displayTitle = "welcome to my"
+displayTitle2 = "C O R N F I E L D 🌽"
 # Font stack for that element only.
-titleFont = "\"FF Dot Matrix\", \"Courier New\", monospace"
+titleFont = "Impact, sans-serif"
+titleFontLine2 = "\"DotMatrixNarrow\", \"Courier New\", monospace"
 # Loads @font-face from static/css/home-title-font.css (put the font in static/fonts/).
 titleFontUrl = "css/home-title-font.css"
 # Optional title colors (.home-site-title). Empty = CSS defaults in home.css.
-titleColor = ""
-titleHighlight = ""
+titleColor = "yellow"
+titleHighlight = "shadow-grey"
 # Animated home button in the nav (sprite id from [[params.sprites]]). Empty = title chip.
 logoSprite = "misdreavus"
 

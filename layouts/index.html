@@ -64,11 +64,15 @@ jgs   `'-..._____.-`</pre>
             <img src="{{ $first }}" alt="{{ $bannerAlt }}" data-home-banner>
         </div>
 
-        {{- $homeTitle := .Site.Params.home.displayTitle | default .Site.Title -}}
-        {{- with $homeTitle }}
-        <p class="home-site-title">{{ . }}</p>
+        {{- $line1 := .Site.Params.home.displayTitle | default .Site.Title -}}
+        {{- $line2 := .Site.Params.home.displayTitleLine2 | default "" -}}
+        {{- if or $line1 $line2 }}
+        <p class="home-site-title">
+            {{- with $line1 }}<span class="home-site-title__line">{{ . }}</span>{{ end -}}
+            {{- with $line2 }}<span class="home-site-title__line home-site-title__line--2">{{ . }}</span>{{ end -}}
+        </p>
         {{- end }}
-
+        
         <header class="home-header">
             {{- partial "header.html" . -}}
         </header>
