@@ -28,7 +28,7 @@ logo = ""
 # Custom cursor. Delete image, or point it at a missing file, to use the normal pointer.
 # x and y are the click point, in pixels from the top left of the image. Keep the image at 32×32.
 [params.cursor]
-image = "images/cursor.png"
+image = "images/cursor.gif"
 x = 0
 y = 0
 
