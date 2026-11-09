@@ -1,4 +1,4 @@
 +++
-title = "digital commonplace journal"
+title = "♡♡"
 +++
 
