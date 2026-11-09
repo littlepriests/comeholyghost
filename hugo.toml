@@ -44,10 +44,10 @@ logoSprite = "misdreavus"
 [[params.sprites]]
 id = "misdreavus"
 src = "images/sprites/misdreavus.png"
-frameWidth = 52
-frameHeight = 108
+frameWidth = 50
+frameHeight = 100
 frames = 10
-fps = 5
+fps = 8
 alt = "Misdreavus"
 
 [[params.sprites]]
