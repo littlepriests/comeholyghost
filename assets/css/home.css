@@ -97,22 +97,22 @@ body:not(.home) .home-stars {
     position: relative;
     z-index: 1;
     max-width: 46rem;
-    margin: 1.5rem auto 3rem;
+    margin: 2rem auto 3rem;
     padding: 0 1.25rem;
 }
 
 .home-banner {
-    margin-bottom: 1.5rem;
-    min-height: 8rem;
-    /* Frame / sparkle come from static/css/retro.css */
+    margin-bottom: -1rem;
 }
 
 .home-banner img {
     display: block;
-    width: 100%;
+    width: auto;
     height: auto;
-    max-height: 16rem;
-    object-fit: cover;
+    max-width: 100%;
+    max-height: none;
+    object-fit: unset;
+    margin: 0 auto;
 }
 
 .home-banner__empty {
