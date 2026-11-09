@@ -4,7 +4,7 @@ title = "₊˚⊹♡"
 
 # hi ♡
 
-welcome to my little corner of the world wide web. you can think of it as a digital commonplace notebook. 
+you can think of this place as a digital commonplace notebook. 
 
 i hope you learn something today~
 
