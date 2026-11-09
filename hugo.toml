@@ -21,7 +21,7 @@ noindex = true
 palette = "base16-dark"
 
 [params.about]
-title = "👼"
+title = ""
 description = ""
 logo = ""
 
@@ -148,13 +148,13 @@ maxheight = "24rem"
     identifier = "about"
     name = "About"
     url = "/about/"
-    weight = 10
+    weight = 20
 
   [[menu.main]]
     identifier = "guestbook"
     name = "Guestbook"
     url = "/guestbook/"
-    weight = 20
+    weight = 10
 
 [taxonomies]
 category = "categories"

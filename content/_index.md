@@ -1,9 +1,23 @@
 +++
-title = "Home"
+title = "₊˚⊹♡"
 +++
 
-# Welcome
+# hi ♡
 
-Notes and experiments in personal development. This is the homepage body. Edit `content/_index.md` to change it.
+welcome to my little corner of the world wide web. you can think of it as a digital commonplace notebook. you'll find writing and pictures of anything that interests me.
 
-The banner, the links, and the footer live in the layout, so this file is only the writing in the middle.
+the audio players let you pause the music or skip any tracks. 
+
+please enjoy! ♡
+
+# ♡
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠤⠤⠤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠣⣀⣀⣀⠜⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⣠⡶⠒⠶⢦⣄⠀⠀⠀⠀⣾⠓⢆⠀⠀⠀⠀⣠⡞⠹⡆⠀⠀⢀⣤⠶⠛⠙⢶⣤
+⠹⢆⠀⠀⠀⠉⠳⠦⠀⣼⠇⠀⠊⠙⠉⠋⠙⠉⡠⠀⢷⠀⠴⠋⠀⠀⠀⢀⡼⠋
+⠀⠀⢳⡄⠀⠀⠀⢀⣴⠟⠀⣴⣧⠀⠀⠀⠀⣼⣦⠀⠈⢷⡀⠀⠀⠀⠴⡏⠁⠀
+⠀⠀⣟⡁⠀⠀⠀⢸⠇⠀⠀⢻⠏⠀⠀⠀⠀⠻⡟⠀⠀⠈⡧⠀⠀⠀⣈⣿⠀⠀
+⠀⠀⣸⠟⠀⠀⠀⠈⠳⣠⣀⠀⠀⠀⠀⠀⠀⠀⡀⣀⣴⠞⠁⠀⠀⠀⢻⡆⠀⠀
+⠀⠀⠉⠶⠖⠆⠀⠀⢰⠞⠉⠠⠛⠓⢤⠀⣰⠞⠂⠘⢦⡀⠀⠀⠘⠛⠛⠃⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⢀⡟⠀⠀⣤⣤⣴⠛⠀⣿⣀⣤⠀⠈⠷⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
