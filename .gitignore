@@ -6,6 +6,9 @@
 # Sprite slicer deps
 /scripts/node_modules/
 
+# Netlify function deps
+/node_modules/
+
 # OS / editor
 .DS_Store
 Thumbs.db

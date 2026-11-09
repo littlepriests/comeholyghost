@@ -2,7 +2,7 @@
 <html lang="{{- site.Language.Lang -}}">
 <head>
     {{- partial "head.html" . -}}
-    <link rel="stylesheet" href="{{ "css/guestbook.css" | relURL }}?v=2">
+    <link rel="stylesheet" href="{{ "css/guestbook.css" | relURL }}?v=3">
 </head>
 <body class="guestbook-page">
     <div id="page-root">
@@ -23,7 +23,11 @@
                 <label>Comment
                     <textarea name="message" maxlength="500" rows="4"></textarea>
                 </label>
-                <p class="guestbook__error" data-guestbook-error hidden>Write a name, a comment, or both.</p>
+                <label class="guestbook__hp" aria-hidden="true">Leave blank
+                    <input type="text" name="website" tabindex="-1" autocomplete="off">
+                </label>
+                <p class="guestbook__error" data-guestbook-error hidden></p>
+                <p class="guestbook__status" data-guestbook-status hidden></p>
                 <button type="submit">Sign</button>
             </form>
 
@@ -35,7 +39,9 @@
     </div>
     <script src="{{ "js/guestbook.js" | relURL }}"></script>
     </div>
+    {{ partial "stars.html" . }}
     {{ partial "backdrop.html" . }}
     {{ partial "player.html" . }}
+    {{ partial "cursor-effects.html" . }}
 </body>
 </html>

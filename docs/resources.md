@@ -8,6 +8,23 @@ The dev server is `hugo server -D --disableFastRender --navigateToChanged` from 
 
 Old-school GeoCities personal homepage energy with modern restraint: playful atmosphere (stars, visitor counter personality, music player, guestbook, corner art, framed pictures, sprite pets), clear readable layout, palette-driven color. Not CRT scanlines, not film-grain “cinematic” overlays, not chaotic 1999 clutter. Custom fun cursor is planned by the owner later — leave `[params.cursor]` alone unless they ask.
 
+## Backlog (do not start unless asked)
+
+Owner notes, 2026-11-09. Capture only — do not implement from this list without an explicit ask.
+
+Done in-tree (pending zip/deploy): sitewide stars; blue stepped headings; relative nav links + pinned production `baseURL`; first-paint player hide; synced `comeholyghost-main(1)` visuals; bubble cursor (pauses over sword); ASCII angel glow/CTA; footer-anchored sword figure with fountain hearts; first-visit Kagura attack → idle walk parked right of the player + Sango left (hurt on slash, click-to-attack Kagura); Joan G. Stark moon + sparse ASCII stars; emojicombos clouds; rotating `bannerDir`; configurable homepage title font.
+
+Credits / provenance:
+- Moon (`.ascii-moon`): “man in the moon” by **Joan G. Stark** (jgs / Spunk). Signature kept. Source: [ASCII Art Archive](https://www.asciiart.eu/art/5d424c2b42c2d3ac).
+- Sparse background ASCII stars: motifs in Joan’s celestial / star style (same archive tradition); credit Joan G. Stark. Tiny repeats omit initials so the sky stays readable — full credit here.
+- Clouds (`.ascii-cloud`): small version of the top cloud on [emojicombos.com/cloud-ascii-art](https://emojicombos.com/cloud-ascii-art). Placed around the ASCII angel (top over halo/wing, `# ♡` gap pair, lower flanks, smaller nest under the cat). Nest shows “sign the guestbook!” on angel hover; `home.js` voids twinkling stars behind cloud boxes.
+- Kagura / Misdreavus / Sango / SkiFree strips: fan-use test assets; publishers own the art (see Sprite animations).
+
+1. ~~**Mobile player chrome**~~ — Done. Under `44.99rem` on non-home pages, `applyPlayerChrome()` uses `site-player--simple` + `site-player--mobile` (no Winamp). Simple chrome (home + mobile) has `[x]` → ♡ without changing play/pause. Remote playlist fetch falls back to `/audio/playlist.json`; if the skin cannot boot, chrome falls back to simple instead of staying hidden.
+2. **Desktop player + sticky header** — Same minimalist player (same close/reopen behavior as mobile) docked on `/blog`, `/gallery`, `/guestbook`, `/about` on the far side of the link dock. On article bodies that already have a third column, dock the player there. On scroll, the whole link dock (home control + player) scrolls with the article — i.e. the header (not the banner) is sticky, in the spirit of the Docker docs blue strip navbar.
+3. **First-paint flicker (follow-up)** — Code already hides `#site-player` with `site-player--booting` until chrome is ready. Remaining work is verify-after-deploy only (backdrop pop-in, SPA swap, icon font) if anything still flashes live.
+4. **Domain primary in Netlify** — Code already uses relative nav/`RelPermalink` and pins production `--baseURL https://cornfieldjournal.com/` in `netlify.toml`. Remaining work is Netlify UI: set `cornfieldjournal.com` as the site primary domain (not only an alias) after deploy.
+
 ## Sprite animations (test)
 
 Horizontal strip sheets under `static/images/sprites/`, driven by CSS `steps()` in `static/css/sprites.css`. Config is `[[params.sprites]]` in `hugo.toml` (`id`, `src`, `frameWidth`, `frameHeight`, `frames`, `fps`, `alt`, optional `scale`). Use in content with `{{< sprite "kagura-walk" >}}` or `{{< sprite id="misdreavus" scale="3" >}}`.
@@ -18,14 +35,24 @@ Refresh strips from source sheets (fan-use test assets; Nintendo / game publishe
 
 - Misdreavus: `node scripts/slice-misdreavus.mjs` (needs `misdreavus-sheet.png`; front hover loop only, no shiny/back)
 - Kagura rows: `node scripts/slice-kagura.mjs` (needs `kagura-sheet.png`; each row → `kagura-walk`, `kagura-down`, `kagura-attack`)
+- Sango (TSR #13363 InuYasha: Fūun Emaki): `node scripts/slice-sango.mjs` → `sango-idle`, `sango-hurt` (impact pose only), `sango-boomerang` (flying Hiraikotsu spin), `sango-walk`, `sango-attack`
+- SkiFree (TSR #26926): `node scripts/slice-skifree.mjs` → `skifree-ski`, `skifree-yeti`, `skifree-crash` (original block only)
 
 `pngjs` for the slicers lives under `scripts/node_modules` (`npm install pngjs --prefix scripts`).
 
 ## Deploy (Netlify)
 
-Build settings live in `netlify.toml` at the repo root. Netlify runs Hugo `0.167.0`, publishes `public/`, and sets `--baseURL` from `$URL` (production) or `$DEPLOY_PRIME_URL` (previews). Leave `baseURL` in `hugo.toml` as localhost for local work.
+Build settings live in `netlify.toml` at the repo root. Netlify runs Hugo `0.167.0`, publishes `public/`, and production builds with `--baseURL https://cornfieldjournal.com/` (previews still use `$DEPLOY_PRIME_URL`). Leave `baseURL` in `hugo.toml` as localhost for local work.
 
-Connect the GitHub repo in Netlify (Import an existing project). No custom domain is required: use the free `*.netlify.app` name under Domain management, and add a real domain later. Keep `noindex = true` in `hugo.toml` until the site should be searchable.
+Nav and in-site list links should stay **relative** (`relURL` / `relLangURL` / `RelPermalink`) so a Netlify primary of `*.netlify.app` cannot send clicks off `cornfieldjournal.com`. Set the custom domain as **primary** in Domain management anyway. Keep `noindex = true` in `hugo.toml` until the site should be searchable.
+
+## Atmosphere (stars)
+
+Twinkling starfield is sitewide: `layouts/partials/stars.html` (outside `#page-root` so SPA nav keeps it), `static/css/stars.css`, `static/js/stars.js`. Linked from `head.html`. Homepage visitor ticker stays in `static/js/home.js`.
+
+## Guestbook
+
+Shared signatures use a Netlify Function at `/api/guestbook` (`netlify/functions/guestbook.mjs`) and a site-wide Netlify Blobs store named `guestbook` (JSON key `entries`). Root `package.json` lists `@netlify/blobs` so Netlify can install it on build. Plain `hugo server` has no functions, so the page falls back to local-only storage and shows a status note. For a real shared guestbook locally, use `netlify dev` (needs the Netlify CLI) or deploy. Honeypot field is `website`. Cap is 100 entries; name 80 chars; message 500.
 
 ## Color palette
 
@@ -75,10 +102,11 @@ Sizes the layout actually uses. `1rem` is 16px unless the browser's default font
 - Guestbook: below 45rem the column is at most 40rem. At 45rem and wider the page uses the same 53rem middle column as the other inner pages, with the 15rem right column, so the form stays to the left of the skin and between the corner pictures.
 - Winamp skin (inner pages only): a classic main window is 275×116. This site stacks the main window, the equalizer, and the playlist, so the unscaled stack is 275×348. On screen the width is 15rem, or the viewport minus 2rem when that is smaller, and the height scales with the width. After the skin loads, `static/js/player.js` measures the open windows and writes `--skin-box-width` and `--skin-box-height`.
 - Homepage player: a compact icon bar (play/pause, stop, skip) sits in `.home-player-slot` beside the visitor-count digits (no “Visitors” label). JS measures it into `--simple-player-width` and `--simple-player-height` so the dock stays vertically centered as a pair.
-- Homepage atmosphere: `.home-stars` (in `layouts/index.html` / `static/js/home.js`) sprinkles subtle twinkles on the gradient. A new session bumps the counter with a small scale flash and a floating `+1`; counts 10 / 100 / 1000 also get a green milestone glow.
-- Media polish: `static/css/retro.css` adds twinkling corner sparkles on banner / post / gallery images — no border, no purple wash, no scanlines. Homepage starfield is denser (`static/js/home.js`, ~180 stars).
+- Atmosphere: `.home-stars` via `layouts/partials/stars.html` / `static/js/stars.js` (~153 CSS dots + ~5 sparse Joan-style `\/` ASCII stars in the side gutters, away from text). Homepage moon is Joan G. Stark’s “man in the moon” (`.ascii-moon`, `jgs` kept), centered in the left grid column and scrolling with the page. First homepage session only: when the visitor ticker scrolls into view, large Kagura attacks across the dock with feet on the player/ticker baseline, the count bumps mid-slash with `+1` (Sango in `.home-dock__pet--left` flinches into `sango-hurt` then returns to idle), then Kagura crossfades to a ~30% smaller `kagura-walk` and parks in `.home-dock__pet--right` (`static/js/home.js`). Returning visits keep Kagura idle-walking right and Sango idle left. Click Sango to play `sango-attack`; mid-swing knocks Kagura into `kagura-down`, then she gets back up to walk; Sango returns to idle when the attack strip finishes (Hiraikotsu home). Sword figure is vertically aligned to that dock band. If they leave without seeing the attack, the count still bumps once with no park. Counts 10 / 100 / 1000 also get a green milestone glow.
+- Media polish: `static/css/retro.css` adds twinkling corner sparkles on banner / post / gallery images — no border, no purple wash, no scanlines.
+- Player first paint: `#site-player` starts with `site-player--booting` in markup so the fixed bottom-right chrome does not flash before JS places it.
 - Favicon slots the theme already looks for, if you add the files under `static/`: `favicon.ico`, `favicon-32x32.png` (32×32), `favicon-16x16.png` (16×16), and `apple-touch-icon.png` (180×180 is the usual size). None of those files are in the repo right now.
-- Backdrop: each corner's cap is `maxwidth` and `maxheight`, both `24rem` (384px) right now. On screen the picture is smaller whenever it needs to stay outside the middle column. Each starter file is drawn at the cap, 384×384: `static/images/backdrop-bottom-right.svg`, `backdrop-bottom-left.svg`, `backdrop-top-right.svg`, and `backdrop-top-left.svg`. A replacement can be any size up to that corner's cap. A larger file is shrunk to fit. A smaller file stays at its own pixel size.
+- Backdrop: fixed corner caps use `maxwidth` / `maxheight` in `hugo.toml`. Homepage bottom-right sword figure is special-cased: `layouts/partials/home-sword.html` anchors her head to the footer hairline and scales her width to the right gutter (`clamp` so she shrinks away instead of covering the column). Other corners still use `layouts/partials/backdrop.html`.
 
 ## Cursor
 
@@ -106,8 +134,10 @@ banner = "images/banner.svg"
 bannerAlt = "Site banner"
 ```
 
-- `banner` is a path under `static/`. The starter is `static/images/banner.svg`.
+- `bannerDir` is a folder under `static/` (starter: `static/images/banners/`). On each homepage render Hugo shuffles that folder and picks one image (png/jpg/webp/gif). Drop more same-size banners in the folder to rotate on refresh.
+- `banner` is the fallback single file if `bannerDir` is empty or missing.
 - `bannerAlt` is the image description.
+- Homepage title under the banner: `displayTitle` (defaults to site title), `titleFont` (CSS `font-family` stack — change in toml to experiment), optional `titleFontUrl` (stylesheet link for that face).
 - The markup is in `layouts/index.html`. If the file is missing, the page shows an empty frame that names the path it expected.
 
 ## Social links
@@ -211,7 +241,7 @@ The player stays above the pictures. On a short window the skin can cover the co
 
 ## Player
 
-Two looks, one player. The homepage shows a simple icon bar (play/pause, stop, skip) in the footer dock beside Visitors — no outer player border, button borders stay. Long titles scroll right-to-left inside a fixed 4.75rem slot (`is-marquee` when the text overflows). Inner pages show the Winamp skin in the right column. On the homepage the icon player stays in simple mode while Webamp mounts off-screen, and CSS anchor positioning pins it to `.home-player-slot` beside Visitors (JS placement is the fallback). On first load of an inner page the icon chrome stays hidden (`site-player--booting`) until the skin frame is ready. Webamp still boots once and stays mounted; `applyPlayerChrome()` swaps `site-player--simple` and `site-player--skin` when same-site navigation changes `body.home`. The icon buttons call the Webamp API when it is ready, and fall back to the HTML audio element before that. The player lives outside `#page-root`. Same-site link clicks swap `#page-root` and leave the player in place, so the track keeps playing. A new tab, an external link, or a page with no `#page-root` loads a fresh document and the music stops.
+Two looks, one player. The homepage shows a simple icon bar (play/pause, stop, skip) in the footer dock beside Visitors — no outer player border, button borders stay. Long titles scroll right-to-left inside a fixed 4.75rem slot (`is-marquee` when the text overflows). Desktop inner pages show the Winamp skin in the right column, document-absolute at the top of the content body / aside so it scrolls with the page (not sticky). Closing Winamp (its own ×) swaps it for a ♡ that calls `webamp.reopen()` — playback is left alone. On viewports under `45rem`, non-home pages keep the same simple icon bar fixed bottom-right (no skin). Simple chrome has a subtle corner × that collapses it to a ♡ the same way. Homepage always opens on the minimalist chrome. On the homepage the icon player stays in simple mode while Webamp mounts off-screen, and CSS anchor positioning pins it to `.home-player-slot` beside Visitors (JS placement is the fallback). On first load of a desktop inner page the icon chrome stays hidden (`site-player--booting`) until the skin frame is ready. Webamp still boots once and stays mounted; `applyPlayerChrome()` swaps `site-player--simple` and `site-player--skin` from `body.home` and the mobile breakpoint. The icon buttons call the Webamp API when it is ready, and fall back to the HTML audio element before that. The player lives outside `#page-root`. Same-site link clicks swap `#page-root` and leave the player in place, so the track keeps playing. A new tab, an external link, or a page with no `#page-root` loads a fresh document and the music stops.
 
 Files:
 

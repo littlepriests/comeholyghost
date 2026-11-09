@@ -8,4 +8,6 @@ title = "North window"
 
 Placeholder one.
 
+hjkhkjhkj 
+
 ![North window](one.png)

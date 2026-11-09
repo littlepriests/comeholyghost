@@ -1,0 +1,13 @@
+{{- /* Small cloud from emojicombos.com/cloud-ascii-art (top entry). Credit in docs/resources.md. */ -}}
+{{- $cloud := trim (readFile "static/ascii/cloud.txt") "\r\n" -}}
+<div class="home-clouds" aria-hidden="true">
+    <pre class="ascii-cloud" data-cloud="heart">{{ $cloud }}</pre>
+    <pre class="ascii-cloud" data-cloud="gap-a">{{ $cloud }}</pre>
+    <pre class="ascii-cloud" data-cloud="gap-b">{{ $cloud }}</pre>
+    <pre class="ascii-cloud" data-cloud="mid">{{ $cloud }}</pre>
+    <pre class="ascii-cloud" data-cloud="below">{{ $cloud }}</pre>
+    <div class="ascii-cloud-nest" data-cloud="nest">
+        <pre class="ascii-cloud" data-cloud="nest">{{ $cloud }}</pre>
+        <span class="ascii-cloud__guest" aria-hidden="true">⋆｡˚ sign the guestbook! ˚｡⋆</span>
+    </div>
+</div>

@@ -1,10 +1,14 @@
 [build]
-  command = "hugo --minify --baseURL $URL"
+  # Pin the public host so baked absolute URLs (og, feeds) match the custom domain.
+  # Nav/home links use relative URLs so a wrong primary domain cannot yank visitors to *.netlify.app.
+  command = "hugo --minify --baseURL https://cornfieldjournal.com/"
   publish = "public"
+  functions = "netlify/functions"
 
 [build.environment]
   HUGO_VERSION = "0.167.0"
   HUGO_ENABLEGITINFO = "true"
+  NODE_VERSION = "22"
 
 [context.deploy-preview]
   command = "hugo --minify --baseURL $DEPLOY_PRIME_URL"

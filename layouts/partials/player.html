@@ -1,5 +1,11 @@
-<div id="site-player">
+<div id="site-player" class="site-player--booting">
+    <button type="button" class="player-reopen" data-player-reopen aria-label="Show player" hidden>
+        <span aria-hidden="true">♡</span>
+    </button>
     <div class="player-chrome" data-player-chrome>
+        <button type="button" class="player-close" data-player-close aria-label="Close player">
+            <span aria-hidden="true">×</span>
+        </button>
         <p class="player-title" data-player-title><span data-player-title-text>Playlist</span></p>
         <div class="player-chrome__buttons">
             <button type="button" data-player-toggle aria-label="Play">
@@ -15,4 +21,4 @@
     </div>
     <div id="winamp-host"></div>
 </div>
-<script src="{{ "js/player.js" | relURL }}?v=13"></script>
+<script src="{{ "js/player.js" | relURL }}?v=24"></script>

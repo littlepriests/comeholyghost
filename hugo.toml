@@ -1,5 +1,6 @@
 baseURL = "http://localhost:1313/"
 theme = "risotto"
+# Browser tab (+ default <title> elsewhere). Not the homepage banner header.
 title = "꒰ঌᐢ.ˬ.ᐢ໒꒱"
 locale = "en-us"
 DefaultContentLanguage = "en"
@@ -32,15 +33,26 @@ image = "images/cursor.gif"
 x = 0
 y = 0
 
-# Homepage banner. Swap the file, or point banner at a different path under static/.
+# Homepage banner + title. Banner picks a random image from bannerDir on each build/refresh.
 [params.home]
+# Folder under static/ with banner-sized images (png/jpg/webp/gif). Falls back to `banner` if empty.
+bannerDir = "images/banners"
 banner = "images/banner.png"
 bannerAlt = "Site banner"
+# Text under the banner only (.home-site-title). Independent of the tab `title` above.
+displayTitle = "notes from cornfields"
+# Font stack for that element only.
+titleFont = "\"FF Dot Matrix\", \"Courier New\", monospace"
+# Loads @font-face from static/css/home-title-font.css (put the font in static/fonts/).
+titleFontUrl = "css/home-title-font.css"
+# Optional title colors (.home-site-title). Empty = CSS defaults in home.css.
+titleColor = ""
+titleHighlight = ""
 # Animated home button in the nav (sprite id from [[params.sprites]]). Empty = title chip.
 logoSprite = "misdreavus"
 
 # Sprite-strip animations (shortcode: {{</* sprite "id" */>}}).
-# Refresh with scripts/slice-misdreavus.mjs / slice-kagura.mjs.
+# Refresh with scripts/slice-misdreavus.mjs / slice-kagura.mjs / slice-sango.mjs / slice-skifree.mjs.
 [[params.sprites]]
 id = "misdreavus"
 src = "images/sprites/misdreavus.png"
@@ -77,6 +89,78 @@ frames = 8
 fps = 5
 alt = "Kagura attack"
 
+[[params.sprites]]
+id = "sango-idle"
+src = "images/sprites/sango-idle.png"
+frameWidth = 27
+frameHeight = 40
+frames = 3
+fps = 4
+alt = "Sango idle"
+
+[[params.sprites]]
+id = "sango-walk"
+src = "images/sprites/sango-walk.png"
+frameWidth = 27
+frameHeight = 42
+frames = 4
+fps = 6
+alt = "Sango walk"
+
+[[params.sprites]]
+id = "sango-hurt"
+src = "images/sprites/sango-hurt.png"
+frameWidth = 30
+frameHeight = 41
+frames = 1
+fps = 1
+alt = "Sango hurt"
+
+[[params.sprites]]
+id = "sango-boomerang"
+src = "images/sprites/sango-boomerang.png"
+frameWidth = 45
+frameHeight = 40
+frames = 4
+fps = 10
+alt = "Hiraikotsu"
+
+[[params.sprites]]
+id = "sango-attack"
+src = "images/sprites/sango-attack.png"
+frameWidth = 48
+frameHeight = 47
+frames = 8
+fps = 8
+alt = "Sango attack"
+
+[[params.sprites]]
+id = "skifree-ski"
+src = "images/sprites/skifree-ski.png"
+frameWidth = 23
+frameHeight = 34
+frames = 4
+fps = 6
+alt = "SkiFree skier"
+
+[[params.sprites]]
+id = "skifree-yeti"
+src = "images/sprites/skifree-yeti.png"
+frameWidth = 32
+frameHeight = 43
+frames = 6
+fps = 5
+alt = "SkiFree yeti"
+
+[[params.sprites]]
+id = "skifree-crash"
+src = "images/sprites/skifree-crash.png"
+frameWidth = 31
+frameHeight = 34
+frames = 3
+fps = 4
+alt = "SkiFree wipeout"
+
 # One picture per corner, fixed behind the page. Panels cover them.
 # Leave image blank ("") to keep that corner empty. A missing file does the same.
 # x and y are the distance from that corner. maxwidth and maxheight cap the picture;
@@ -84,10 +168,12 @@ alt = "Kagura attack"
 [params.backdrop.bottom-right]
 image = "images/backdrop-bottom-right.png"
 alt = ""
-x = "-9.5rem"
+# Homepage uses layouts/partials/home-sword.html (footer hairline + gutter scale).
+# These offsets only apply if the fixed corner backdrop is shown elsewhere.
+x = "0.75rem"
 y = "0rem"
-maxwidth = "24rem"
-maxheight = "24rem"
+maxwidth = "16rem"
+maxheight = "20rem"
 
 # [params.backdrop.bottom-left]
 # image = "images/backdrop-bottom-left.png"

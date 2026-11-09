@@ -1,6 +1,8 @@
 /*
   Horizontal strip sprite animations (pixel-art sheets).
-  Set --sprite-frames, --sprite-fw, --sprite-fh, --sprite-fps, and background-image.
+  Set --sprite-fw, --sprite-fh, --sprite-frames, --sprite-fps, and background-image.
+  End position is the last real frame (not one cell past it) so one-shot
+  animations with fill-mode:forwards don't freeze on a blank cell.
 */
 
 .sprite-anim {
@@ -15,9 +17,16 @@
     image-rendering: crisp-edges;
     animation-name: sprite-anim-play;
     animation-duration: calc(var(--sprite-frames, 1) / var(--sprite-fps, 8) * 1s);
-    animation-timing-function: steps(var(--sprite-frames, 1));
+    animation-timing-function: steps(var(--sprite-steps, 1), end);
     animation-iteration-count: infinite;
     vertical-align: bottom;
+}
+
+/* One-frame strips must not animate — steps(0) is invalid and a 1-wide sheet
+   would land on an empty cell past the only frame. */
+.sprite-anim.is-static {
+    animation: none !important;
+    background-position: 0 0 !important;
 }
 
 .sprite-anim.is-scale-2 {
@@ -35,7 +44,7 @@
         background-position: 0 0;
     }
     to {
-        background-position: calc(var(--sprite-fw, 32) * var(--sprite-frames, 1) * -1px) 0;
+        background-position: calc(var(--sprite-fw, 32) * (var(--sprite-frames, 1) - 1) * -1px) 0;
     }
 }
 

@@ -1,7 +1,38 @@
 <script type="module">
     import { bubbleCursor } from "https://unpkg.com/cursor-effects@latest/dist/esm.js";
 
-    new bubbleCursor({
-        colors: ["#ff69b4", "#ffffff", "#b388ff"]
-    });
+    var bubbles = null;
+    var overSword = false;
+
+    function startBubbles() {
+        if (bubbles || overSword) return;
+        bubbles = bubbleCursor({
+            colors: ["#ff69b4", "#ffffff", "#b388ff"]
+        });
+    }
+
+    function stopBubbles() {
+        if (!bubbles) return;
+        if (typeof bubbles.destroy === "function") bubbles.destroy();
+        bubbles = null;
+    }
+
+    function isSword(node) {
+        return !!(node && node.closest && node.closest(".home-sword"));
+    }
+
+    document.addEventListener("pointerover", function (event) {
+        if (!isSword(event.target)) return;
+        overSword = true;
+        stopBubbles();
+    }, true);
+
+    document.addEventListener("pointerout", function (event) {
+        if (!isSword(event.target)) return;
+        if (isSword(event.relatedTarget)) return;
+        overSword = false;
+        startBubbles();
+    }, true);
+
+    startBubbles();
 </script>
