@@ -224,8 +224,8 @@ body.home .ascii-angel__cta-art {
     -webkit-box-decoration-break: clone;
     color: var(--home-title-color);
     background-color: var(--home-title-highlight);
-    font-size: clamp(3rem, 5vw, 3rem);
-    font-weight: 500;
+    font-size: 1rem;
+    font-weight: 600;    
     letter-spacing: 0.04em;
     line-height: 1.15;
     text-align: left;
@@ -234,11 +234,20 @@ body.home .ascii-angel__cta-art {
         0 0 28px color-mix(in srgb, #9ec9ff 16%, transparent);
 }
 
+.home-site-title__line {
+    display: block;
+    text-align: center;
+    color: white;
+    font-family: "Segoe Script", "Apple Chancery", cursive;
+    font-size: 1.5rem;
+}
+
 .home-site-title__line--2 {
-    font-family: Impact, sans-serif;
-    font-size: 1rem;
+    font-family: "DotMatrixNarrow";
+    font-size: 4rem;
     font-weight: 600;
     letter-spacing: 0.02rem;
+    color: #fdfb76;
 }
 
 /* "man in the moon" by Joan G. Stark (jgs / Spunk) — keep the signature.
