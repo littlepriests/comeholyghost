@@ -41,6 +41,23 @@
     opacity: 0 !important;
 }
 
+/*
+  Inner pages: punch a hole in the starfield over the reading column so
+  soft glows cannot sit in letter gaps. Vars set by stars.js from .page__body.
+*/
+.home-stars.is-reading-masked {
+    -webkit-mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
+    -webkit-mask-size: 100% 100%, var(--read-void-w, 0px) var(--read-void-h, 0px);
+    -webkit-mask-position: 0 0, var(--read-void-x, 0px) var(--read-void-y, 0px);
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-composite: destination-out;
+    mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
+    mask-size: 100% 100%, var(--read-void-w, 0px) var(--read-void-h, 0px);
+    mask-position: 0 0, var(--read-void-x, 0px) var(--read-void-y, 0px);
+    mask-repeat: no-repeat;
+    mask-composite: exclude;
+}
+
 /* Sparse Joan G. Stark–style ASCII stars in quiet gaps (credit in docs/resources.md). */
 .home-stars__ascii-star {
     position: absolute;

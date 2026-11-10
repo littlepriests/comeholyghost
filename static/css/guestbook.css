@@ -25,7 +25,16 @@
 
 @media (max-width: 44.99rem) {
     .guestbook-wrap {
-        padding-bottom: calc(var(--skin-height) + 2rem);
+        padding-left: 0.85rem;
+        padding-right: 0.85rem;
+        max-width: 100%;
+        padding-bottom: calc(var(--simple-player-height, 3rem) + 2.5rem + env(safe-area-inset-bottom, 0px));
+    }
+
+    .guestbook__form input,
+    .guestbook__form textarea,
+    .guestbook__form button {
+        font-size: 1rem;
     }
 }
 

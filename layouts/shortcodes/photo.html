@@ -1,0 +1,41 @@
+{{- /*
+  Medium centered article photo; click opens full size.
+
+  {{< photo src="photo.png" caption="Hello" >}}
+  {{< photo src="photo.png" alt="Hello" >}}Caption{{< /photo >}}
+
+  Page resources: display thumb is Fit 1400x webp q75; lightbox uses Fit 2400x webp q80
+  (or original if already smaller / not processable).
+*/ -}}
+{{- $src := .Get "src" | default (.Get 0) -}}
+{{- if not $src -}}
+  {{- errorf "photo shortcode on %q: missing src" .Page.Path -}}
+{{- end -}}
+{{- $alt := .Get "alt" | default "" -}}
+{{- $caption := .Get "caption" | default (strings.TrimSpace .Inner) -}}
+{{- $img := false -}}
+{{- with .Page.Resources.GetMatch $src -}}
+  {{- $img = . -}}
+{{- end -}}
+{{- $href := cond $img $img.RelPermalink ($src | relURL) -}}
+{{- $thumb := $href -}}
+{{- $full := $href -}}
+{{- if $img -}}
+  {{- if ge $img.Width 1 -}}
+    {{- $disp := $img.Fit "1400x1400 webp q75" -}}
+    {{- $large := $img.Fit "2400x2400 webp q80" -}}
+    {{- $thumb = $disp.RelPermalink -}}
+    {{- $full = $large.RelPermalink -}}
+  {{- end -}}
+{{- end -}}
+{{- if and (not $alt) $caption -}}
+  {{- $alt = $caption | plainify -}}
+{{- end -}}
+<figure class="article-photo">
+  <button type="button" class="article-photo__thumb" data-article-photo data-full="{{ $full }}" aria-label="{{ if $alt }}View larger: {{ $alt }}{{ else }}View larger image{{ end }}">
+    <img src="{{ $thumb }}" alt="{{ $alt }}" loading="lazy" decoding="async">
+  </button>
+  {{- with $caption }}
+  <figcaption class="article-figure__caption">{{ . | $.Page.RenderString }}</figcaption>
+  {{- end }}
+</figure>

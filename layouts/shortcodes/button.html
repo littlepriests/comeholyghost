@@ -1,1 +1,6 @@
-<a class="site-button" href="{{ .Get "url" | safeURL }}">{{ with .Get "icon" }}<i class="{{ . }}" aria-hidden="true"></i>{{ end }}{{ .Get "text" }}</a>
+{{- $text := .Get "text" -}}
+{{- $url := .Get "url" -}}
+{{- $icon := .Get "icon" | default "" -}}
+{{- $name := "" -}}
+{{- if $icon }}{{ $name = partial "icon-name.html" $icon }}{{ end -}}
+<a class="site-button" href="{{ $url | safeURL }}">{{- with $name }}{{ partial "icon.html" (dict "name" .) }} {{ end -}}{{ $text }}</a>

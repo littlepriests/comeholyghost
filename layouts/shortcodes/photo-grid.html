@@ -1,0 +1,56 @@
+{{- /*
+  Grouped article photos. Click any tile to enlarge (same lightbox as photo).
+
+  {{< photo-grid caption="amaral gold" >}}
+  weaving-infinite-gold.png
+  weaving-infinite-gold.png
+  weaving-infinite-gold.png
+  {{< /photo-grid >}}
+
+  One image path per line (page resource or static/ path). Optional caption=.
+  Page-resource tiles: Fit 800x webp thumb; lightbox Fit 2400x webp.
+*/ -}}
+{{- $caption := .Get "caption" | default "" -}}
+{{- $raw := split .Inner "\n" -}}
+{{- $srcs := slice -}}
+{{- range $raw -}}
+  {{- $line := trim . " \t\r" -}}
+  {{- if and $line (not (strings.HasPrefix $line "<!--")) -}}
+    {{- $srcs = $srcs | append $line -}}
+  {{- end -}}
+{{- end -}}
+{{- $n := len $srcs -}}
+{{- if eq $n 0 -}}
+  {{- errorf "photo-grid on %q: need at least one image path (one per line)" .Page.Path -}}
+{{- end -}}
+<figure class="article-photo-grid" data-count="{{ $n }}">
+  <div class="article-photo-grid__tiles">
+    {{- range $i, $src := $srcs -}}
+      {{- $img := false -}}
+      {{- with $.Page.Resources.GetMatch $src -}}
+        {{- $img = . -}}
+      {{- end -}}
+      {{- $href := cond $img $img.RelPermalink ($src | relURL) -}}
+      {{- $thumb := $href -}}
+      {{- $full := $href -}}
+      {{- if and $img (ge $img.Width 1) -}}
+        {{- $disp := $img.Fit "800x800 webp q75" -}}
+        {{- $large := $img.Fit "2400x2400 webp q80" -}}
+        {{- $thumb = $disp.RelPermalink -}}
+        {{- $full = $large.RelPermalink -}}
+      {{- end -}}
+      {{- $alt := printf "%s (%d)" ($caption | default "photo" | plainify) (add $i 1) -}}
+      <button
+        type="button"
+        class="article-photo-grid__item"
+        data-article-photo
+        data-full="{{ $full }}"
+        aria-label="View larger: {{ $alt }}">
+        <img src="{{ $thumb }}" alt="{{ $alt }}" loading="lazy" decoding="async">
+      </button>
+    {{- end -}}
+  </div>
+  {{- with $caption }}
+  <figcaption class="article-figure__caption article-photo-grid__caption">{{ . | $.Page.RenderString }}</figcaption>
+  {{- end }}
+</figure>

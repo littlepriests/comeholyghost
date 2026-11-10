@@ -1,0 +1,37 @@
+{{- /*
+  Figure with caption under the image.
+
+  {{< figcaption src="photo.png" caption="Hello" >}}
+  {{< figcaption src="photo.png" alt="Hello" >}}Caption text{{< /figcaption >}}
+
+  src may be a page resource (same folder as the post) or a path under static/.
+  Page resources use Fit 1600x webp for display.
+*/ -}}
+{{- $src := .Get "src" | default (.Get 0) -}}
+{{- if not $src -}}
+  {{- errorf "figcaption shortcode on %q: missing src" .Page.Path -}}
+{{- end -}}
+{{- $alt := .Get "alt" | default "" -}}
+{{- $caption := .Get "caption" | default (strings.TrimSpace .Inner) -}}
+{{- $img := false -}}
+{{- with .Page.Resources.GetMatch $src -}}
+  {{- $img = . -}}
+{{- end -}}
+{{- $href := cond $img $img.RelPermalink ($src | relURL) -}}
+{{- if $img -}}
+  {{- if ge $img.Width 1 -}}
+    {{- $disp := $img.Fit "1600x1600 webp q75" -}}
+    {{- $href = $disp.RelPermalink -}}
+  {{- end -}}
+{{- end -}}
+{{- if and (not $alt) $caption -}}
+  {{- $alt = $caption | plainify -}}
+{{- end -}}
+<figure class="article-figure">
+  <div class="article-figure__frame">
+    <img src="{{ $href }}" alt="{{ $alt }}" loading="lazy" decoding="async">
+  </div>
+  {{- with $caption }}
+  <figcaption class="article-figure__caption">{{ . | $.Page.RenderString }}</figcaption>
+  {{- end }}
+</figure>

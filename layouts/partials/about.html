@@ -1,0 +1,22 @@
+{{- $about := .Site.Params.about -}}
+{{- $hasAbout := or $about.title $about.description $about.logo $about.logo_image -}}
+{{- if $hasAbout }}
+<div class="aside__about">
+    {{ with $about.logo }}<span class="about__logo" role="img">{{ . }}</span>&nbsp;{{ end }}
+    {{ with $about.logo_image }}<img class="about__logo" src="{{ . | absURL }}" alt="Logo">{{ end }}
+    {{ with $about.title }}<h1 class="about__title">{{ . }}</h1>{{ end }}
+    {{ with $about.description }}<p class="about__description">{{ . | markdownify }}</p>{{ end }}
+</div>
+{{- end }}
+
+{{- with .Site.Params.socialLinks }}
+<ul class="aside__social-links">
+    {{ range $item := . }}
+    {{- $name := "" -}}
+    {{- with $item.icon }}{{ $name = partial "icon-name.html" . }}{{ end -}}
+    <li>
+        <a href="{{ $item.url }}" rel="me" aria-label="{{ $item.title }}" title="{{ $item.title }}">{{- with $name }}{{ partial "icon.html" (dict "name" .) }}{{ else }}{{ $item.title }}{{ end -}}</a>&nbsp;
+    </li>
+    {{ end }}
+</ul>
+{{- end }}

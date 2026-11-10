@@ -1,0 +1,76 @@
+{{- /*
+  Writing-index card. Front matter on the post:
+
+    title          → linked heading
+    date           → date line
+    summary        → teaser (falls back to description, then .Summary)
+    index_image    → page-resource filename or static/ path
+    index_caption  → figcaption under the thumb (optional)
+
+  Thumb at top, centered in the column; title / date / summary stay left.
+  Thumbnails stay small (never full-fold). Click expands via article-media lightbox.
+*/ -}}
+{{- /*
+  Index teaser is front matter only — never Hugo's auto .Summary, which
+  would pull the article body stub (e.g. "soon!") onto /blog/.
+*/ -}}
+{{- $summary := "" -}}
+{{- with .Param "summary" }}{{ $summary = . }}{{ end -}}
+{{- if not $summary -}}
+  {{- with .Param "description" }}{{ $summary = . }}{{ end -}}
+{{- end -}}
+{{- if not $summary -}}
+  {{- with .Params.index_summary }}{{ $summary = . }}{{ end -}}
+{{- end -}}
+
+{{- $imgSrc := .Params.index_image | default .Params.image | default "" -}}
+{{- $caption := .Params.index_caption | default "" -}}
+{{- $thumb := false -}}
+{{- $full := "" -}}
+{{- if $imgSrc -}}
+  {{- with .Resources.GetMatch $imgSrc -}}
+    {{- $full = .RelPermalink -}}
+    {{- if ge .Width 1 -}}
+      {{- $thumb = (.Resize "420x webp q75").RelPermalink -}}
+      {{- $full = (.Fit "2400x2400 webp q80").RelPermalink -}}
+    {{- else -}}
+      {{- $thumb = .RelPermalink -}}
+    {{- end -}}
+  {{- else -}}
+    {{- $full = $imgSrc | relURL -}}
+    {{- $thumb = $full -}}
+  {{- end -}}
+{{- end -}}
+{{- if and (not $caption) $imgSrc -}}
+  {{- with .Resources.GetMatch $imgSrc -}}
+    {{- with .Title }}{{ $caption = . }}{{ end -}}
+  {{- end -}}
+{{- end -}}
+<article class="blog-entry">
+    {{- if $thumb }}
+    <figure class="blog-entry__figure">
+        <button
+            type="button"
+            class="blog-entry__thumb"
+            data-article-photo
+            data-full="{{ $full }}"
+            aria-label="{{ if $caption }}view larger: {{ $caption | plainify }}{{ else }}view larger image{{ end }}">
+            <img src="{{ $thumb }}" alt="{{ $caption | default .Title | plainify }}" loading="lazy" decoding="async" width="420">
+        </button>
+        {{- with $caption }}
+        <figcaption class="blog-entry__caption">{{ . | $.RenderString }}</figcaption>
+        {{- end }}
+    </figure>
+    {{- end }}
+    <h2 class="blog-entry__title">
+        <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a>
+    </h2>
+    <p class="blog-entry__meta">
+        <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "January 2, 2006" }}</time>
+    </p>
+    {{- with $summary }}
+    <div class="blog-entry__summary">
+        {{ . | $.RenderString }}
+    </div>
+    {{- end }}
+</article>

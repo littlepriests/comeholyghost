@@ -117,12 +117,13 @@ if (skiRow) {
   meta.push(writeStrip("skifree-ski", skiRow.frames.slice(0, 4), 6, "SkiFree skier"));
 }
 
-// Tall yeti row (stand / roar / walk / grab+eat).
+// Tall yeti row only (stand / walk / grab / eat+blood). Keep native ~32px
+// cells — appending the wider climax row stretched the strip weirdly.
 const yetiRow = original
   .filter((r) => r.h >= 40 && r.frames.length >= 3)
   .sort((a, b) => b.frames.length - a.frames.length)[0];
 if (yetiRow) {
-  meta.push(writeStrip("skifree-yeti", yetiRow.frames.slice(0, 6), 5, "SkiFree yeti"));
+  meta.push(writeStrip("skifree-yeti", yetiRow.frames, 3, "SkiFree yeti"));
 }
 
 // Wipeout: tumble + star poses from the end of the skier row, else a short mid row.

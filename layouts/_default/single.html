@@ -1,20 +1,34 @@
 {{ define "main" }}
+    {{/* Page-scoped: article media + lightbox (not on home / blog index). */}}
+    <link rel="stylesheet" href="{{ "css/article-media.css" | relURL }}?v=5">
     <header class="content__header">
         <h1>{{ .Title | markdownify }}</h1>
     </header>
     <div class="content__body">
         {{ .Content }}
         {{- partial "page-buttons.html" . -}}
+        {{- if .Params.back_to_top }}
+        <p class="back-to-top">
+            <a
+                class="back-to-top__link"
+                href="#page-root"
+                aria-label="Back to top"
+                title="Back to top"
+                onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">⌃</a>
+        </p>
+        {{- end }}
     </div>
     <footer class="content__footer"></footer>
 {{ end }}
 
 {{ define "aside" }}
     {{ if .Params.description }}<p>{{ .Params.description }}</p>{{ end }}
-    {{ if or (.Params.author) (.Params.date) }}
+    {{- /* Date still sorts the post; hide_date = true only drops the aside line. */ -}}
+    {{- $showDate := and .Date (not .Params.hide_date) -}}
+    {{ if or .Params.author $showDate }}
         <p>
-            {{ if .Params.author }}By {{ .Params.author }}{{ if .Date }}, {{ end }}{{ end }}
-            {{ if .Date }}{{ .Date.Format "2006-01-02" }}{{ end }}
+            {{ if .Params.author }}By {{ .Params.author }}{{ if $showDate }}, {{ end }}{{ end }}
+            {{ if $showDate }}{{ .Date.Format "2006-01-02" }}{{ end }}
         </p>
     {{ end }}
 
@@ -23,4 +37,16 @@
 	    On this page:
 	    {{ .TableOfContents }}
     {{ end }}
+
+    {{- /* Read-me (and any page with email_cta): mailto under the Winamp column. */ -}}
+    {{- if and .Params.email_cta .Site.Params.about.email }}
+    <p class="aside-email">
+        <a class="aside-email__link" href="mailto:{{ .Site.Params.about.email }}" aria-label="email me" title="email me">
+            <span class="aside-email__icon" aria-hidden="true">
+                {{ partial "icon.html" (dict "name" "envelope") }}
+                <span class="aside-email__heart">♥</span>
+            </span>
+        </a>
+    </p>
+    {{- end }}
 {{ end }}

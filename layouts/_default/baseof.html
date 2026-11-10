@@ -21,7 +21,14 @@
                 <div class="aside__about">
                     {{- partial "about.html" . -}}
                 </div>
+                {{- /* No hairline when the about block is empty chrome. */ -}}
+                {{- $about := .Site.Params.about -}}
+                {{- $hasAbout := or $about.title $about.description $about.logo $about.logo_image -}}
+                {{- $hasSocial := false -}}
+                {{- with .Site.Params.socialLinks }}{{ $hasSocial = gt (len .) 0 }}{{ end -}}
+                {{- if or $hasAbout $hasSocial }}
                 <hr>
+                {{- end }}
                 <div class="aside__content">
                     {{- block "aside" . }}{{- end }}
                 </div>
@@ -36,7 +43,7 @@
         {{ partial "stars.html" . }}
         {{ partial "backdrop.html" . }}
         {{ partial "player.html" . }}
-        {{ partial "cursor-effects.html" . }}
+        <script src="{{ "js/article-media.js" | relURL }}?v=1"></script>
     </body>
 
 </html>

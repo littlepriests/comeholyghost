@@ -3,10 +3,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta charset="UTF-8"/>
 {{ if .Site.Params.noindex }}<meta name="robots" content="noindex" /> {{ end }}
-<!-- FontAwesome <https://fontawesome.com/> -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-<!-- Academicons <https://jpswalsh.github.io/academicons/> -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.9.4/css/academicons.min.css" integrity="sha512-IW0nhlW5MgNydsXJO40En2EoCkTTjZhI3yuODrZIc8cQ4h1XcF53PsqDHa09NqnkXuIe0Oiyyj171BqZFwISBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="preload" href="{{ "fonts/fira-mono-400.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="{{ "css/site-fonts.css" | relURL }}?v=1">
+<script>
+  (function () {
+    function ready() { document.documentElement.classList.add("fonts-ready"); }
+    ready();
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.catch(function () {});
+    }
+  })();
+</script>
 <!-- risotto theme -->
 {{ $palette := resources.Get (printf "css/palettes/%s.css" (.Site.Params.theme.palette | default "base16-dark")) }}
 {{ $core := slice
@@ -53,12 +60,13 @@
 {{ end }}
 {{ with .Site.Language.Locale }}<meta property="og:locale" content="{{ . }}" />{{ end }}
 {{ with .Site.Params.about }}<meta property="og:image" content="{{ with .logo_image }}{{ . | absURL }}{{ end }}" />{{ end }}
-<link rel="stylesheet" href="{{ "css/player.css" | relURL }}?v=25">
-<link rel="stylesheet" href="{{ "css/reading.css" | relURL }}?v=4">
-<link rel="stylesheet" href="{{ "css/retro.css" | relURL }}?v=10">
-<link rel="stylesheet" href="{{ "css/stars.css" | relURL }}?v=8">
-<link rel="stylesheet" href="{{ "css/sprites.css" | relURL }}?v=5">
-<link rel="stylesheet" href="{{ "css/buttons.css" | relURL }}">
+{{/* Always-on site chrome. Page-specific sheets load in their layouts. */}}
+<link rel="stylesheet" href="{{ "css/player.css" | relURL }}?v=29">
+<link rel="stylesheet" href="{{ "css/reading.css" | relURL }}?v=17">
+<link rel="stylesheet" href="{{ "css/retro.css" | relURL }}?v=13">
+<link rel="stylesheet" href="{{ "css/stars.css" | relURL }}?v=10">
+<link rel="stylesheet" href="{{ "css/sprites.css" | relURL }}?v=13">
+<link rel="stylesheet" href="{{ "css/buttons.css" | relURL }}?v=2">
 {{/* Custom cursor image, when static/ holds the file named in params.cursor.image. */}}
 {{ $cursor := .Site.Params.cursor.image }}
 {{ if and $cursor (os.FileExists (printf "static/%s" (strings.TrimPrefix "/" $cursor))) }}

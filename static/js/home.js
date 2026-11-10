@@ -1,8 +1,48 @@
 (function () {
+    // Scale the footer dock (pets + ticker + player) as one unit to the
+    // available width so the row never wraps or spills horizontally.
+    var dockFit = document.querySelector("[data-home-dock-fit]");
+    var dock = document.querySelector("[data-home-dock]");
+    var dockScale = 1;
+
+    function fitHomeDock() {
+        if (!dockFit || !dock || !document.body.classList.contains("home")) return;
+        // scrollWidth ignores transform, so measure without resetting scale.
+        var avail = dockFit.clientWidth;
+        var need = dock.scrollWidth;
+        var next = 1;
+        if (avail > 0 && need > avail) {
+            next = Math.max(0.55, (avail / need) * 0.98);
+        }
+        if (Math.abs(next - dockScale) <= 0.002) {
+            dockFit.style.setProperty("--home-dock-h", dock.offsetHeight + "px");
+            return;
+        }
+        dockScale = next;
+        var token = next.toFixed(4);
+        dock.style.setProperty("--home-dock-scale", token);
+        dockFit.style.setProperty("--home-dock-scale", token);
+        dockFit.style.setProperty("--home-dock-h", dock.offsetHeight + "px");
+        document.body.classList.toggle("is-home-dock-scaled", next < 0.998);
+        window.dispatchEvent(new Event("resize"));
+    }
+
+    if (dockFit && dock) {
+        fitHomeDock();
+        window.addEventListener("resize", fitHomeDock);
+        if (typeof ResizeObserver === "function") {
+            new ResizeObserver(fitHomeDock).observe(dockFit);
+        }
+        window.addEventListener("load", fitHomeDock);
+    }
+
     // Pick a random homepage banner from the toml-configured folder pool.
+    // Keep the frame pending until the chosen image is decoded so the src swap
+    // does not flash the Hugo-default first pool entry.
     var bannerHost = document.querySelector(".home-banner[data-banner-pool]");
     var bannerImg = document.querySelector("[data-home-banner]");
     if (bannerHost && bannerImg) {
+        bannerHost.classList.add("is-pending");
         var pool = (bannerHost.getAttribute("data-banner-pool") || "")
             .split(",")
             .map(function (s) {
@@ -17,6 +57,15 @@
         }
         var alt = bannerHost.getAttribute("data-banner-alt");
         if (alt) bannerImg.setAttribute("alt", alt);
+        function revealBanner() {
+            bannerHost.classList.remove("is-pending");
+        }
+        if (bannerImg.complete && bannerImg.naturalWidth) {
+            revealBanner();
+        } else {
+            bannerImg.addEventListener("load", revealBanner, { once: true });
+            bannerImg.addEventListener("error", revealBanner, { once: true });
+        }
     }
 
     // Sit the moon beside the content body, midway between Misdreavus and the ASCII angel.
@@ -169,16 +218,36 @@
             setCloud("mid", ar.right + 10, flankY + 4, false, true);
         }
 
-        // Keep the existing guestbook CTA hit-target over the nest cloud.
+        // Keep the guestbook CTA over the nest cloud when clouds are visible.
+        // On narrow screens .home-clouds is display:none — clear inline coords so CSS can place it.
         var cta = angel.querySelector(".ascii-angel__cta");
         if (cta && nestEl) {
+            var cloudsWrap = document.querySelector(".home-clouds");
+            var wrapCs = cloudsWrap ? window.getComputedStyle(cloudsWrap) : null;
+            var nestCs = window.getComputedStyle(nestEl);
             var nr = nestEl.getBoundingClientRect();
-            var ab = angel.getBoundingClientRect();
-            cta.style.left = ((nr.left + nr.right) / 2 - ab.left).toFixed(1) + "px";
-            cta.style.bottom = "auto";
-            cta.style.top = (nr.top - ab.top + nr.height * 0.35).toFixed(1) + "px";
-            cta.style.transform = "translate(-50%, 0)";
-            cta.style.minWidth = Math.max(16, nr.width * 0.85).toFixed(1) + "px";
+            var wrapHidden =
+                wrapCs &&
+                (wrapCs.display === "none" || wrapCs.visibility === "hidden");
+            var nestVisible =
+                !wrapHidden &&
+                nestCs.display !== "none" &&
+                nestCs.visibility !== "hidden" &&
+                nr.width > 1;
+            if (!nestVisible) {
+                cta.style.removeProperty("left");
+                cta.style.removeProperty("top");
+                cta.style.removeProperty("bottom");
+                cta.style.removeProperty("transform");
+                cta.style.removeProperty("min-width");
+            } else {
+                var ab = angel.getBoundingClientRect();
+                cta.style.left = ((nr.left + nr.right) / 2 - ab.left).toFixed(1) + "px";
+                cta.style.bottom = "auto";
+                cta.style.top = (nr.top - ab.top + nr.height * 0.35).toFixed(1) + "px";
+                cta.style.transform = "translate(-50%, 0)";
+                cta.style.minWidth = Math.max(16, nr.width * 0.85).toFixed(1) + "px";
+            }
         }
     }
 
@@ -266,6 +335,7 @@
 })();
 
 (function () {
+    var apiUrl = "/api/visitors";
     var countKey = "pd-visitor-count";
     var seenKey = "pd-visitor-seen";
     var digits = document.querySelector("[data-visitor-count]");
@@ -305,7 +375,60 @@
     var kaguraRecoverTimer = 0;
     var boomTimer = 0;
 
-    digits.textContent = String(count || 0).padStart(6, "0");
+    function paintCount() {
+        digits.textContent = String(count || 0).padStart(6, "0");
+        try {
+            localStorage.setItem(countKey, String(count || 0));
+        } catch (error) {}
+    }
+
+    function applyCount(next, withFx) {
+        count = Math.max(0, Math.floor(Number(next) || 0));
+        paintCount();
+        if (withFx) showBumpFx(count);
+    }
+
+    // Global tally via Netlify Blobs (/api/visitors). Plain hugo server has no
+    // functions, so GET/POST fall back to the cached localStorage number.
+    function loadRemoteCount() {
+        fetch(apiUrl, { headers: { Accept: "application/json" } })
+            .then(function (response) {
+                if (!response.ok) throw new Error("visitor GET failed");
+                return response.json();
+            })
+            .then(function (data) {
+                var next = Number(data && data.count);
+                if (!Number.isFinite(next) || next < 0) return;
+                if (finishing) return;
+                count = Math.floor(next);
+                paintCount();
+            })
+            .catch(function () {});
+    }
+
+    function bumpRemote(withFx, done) {
+        fetch(apiUrl, {
+            method: "POST",
+            headers: { Accept: "application/json" }
+        })
+            .then(function (response) {
+                if (!response.ok) throw new Error("visitor POST failed");
+                return response.json();
+            })
+            .then(function (data) {
+                var next = Number(data && data.count);
+                if (!Number.isFinite(next) || next < 0) throw new Error("bad count");
+                applyCount(next, withFx);
+                if (done) done();
+            })
+            .catch(function () {
+                applyCount(count + 1, withFx);
+                if (done) done();
+            });
+    }
+
+    paintCount();
+    loadRemoteCount();
 
     function showBumpFx(next) {
         digits.classList.remove("is-bump", "is-milestone");
@@ -508,12 +631,10 @@
         if (!pending || finishing) return;
         finishing = true;
         pending = false;
-        count += 1;
-        localStorage.setItem(countKey, String(count));
-        sessionStorage.setItem(seenKey, "1");
-        digits.textContent = String(count || 0).padStart(6, "0");
-        if (withFx) showBumpFx(count);
-        cleanup();
+        try {
+            sessionStorage.setItem(seenKey, "1");
+        } catch (error) {}
+        bumpRemote(withFx, cleanup);
     }
 
     function playAttackThenBump() {
@@ -525,10 +646,12 @@
         }
         finishing = true;
         pending = false;
+        try {
+            sessionStorage.setItem(seenKey, "1");
+        } catch (error) {}
 
         var bumped = false;
         var travel = measureTravel();
-        var next = count + 1;
 
         if (kagura.parentElement !== dock) dock.appendChild(kagura);
         kagura.classList.remove("is-idle", "is-down");
@@ -557,11 +680,7 @@
                 window.setTimeout(function () {
                     if (bumped) return;
                     bumped = true;
-                    count = next;
-                    localStorage.setItem(countKey, String(count));
-                    sessionStorage.setItem(seenKey, "1");
-                    digits.textContent = String(count || 0).padStart(6, "0");
-                    showBumpFx(count);
+                    bumpRemote(true);
                 }, slashMs * bumpAt);
 
                 window.setTimeout(function () {
@@ -659,4 +778,113 @@
         { threshold: 0.55, rootMargin: "0px 0px -8% 0px" }
     );
     observer.observe(ticker);
+})();
+
+// First homepage landing: thought bubble left of Misdreavus asks to play music.
+// Phone (≤44.99rem): skip entirely — bottom player is enough; don't mark seen.
+(function () {
+    var prompt = document.querySelector("[data-music-prompt]");
+    if (!prompt) return;
+    if (window.matchMedia("(max-width: 44.99rem)").matches) return;
+
+    var key = "home-music-prompt-seen";
+    try {
+        if (new URLSearchParams(location.search).has("replay-music")) {
+            sessionStorage.removeItem(key);
+        }
+    } catch (error) {}
+
+    var seen = false;
+    try {
+        seen = !!sessionStorage.getItem(key);
+    } catch (error) {}
+    if (seen) return;
+
+    var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var syncRaf = 0;
+    // Opaque-pixel centroids per Misdreavus frame (52×108 strip). Positive = lower.
+    var centroids = [45.2, 49.6, 49.5, 52.7, 52.7, 56.2, 60.0, 61.5, 61.4, 62.4];
+    var centroidMean =
+        centroids.reduce(function (sum, value) {
+            return sum + value;
+        }, 0) / centroids.length;
+
+    function dismiss() {
+        prompt.hidden = true;
+        prompt.classList.remove("is-open");
+        if (syncRaf) {
+            cancelAnimationFrame(syncRaf);
+            syncRaf = 0;
+        }
+        try {
+            sessionStorage.setItem(key, "1");
+        } catch (error) {}
+    }
+
+    function playMusic() {
+        if (typeof window.sitePlayerPlay === "function") {
+            window.sitePlayerPlay();
+            return;
+        }
+        var toggle = document.querySelector("[data-player-toggle]");
+        if (toggle) toggle.click();
+    }
+
+    function spriteFrameIndex(sprite) {
+        var frames = Math.max(1, parseFloat(getComputedStyle(sprite).getPropertyValue("--sprite-frames")) || 10);
+        var fps = Math.max(0.1, parseFloat(getComputedStyle(sprite).getPropertyValue("--sprite-fps")) || 8);
+        var period = (frames / fps) * 1000;
+        var anims = typeof sprite.getAnimations === "function" ? sprite.getAnimations() : [];
+        var t = 0;
+        if (anims.length && typeof anims[0].currentTime === "number") {
+            t = anims[0].currentTime;
+        } else {
+            // Fallback when WAAPI isn't available: wall-clock from first paint.
+            if (!spriteFrameIndex._t0) spriteFrameIndex._t0 = performance.now();
+            t = performance.now() - spriteFrameIndex._t0;
+        }
+        var cycle = ((t % (period * 2)) + period * 2) % (period * 2);
+        var forward = cycle < period;
+        var local = forward ? cycle : period * 2 - cycle;
+        var steps = Math.max(1, frames - 1);
+        var frame = Math.min(frames - 1, Math.floor((local / period) * steps + 1e-6));
+        return frame;
+    }
+
+    function syncThoughtBob() {
+        syncRaf = 0;
+        if (prompt.hidden || !prompt.classList.contains("is-open")) return;
+        var sprite = document.querySelector(".page__logo-inner--sprite .sprite-anim");
+        if (sprite && !reduceMotion) {
+            var frame = spriteFrameIndex(sprite);
+            var bob = (centroids[frame] || centroidMean) - centroidMean;
+            // Scale with the logo sprite box (mobile shrinks the strip).
+            var box = sprite.parentElement;
+            var scale = box ? box.getBoundingClientRect().height / 108 : 1;
+            prompt.style.setProperty("--thought-bob", (bob * scale).toFixed(2) + "px");
+        } else {
+            prompt.style.setProperty("--thought-bob", "0px");
+        }
+        syncRaf = requestAnimationFrame(syncThoughtBob);
+    }
+
+    var yesBtn = prompt.querySelector("[data-music-yes]");
+    var noBtn = prompt.querySelector("[data-music-no]");
+    if (yesBtn) {
+        yesBtn.addEventListener("click", function () {
+            playMusic();
+            dismiss();
+        });
+    }
+    if (noBtn) {
+        noBtn.addEventListener("click", function () {
+            dismiss();
+        });
+    }
+
+    prompt.hidden = false;
+    requestAnimationFrame(function () {
+        prompt.classList.add("is-open");
+        syncThoughtBob();
+    });
 })();
