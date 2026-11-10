@@ -10,7 +10,9 @@ This site is inspired by commonplace journals, Tumblr + Livejournal, and the par
 
 - Hugo with [Risotto theme](https://themes.gohugo.io/themes/risotto/)
 - Kagura banner from InuYasha ep67, "The Howling Wind of Betrayal"
-- [Joan Stark](https://oldcompcz.github.io/jgs/joan_stark/me.html) created the moon + stars ASCII art on the homepage 
+- ASCII art roundup
+	- [Joan Stark](https://oldcompcz.github.io/jgs/joan_stark/me.html) created the moon + stars
+	- Emojicombos for [the cat angel](https://emojicombos.com/insta%EF%BC%9Aimwendyaaa%E3%80%81aesthetic%E3%80%81cute) and [clouds](https://emojicombos.com/beautiful-art-dot-cloud)
 - [Bubble cursor](https://github.com/tholman/cursor-effects)
 - [Suicide of Dido](https://digital.bodleian.ox.ac.uk/objects/fdc348b0-c5e4-4e97-843f-4395e4feb2cc/surfaces/106d6005-1706-4f17-bb74-327621120f28/), Bodleian Library MS. e Mus. 65
 - Sprites sourced by various users at [The Spriters Resource](https://www.spriters-resource.com/) 
