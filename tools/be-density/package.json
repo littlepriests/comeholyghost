@@ -1,0 +1,12 @@
+{
+  "name": "be-density",
+  "private": true,
+  "type": "module",
+  "description": "Flag files where be-verbs are over a share of all verbs (POS-tagged)",
+  "bin": {
+    "be-density": "./be-density.mjs"
+  },
+  "dependencies": {
+    "wink-pos-tagger": "^2.2.2"
+  }
+}
