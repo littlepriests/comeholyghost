@@ -1,6 +1,6 @@
 +++
-title = "Blog"
+title = "read me"
 description = "Writing"
 +++
 
-Blog
+

@@ -4,9 +4,11 @@ title = "₊˚⊹♡"
 
 # hi ♡
 
-you can think of this place as a digital commonplace notebook. 
+</br>
 
-i hope you learn something today~
+this is my digital commonplace notebook. 
+
+let's learn something new today~ 
 
 # ♡
 

@@ -235,7 +235,7 @@ body.home .ascii-angel__cta-art {
 }
 
 .home-site-title__line {
-    display: block;
+    display: inline;
     text-align: center;
     color: white;
     font-family: "Segoe Script", "Apple Chancery", cursive;

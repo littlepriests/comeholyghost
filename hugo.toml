@@ -40,8 +40,8 @@ bannerDir = "images/banners"
 banner = "images/banner.png"
 bannerAlt = "Site banner"
 # Text under the banner only (.home-site-title). Independent of the tab `title` above.
-displayTitle = "welcome to the"
-displayTitleLine2 = "🌽F I E L D "
+displayTitle = "welcome to the "
+displayTitleLine2 = " F I E L D🌽"
 # Font stack for that element only.
 titleFont = "Impact, sans-serif"
 titleFontLine2 = "\"DotMatrixNarrow\", \"Courier New\", monospace"
@@ -222,20 +222,20 @@ maxheight = "24rem"
 
   [[menu.main]]
     identifier = "blog"
-    name = "Blog"
+    name = "writing"
     url = "/blog/"
     weight = 5
 
   [[menu.main]]
     identifier = "gallery"
-    name = "Gallery"
+    name = "photobook"
     url = "/gallery/"
     weight = 6
 
   [[menu.main]]
-    identifier = "about"
-    name = "About"
-    url = "/about/"
+    identifier = "read-me"
+    name = "read-me.txt"
+    url = "/read-me/"
     weight = 20
 
   [[menu.main]]

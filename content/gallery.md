@@ -1,4 +1,4 @@
 +++
-title = "Gallery"
+title = "photobook"
 layout = "gallery"
 +++
