@@ -5,16 +5,22 @@
     {{ $home := resources.Get "css/home.css" | minify | fingerprint }}
     <link rel="stylesheet" href="{{ $home.RelPermalink }}" integrity="{{ $home.Data.Integrity }}">
     {{- with .Site.Params.home.titleFontUrl }}
+    <link rel="preload" href="{{ "fonts/DotMatrixNarrow.ttf" | relURL }}" as="font" type="font/ttf" crossorigin>
     <link rel="stylesheet" href="{{ . | relURL }}">
     {{- end }}
     {{- $homeTitle := .Site.Params.home -}}
-    {{- if or $homeTitle.titleFont $homeTitle.titleColor $homeTitle.titleHighlight }}
+    {{- if or $homeTitle.titleFont $homeTitle.titleFontLine2 $homeTitle.titleColor $homeTitle.titleHighlight }}
     <style>
       body.home .home-site-title {
         {{- with $homeTitle.titleFont }}font-family: {{ . | safeCSS }};{{ end }}
         {{- with $homeTitle.titleColor }}--home-title-color: {{ . | safeCSS }};{{ end }}
         {{- with $homeTitle.titleHighlight }}--home-title-highlight: {{ . | safeCSS }};{{ end }}
       }
+      {{- with $homeTitle.titleFontLine2 }}
+      body.home .home-site-title__line--2 {
+        font-family: {{ . | safeCSS }};
+      }
+      {{- end }}
     </style>
     {{- end }}
 </head>
@@ -84,6 +90,7 @@ jgs   `'-..._____.-`</pre>
 
         <footer class="home-footer">
             {{- partial "home-sword.html" . -}}
+            <div class="home-footer__dock-fit" data-home-dock-fit>
             <div class="home-dock" data-home-dock>
                 {{- $kAttack := dict -}}
                 {{- $kWalk := dict -}}
@@ -149,6 +156,7 @@ jgs   `'-..._____.-`</pre>
                     {{- end -}}
                 </span>
             </div>
+            </div>
 
             {{ with .Site.Params.home.footer }}
             <div class="home-footer__extra">
@@ -162,7 +170,9 @@ jgs   `'-..._____.-`</pre>
                 {{ else if eq .kind "text" }}
                 <p>{{ .text | markdownify }}</p>
                 {{ else if eq .kind "button" }}
-                <a class="site-button" href="{{ .url | safeURL }}">{{ with .icon }}<i class="{{ . }}" aria-hidden="true"></i>{{ end }}{{ .title }}</a>
+                {{- $name := "" -}}
+                {{- with .icon }}{{ $name = partial "icon-name.html" . }}{{ end -}}
+                <a class="site-button" href="{{ .url | safeURL }}">{{- with $name }}{{ partial "icon.html" (dict "name" .) }} {{ end -}}{{ .title }}</a>
                 {{ end }}
                 {{ end }}
             </div>
@@ -170,7 +180,7 @@ jgs   `'-..._____.-`</pre>
         </footer>
     </div>
     {{- partial "home-clouds.html" . -}}
-    <script src="{{ "js/home.js" | relURL }}?v=38"></script>
+    <script src="{{ "js/home.js" | relURL }}?v=47"></script>
     </div>
     {{ partial "stars.html" . }}
     {{ partial "backdrop.html" . }}

@@ -161,7 +161,7 @@ body.home .ascii-cloud-nest.is-guest-out .ascii-cloud__guest {
     }
 }
 
-/* Guestbook copy lives in the nest cloud under the cat. */
+/* Guestbook copy lives in the nest cloud under the cat (desktop). */
 body.home .ascii-angel__cta-art {
     opacity: 0 !important;
 }
@@ -197,15 +197,30 @@ body.home .ascii-angel__cta-art {
     position: relative;
     margin-bottom: 0;
     min-height: 8rem;
+    max-width: 100%;
+    overflow: hidden;
     /* Frame / sparkle come from static/css/retro.css */
+}
+
+.home-banner.is-pending img {
+    opacity: 0;
 }
 
 .home-banner img {
     display: block;
     width: 100%;
+    max-width: 100%;
     height: auto;
     max-height: 280px;
     object-fit: cover;
+    opacity: 1;
+    transition: opacity 0.2s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .home-banner img {
+        transition: none;
+    }
 }
 
 /* Homepage-only stable title under the banner.
@@ -243,7 +258,7 @@ body.home .ascii-angel__cta-art {
 }
 
 .home-site-title__line--2 {
-    font-family: "DotMatrixNarrow";
+    font-family: "DotMatrixNarrow", "Courier New", monospace;
     font-size: 4rem;
     font-weight: 600;
     letter-spacing: 0.02rem;
@@ -328,8 +343,339 @@ body.home pre.ascii-moon::-webkit-scrollbar {
 }
 
 .home-header {
+    position: relative;
     margin-top: 0.15rem;
     margin-bottom: .5rem;
+    overflow: visible;
+}
+
+/* First-landing music ask: ASCII thought bubble + pink glow, synced to Misdreavus frames. */
+body.home .page__logo-slot {
+    --misdreavus-pink: #ff69b4;
+    --misdreavus-yellow: #efe763;
+    --misdreavus-eye: #9c394a;
+    position: relative;
+    flex: 0 0 auto;
+    align-self: center;
+    overflow: visible;
+}
+
+body.home .page__logo-slot .page__logo {
+    margin: 0;
+}
+
+body.home .music-prompt {
+    /* --thought-bob is driven by home.js from Misdreavus sprite frame centroids. */
+    --thought-bob: 0px;
+    /* Grow ASCII+fill only; panel/buttons stay put so y/n clear the rim.
+       Dot offsets below are your tuned values at scale 1 — use sites multiply. */
+    --cloud-scale: 1.18;
+    /* Move cloud+text+buttons together (↑ top = down, ↑ left = right). */
+    --bubble-left: .7rem;
+    --bubble-top: -2.75rem;
+    /* Nudge only the ask + y/n inside the cloud (↑ y = down, ↑ x = right). */
+    --panel-nudge-x: -.3rem;
+    --panel-nudge-y: 0.8rem;
+    /* Dot knobs: mid = larger ○, tip = smaller ◦. ↑ top = down, ↑ right = left. */
+    --dot-mid-right: .3rem;
+    --dot-mid-top: 2.95rem;
+    --dot-tip-right: -.1rem;
+    --dot-tip-top: 3.35rem;
+    position: absolute;
+    right: calc(100% + 0.15rem);
+    top: 0;
+    z-index: 12;
+    width: calc(12.5rem * var(--cloud-scale));
+    height: calc(7.25rem * var(--cloud-scale));
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    /* Whole prompt bobs with Misdreavus. */
+    transform: translateY(calc(-0.5rem + var(--thought-bob)));
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    will-change: transform;
+}
+
+body.home .music-prompt.is-open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+body.home .music-prompt[hidden] {
+    display: none !important;
+}
+
+/* Cloud fill + ASCII rim + CTA as one movable unit.
+   ASCII <pre> sizes the box; scalloped SVG fill stretches under it. */
+body.home .music-prompt__bubble {
+    position: absolute;
+    left: var(--bubble-left);
+    top: var(--bubble-top);
+    z-index: 1;
+    display: grid;
+    width: max-content;
+    max-width: 100%;
+    overflow: visible;
+}
+
+/* Soft radial pink — fades to transparent on all sides (no hard bottom cut).
+   Move this glow alone: inset top / bottom (↑ top % = lower; ↑ bottom % magnitude = extend down). */
+body.home .music-prompt__fill {
+    grid-area: 1 / 1;
+    position: absolute;
+    /* top | right | bottom | left — nudge top/bottom to slide the glow */
+    inset: -18% -12% -42% -12%;
+    z-index: 0;
+    display: block;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    pointer-events: none;
+    opacity: 0.55;
+    background:
+        radial-gradient(
+            ellipse 52% 46% at 38% 42%,
+            color-mix(in srgb, var(--misdreavus-pink) 38%, transparent) 0%,
+            transparent 72%
+        ),
+        radial-gradient(
+            ellipse 50% 44% at 62% 46%,
+            color-mix(in srgb, var(--misdreavus-pink) 30%, transparent) 0%,
+            transparent 72%
+        ),
+        radial-gradient(
+            ellipse 68% 62% at 50% 52%,
+            color-mix(in srgb, var(--misdreavus-pink) 34%, transparent) 0%,
+            color-mix(in srgb, #c4a0d8 14%, transparent) 42%,
+            transparent 78%
+        );
+    filter: blur(10px);
+}
+
+body.home .music-prompt__cloud {
+    grid-area: 1 / 1;
+    position: relative;
+    z-index: 1;
+    display: block;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0;
+    background: transparent !important;
+    color: color-mix(in srgb, #ffe6f2 70%, var(--fg, #d8d8d8)) !important;
+    font-family: ui-monospace, "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, monospace;
+    font-size: calc(0.4rem * var(--cloud-scale));
+    line-height: 1.05 !important;
+    letter-spacing: 0;
+    white-space: pre;
+    overflow: visible !important;
+    pointer-events: none;
+    user-select: none;
+    text-shadow:
+        0 0 6px color-mix(in srgb, var(--misdreavus-pink) 40%, transparent),
+        0 0 1px color-mix(in srgb, #ba8baf 40%, transparent);
+    opacity: 0.92;
+}
+
+/* Two tiny thought dots in the gap between cloud and Misdreavus’s head. */
+body.home .music-prompt__dot {
+    position: absolute;
+    z-index: 3;
+    display: block;
+    color: color-mix(in srgb, #ffe6f2 55%, var(--misdreavus-pink));
+    font-family: ui-monospace, "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, monospace;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+    text-shadow:
+        0 0 6px color-mix(in srgb, var(--misdreavus-pink) 50%, transparent),
+        0 0 10px color-mix(in srgb, var(--misdreavus-pink) 28%, transparent);
+}
+
+body.home .music-prompt__dot--mid {
+    right: calc(var(--dot-mid-right) * var(--cloud-scale));
+    top: calc(var(--dot-mid-top) * var(--cloud-scale));
+    bottom: auto;
+    left: auto;
+    font-size: calc(0.42rem * var(--cloud-scale));
+    opacity: 0.9;
+}
+
+body.home .music-prompt__dot--tip {
+    right: calc(var(--dot-tip-right) * var(--cloud-scale));
+    top: calc(var(--dot-tip-top) * var(--cloud-scale));
+    bottom: auto;
+    left: auto;
+    font-size: calc(0.28rem * var(--cloud-scale));
+    opacity: 0.95;
+}
+
+body.home .music-prompt__panel {
+    grid-area: 1 / 1;
+    place-self: center;
+    position: relative;
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.05rem;
+    /* Fixed size — does not grow with --cloud-scale, so y/n clear the ASCII rim. */
+    width: 8.7rem;
+    max-width: 8.7rem;
+    padding: 0.35rem 0.45rem 0.3rem;
+    box-sizing: border-box;
+    border-radius: 0;
+    /* No panel plate — pink comes only from the cloud-shaped fill under the ASCII. */
+    background: transparent;
+    text-align: center;
+    /* Edit --panel-nudge-x / --panel-nudge-y on .music-prompt to move this. */
+    transform: translate(var(--panel-nudge-x), var(--panel-nudge-y));
+}
+
+body.home .music-prompt__ask {
+    margin: 0;
+    max-width: 100%;
+    color: color-mix(in srgb, #ffe0ef 70%, #fff1c2);
+    font-family: var(--font-monospace, ui-monospace, "Cascadia Mono", "Fira Mono", monospace);
+    font-size: 0.68rem;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    text-align: center;
+    text-transform: lowercase;
+    text-shadow:
+        0 1px 0 #1a0814,
+        0 2px 3px color-mix(in srgb, #0a0408 80%, transparent),
+        0 4px 10px color-mix(in srgb, #0a0408 55%, transparent),
+        0 0 10px color-mix(in srgb, var(--misdreavus-pink) 30%, transparent),
+        0 0 16px color-mix(in srgb, var(--misdreavus-yellow) 22%, transparent);
+}
+
+body.home .music-prompt__actions {
+    display: flex;
+    gap: 0;
+    justify-content: center;
+    flex-wrap: nowrap;
+}
+
+body.home .music-prompt__btn {
+    --btn-face: color-mix(in srgb, #2a2038 55%, transparent);
+    --btn-ink: var(--fg);
+    appearance: none;
+    position: relative;
+    margin: 0;
+    /* Keep a comfortable hit target; face is drawn smaller via ::before. */
+    width: 1.55rem;
+    height: 1.55rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--btn-ink);
+    font-family: inherit;
+    font-size: 0.58rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    text-transform: lowercase;
+    cursor: pointer;
+    z-index: 1;
+}
+
+body.home .music-prompt__btn::before {
+    content: "";
+    position: absolute;
+    inset: 0.29rem;
+    z-index: -1;
+    border-radius: 50%;
+    background: var(--btn-face);
+    opacity: 0.95;
+    transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+body.home .music-prompt__btn:hover::before,
+body.home .music-prompt__btn:focus-visible::before {
+    opacity: 1;
+}
+
+body.home .music-prompt__btn:hover,
+body.home .music-prompt__btn:focus-visible {
+    outline: none;
+}
+
+body.home .music-prompt__btn[data-music-yes] {
+    --btn-face: color-mix(in srgb, var(--misdreavus-yellow) 92%, #fff);
+    --btn-ink: #2a2410;
+}
+
+body.home .music-prompt__btn[data-music-no] {
+    --btn-face: color-mix(in srgb, var(--misdreavus-eye) 90%, #fff);
+    --btn-ink: #ffe8ee;
+}
+
+body.home .music-prompt__btn[data-music-yes]:hover,
+body.home .music-prompt__btn[data-music-yes]:focus-visible {
+    --btn-face: color-mix(in srgb, var(--misdreavus-yellow) 88%, #fff);
+}
+
+body.home .music-prompt__btn[data-music-no]:hover,
+body.home .music-prompt__btn[data-music-no]:focus-visible {
+    --btn-face: color-mix(in srgb, var(--misdreavus-eye) 88%, #fff);
+}
+
+@media (max-width: 52rem) {
+    body.home .music-prompt {
+        --cloud-scale: 1.12;
+        --dot-mid-right: 0.2rem;
+        --dot-mid-top: 3.25rem;
+        --dot-tip-right: -0.3rem;
+        --dot-tip-top: 4.15rem;
+        width: calc(11.25rem * var(--cloud-scale));
+        height: calc(6.5rem * var(--cloud-scale));
+        right: calc(100% - 0.05rem);
+        transform: translateY(calc(-0.35rem + var(--thought-bob)));
+    }
+
+    body.home .music-prompt__cloud {
+        font-size: calc(0.34rem * var(--cloud-scale));
+    }
+
+    body.home .music-prompt__dot--mid {
+        font-size: calc(0.36rem * var(--cloud-scale));
+    }
+
+    body.home .music-prompt__dot--tip {
+        font-size: calc(0.24rem * var(--cloud-scale));
+    }
+
+    body.home .music-prompt__panel {
+        width: 6.8rem;
+        padding: 0.3rem 0.4rem 0.25rem;
+    }
+
+    body.home .music-prompt__ask {
+        font-size: 0.6rem;
+    }
+
+    body.home .music-prompt__btn {
+        width: 1.45rem;
+        height: 1.45rem;
+        font-size: 0.5rem;
+    }
+
+    body.home .music-prompt__btn::before {
+        inset: 0.3rem;
+    }
+}
+
+@media (max-width: 44.99rem) {
+    /* Phone: no music-prompt cloud — use the bottom player instead. */
+    body.home .music-prompt {
+        display: none !important;
+    }
 }
 
 .home-main {
@@ -834,14 +1180,32 @@ body.home pre.ascii-moon::-webkit-scrollbar {
     }
 }
 
+/* Scales the dock row as one unit so pets + ticker + player never spill. */
+.home-footer__dock-fit {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 0.75rem;
+    box-sizing: border-box;
+    overflow: hidden;
+    height: calc(var(--home-dock-h, 4.5rem) * var(--home-dock-scale, 1));
+}
+
 .home-dock {
     position: relative;
     display: flex;
+    flex-wrap: nowrap;
     align-items: flex-end;
     justify-content: center;
     gap: 1.25rem;
-    margin-top: 0.75rem;
+    margin-top: 0;
     min-height: 4.5rem;
+    width: max-content;
+    max-width: none;
+    transform: scale(var(--home-dock-scale, 1));
+    transform-origin: center bottom;
 }
 
 .home-player-slot {
@@ -956,10 +1320,12 @@ body.home pre.ascii-moon::-webkit-scrollbar {
 
 .dock-kagura.is-idle .dock-kagura__strip--walk .sprite-anim {
     animation-iteration-count: infinite;
-    animation-timing-function: steps(var(--sprite-steps, 5), end);
+    animation-timing-function: steps(var(--sprite-frames, 6), end);
 }
 
 .dock-kagura.is-down .dock-kagura__strip--down .sprite-anim {
+    animation-name: sprite-anim-play-hold;
+    animation-timing-function: steps(var(--sprite-steps, 1), end);
     animation-iteration-count: 1;
     animation-fill-mode: forwards;
 }
@@ -1031,6 +1397,8 @@ body.home pre.ascii-moon::-webkit-scrollbar {
 }
 
 .dock-sango.is-attacking .dock-sango__strip--attack .sprite-anim {
+    animation-name: sprite-anim-play-hold;
+    animation-timing-function: steps(var(--sprite-steps, 1), end);
     animation-iteration-count: 1;
     animation-fill-mode: forwards;
 }
@@ -1190,4 +1558,148 @@ body.home pre.ascii-moon::-webkit-scrollbar {
     display: block;
     max-width: 8rem;
     height: auto;
+}
+
+/* —— Mobile homepage (aligns with player simple chrome @ 44.99rem) —— */
+@media (max-width: 44.99rem) {
+    html,
+    body.home {
+        overflow-x: clip;
+    }
+
+    .home-root {
+        padding: 1rem 0 4.5rem;
+    }
+
+    .home-page {
+        padding: 0 0.85rem;
+        max-width: 100%;
+        overflow-x: clip;
+    }
+
+    .home-banner {
+        max-width: 100%;
+        min-height: 5.5rem;
+    }
+
+    .home-banner img {
+        max-height: 9.5rem;
+        width: 100%;
+    }
+
+    .home-site-title {
+        margin-top: 1.25rem;
+        max-width: 100%;
+        overflow-wrap: anywhere;
+    }
+
+    .home-site-title__line {
+        font-size: 1.15rem;
+    }
+
+    .home-site-title__line--2 {
+        font-size: clamp(1.65rem, 11vw, 2.35rem);
+        letter-spacing: 0.01rem;
+    }
+
+    .home-main {
+        max-width: 100%;
+        margin-bottom: 2rem;
+    }
+
+    .home-main .ascii-angel {
+        margin: 1.25rem auto 1.75rem;
+        padding: 1.1rem 0 2.25rem;
+        max-width: 100%;
+    }
+
+    .home-main .ascii-art {
+        font-size: clamp(0.52rem, 2.7vw, 0.78rem);
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .home-sword {
+        display: none;
+    }
+
+    .home-footer__dock-fit {
+        margin-top: 0.5rem;
+        padding: 0 0.25rem;
+    }
+
+    .home-dock {
+        gap: 0.55rem 0.75rem;
+        min-height: 0;
+    }
+
+    .home-dock__pet {
+        width: calc(25px * 1.55);
+        height: calc(42px * 1.55);
+    }
+
+    .home-dock__pet--left {
+        width: calc(48px * 1.55);
+        height: calc(47px * 1.55);
+    }
+
+    .dock-kagura.is-idle .sprite-anim.is-scale-3,
+    .dock-kagura.is-down .sprite-anim.is-scale-3,
+    .dock-sango .sprite-anim.is-scale-3 {
+        transform: scale(1.55);
+    }
+
+    .dock-kagura.is-traveling .sprite-anim.is-scale-3,
+    .dock-kagura.is-attacking .sprite-anim.is-scale-3 {
+        transform: scale(2.2);
+    }
+
+    .ticker__count {
+        font-size: 1.35rem;
+        letter-spacing: 0.08em;
+    }
+
+    .home-player-slot {
+        width: var(--simple-player-width, 9.5rem);
+        min-height: 2.75rem;
+    }
+
+    .home-footer {
+        padding-bottom: 0.5rem;
+    }
+}
+
+/* After base CTA rules so these win the cascade on narrow screens. */
+@media (max-width: 52rem) {
+    body.home .ascii-angel__cta-art {
+        opacity: 1 !important;
+    }
+
+    .home-main .ascii-angel__cta,
+    .home-main .ascii-angel:hover .ascii-angel__cta,
+    .home-main .ascii-angel:focus-within .ascii-angel__cta {
+        opacity: 1;
+        pointer-events: auto;
+        left: 0;
+        right: 0;
+        width: auto;
+        min-width: 0;
+        max-width: 100%;
+        margin: 0;
+        transform: none;
+        padding: 0.35rem 0.25rem 0.1rem;
+        box-sizing: border-box;
+    }
+
+    .home-main .ascii-angel__cta-art {
+        font-size: clamp(0.62rem, 3.2vw, 0.78rem);
+        white-space: pre-wrap;
+        max-width: 100%;
+        overflow-wrap: anywhere;
+    }
+
+    .home-main .ascii-angel__heart {
+        display: none !important;
+    }
 }

@@ -1,8 +1,9 @@
 /* Homepage title face only (.home-site-title). Drop your licensed files in static/fonts/. */
 @font-face {
     font-family: "DotMatrixNarrow";
-    src:
-        url("/fonts/DotMatrixNarrow.ttf") format("truetype");    font-weight: normal;
+    src: url("/fonts/DotMatrixNarrow.ttf") format("truetype");
+    font-weight: normal;
     font-style: normal;
+    /* Prefer showing DotMatrix once ready over keeping a wrong fallback forever. */
     font-display: swap;
 }

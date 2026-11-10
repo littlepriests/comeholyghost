@@ -1,5 +1,6 @@
 +++
 title = "♡♡"
+email_cta = true
 +++
 
 I'm an in-my-30s something-or-other with broad interests, living somewhere in rural America near the Embarrass River and many cornfields. (Also, it's pronounced Am-braw.)

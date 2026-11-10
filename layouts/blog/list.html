@@ -1,16 +1,20 @@
 {{ define "main" }}
-    <h1 id="{{ .Title | urlize }}">{{ .Title | markdownify }}</h1>
+    <link rel="stylesheet" href="{{ "css/blog-index.css" | relURL }}?v=8">
+    <link rel="stylesheet" href="{{ "css/article-media.css" | relURL }}?v=5">
+    <div class="blog-index">
+        <h1 class="blog-index__heading" id="{{ .Title | urlize }}">{{ .Title | markdownify }}</h1>
 
-    {{ .Content }}
-    {{- partial "page-buttons.html" . -}}
+        {{ .Content }}
+        {{- partial "page-buttons.html" . -}}
 
-    {{ with .Pages }}
-    <ul>
-    {{ range . }}
-        {{ .Render "li" }}
-    {{ end }}
-    </ul>
-    {{ end }}
+        {{ with .Pages }}
+        <div class="blog-index__feed">
+            {{ range . }}
+                {{ partial "blog-entry.html" . }}
+            {{ end }}
+        </div>
+        {{ end }}
+    </div>
 {{ end }}
 
 {{ define "aside" }}

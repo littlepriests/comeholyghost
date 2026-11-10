@@ -306,36 +306,85 @@ body {
 
 /* Mobile inner pages: homepage-style icon bar instead of the Winamp skin. */
 @media (max-width: 44.99rem) {
+    html,
+    body:not(.home) {
+        overflow-x: clip;
+    }
+
+    /* If JS is late or skin class sticks, never leave Winamp parked on phones. */
+    body:not(.home) #site-player.site-player--skin,
+    body:not(.home) #site-player.site-player--booting {
+        position: fixed !important;
+        top: auto !important;
+        right: max(0.75rem, env(safe-area-inset-right)) !important;
+        bottom: max(0.75rem, env(safe-area-inset-bottom)) !important;
+        left: auto !important;
+        width: max-content !important;
+        height: auto !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+
+    body:not(.home) #site-player.site-player--skin > .player-chrome,
+    body:not(.home) #site-player.site-player--booting > .player-chrome {
+        display: flex !important;
+    }
+
+    body:not(.home) #site-player.site-player--skin #winamp-host {
+        display: block !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: -10000px !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+    }
+
     body:not(.home) #site-player.site-player--simple {
         position: fixed;
         top: auto;
-        right: 1rem;
-        bottom: 1rem;
+        right: max(0.75rem, env(safe-area-inset-right));
+        bottom: max(0.75rem, env(safe-area-inset-bottom));
         left: auto;
         width: max-content;
+        max-width: calc(100vw - 1.5rem);
         height: auto;
-        gap: 0.45rem;
+        gap: 0.5rem;
         display: flex;
         align-items: center;
+        z-index: 40;
     }
 
     body:not(.home) #site-player.site-player--simple .player-chrome {
         display: flex;
-        gap: 0.45rem;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     body:not(.home) #site-player.site-player--simple .player-title {
         font-size: 0.75rem;
-        width: 4rem;
+        width: 4.25rem;
     }
 
-    body:not(.home) #site-player.site-player--simple button:not(.player-close):not(.player-reopen) {
-        width: 1.5rem;
-        height: 1.5rem;
+    /* ~44px touch targets (was 1.5rem / 24px). */
+    body:not(.home) #site-player.site-player--simple button:not(.player-close):not(.player-reopen),
+    body.home #site-player.site-player--simple button:not(.player-close):not(.player-reopen) {
+        width: 2.75rem;
+        height: 2.75rem;
     }
 
-    body:not(.home) #site-player.site-player--simple button i {
-        font-size: 0.65rem;
+    body:not(.home) #site-player.site-player--simple button i,
+    body.home #site-player.site-player--simple button i {
+        font-size: 0.85rem;
+    }
+
+    body:not(.home) #site-player.site-player--simple .player-close,
+    body:not(.home) #site-player.site-player--simple .player-reopen,
+    body.home #site-player.site-player--simple .player-close,
+    body.home #site-player.site-player--simple .player-reopen {
+        width: 2rem;
+        height: 2rem;
+        min-width: 2rem;
+        min-height: 2rem;
     }
 
     body:not(.home) #site-player.site-player--simple.site-player--closed {
@@ -345,14 +394,36 @@ body {
     body:not(.home) .page,
     body:not(.home) .gallery-wrap,
     body:not(.home) .guestbook-wrap {
-        padding-bottom: calc(var(--simple-player-height) + 2rem);
+        padding-bottom: calc(var(--simple-player-height, 3rem) + 2.5rem + env(safe-area-inset-bottom, 0px));
     }
 
     body:not(.home):has(#site-player.site-player--closed) .page,
     body:not(.home):has(#site-player.site-player--closed) .gallery-wrap,
     body:not(.home):has(#site-player.site-player--closed) .guestbook-wrap {
-        padding-bottom: 3rem;
+        padding-bottom: calc(3.25rem + env(safe-area-inset-bottom, 0px));
     }
+
+    /* Stacked aside should not stick over content on phones. */
+    body:not(.home) .page__aside {
+        position: static;
+        max-height: none;
+        overflow: visible;
+        top: auto;
+        right: auto;
+    }
+
+    body:not(.home) .page {
+        margin: 0.75rem auto;
+        padding-left: 0.85rem;
+        padding-right: 0.85rem;
+        max-width: 100%;
+    }
+
+    body:not(.home) .page__header {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
 }
 
 body.home #site-player.site-player--simple {
@@ -387,7 +458,8 @@ body.home #site-player.site-player--simple button i {
 }
 
 @supports (anchor-name: --home-player-slot) {
-    body.home #site-player.site-player--simple {
+    /* Skip anchors while the dock is CSS-scaled as a group (JS places instead). */
+    body.home:not(.is-home-dock-scaled) #site-player.site-player--simple {
         position-anchor: --home-player-slot;
         top: anchor(top);
         left: anchor(left);
@@ -395,7 +467,7 @@ body.home #site-player.site-player--simple button i {
         pointer-events: auto;
     }
 
-    body.home #site-player.site-player--simple.site-player--home-pending {
+    body.home:not(.is-home-dock-scaled) #site-player.site-player--simple.site-player--home-pending {
         visibility: visible;
         pointer-events: auto;
     }

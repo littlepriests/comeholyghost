@@ -3,10 +3,12 @@
     if (!starsHost || starsHost.dataset.ready) return;
     starsHost.dataset.ready = "1";
 
-    // Prior 180 → ~15% → 153 → another ~5% → 145.
-    var total = 145;
+    var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var narrow = window.matchMedia("(max-width: 44.99rem)").matches;
+    // Desktop ~110; phone ~55; reduced-motion: fewer static dots, no CSS anim relied on.
+    var total = reduceMotion ? 40 : narrow ? 55 : 110;
     var positions = [];
-    var minDist = 3.6;
+    var minDist = narrow ? 4.2 : 3.8;
 
     function farEnough(x, y) {
         for (var i = 0; i < positions.length; i++) {
@@ -60,17 +62,25 @@
 
     // Sparse Joan-style star motif only (no ,O, / 000 blobs). Credit in docs/resources.md.
     var asciiStar = "  \\/\n-= * =-\n  /\\";
-    var asciiCount = 5;
     minDist = 28;
-    var slots = [
-        { x: 6, y: 8 },
-        { x: 14, y: 26 },
-        { x: 92, y: 22 },
-        { x: 10, y: 55 },
-        { x: 90, y: 62 },
-        { x: 12, y: 88 }
-    ];
-    asciiCount = slots.length;
+    var slots = reduceMotion
+        ? [{ x: 6, y: 8 }, { x: 92, y: 22 }]
+        : narrow
+          ? [
+                { x: 6, y: 8 },
+                { x: 92, y: 22 },
+                { x: 10, y: 55 },
+                { x: 90, y: 62 }
+            ]
+          : [
+                { x: 6, y: 8 },
+                { x: 14, y: 26 },
+                { x: 92, y: 22 },
+                { x: 10, y: 55 },
+                { x: 90, y: 62 },
+                { x: 12, y: 88 }
+            ];
+    var asciiCount = slots.length;
     for (var g = 0; g < asciiCount; g++) {
         var gx = slots[g].x + (Math.random() * 6 - 3);
         var gy = slots[g].y + (Math.random() * 8 - 4);
@@ -96,28 +106,82 @@
         starsHost.appendChild(glyph);
     }
 
-    // On article pages, hide blinking stars behind the reading column only.
-    // Gradient stays; gutters keep their twinkles.
+    // On article / inner pages, hide twinkles behind the reading column
+    // (title + body + footer). Gradient + side gutters / aside keep stars.
+    function clearReadingMask() {
+        starsHost.classList.remove("is-reading-masked");
+        starsHost.style.removeProperty("--read-void-x");
+        starsHost.style.removeProperty("--read-void-y");
+        starsHost.style.removeProperty("--read-void-w");
+        starsHost.style.removeProperty("--read-void-h");
+    }
+
     function voidBehindArticleBodies() {
         var stars = document.querySelectorAll(".home-stars__star, .home-stars__ascii-star");
         if (!stars.length) return;
 
         if (document.body.classList.contains("home")) {
+            clearReadingMask();
             for (var c = 0; c < stars.length; c++) {
                 stars[c].classList.remove("is-reading-void");
             }
             return;
         }
 
-        var masks = document.querySelectorAll(".content__body");
-        if (!masks.length) masks = document.querySelectorAll(".page__body");
+        // Prefer the full main column so the h1 isn't left twinkling through.
+        var masks = document.querySelectorAll(".page__body");
+        if (!masks.length) {
+            masks = document.querySelectorAll(
+                ".content__header, .content__body, .content__footer"
+            );
+        }
+        // Generous pad + glow bleed so soft box-shadows don't sit in letter gaps.
+        var padX = 64;
+        var padY = 48;
+        var glow = 12;
         var rects = [];
-        var pad = 10;
+        var union = null;
         for (var i = 0; i < masks.length; i++) {
             var cr = masks[i].getBoundingClientRect();
             if (cr.width < 1 || cr.height < 1) continue;
-            if (cr.bottom < 0 || cr.top > window.innerHeight) continue;
-            rects.push(cr);
+            if (cr.bottom < -glow || cr.top > window.innerHeight + glow) continue;
+            var box = {
+                left: cr.left - padX,
+                right: cr.right + padX,
+                top: cr.top - padY,
+                bottom: cr.bottom + padY
+            };
+            rects.push(box);
+            if (!union) {
+                union = {
+                    left: box.left,
+                    right: box.right,
+                    top: box.top,
+                    bottom: box.bottom
+                };
+            } else {
+                union.left = Math.min(union.left, box.left);
+                union.right = Math.max(union.right, box.right);
+                union.top = Math.min(union.top, box.top);
+                union.bottom = Math.max(union.bottom, box.bottom);
+            }
+        }
+
+        // Host-level mask punches one hole for the whole reading strip (glow-safe).
+        if (union) {
+            starsHost.style.setProperty("--read-void-x", Math.round(union.left) + "px");
+            starsHost.style.setProperty("--read-void-y", Math.round(union.top) + "px");
+            starsHost.style.setProperty(
+                "--read-void-w",
+                Math.round(Math.max(0, union.right - union.left)) + "px"
+            );
+            starsHost.style.setProperty(
+                "--read-void-h",
+                Math.round(Math.max(0, union.bottom - union.top)) + "px"
+            );
+            starsHost.classList.add("is-reading-masked");
+        } else {
+            clearReadingMask();
         }
 
         for (var s = 0; s < stars.length; s++) {
@@ -127,16 +191,18 @@
                 continue;
             }
             var sr = star.getBoundingClientRect();
-            var cx = (sr.left + sr.right) / 2;
-            var cy = (sr.top + sr.bottom) / 2;
+            var left = sr.left - glow;
+            var right = sr.right + glow;
+            var top = sr.top - glow;
+            var bottom = sr.bottom + glow;
             var hit = false;
             for (var r = 0; r < rects.length; r++) {
-                var box = rects[r];
+                var m = rects[r];
                 if (
-                    cx >= box.left - pad &&
-                    cx <= box.right + pad &&
-                    cy >= box.top - pad &&
-                    cy <= box.bottom + pad
+                    left < m.right &&
+                    right > m.left &&
+                    top < m.bottom &&
+                    bottom > m.top
                 ) {
                     hit = true;
                     break;
@@ -150,6 +216,12 @@
     window.refreshStarReadingVoids = voidBehindArticleBodies;
     voidBehindArticleBodies();
     window.addEventListener("resize", voidBehindArticleBodies);
-    window.addEventListener("scroll", voidBehindArticleBodies, { passive: true });
+    // Phone: fewer stars — skip scroll voiding; resize/load/SPA refresh still run.
+    if (!narrow) {
+        window.addEventListener("scroll", voidBehindArticleBodies, { passive: true });
+    }
     window.addEventListener("load", voidBehindArticleBodies);
+    // Images / fonts can shift the reading column after first paint (SPA + cold).
+    window.setTimeout(voidBehindArticleBodies, 120);
+    window.setTimeout(voidBehindArticleBodies, 480);
 })();

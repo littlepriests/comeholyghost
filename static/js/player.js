@@ -8,6 +8,7 @@
     player.appendChild(audio);
 
     var tracks = [];
+    var playWhenReady = false;
     var index = 0;
     var playing = false;
     var trackTitle = "";
@@ -75,27 +76,67 @@
         requestAnimationFrame(syncTitleMarquee);
     }
 
+    // Home/mobile use simple chrome + <audio>. Webamp may still be parked for
+    // desktop skin pages — only drive it while --skin is the active chrome.
+    function useWebampTransport() {
+        return !!(window.__webamp && player.classList.contains("site-player--skin"));
+    }
+
     function load(nextIndex, andPlay) {
         if (!tracks.length) return;
         index = (nextIndex + tracks.length) % tracks.length;
         trackTitle = tracks[index].title || "";
         var src = tracks[index].src;
-        if (audio.getAttribute("src") !== src) audio.src = src;
-        if (andPlay) {
-            audio.play();
-            playing = true;
+        var changed = audio.getAttribute("src") !== src;
+        if (changed) {
+            audio.src = src;
+            audio.load();
         }
-        show();
+        if (!andPlay) {
+            show();
+            return;
+        }
+        function attemptPlay() {
+            var playPromise = audio.play();
+            if (playPromise && typeof playPromise.then === "function") {
+                playPromise.then(function () {
+                    playing = true;
+                    show();
+                }).catch(function () {
+                    // Autoplay / decode can reject; leave chrome paused.
+                    playing = false;
+                    show();
+                });
+            } else {
+                playing = true;
+                show();
+            }
+        }
+        // After a src change, wait until the element can play or play() no-ops.
+        if (changed && audio.readyState < 2) {
+            var onReady = function () {
+                audio.removeEventListener("canplay", onReady);
+                attemptPlay();
+            };
+            audio.addEventListener("canplay", onReady);
+            show();
+            return;
+        }
+        attemptPlay();
     }
 
     function playMedia() {
-        if (window.__webamp) {
+        if (useWebampTransport()) {
             window.__webamp.play();
             playing = true;
             show();
             return;
         }
-        if (!tracks.length) return;
+        if (!tracks.length) {
+            playWhenReady = true;
+            return;
+        }
+        playWhenReady = false;
         if (!audio.getAttribute("src")) load(0, true);
         else {
             audio.play();
@@ -104,8 +145,11 @@
         }
     }
 
+    // Homepage music-prompt (and anything else) can start playback after a gesture.
+    window.sitePlayerPlay = playMedia;
+
     function pauseMedia() {
-        if (window.__webamp) {
+        if (useWebampTransport()) {
             window.__webamp.pause();
         } else {
             audio.pause();
@@ -115,7 +159,7 @@
     }
 
     function stopMedia() {
-        if (window.__webamp) {
+        if (useWebampTransport()) {
             window.__webamp.stop();
         } else {
             audio.pause();
@@ -126,7 +170,7 @@
     }
 
     function skipMedia() {
-        if (window.__webamp) {
+        if (useWebampTransport()) {
             window.__webamp.nextTrack();
             playing = true;
             show();
@@ -201,25 +245,30 @@
     }
 
     audio.addEventListener("play", function () {
-        if (window.__webamp) return;
+        if (useWebampTransport()) return;
         playing = true;
         show();
     });
     audio.addEventListener("pause", function () {
-        if (window.__webamp) return;
+        if (useWebampTransport()) return;
         playing = false;
         show();
     });
     audio.addEventListener("ended", function () {
-        if (window.__webamp) return;
+        if (useWebampTransport()) return;
         load(index + 1, true);
     });
+
+    // Show the right chrome immediately (esp. mobile simple) so playlist /
+    // Webamp network work cannot leave the player stuck in --booting.
+    applyPlayerChrome();
 
     loadPlaylist()
         .then(function (list) {
             tracks = Array.isArray(list) ? list : [];
             show();
             applyPlayerChrome();
+            if (playWhenReady && tracks.length) playMedia();
             return bootSkin(tracks);
         })
         .catch(function (error) {
@@ -370,8 +419,14 @@
                 });
             }
             return webamp.renderInto(host).then(function () {
-                audio.pause();
-                revealSkin();
+                // Desktop skin only: on home/mobile stay on simple chrome + <audio>.
+                // Don't pause HTML audio on home — playlist advance depends on it.
+                if (document.body.classList.contains("home") || isMobileViewport()) {
+                    applyPlayerChrome();
+                } else {
+                    audio.pause();
+                    revealSkin();
+                }
                 window.addEventListener("resize", onViewportChange);
                 window.addEventListener("scroll", placeHomePlayer, { passive: true });
             });
@@ -454,7 +509,8 @@
             return;
         }
         measureSimplePlayer();
-        if (supportsAnchor) {
+        // Anchor placement breaks when the dock is CSS-scaled as a group.
+        if (supportsAnchor && !document.body.classList.contains("is-home-dock-scaled")) {
             clearInlinePlacement();
             player.classList.remove("site-player--home-pending");
             return;
@@ -580,55 +636,122 @@
         mobileQuery.addListener(onViewportChange);
     }
 
+    function stylesheetPresent(absolute) {
+        return Array.prototype.some.call(document.querySelectorAll('link[rel="stylesheet"]'), function (link) {
+            try {
+                return new URL(link.href, location.href).href === absolute;
+            } catch (error) {
+                return false;
+            }
+        });
+    }
+
+    function ensureStyles(doc, baseHref) {
+        var waits = [];
+        doc.querySelectorAll('link[rel="stylesheet"]').forEach(function (link) {
+            var href = link.getAttribute("href");
+            if (!href) return;
+            var absolute = new URL(href, baseHref).href;
+            if (stylesheetPresent(absolute)) return;
+            waits.push(new Promise(function (resolve) {
+                var copy = document.createElement("link");
+                copy.rel = "stylesheet";
+                copy.href = absolute;
+                var integrity = link.getAttribute("integrity");
+                if (integrity) {
+                    copy.integrity = integrity;
+                    copy.crossOrigin = link.getAttribute("crossorigin") || "anonymous";
+                }
+                copy.onload = resolve;
+                copy.onerror = resolve;
+                document.head.appendChild(copy);
+            }));
+        });
+        return Promise.all(waits);
+    }
+
+    function waitForFonts() {
+        if (!document.fonts || !document.fonts.ready) return Promise.resolve();
+        return Promise.race([
+            document.fonts.ready.catch(function () {}),
+            new Promise(function (resolve) {
+                window.setTimeout(resolve, 180);
+            })
+        ]);
+    }
+
     function adopt(href, fromPop) {
+        var current = document.getElementById("page-root");
+        if (current) current.classList.add("is-page-pending");
         return fetch(href)
             .then(function (response) { return response.text(); })
             .then(function (text) {
                 var doc = new DOMParser().parseFromString(text, "text/html");
                 var incoming = doc.getElementById("page-root");
-                var current = document.getElementById("page-root");
+                current = document.getElementById("page-root");
                 if (!incoming || !current) {
                     location.assign(href);
                     return;
                 }
-                doc.querySelectorAll('link[rel="stylesheet"]').forEach(function (link) {
-                    var absolute = new URL(link.getAttribute("href"), href).href;
-                    var present = Array.prototype.some.call(document.styleSheets, function (sheet) {
-                        return sheet.href === absolute;
+                return ensureStyles(doc, href)
+                    .then(waitForFonts)
+                    .then(function () {
+                        current.replaceWith(document.importNode(incoming, true));
+                        document.title = doc.title;
+                        document.body.className = doc.body.className;
+                        var nextRoot = document.getElementById("page-root");
+                        if (nextRoot) {
+                            nextRoot.classList.add("is-page-pending");
+                            nextRoot.querySelectorAll("script[src]").forEach(function (old) {
+                                var created = document.createElement("script");
+                                created.src = new URL(old.getAttribute("src"), href).href;
+                                document.body.appendChild(created);
+                            });
+                        }
+                        // Drop leftover fixed bottom-right corner art when home
+                        // brings its own footer-anchored .home-sword (SPA dupe).
+                        if (document.body.classList.contains("home")) {
+                            document.querySelectorAll(
+                                '.site-backdrop[data-anchor="bottom-right"]'
+                            ).forEach(function (node) {
+                                node.remove();
+                            });
+                        }
+                        // Homepage always opens on the minimalist chrome.
+                        if (document.body.classList.contains("home")) chromeClosed = false;
+                        applyPlayerChrome();
+                        if (typeof window.refreshStarReadingVoids === "function") {
+                            requestAnimationFrame(function () {
+                                window.refreshStarReadingVoids();
+                                requestAnimationFrame(function () {
+                                    window.refreshStarReadingVoids();
+                                    window.setTimeout(window.refreshStarReadingVoids, 200);
+                                });
+                            });
+                        }
+                        if (player.classList.contains("site-player--skin")) {
+                            requestAnimationFrame(function () {
+                                fitSkinBox();
+                                placeSkinPlayer();
+                            });
+                        }
+                        if (!fromPop) history.pushState({ player: true }, "", href);
+                        if (location.hash) {
+                            var target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+                            if (target) target.scrollIntoView();
+                        } else {
+                            window.scrollTo(0, 0);
+                        }
+                        requestAnimationFrame(function () {
+                            var root = document.getElementById("page-root");
+                            if (root) root.classList.remove("is-page-pending");
+                        });
                     });
-                    if (present) return;
-                    var copy = document.createElement("link");
-                    copy.rel = "stylesheet";
-                    copy.href = absolute;
-                    document.head.appendChild(copy);
-                });
-                current.replaceWith(document.importNode(incoming, true));
-                document.title = doc.title;
-                document.body.className = doc.body.className;
-                document.getElementById("page-root").querySelectorAll("script[src]").forEach(function (old) {
-                    var created = document.createElement("script");
-                    created.src = new URL(old.getAttribute("src"), href).href;
-                    document.body.appendChild(created);
-                });
-                // Homepage always opens on the minimalist chrome.
-                if (document.body.classList.contains("home")) chromeClosed = false;
-                applyPlayerChrome();
-                if (typeof window.refreshStarReadingVoids === "function") {
-                    requestAnimationFrame(window.refreshStarReadingVoids);
-                }
-                if (player.classList.contains("site-player--skin")) {
-                    requestAnimationFrame(function () {
-                        fitSkinBox();
-                        placeSkinPlayer();
-                    });
-                }
-                if (!fromPop) history.pushState({ player: true }, "", href);
-                if (location.hash) {
-                    var target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
-                    if (target) target.scrollIntoView();
-                } else {
-                    window.scrollTo(0, 0);
-                }
+            })
+            .catch(function () {
+                var root = document.getElementById("page-root");
+                if (root) root.classList.remove("is-page-pending");
+                location.assign(href);
             });
     }
 

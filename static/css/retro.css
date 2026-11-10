@@ -1,12 +1,13 @@
 /*
   GeoCities vibe, modern restraint.
-  Twinkling corner sparkles on media only — no chrome border, no purple wash.
+  Corner sparkles: homepage banner only — never gallery, article, or index thumbs.
   Sitewide stars live in stars.css / stars.js. Bubble cursor is layouts/partials/cursor-effects.html.
 */
 
 .retro-media,
 .home-banner,
 .gallery a,
+.article-photo__thumb,
 .content__body p:has(> img:only-child),
 .page__body p:has(> img:only-child) {
     position: relative;
@@ -19,12 +20,16 @@
 .retro-media > img,
 .home-banner > img,
 .gallery a > img,
+.article-photo__thumb > img,
 .content__body p:has(> img:only-child) > img,
 .page__body p:has(> img:only-child) > img {
     display: block;
     width: 100%;
     max-width: 100%;
     height: auto;
+}
+
+.home-banner > img {
     filter: contrast(1.04) saturate(1.06) brightness(1.01);
 }
 
@@ -32,12 +37,8 @@
     background: var(--inner-bg, #44355B);
 }
 
-/* Twinkling corner sparkles */
-.retro-media::before,
-.home-banner::before,
-.gallery a::before,
-.content__body p:has(> img:only-child)::before,
-.page__body p:has(> img:only-child)::before {
+/* Twinkling corner sparkles — home banner only */
+.home-banner::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -78,11 +79,7 @@ body.home .site-backdrop img {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .retro-media::before,
-    .home-banner::before,
-    .gallery a::before,
-    .content__body p:has(> img:only-child)::before,
-    .page__body p:has(> img:only-child)::before {
+    .home-banner::before {
         animation: none;
         opacity: 0.85;
     }

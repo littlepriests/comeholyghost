@@ -2,7 +2,7 @@
 <html lang="{{- site.Language.Lang -}}">
 <head>
     {{- partial "head.html" . -}}
-    <link rel="stylesheet" href="{{ "css/gallery.css" | relURL }}?v=2">
+    <link rel="stylesheet" href="{{ "css/gallery.css" | relURL }}?v=4">
 </head>
 <body class="gallery-page">
     <div id="page-root">
@@ -31,11 +31,12 @@
                 {{ $post := .post }}
                 {{ $thumb := $img }}
                 {{ if ne $img.MediaType.SubType "svg" }}
-                    {{ $thumb = $img.Fill "600x600" }}
+                    {{/* Center-crop to a square so the thumb never distorts. */}}
+                    {{ $thumb = $img.Fill "600x600 Center" }}
                 {{ end }}
                 <li>
                     <a href="{{ $post.RelPermalink }}#{{ $img.Name | anchorize }}">
-                        <img src="{{ $thumb.RelPermalink }}" alt="{{ with $img.Title }}{{ . }}{{ else }}{{ $post.Title }}{{ end }}" width="{{ $thumb.Width }}" height="{{ $thumb.Height }}">
+                        <img src="{{ $thumb.RelPermalink }}" alt="{{ with $img.Title }}{{ . }}{{ else }}{{ $post.Title }}{{ end }}" width="600" height="600" loading="lazy" decoding="async">
                     </a>
                 </li>
                 {{ end }}
@@ -49,6 +50,5 @@
     {{ partial "stars.html" . }}
     {{ partial "backdrop.html" . }}
     {{ partial "player.html" . }}
-    {{ partial "cursor-effects.html" . }}
 </body>
 </html>

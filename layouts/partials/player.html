@@ -9,16 +9,16 @@
         <p class="player-title" data-player-title><span data-player-title-text>Playlist</span></p>
         <div class="player-chrome__buttons">
             <button type="button" data-player-toggle aria-label="Play">
-                <i class="fa-solid fa-play" aria-hidden="true"></i>
+                {{ partial "icon.html" (dict "name" "play") }}
             </button>
             <button type="button" data-player-stop aria-label="Stop">
-                <i class="fa-solid fa-stop" aria-hidden="true"></i>
+                {{ partial "icon.html" (dict "name" "stop") }}
             </button>
             <button type="button" data-player-skip aria-label="Skip">
-                <i class="fa-solid fa-forward" aria-hidden="true"></i>
+                {{ partial "icon.html" (dict "name" "forward") }}
             </button>
         </div>
     </div>
     <div id="winamp-host"></div>
 </div>
-<script src="{{ "js/player.js" | relURL }}?v=24"></script>
+<script src="{{ "js/player.js" | relURL }}?v=34"></script>

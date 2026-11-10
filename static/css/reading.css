@@ -2,6 +2,49 @@
   Inner pages share the homepage look: text on the open gradient, no pane.
   Kill the theme's solid body plate / halo so nothing boxes the prose.
 */
+
+/* Page title gold; h2+ stay theme link blue. */
+h1 {
+    color: #ffd749;
+}
+
+h1:before {
+    color: color-mix(in srgb, #ffd749 55%, var(--muted, #888));
+}
+
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--link);
+}
+
+h2:before,
+h3:before,
+h4:before,
+h5:before,
+h6:before {
+    color: color-mix(in srgb, var(--link) 55%, var(--muted, #888));
+}
+
+/* SPA nav: hold the outgoing/incoming page briefly while new CSS settles. */
+#page-root.is-page-pending {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#page-root {
+    transition: opacity 0.12s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #page-root {
+        transition: none;
+    }
+}
+
+/* fonts-ready is set immediately in head.html (preload FA solid). */
 body:not(.home) .page__body,
 body:not(.home) .guestbook-wrap > main,
 body:not(.home) .gallery-wrap > main {
@@ -22,4 +65,99 @@ body:not(.home) .guestbook-header,
 body:not(.home) .gallery-header {
     background: transparent !important;
     box-shadow: none !important;
+}
+
+/* SkiFree yeti where $ echo $LANG used to sit (articles + read-me). */
+.page-footer__skifree {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+    margin: 0.35rem 0 0.75rem;
+    min-height: calc(43px * 2);
+    /* Native yeti cell is 32×43; scale-2 keeps pixel aspect. */
+    line-height: 0;
+}
+
+.page-footer__skifree .sprite-anim {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+/* Read-me mailto under Winamp column */
+.aside-email {
+    margin: 0.35rem 0 0;
+    padding: 0;
+    text-align: center;
+}
+
+.aside-email__link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: inherit;
+    text-decoration: none;
+}
+
+.aside-email__icon {
+    position: relative;
+    display: inline-block;
+    font-size: 1.75rem;
+    line-height: 1;
+    color: var(--link, #7ec8ff);
+}
+
+.aside-email__link:hover .aside-email__icon,
+.aside-email__link:focus-visible .aside-email__icon {
+    color: var(--highlight, #18FF6D);
+}
+
+.aside-email__link:focus-visible {
+    outline: 2px solid var(--highlight, #18FF6D);
+    outline-offset: 3px;
+}
+
+/* Heart sits on the flap V-point (center of the envelope face). */
+.aside-email__heart {
+    position: absolute;
+    left: 50%;
+    top: 56%;
+    transform: translate(-50%, -50%);
+    font-size: 0.7rem;
+    line-height: 1;
+    color: #ff6b9d;
+    -webkit-text-stroke: 1.1px #0a0612;
+    paint-order: stroke fill;
+    text-shadow:
+        0 0 0 #0a0612,
+        0.6px 0 0 #0a0612,
+        -0.6px 0 0 #0a0612,
+        0 0.6px 0 #0a0612,
+        0 -0.6px 0 #0a0612,
+        0.6px 0.6px 0 #0a0612,
+        -0.6px 0.6px 0 #0a0612,
+        0.6px -0.6px 0 #0a0612,
+        -0.6px -0.6px 0 #0a0612;
+    pointer-events: none;
+}
+
+/* Optional end-of-article control: front matter back_to_top = true */
+.back-to-top {
+    margin: 1.75rem 0 0;
+    padding: 0;
+    text-align: center;
+}
+
+.back-to-top__link {
+    display: inline-block;
+    padding: 0.35rem 0.65rem;
+    color: var(--link, #7ec8ff);
+    font-size: 1.35rem;
+    line-height: 1;
+    text-decoration: none;
+    opacity: 0.75;
+}
+
+.back-to-top__link:hover {
+    color: var(--hover, #ffd749);
+    opacity: 1;
 }

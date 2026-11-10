@@ -1,2 +1,23 @@
-{{- partial "lang.html" . -}}
+{{- /*
+  SkiFree yeti wherever $ echo $LANG used to sit (any page using this footer).
+*/ -}}
+{{- $yeti := false -}}
+{{- range site.Params.sprites -}}
+  {{- if and (not $yeti) (eq .id "skifree-yeti") -}}
+    {{- $yeti = . -}}
+  {{- end -}}
+{{- end -}}
+{{- with $yeti }}
+<div class="page-footer__skifree" aria-hidden="true">
+  {{- partial "sprite.html" (dict
+    "src" .src
+    "frameWidth" .frameWidth
+    "frameHeight" .frameHeight
+    "frames" .frames
+    "fps" .fps
+    "alt" ""
+    "scale" "2"
+  ) -}}
+</div>
+{{- end -}}
 <p class="copyright">{{ .Site.Copyright | markdownify }}</p>

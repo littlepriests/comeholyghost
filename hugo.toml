@@ -25,6 +25,8 @@ palette = "base16-dark"
 title = ""
 description = ""
 logo = ""
+# Public contact (read-me aside CTA). mailto only — nothing secret.
+email = "fellbeasts@proton.me"
 
 # Custom cursor. Delete image, or point it at a missing file, to use the normal pointer.
 # x and y are the click point, in pixels from the top left of the image. Keep the image at 32×32.
@@ -37,11 +39,11 @@ y = 0
 [params.home]
 # Folder under static/ with banner-sized images (png/jpg/webp/gif). Falls back to `banner` if empty.
 bannerDir = "images/banners"
-banner = "images/banner.png"
+banner = "images/banner.webp"
 bannerAlt = "Site banner"
 # Text under the banner only (.home-site-title). Independent of the tab `title` above.
 displayTitle = "welcome to the "
-displayTitleLine2 = " F I E L D🌽"
+displayTitleLine2 = "FIELD🌽"
 # Font stack for that element only.
 titleFont = "Impact, sans-serif"
 titleFontLine2 = "\"DotMatrixNarrow\", \"Courier New\", monospace"
@@ -150,8 +152,8 @@ id = "skifree-yeti"
 src = "images/sprites/skifree-yeti.png"
 frameWidth = 32
 frameHeight = 43
-frames = 6
-fps = 5
+frames = 9
+fps = 3
 alt = "SkiFree yeti"
 
 [[params.sprites]]
@@ -168,7 +170,7 @@ alt = "SkiFree wipeout"
 # x and y are the distance from that corner. maxwidth and maxheight cap the picture;
 # a smaller file stays at its own size.
 [params.backdrop.bottom-right]
-image = "images/backdrop-bottom-right.png"
+image = "images/backdrop-bottom-right.webp"
 alt = ""
 # Homepage uses layouts/partials/home-sword.html (footer hairline + gutter scale).
 # These offsets only apply if the fixed corner backdrop is shown elsewhere.
@@ -233,16 +235,16 @@ maxheight = "24rem"
     weight = 6
 
   [[menu.main]]
-    identifier = "read-me"
-    name = "read-me.txt"
-    url = "/read-me/"
-    weight = 20
-
-  [[menu.main]]
     identifier = "guestbook"
     name = "Guestbook"
     url = "/guestbook/"
     weight = 10
+
+  [[menu.main]]
+    identifier = "read-me"
+    name = "read-me.txt"
+    url = "/read-me/"
+    weight = 11
 
 [taxonomies]
 category = "categories"

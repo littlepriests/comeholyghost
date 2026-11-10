@@ -1,11 +1,23 @@
+{{/*
+  Bubble cursor — homepage only (see layouts/index.html).
+  Self-hosted pin: static/js/vendor/cursor-effects.esm.js (v1.0.18).
+  Skip on coarse pointers / narrow viewports / reduced motion.
+*/}}
 <script type="module">
-    import { bubbleCursor } from "https://unpkg.com/cursor-effects@latest/dist/esm.js";
+    import { bubbleCursor } from "{{ "js/vendor/cursor-effects.esm.js" | relURL }}";
 
     var bubbles = null;
     var overSword = false;
+    var mqReduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+    var mqNarrow = window.matchMedia("(max-width: 44.99rem)");
+    var mqCoarse = window.matchMedia("(pointer: coarse)");
+
+    function allowed() {
+        return !mqReduce.matches && !mqNarrow.matches && !mqCoarse.matches;
+    }
 
     function startBubbles() {
-        if (bubbles || overSword) return;
+        if (bubbles || overSword || !allowed()) return;
         bubbles = bubbleCursor({
             colors: ["#ff69b4", "#ffffff", "#b388ff"]
         });
@@ -15,6 +27,11 @@
         if (!bubbles) return;
         if (typeof bubbles.destroy === "function") bubbles.destroy();
         bubbles = null;
+    }
+
+    function sync() {
+        if (allowed()) startBubbles();
+        else stopBubbles();
     }
 
     function isSword(node) {
@@ -31,8 +48,11 @@
         if (!isSword(event.target)) return;
         if (isSword(event.relatedTarget)) return;
         overSword = false;
-        startBubbles();
+        sync();
     }, true);
 
-    startBubbles();
+    mqReduce.addEventListener("change", sync);
+    mqNarrow.addEventListener("change", sync);
+    mqCoarse.addEventListener("change", sync);
+    sync();
 </script>
