@@ -3,13 +3,14 @@ title = "♡♡"
 email_cta = true
 +++
 
-I'm an in-my-30s something-or-other with broad interests, living somewhere in rural America near the Embarrass River and many cornfields. (Also, it's pronounced Am-braw.)
+I'm an in-my-30s something-or-other with broad interests, living somewhere in rural America near many cornfields and the Embarrass River.(It's pronounced AM-braw.)
 
-This site is inspired by commonplace journals, Tumblr + Livejournal, and the part of me who's still nine and wishing she could make an Angelfire shrine. Pictures, photo edits, any and all writing, research and anything worthwhile are done by me. 
+This site is inspired by commonplace journals, Tumblr + Livejournal, Jenny Nicholson's unyielding authenticity, my beautiful + courageous friends, and the me who's still nine and wishing she could make an Angelfire shrine. Pictures, photo edits, any and all writing, and anything worthwhile are done by me. 
 
 ## footnotes
 
 - Hugo with [Risotto theme](https://themes.gohugo.io/themes/risotto/)
+- Music: _Symphonic Suite Akira_ (1988) by Geinoh Yamashirogumi
 - Kagura banner from InuYasha ep67, "The Howling Wind of Betrayal"
 - ASCII art roundup
 	- [Joan Stark](https://oldcompcz.github.io/jgs/joan_stark/me.html) created the moon + stars
