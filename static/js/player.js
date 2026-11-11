@@ -18,7 +18,7 @@
     var skinUnavailable = false;
     var syncingWebampClose = false;
     var mobileQuery = window.matchMedia("(max-width: 44.99rem)");
-    var playlistRemote = "https://surface-according-federal-forestry.trycloudflare.com/playlist.json";
+    var playlistRemote = "https://administrator-corporation-syntax-page.trycloudflare.com/playlist.json";
     var playlistLocal = "/audio/playlist.json";
     var toggle = player.querySelector("[data-player-toggle]");
     var skip = player.querySelector("[data-player-skip]");
