@@ -1,0 +1,22 @@
+SentenceFlow — soft suggestion (not a warning) about back-to-back rhythm.
+
+Files
+  wraith/SentenceFlow.yml          → <repo>/styles/wraith/SentenceFlow.yml
+  scripts/SentenceFlow.tengo       → <repo>/styles/config/scripts/SentenceFlow.tengo
+
+Enable
+  BasedOnStyles = ..., wraith
+  Rule id: wraith.SentenceFlow
+
+Configure (edit knobs at top of SentenceFlow.tengo)
+  short_max_words      default 8   — pithy if ≤ this many words
+  short_streak_max     default 3   — flag when MORE than this many shorts in a row
+  pattern_streak_max   default 2   — flag when this many share the same hinge/opener in a row
+  min_sentence_words   default 2   — ignore tiny fragments
+
+What it notices (open-ended, not exhaustive)
+  - Streaks of short sentences (choppy rhythm)
+  - Repeated openers: But / And / So / Yet / However / Still / Meanwhile
+  - Repeated mid-sentence hinges: ", but" / ", and" / ", so" / ", yet" / ", or"
+
+It is a nudge about flow, not a hard style ban. Tuned soft on purpose.

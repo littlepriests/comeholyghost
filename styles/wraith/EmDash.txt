@@ -1,0 +1,19 @@
+EmDash — substitution with action: replace (editor autofix / quick-fix).
+
+  wraith/EmDash.yml → <repo>/styles/wraith/EmDash.yml
+  Rule id: wraith.EmDash
+
+What Vale does
+  On lint: flags the match and attaches a replacement.
+  In the Vale VS Code/Cursor extension: apply the suggested fix (swap).
+  `vale` CLI alone does not rewrite the file.
+
+Patterns
+  " -- "           → —
+  word--word       → word—word
+
+Avoided on purpose
+  --- front matter / thematic breaks (no spaces, no letter on both sides)
+  --flag style tokens in code (usually skipped via code scopes anyway)
+
+Prefer unspaced em dashes in the replacement. If you want spaces ( — ), change the swap values.

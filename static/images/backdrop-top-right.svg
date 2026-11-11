@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="384" height="384" viewBox="0 0 384 384" role="img" aria-label="Top right backdrop">
-  <rect width="384" height="384" fill="#282828"/>
-  <rect x="16" y="16" width="352" height="352" fill="none" stroke="#7cafc2" stroke-width="3" stroke-dasharray="12 10"/>
-  <text x="192" y="176" text-anchor="middle" fill="#f8f8f8" font-family="ui-monospace, monospace" font-size="28">top right</text>
-  <text x="192" y="214" text-anchor="middle" fill="#b8b8b8" font-family="ui-monospace, monospace" font-size="16">max 24rem</text>
-</svg>

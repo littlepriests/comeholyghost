@@ -1,0 +1,5 @@
+extends: script
+message: "Flow: nearby sentences share a similar shape. Vary the construction if it feels repetitive."
+level: suggestion
+scope: raw
+script: SentenceFlow.tengo

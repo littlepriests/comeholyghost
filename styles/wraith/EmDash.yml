@@ -1,0 +1,11 @@
+extends: substitution
+message: "Use an em dash ('%s') instead of double hyphen '%s'."
+level: suggestion
+nonword: true
+action:
+  name: replace
+swap:
+  # Spaced ASCII dash (won't touch YAML --- or HR ---)
+  " -- ": "—"
+  # word--word → word—word (requires a character on both sides)
+  '([A-Za-z0-9])--([A-Za-z0-9])': "$1—$2"

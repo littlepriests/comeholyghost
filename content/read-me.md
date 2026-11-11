@@ -5,7 +5,7 @@ email_cta = true
 
 I'm an in-my-30s something-or-other with broad interests, living somewhere in rural America near the Embarrass River and many cornfields. (Also, it's pronounced Am-braw.)
 
-This site is inspired by commonplace journals, Tumblr + Livejournal, and the part of me who's still nine and wishing she could make an Angelfire shrine. Pictures, photo edits, any and all writing, research and anything worthwhile is done by me. 
+This site is inspired by commonplace journals, Tumblr + Livejournal, and the part of me who's still nine and wishing she could make an Angelfire shrine. Pictures, photo edits, any and all writing, research and anything worthwhile are done by me. 
 
 ## footnotes
 
@@ -24,4 +24,4 @@ This site is inspired by commonplace journals, Tumblr + Livejournal, and the par
 	- Coverart by Michael Godard http://www.michaelgodard.com 
 	- Opaline by Dishwalla http://www.dishwalla.com 
 	- Skin created by Jared Harley 
-	- I don't know this group but I loved the art
+	- I don't know this group, but I loved the art

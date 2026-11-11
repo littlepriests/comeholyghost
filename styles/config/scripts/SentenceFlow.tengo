@@ -1,0 +1,149 @@
+/*
+  SentenceFlow — soft flow nudges for back-to-back similar constructions.
+
+  Copy to: <repo>/styles/config/scripts/SentenceFlow.tengo
+  Rule:    <repo>/styles/wraith/SentenceFlow.yml
+
+  Configure the knobs below, then re-lint. Level is suggestion in the YAML.
+*/
+
+text := import("text")
+fmt := import("fmt")
+
+matches := []
+
+// --- configure me ---
+short_max_words := 8 // "pithy" if word count <= this
+short_streak_max := 3 // flag when MORE than this many short sentences in a row
+pattern_streak_max := 2 // flag when this many (or more) share the same hinge/opener in a row
+min_sentence_words := 2 // ignore tiny fragments
+// -------------------
+
+doc := scope
+doc = text.re_replace("(?s)^---.*?---\\r?\\n", doc, "\n")
+doc = text.re_replace("(?s)```.*?```", doc, " ")
+doc = text.re_replace("`[^`]+`", doc, " ")
+doc = text.re_replace("(?s)\\{\\{[%<].*?[%/>]\\}\\}", doc, " ")
+doc = text.re_replace("!\\[[^\\]]*\\]\\([^)]+\\)", doc, " ")
+doc = text.re_replace("\\[([^\\]]+)\\]\\([^)]+\\)", doc, "$1")
+doc = text.re_replace("(?m)^#{1,6}\\s+", doc, "")
+doc = text.re_replace("(?m)^\\s*>\\s?", doc, "")
+doc = text.re_replace("(?m)^\\s*[-*+]\\s+", doc, "")
+doc = text.re_replace("(?m)^\\s*\\d+\\.\\s+", doc, "")
+doc = text.re_replace("[*_~]+", doc, "")
+doc = text.re_replace("</?[^>]+>", doc, " ")
+doc = text.re_replace("[ \\t]+", doc, " ")
+
+raw_sents := text.re_split("[.!?]+\\s+", doc, -1)
+
+sent_texts := []
+sent_words := []
+sent_begins := []
+sent_ends := []
+
+for s in raw_sents {
+  t := text.trim_space(s)
+  if t == "" {
+    continue
+  }
+  words := text.fields(t)
+  n := len(words)
+  if n < min_sentence_words {
+    continue
+  }
+  begin := text.index(scope, t)
+  if begin < 0 {
+    begin = 0
+  }
+  sent_texts = append(sent_texts, t)
+  sent_words = append(sent_words, n)
+  sent_begins = append(sent_begins, begin)
+  sent_ends = append(sent_ends, begin + len(t))
+}
+
+// Build parallel pattern ids ("" if none).
+patterns := []
+for t in sent_texts {
+  p := ""
+  if text.re_match("(?i)^but\\b", t) {
+    p = "opener:but"
+  } else if text.re_match("(?i)^and\\b", t) {
+    p = "opener:and"
+  } else if text.re_match("(?i)^so\\b", t) {
+    p = "opener:so"
+  } else if text.re_match("(?i)^yet\\b", t) {
+    p = "opener:yet"
+  } else if text.re_match("(?i)^however\\b", t) {
+    p = "opener:however"
+  } else if text.re_match("(?i)^still\\b", t) {
+    p = "opener:still"
+  } else if text.re_match("(?i)^meanwhile\\b", t) {
+    p = "opener:meanwhile"
+  } else if text.re_match("(?i),\\s*but\\b", t) {
+    p = "hinge:but"
+  } else if text.re_match("(?i),\\s*and\\b", t) {
+    p = "hinge:and"
+  } else if text.re_match("(?i),\\s*so\\b", t) {
+    p = "hinge:so"
+  } else if text.re_match("(?i),\\s*yet\\b", t) {
+    p = "hinge:yet"
+  } else if text.re_match("(?i),\\s*or\\b", t) {
+    p = "hinge:or"
+  }
+  patterns = append(patterns, p)
+}
+
+count := len(sent_texts)
+
+// Short / pithy streak — fire once when it first exceeds short_streak_max
+short_start := -1
+i := 0
+for i < count {
+  is_short := sent_words[i] <= short_max_words
+  if is_short {
+    if short_start < 0 {
+      short_start = i
+    }
+    streak := i - short_start + 1
+    if streak == short_streak_max + 1 {
+      matches = append(matches, {
+        begin: sent_begins[i],
+        end: sent_ends[i],
+        message: fmt.sprintf(
+          "Flow: %d short sentences in a row (≤%d words). Mix the rhythm if it feels choppy.",
+          streak,
+          short_max_words)
+      })
+    }
+  } else {
+    short_start = -1
+  }
+  i += 1
+}
+
+// Same hinge/opener pattern streak — fire once when it hits pattern_streak_max
+pat_start := -1
+pat_cur := ""
+i = 0
+for i < count {
+  p := patterns[i]
+  if p != "" && p == pat_cur {
+    streak := i - pat_start + 1
+    if streak == pattern_streak_max {
+      matches = append(matches, {
+        begin: sent_begins[i],
+        end: sent_ends[i],
+        message: fmt.sprintf(
+          "Flow: similar construction repeated (%s). Vary the shape if it feels sing-song.",
+          p)
+      })
+    }
+  } else if p != "" {
+    pat_start = i
+    pat_cur = p
+  } else {
+    pat_start = -1
+    pat_cur = ""
+  }
+  i += 1
+}

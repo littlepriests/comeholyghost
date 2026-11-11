@@ -15,3 +15,7 @@ Thumbs.db
 *.swp
 .idea/
 .vscode/
+
+styles/*
+!styles/config/
+!styles/wraith/
