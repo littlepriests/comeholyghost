@@ -1,0 +1,36 @@
+extends: substitution
+message: "Prefer positive phrasing: '%s' instead of '%s'."
+link: https://learn.microsoft.com/en-us/style-guide/grammar/positive-and-negative-phrasing
+level: suggestion
+ignorecase: true
+action:
+  name: replace
+swap:
+  # Litotes / double-ish negatives — say the quality you mean
+  not uncommon: common
+  not unusual: common|typical
+  not unlikely: likely
+  not insignificant: significant
+  not unimportant: important
+  not infrequent: frequent|common
+  not dissimilar: similar
+  not dissimilar to: similar to
+  not unable: able
+  not incapable: capable
+  not impossible: possible
+  not imperfect: perfect|sound
+  not unlike: like
+  not a few: several|many
+  not many: few
+  # Circumlocutions that hide the positive claim
+  not able to: cannot|can't
+  not capable of: cannot|can't
+  does not have: lacks|has no
+  do not have: lack|have no
+  did not have: lacked|had no
+  is not the same as: differs from|is different from
+  are not the same as: differ from|are different from
+  is not different from: is like|is similar to
+  are not different from: are like|are similar to
+  is not without: has|includes
+  are not without: have|include
