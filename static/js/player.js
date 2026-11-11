@@ -13,6 +13,7 @@
     var playing = false;
     var trackTitle = "";
     var slotObserver = null;
+    var skinDockObserver = null;
     var chromeClosed = false;
     var skinUnavailable = false;
     var syncingWebampClose = false;
@@ -26,7 +27,14 @@
     var reopenBtn = player.querySelector("[data-player-reopen]");
     var label = player.querySelector("[data-player-title]");
     var labelText = player.querySelector("[data-player-title-text]");
-    var toggleIcon = toggle ? toggle.querySelector("i") : null;
+    var toggleIconPlay = toggle ? toggle.querySelector("[data-player-icon-play]") : null;
+    var toggleIconPlaying = toggle ? toggle.querySelector("[data-player-icon-playing]") : null;
+    var dockIdle = player.querySelector("[data-player-dock-idle]");
+    var dockKick = player.querySelector("[data-player-dock-kick]");
+    var dockKickStrip = dockKick ? dockKick.querySelector(".sprite-anim") : null;
+    var dockPetTimer = 0;
+    var dockPetKicking = false;
+    var chromeEl = player.querySelector("[data-player-chrome]");
     var supportsAnchor = typeof CSS !== "undefined" && CSS.supports && CSS.supports("anchor-name", "--home-player-slot");
 
     function isMobileViewport() {
@@ -64,22 +72,82 @@
         }
     }
 
+    function showDockIdle() {
+        dockPetKicking = false;
+        window.clearTimeout(dockPetTimer);
+        if (dockIdle) dockIdle.removeAttribute("hidden");
+        if (dockKick) dockKick.setAttribute("hidden", "");
+        if (dockKickStrip) dockKickStrip.classList.remove("is-kick-play");
+    }
+
+    function playDockKickThenIdle() {
+        if (!dockIdle || !dockKick) return;
+        window.clearTimeout(dockPetTimer);
+        dockPetKicking = true;
+        dockIdle.setAttribute("hidden", "");
+        dockKick.removeAttribute("hidden");
+        if (dockKickStrip) {
+            dockKickStrip.classList.remove("is-kick-play");
+            void dockKickStrip.offsetWidth;
+            dockKickStrip.classList.add("is-kick-play");
+        }
+        var kickMs = 400;
+        try {
+            var fps = dockKickStrip
+                ? parseFloat(getComputedStyle(dockKickStrip).getPropertyValue("--sprite-fps")) || 8
+                : 8;
+            var frames = dockKickStrip
+                ? parseFloat(getComputedStyle(dockKickStrip).getPropertyValue("--sprite-frames")) || 3
+                : 3;
+            // One kick cycle, brief hold, then static idle again.
+            kickMs = Math.max(320, Math.round((frames / fps) * 1000) + 120);
+        } catch (error) {}
+        dockPetTimer = window.setTimeout(showDockIdle, kickMs);
+    }
+
+    function syncDockPet() {
+        if (!dockIdle && !dockKick) return;
+        // Don't clobber an in-progress kick (pauseMedia + audio "pause" both call show).
+        if (!dockPetKicking) showDockIdle();
+    }
+
+    function pulseDockKick() {
+        playDockKickThenIdle();
+    }
+
     function show() {
         if (labelText) labelText.textContent = currentTitle();
         else if (label) label.textContent = currentTitle();
-        if (toggleIcon) {
-            toggleIcon.className = playing ? "fa-solid fa-pause" : "fa-solid fa-play";
+        // Play chevron when paused; speaker when audio is on (tab-style cue).
+        if (toggleIconPlay) {
+            if (playing) toggleIconPlay.setAttribute("hidden", "");
+            else toggleIconPlay.removeAttribute("hidden");
+        }
+        if (toggleIconPlaying) {
+            if (playing) toggleIconPlaying.removeAttribute("hidden");
+            else toggleIconPlaying.setAttribute("hidden", "");
         }
         if (toggle) {
+            toggle.classList.toggle("is-playing", playing);
             toggle.setAttribute("aria-label", playing ? "Pause" : "Play");
         }
+        syncDockPet();
         requestAnimationFrame(syncTitleMarquee);
     }
 
-    // Home/mobile use simple chrome + <audio>. Webamp may still be parked for
-    // desktop skin pages — only drive it while --skin is the active chrome.
+    // HTML <audio> always owns real playback + auto-next (survives SPA).
+    // Winamp is chrome/visual only — never start it, never hand off into setTracksToPlay
+    // (that API always autoplays and caused idle navigations / cold loads to start music).
     function useWebampTransport() {
-        return !!(window.__webamp && player.classList.contains("site-player--skin"));
+        return false;
+    }
+
+    function silenceWebamp() {
+        var w = window.__webamp;
+        if (!w || typeof w.pause !== "function") return;
+        try {
+            w.pause();
+        } catch (error) {}
     }
 
     function load(nextIndex, andPlay) {
@@ -126,12 +194,7 @@
     }
 
     function playMedia() {
-        if (useWebampTransport()) {
-            window.__webamp.play();
-            playing = true;
-            show();
-            return;
-        }
+        silenceWebamp();
         if (!tracks.length) {
             playWhenReady = true;
             return;
@@ -149,48 +212,46 @@
     window.sitePlayerPlay = playMedia;
 
     function pauseMedia() {
-        if (useWebampTransport()) {
-            window.__webamp.pause();
-        } else {
-            audio.pause();
-        }
+        silenceWebamp();
+        // Set playing first so the audio "pause" listener does not run a second show()
+        // that would cancel the dock kick animation.
         playing = false;
         show();
+        try {
+            audio.pause();
+        } catch (error) {}
     }
 
     function stopMedia() {
-        if (useWebampTransport()) {
-            window.__webamp.stop();
-        } else {
-            audio.pause();
-            audio.currentTime = 0;
-        }
+        silenceWebamp();
         playing = false;
         show();
+        try {
+            audio.pause();
+            audio.currentTime = 0;
+        } catch (error) {}
     }
 
     function skipMedia() {
-        if (useWebampTransport()) {
-            window.__webamp.nextTrack();
-            playing = true;
-            show();
-            return;
-        }
+        silenceWebamp();
         load(index + (audio.getAttribute("src") ? 1 : 0), true);
     }
 
     toggle.addEventListener("click", function () {
         if (playing) pauseMedia();
         else playMedia();
+        pulseDockKick();
     });
 
     skip.addEventListener("click", function () {
         skipMedia();
+        pulseDockKick();
     });
 
     if (stop) {
         stop.addEventListener("click", function () {
             stopMedia();
+            pulseDockKick();
         });
     }
 
@@ -246,11 +307,14 @@
 
     audio.addEventListener("play", function () {
         if (useWebampTransport()) return;
+        if (playing) return;
         playing = true;
         show();
     });
     audio.addEventListener("pause", function () {
         if (useWebampTransport()) return;
+        // pauseMedia/stopMedia already updated UI; skip duplicate show().
+        if (!playing) return;
         playing = false;
         show();
     });
@@ -366,19 +430,9 @@
                 return;
             }
             var webamp = new Webamp({
-                initialTracks: list.map(function (track) {
-                    var entry = {
-                        metaData: {
-                            artist: track.artist || "",
-                            title: track.title || ""
-                        },
-                        url: new URL(track.src, location.origin).href
-                    };
-                    if (typeof track.duration === "number" && track.duration > 0) {
-                        entry.duration = track.duration;
-                    }
-                    return entry;
-                }),
+                // Empty on purpose — loading real URLs here made Winamp audible on boot
+                // and fought the HTML <audio> transport. Skin is visual chrome only.
+                initialTracks: [],
                 initialSkin: { url: new URL("/skins/Opaline.wsz", location.origin).href },
                 windowLayout: {
                     main: { position: { left: 0, top: 0 } },
@@ -397,34 +451,23 @@
                 }
             });
             window.__webamp = webamp;
-            if (typeof webamp.onTrackDidChange === "function") {
-                webamp.onTrackDidChange(function (track) {
-                    if (track && track.metaData) {
-                        trackTitle = track.metaData.title || "";
-                        var found = tracks.findIndex(function (item) {
-                            return item.title === trackTitle;
-                        });
-                        if (found >= 0) index = found;
-                    }
-                    show();
-                });
-            }
             if (typeof webamp.onClose === "function") {
                 webamp.onClose(function () {
                     if (syncingWebampClose) return;
-                    // Winamp's own × — leave playback alone, show the reopen heart.
+                    // Winamp's own × — leave HTML audio alone, show the reopen heart.
                     chromeClosed = true;
                     syncClosedChrome();
                     placeSkinPlayer();
                 });
             }
             return webamp.renderInto(host).then(function () {
-                // Desktop skin only: on home/mobile stay on simple chrome + <audio>.
-                // Don't pause HTML audio on home — playlist advance depends on it.
+                silenceWebamp();
+                [50, 200, 500].forEach(function (ms) {
+                    window.setTimeout(silenceWebamp, ms);
+                });
                 if (document.body.classList.contains("home") || isMobileViewport()) {
                     applyPlayerChrome();
                 } else {
-                    audio.pause();
                     revealSkin();
                 }
                 window.addEventListener("resize", onViewportChange);
@@ -464,12 +507,16 @@
             if (useSimple) clearInlinePlacement();
             else clearForcedWindowStyles();
         }
+        // Never start/stop HTML audio on chrome swap. Keep Winamp muted so it
+        // cannot autoplay under the skin.
+        if (window.__webamp) silenceWebamp();
         syncClosedChrome();
         syncWebampClosedState();
         watchHomeSlot();
         measureSimplePlayer();
         placeHomePlayer();
         placeSkinPlayer();
+        watchSkinDock();
     }
 
     function measureSimplePlayer() {
@@ -603,6 +650,7 @@
             player.style.removeProperty("right");
             document.documentElement.style.removeProperty("--skin-offset-top");
         }
+        placeDockedChrome();
     }
 
     function watchHomeSlot() {
@@ -620,15 +668,89 @@
         }
     }
 
+    // When the Winamp skin scrolls out of view, stick the minimalist chrome mid-
+    // viewport (tracks the scrollbar vertically) and center it on the skin column.
+    function clearDockedChromePlacement() {
+        if (chromeEl) {
+            chromeEl.style.removeProperty("left");
+            chromeEl.style.removeProperty("right");
+        }
+        if (reopenBtn) {
+            reopenBtn.style.removeProperty("left");
+            reopenBtn.style.removeProperty("right");
+        }
+    }
+
+    function placeDockedChrome() {
+        if (!player.classList.contains("site-player--docked") || !player.classList.contains("site-player--skin")) {
+            clearDockedChromePlacement();
+            return;
+        }
+        if (document.body.classList.contains("home") || isMobileViewport()) {
+            clearDockedChromePlacement();
+            return;
+        }
+        var anchor = skinHorizontalAnchor() || document.getElementById("winamp-host");
+        if (!anchor) return;
+        var rect = anchor.getBoundingClientRect();
+        if (rect.width < 2) return;
+        var cx = Math.round(rect.left + rect.width / 2) + "px";
+        if (chromeEl) {
+            chromeEl.style.left = cx;
+            chromeEl.style.right = "auto";
+        }
+        if (reopenBtn) {
+            reopenBtn.style.left = cx;
+            reopenBtn.style.right = "auto";
+        }
+    }
+
+    function setSkinDocked(docked) {
+        player.classList.toggle("site-player--docked", !!docked);
+        if (docked) placeDockedChrome();
+        else clearDockedChromePlacement();
+    }
+
+    function watchSkinDock() {
+        if (skinDockObserver) {
+            skinDockObserver.disconnect();
+            skinDockObserver = null;
+        }
+        setSkinDocked(false);
+        if (!player.classList.contains("site-player--skin")) return;
+        if (document.body.classList.contains("home") || isMobileViewport()) return;
+        if (typeof IntersectionObserver !== "function") return;
+        var host = document.getElementById("winamp-host");
+        if (!host) return;
+        skinDockObserver = new IntersectionObserver(
+            function (entries) {
+                var entry = entries[0];
+                if (!entry) return;
+                if (!player.classList.contains("site-player--skin")) {
+                    setSkinDocked(false);
+                    return;
+                }
+                setSkinDocked(!entry.isIntersecting);
+            },
+            { root: null, threshold: 0, rootMargin: "0px" }
+        );
+        skinDockObserver.observe(host);
+        placeDockedChrome();
+    }
+
     function onViewportChange() {
         applyPlayerChrome();
         if (player.classList.contains("site-player--skin")) {
             fitSkinBox();
             placeSkinPlayer();
+            placeDockedChrome();
         } else {
             placeHomePlayer();
         }
     }
+
+    window.addEventListener("resize", placeDockedChrome);
+    window.addEventListener("scroll", placeDockedChrome, { passive: true });
 
     if (typeof mobileQuery.addEventListener === "function") {
         mobileQuery.addEventListener("change", onViewportChange);
@@ -733,6 +855,7 @@
                             requestAnimationFrame(function () {
                                 fitSkinBox();
                                 placeSkinPlayer();
+                                watchSkinDock();
                             });
                         }
                         if (!fromPop) history.pushState({ player: true }, "", href);

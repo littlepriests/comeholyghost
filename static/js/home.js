@@ -868,19 +868,18 @@
         syncRaf = requestAnimationFrame(syncThoughtBob);
     }
 
-    var yesBtn = prompt.querySelector("[data-music-yes]");
-    var noBtn = prompt.querySelector("[data-music-no]");
-    if (yesBtn) {
-        yesBtn.addEventListener("click", function () {
+    // Cloud left/right hit zones + visible y/n share the same data attrs.
+    prompt.querySelectorAll("[data-music-yes]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
             playMusic();
             dismiss();
         });
-    }
-    if (noBtn) {
-        noBtn.addEventListener("click", function () {
+    });
+    prompt.querySelectorAll("[data-music-no]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
             dismiss();
         });
-    }
+    });
 
     prompt.hidden = false;
     requestAnimationFrame(function () {

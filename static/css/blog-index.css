@@ -62,20 +62,27 @@
     text-transform: lowercase;
 }
 
+/*
+  Index thumb size knobs:
+  - .blog-entry__figure max-width = column cap for the preview
+  - img max-height = vertical cap (object-fit: contain — no crop/stretch)
+  Hugo Fit caps live in layouts/partials/blog-entry.html ($previewMaxW/H).
+*/
 .blog-entry__figure {
     margin: 0 auto 1rem;
     padding: 0;
-    max-width: min(14rem, 55%);
+    max-width: min(36rem, 100%);
     text-align: center;
 }
 
 .blog-entry__thumb {
     display: block;
-    width: 100%;
-    margin: 0;
+    width: auto;
+    max-width: 100%;
+    margin: 0 auto;
     padding: 0;
     border: 0;
-    background: var(--inner-bg, #44355B);
+    background: transparent;
     cursor: zoom-in;
     appearance: none;
     -webkit-appearance: none;
@@ -83,10 +90,12 @@
 
 .blog-entry__thumb > img {
     display: block;
-    width: 100%;
+    width: auto;
+    max-width: 100%;
     height: auto;
-    max-height: 11rem;
-    object-fit: cover;
+    max-height: 28rem;
+    margin: 0 auto;
+    object-fit: contain;
     object-position: center;
     vertical-align: middle;
 }
@@ -128,10 +137,10 @@
     }
 
     .blog-entry__figure {
-        max-width: min(12rem, 70%);
+        max-width: 100%;
     }
 
     .blog-entry__thumb > img {
-        max-height: 9.5rem;
+        max-height: 18rem;
     }
 }

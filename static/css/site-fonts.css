@@ -1,4 +1,4 @@
-/* Self-hosted Fira Mono (latin). No Google Fonts CDN. */
+/* Self-hosted Fira Mono (latin). No Google Fonts / company CDNs. */
 @font-face {
     font-family: "Fira Mono";
     src: url("/fonts/fira-mono-400.woff2") format("woff2");
@@ -23,3 +23,10 @@
     font-style: normal;
     font-display: swap;
 }
+
+/*
+  Face tokens (--font-site / --font-article) are set from hugo.toml [params.fonts]
+  in themes/risotto/layouts/partials/head.html. Defaults:
+    site    = Fira Mono (chrome, home, guestbook, writing index)
+    article = Georgia system stack (/blog/<slug>/ via article-reading.css)
+*/

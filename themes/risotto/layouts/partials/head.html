@@ -4,7 +4,18 @@
 <meta charset="UTF-8"/>
 {{ if .Site.Params.noindex }}<meta name="robots" content="noindex" /> {{ end }}
 <link rel="preload" href="{{ "fonts/fira-mono-400.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="{{ "css/site-fonts.css" | relURL }}?v=1">
+<link rel="stylesheet" href="{{ "css/site-fonts.css" | relURL }}?v=2">
+{{- $fontSite := .Site.Params.fonts.site | default `"Fira Mono", ui-monospace, monospace` -}}
+{{- $fontArticle := .Site.Params.fonts.article | default `Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, "Times New Roman", serif` -}}
+<style>
+  :root {
+    --font-site: {{ $fontSite | safeCSS }};
+    --font-article: {{ $fontArticle | safeCSS }};
+  }
+</style>
+{{- with .Site.Params.fonts.articleFontUrl }}
+<link rel="stylesheet" href="{{ . | relURL }}">
+{{- end }}
 <script>
   (function () {
     function ready() { document.documentElement.classList.add("fonts-ready"); }
@@ -61,8 +72,8 @@
 {{ with .Site.Language.Locale }}<meta property="og:locale" content="{{ . }}" />{{ end }}
 {{ with .Site.Params.about }}<meta property="og:image" content="{{ with .logo_image }}{{ . | absURL }}{{ end }}" />{{ end }}
 {{/* Always-on site chrome. Page-specific sheets load in their layouts. */}}
-<link rel="stylesheet" href="{{ "css/player.css" | relURL }}?v=29">
-<link rel="stylesheet" href="{{ "css/reading.css" | relURL }}?v=17">
+<link rel="stylesheet" href="{{ "css/player.css" | relURL }}?v=43">
+<link rel="stylesheet" href="{{ "css/reading.css" | relURL }}?v=19">
 <link rel="stylesheet" href="{{ "css/retro.css" | relURL }}?v=13">
 <link rel="stylesheet" href="{{ "css/stars.css" | relURL }}?v=10">
 <link rel="stylesheet" href="{{ "css/sprites.css" | relURL }}?v=13">

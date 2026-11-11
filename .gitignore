@@ -9,13 +9,17 @@
 # Netlify function deps
 /node_modules/
 
+# Vale (local lint packs / binary — keep out of git and proj-zip)
+Styles/
+.vale.ini
+.vale/
+vale
+vale.exe
+vale-rules/
+
 # OS / editor
 .DS_Store
 Thumbs.db
 *.swp
 .idea/
 .vscode/
-
-styles/*
-!styles/config/
-!styles/wraith/
