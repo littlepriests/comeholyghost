@@ -6,9 +6,10 @@
 
 .section-blog .content__header,
 .section-blog .content__body {
-    font-family: var(--font-article, Georgia, "Iowan Old Style", Palatino, serif);
-    font-size: 1.05rem;
+    font-family: var(--font-article, Georgia, "Iowan Old Style", Palatino, sans-serif);
+    font-size: 1.15rem;
     line-height: 1.65;
+    letter-spacing: .55px;
 }
 
 /* Keep markdown # prefixes readable beside serif titles. */
