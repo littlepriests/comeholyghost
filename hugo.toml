@@ -26,8 +26,8 @@ palette = "base16-dark"
 # Knobs documented in docs/resources.md (Fonts).
 [params.fonts]
 site = "\"Fira Mono\", ui-monospace, monospace"
-article = "Georgia, \"Iowan Old Style\", \"Palatino Linotype\", Palatino, \"Times New Roman\", serif"
-# articleFontUrl = "css/article-font.css"
+article = "\"Montserrat\", sans-serif"
+articleFontUrl = "css/article-font.css"
 
 [params.about]
 title = ""
