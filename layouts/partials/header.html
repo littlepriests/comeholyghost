@@ -17,6 +17,11 @@
         {{- /* Soft radial glow (CSS) — no box-edge cut like the old SVG fill. */ -}}
         <div class="music-prompt__fill" aria-hidden="true"></div>
         <pre class="music-prompt__cloud" aria-hidden="true">{{ $cloud }}</pre>
+        {{- /* Invisible left/right halves inside the ASCII cloud (yes | no). */ -}}
+        <div class="music-prompt__hits">
+          <button type="button" class="music-prompt__hit music-prompt__hit--yes" data-music-yes aria-label="Yes, play music"></button>
+          <button type="button" class="music-prompt__hit music-prompt__hit--no" data-music-no aria-label="No, dismiss"></button>
+        </div>
         <div class="music-prompt__panel">
           <p class="music-prompt__ask">⋆｡˚ play music? ˚｡⋆</p>
           <div class="music-prompt__actions">

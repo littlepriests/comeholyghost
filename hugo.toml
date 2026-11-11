@@ -21,6 +21,14 @@ noindex = true
 [params.theme]
 palette = "base16-dark"
 
+# Site chrome vs blog-article faces. Self-host extra files under static/fonts/ +
+# optional articleFontUrl — do not add Google Fonts / company CDNs.
+# Knobs documented in docs/resources.md (Fonts).
+[params.fonts]
+site = "\"Fira Mono\", ui-monospace, monospace"
+article = "Georgia, \"Iowan Old Style\", \"Palatino Linotype\", Palatino, \"Times New Roman\", serif"
+# articleFontUrl = "css/article-font.css"
+
 [params.about]
 title = ""
 description = ""
@@ -56,7 +64,7 @@ titleHighlight = "shadow-grey"
 logoSprite = "misdreavus"
 
 # Sprite-strip animations (shortcode: {{</* sprite "id" */>}}).
-# Refresh with scripts/slice-misdreavus.mjs / slice-kagura.mjs / slice-sango.mjs / slice-skifree.mjs.
+# Refresh with scripts/slice-misdreavus.mjs / slice-kagura.mjs / slice-sango.mjs / slice-skifree.mjs / slice-grundo.mjs.
 [[params.sprites]]
 id = "misdreavus"
 src = "images/sprites/misdreavus.png"
@@ -164,6 +172,24 @@ frameHeight = 34
 frames = 3
 fps = 4
 alt = "SkiFree wipeout"
+
+[[params.sprites]]
+id = "grundo-idle"
+src = "images/sprites/grundo-idle.png"
+frameWidth = 42
+frameHeight = 56
+frames = 1
+fps = 1
+alt = "Orange Grundo idle"
+
+[[params.sprites]]
+id = "grundo-kick"
+src = "images/sprites/grundo-kick.png"
+frameWidth = 46
+frameHeight = 56
+frames = 3
+fps = 8
+alt = "Orange Grundo kick"
 
 # One picture per corner, fixed behind the page. Panels cover them.
 # Leave image blank ("") to keep that corner empty. A missing file does the same.

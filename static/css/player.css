@@ -77,9 +77,21 @@
     border-color: color-mix(in srgb, var(--highlight) 55%, transparent);
 }
 
-#site-player button i {
+#site-player button i,
+#site-player button .site-icon {
     font-size: 0.75rem;
     line-height: 1;
+}
+
+#site-player [data-player-toggle] .player-toggle-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;
+}
+
+#site-player [data-player-toggle] .player-toggle-icon[hidden] {
+    display: none !important;
 }
 
 #site-player .player-close {
@@ -267,9 +279,153 @@ body {
     display: block;
 }
 
-#site-player.site-player--skin > .player-chrome,
+/* Audio stays hidden but keeps playing (HTML <audio> owns sound). */
 #site-player.site-player--skin > audio {
     display: none;
+}
+
+/*
+  Desktop skin: Winamp scrolls away with the article. When it leaves the
+  viewport, JS adds --docked: chrome is fixed mid-viewport (scrollbar axis)
+  and horizontally centered on the Winamp / aside column via placeDockedChrome.
+*/
+#site-player.site-player--skin > .player-chrome {
+    display: none;
+}
+
+/* Dock pet (Grundo) — sits above the chrome controls when docked. */
+#site-player .player-dock-pet {
+    --dock-pet-size: 100px;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    flex: none;
+    position: relative;
+    line-height: 0;
+    width: var(--dock-pet-size);
+    height: var(--dock-pet-size);
+}
+
+#site-player .player-dock-pet__strip {
+    display: block;
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    line-height: 0;
+    /* Native cell is 56px tall; scale() needs a unitless ratio (px/px). */
+    transform: translateX(-50%) scale(calc(var(--dock-pet-size) / 56px));
+    transform-origin: bottom center;
+}
+
+#site-player .player-dock-pet__strip .sprite-anim {
+    display: block;
+}
+
+#site-player .player-dock-pet__strip[hidden] {
+    display: none !important;
+}
+
+/* Idle is a one-frame static PNG (.is-static). Kick stays frozen until click. */
+#site-player .player-dock-pet__strip--kick .sprite-anim:not(.is-kick-play) {
+    animation: none !important;
+    background-position: 0 0 !important;
+}
+
+/* Kick is a one-shot; restart by toggling .is-kick-play in JS. */
+#site-player .player-dock-pet__strip--kick .sprite-anim.is-kick-play {
+    animation-name: sprite-anim-play-hold;
+    animation-duration: calc(var(--sprite-frames, 2) / var(--sprite-fps, 8) * 1s);
+    animation-timing-function: steps(var(--sprite-steps, 1), end);
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+}
+
+@media (min-width: 45rem) {
+    /* Mid-viewport vertically; left set in JS to the skin column center.
+       Grundo centered on top; title + buttons on the row beneath. */
+    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) > .player-chrome {
+        display: grid !important;
+        grid-template-columns: auto auto;
+        grid-template-rows: auto auto;
+        justify-items: center;
+        align-items: end;
+        column-gap: 0.22rem;
+        row-gap: 0.2rem;
+        position: fixed;
+        top: 50%;
+        left: 0;
+        right: auto;
+        width: max-content;
+        max-width: calc(100vw - 1.5rem);
+        box-sizing: border-box;
+        padding-right: 0.3rem;
+        transform: translate(-50%, -50%);
+        z-index: 35;
+        opacity: 0.97;
+        transition: opacity 0.15s ease;
+    }
+
+    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) .player-dock-pet {
+        display: flex;
+        grid-column: 1 / -1;
+        grid-row: 1;
+        justify-self: center;
+        width: var(--dock-pet-size);
+        height: var(--dock-pet-size);
+        margin: 0;
+    }
+
+    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) > .player-chrome .player-title {
+        grid-column: 1;
+        grid-row: 2;
+        width: 2.6rem;
+        font-size: 0.62rem;
+    }
+
+    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) > .player-chrome .player-chrome__buttons {
+        grid-column: 2;
+        grid-row: 2;
+        display: flex;
+        gap: 0.12rem;
+    }
+
+    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) > .player-chrome button:not(.player-close) {
+        width: 1.15rem;
+        height: 1.15rem;
+    }
+
+    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) > .player-chrome button:not(.player-close) i,
+    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) > .player-chrome button:not(.player-close) .site-icon {
+        font-size: 0.52rem;
+    }
+
+    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) > .player-chrome .player-close {
+        top: auto;
+        bottom: 0.15rem;
+        right: -0.1rem;
+        width: 0.8rem;
+        height: 0.8rem;
+        font-size: 0.6rem;
+    }
+
+    body:not(.home) #site-player.site-player--skin.site-player--docked.site-player--closed > .player-reopen {
+        display: inline-flex !important;
+        position: fixed;
+        top: 50%;
+        left: 0;
+        right: auto;
+        transform: translate(-50%, -50%);
+        z-index: 35;
+        width: 1.15rem;
+        height: 1.15rem;
+        font-size: 0.65rem;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) > .player-chrome {
+            transition: none;
+        }
+    }
 }
 
 #site-player.site-player--skin #winamp-host {

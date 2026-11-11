@@ -1,0 +1,23 @@
+{
+  "note": "Orange Grundo (Pokémon G/S style). TSR #186604. Credit LonelyMarowak. Fan-use.",
+  "anims": [
+    {
+      "id": "grundo-idle",
+      "src": "images/sprites/grundo-idle.png",
+      "frameWidth": 42,
+      "frameHeight": 56,
+      "frames": 1,
+      "fps": 1,
+      "alt": "Orange Grundo idle"
+    },
+    {
+      "id": "grundo-kick",
+      "src": "images/sprites/grundo-kick.png",
+      "frameWidth": 46,
+      "frameHeight": 56,
+      "frames": 3,
+      "fps": 8,
+      "alt": "Orange Grundo kick"
+    }
+  ]
+}

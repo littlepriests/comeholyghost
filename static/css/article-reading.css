@@ -1,0 +1,30 @@
+/*
+  Blog article readability knobs (/blog/<slug>/ only — linked from single.html).
+  Ad-hoc fixes go here so Risotto theme CSS stays untouched.
+  Faces come from :root --font-article (hugo.toml [params.fonts]).
+*/
+
+.section-blog .content__header,
+.section-blog .content__body {
+    font-family: var(--font-article, Georgia, "Iowan Old Style", Palatino, serif);
+    font-size: 1.05rem;
+    line-height: 1.65;
+}
+
+/* Keep markdown # prefixes readable beside serif titles. */
+.section-blog .content__header h1,
+.section-blog .content__body :is(h1, h2, h3, h4, h5, h6) {
+    font-family: var(--font-article, Georgia, "Iowan Old Style", Palatino, serif);
+    line-height: 1.35;
+    letter-spacing: 0;
+}
+
+.section-blog .content__body p {
+    max-width: 40rem;
+}
+
+.section-blog .content__body code,
+.section-blog .content__body pre {
+    font-family: var(--font-site, "Fira Mono", ui-monospace, monospace);
+    font-size: 0.92em;
+}

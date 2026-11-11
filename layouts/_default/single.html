@@ -1,6 +1,9 @@
 {{ define "main" }}
     {{/* Page-scoped: article media + lightbox (not on home / blog index). */}}
     <link rel="stylesheet" href="{{ "css/article-media.css" | relURL }}?v=5">
+    {{- if eq .Section "blog" }}
+    <link rel="stylesheet" href="{{ "css/article-reading.css" | relURL }}?v=1">
+    {{- end }}
     <header class="content__header">
         <h1>{{ .Title | markdownify }}</h1>
     </header>
@@ -10,10 +13,10 @@
         {{- if .Params.back_to_top }}
         <p class="back-to-top">
             <a
-                class="back-to-top__link"
+                class="back-to-top__link site-tip"
                 href="#page-root"
                 aria-label="Back to top"
-                title="Back to top"
+                data-tip="back to top"
                 onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">⌃</a>
         </p>
         {{- end }}
@@ -41,7 +44,11 @@
     {{- /* Read-me (and any page with email_cta): mailto under the Winamp column. */ -}}
     {{- if and .Params.email_cta .Site.Params.about.email }}
     <p class="aside-email">
-        <a class="aside-email__link" href="mailto:{{ .Site.Params.about.email }}" aria-label="email me" title="email me">
+        <a
+            class="aside-email__link site-tip"
+            href="mailto:{{ .Site.Params.about.email }}"
+            aria-label="email me"
+            data-tip="email me">
             <span class="aside-email__icon" aria-hidden="true">
                 {{ partial "icon.html" (dict "name" "envelope") }}
                 <span class="aside-email__heart">♥</span>

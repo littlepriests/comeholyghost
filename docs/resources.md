@@ -9,8 +9,8 @@ The dev server is `hugo server -D --disableFastRender --navigateToChanged` from 
 What we tightened (keep the GeoCities vibe; don’t gut atmosphere):
 
 - **Images:** article masters as WebP where possible; `photo` / `figcaption` / `photo-grid` / writing-index serve Hugo-processed WebP display sizes from page resources. Prefer masters under ~300–500 KB (see `docs/posting.md`).
-- **Fonts / icons:** self-hosted Fira Mono WOFF2 (`static/fonts/fira-mono-*.woff2`, `static/css/site-fonts.css`). No Google Fonts / Font Awesome / Academicons CDN. Icons via `layouts/partials/icon.html`.
-- **CSS scope:** always-on chrome in theme `head.html` (player, reading, retro, stars, sprites, buttons). `article-media` / `blog-index` load from article + writing-index layouts (inside `#page-root` for SPA). Gallery / guestbook keep their own sheets.
+- **Fonts / icons:** self-hosted Fira Mono WOFF2 (`static/fonts/fira-mono-*.woff2`, `static/css/site-fonts.css`). Site vs article faces via `[params.fonts]` (see **Fonts** below). No Google Fonts / Font Awesome / Academicons CDN. Icons via `layouts/partials/icon.html`.
+- **CSS scope:** always-on chrome in theme `head.html` (player, reading, retro, stars, sprites, buttons). `article-reading` (blog posts), `article-media` / `blog-index` load from their layouts (inside `#page-root` for SPA). Gallery / guestbook keep their own sheets. Prefer site-owned sheets over editing Risotto core.
 - **Atmosphere JS:** bubble cursor self-hosted (`static/js/vendor/cursor-effects.esm.js` v1.0.18), homepage + desktop only. Stars: fewer on phone / `prefers-reduced-motion`; no scroll voiding on narrow viewports.
 - **npm:** project `.npmrc` → `registry.npmjs.org` only. Before any zip, confirm lockfile `resolved` URLs are all `registry.npmjs.org` (no private registry hosts).
 
@@ -68,6 +68,7 @@ Refresh strips from source sheets (fan-use test assets; Nintendo / game publishe
 - Kagura rows: `node scripts/slice-kagura.mjs` (needs `kagura-sheet.png`; each row → `kagura-walk`, `kagura-down`, `kagura-attack`)
 - Sango (TSR #13363 InuYasha: Fūun Emaki): `node scripts/slice-sango.mjs` → `sango-idle`, `sango-hurt` (impact pose only), `sango-boomerang` (flying Hiraikotsu spin), `sango-walk`, `sango-attack`
 - SkiFree (TSR #26926): `node scripts/slice-skifree.mjs` → `skifree-ski`, `skifree-yeti`, `skifree-crash` (original block only)
+- Grundo (TSR #186604, LonelyMarowak): `node scripts/slice-grundo.mjs` → `grundo-idle`, `grundo-kick` (orange row; dock pet)
 
 `pngjs` for the slicers lives under `scripts/node_modules` (`npm install pngjs --prefix scripts`).
 
@@ -83,11 +84,57 @@ Twinkling starfield is sitewide: `layouts/partials/stars.html` (outside `#page-r
 
 ## Music prompt (first homepage landing)
 
-On the first homepage view in a browser session (desktop / ≥45rem), one ASCII thought bubble sits by Misdreavus (“⋆｡˚ play music? ˚｡⋆” with **y** / **n**). Phone (≤44.99rem): cloud CTA is omitted — use the bottom player. Cloud + pink fill + CTA are one unit (`.music-prompt__bubble`); move with `--bubble-left` / `--bubble-top`. Grow ASCII+fill with `--cloud-scale` (panel/buttons stay fixed; `--dot-*` are scale-1 bases). Nudge ask + buttons with `--panel-nudge-x` / `--panel-nudge-y`. Pink fill is `.music-prompt__fill` (CSS radials). Trail dots: `--dot-mid-*` / `--dot-tip-*`. `--thought-bob` syncs to Misdreavus frame centroids in `home.js`. **y** → `window.sitePlayerPlay` then dismiss; **n** dismiss only. `sessionStorage` `home-music-prompt-seen` (not set on phone); retest `?replay-music=1`.
+On the first homepage view in a browser session (desktop / ≥45rem), one ASCII thought bubble sits by Misdreavus (“⋆｡˚ play music? ˚｡⋆” with **y** / **n**). Phone (≤44.99rem): cloud CTA is omitted — use the bottom player. Cloud + pink fill + CTA are one unit (`.music-prompt__bubble`); move with `--bubble-left` / `--bubble-top`. Grow ASCII+fill with `--cloud-scale` (panel/buttons stay fixed; `--dot-*` are scale-1 bases). Nudge ask + buttons with `--panel-nudge-x` / `--panel-nudge-y`. Pink fill is `.music-prompt__fill` (CSS radials). Trail dots: `--dot-mid-*` / `--dot-tip-*`. `--thought-bob` syncs to Misdreavus frame centroids in `home.js`. Invisible `.music-prompt__hits` halves cover the ASCII cloud (left = yes, right = no) so approximate clicks work; visible **y** / **n** still work. **y** → `window.sitePlayerPlay` then dismiss; **n** dismiss only. `sessionStorage` `home-music-prompt-seen` (not set on phone); retest `?replay-music=1`.
 
 ## Read-me email CTA
 
-`content/read-me.md` sets `email_cta = true`. The aside (under Winamp on desktop) shows a mailto link from `[params.about] email` in `hugo.toml` — envelope + ♥ icon only. Address is public on purpose; keep secrets out of `content/` / `hugo.toml` if you ever need a private inbox.
+`content/read-me.md` sets `email_cta = true`. The aside (under Winamp on desktop) shows a mailto link from `[params.about] email` in `hugo.toml` — envelope + ♥ icon only. Address is public on purpose; keep secrets out of `content/` / `hugo.toml` if you ever need a private inbox. Hover label uses `.site-tip` / `data-tip` (see **Hover tips**).
+
+## Aside meta (date / author / ToC)
+
+Article front matter in the right column (`.page__aside`) **scrolls with the page** — not sticky. Override lives in site-owned `static/css/reading.css` (`position: static` on `body:not(.home) .page__aside`), so Risotto’s theme `layout.css` sticky rule does not chase the viewport. Hide only the date line with front matter `hide_date = true` (keep `date` for sort order). ToC still needs `toc = true`.
+
+## Fonts (site vs blog articles)
+
+Two faces, both set in `hugo.toml` — no Google Fonts / company CDNs:
+
+```toml
+[params.fonts]
+site = "\"Fira Mono\", ui-monospace, monospace"
+article = "Georgia, \"Iowan Old Style\", \"Palatino Linotype\", Palatino, \"Times New Roman\", serif"
+# Optional self-hosted @font-face sheet for the article stack:
+# articleFontUrl = "css/article-font.css"
+```
+
+| Token | Where it applies | How to change |
+| --- | --- | --- |
+| `--font-site` | Body / chrome (home, guestbook, gallery, writing index, asides) | `[params.fonts] site` |
+| `--font-article` | `/blog/<slug>/` prose (`.content__header` + `.content__body`) | `[params.fonts] article` + optional `articleFontUrl` |
+
+`head.html` writes the CSS variables; `static/css/reading.css` applies `--font-site` on `body`. Blog posts also load `static/css/article-reading.css` (linked from `layouts/_default/single.html` when `.Section == "blog"`). **Ad-hoc article readability fixes** (line-height, measure, heading weight, code face) go in `article-reading.css` — leave Risotto `typography.css` alone unless you intentionally want a theme-wide change. Writing-index face stays on `.blog-index` in `static/css/blog-index.css` (still site mono by default).
+
+Self-host a new article face: drop WOFF2 under `static/fonts/`, add `@font-face` in e.g. `static/css/article-font.css`, set `articleFontUrl` and put that family first in `article`.
+
+## Hover tips (email + icons)
+
+Native `title=` tooltips sit under the cursor and fight the bubble cursor / Winamp stacking. Use instead:
+
+- Class `site-tip` + attribute `data-tip="label text"` on the control
+- `static/js/site-tips.js` draws a **fixed** `.site-tip-float` on `document.body` (`z-index: 10000`) so labels paint above Winamp, sprites, and images
+- Prefers above the control; flips below if that would clip off-screen (e.g. icon under the skin)
+
+Wired today: read-me envelope (`layouts/_default/single.html`), social icons (`layouts/partials/about.html`), optional back-to-top. Script is included from `baseof.html` (and mirror on gallery/guestbook if those shells are used). For any other asset hover label, add the same class/attr (keep `aria-label`; omit `title` so you do not get a double tip).
+
+## Writing-index thumbnails (`/blog/` cards)
+
+Tune preview size in two places (no stretch/crop — `object-fit: contain`):
+
+1. **Hugo Fit caps** — `layouts/partials/blog-entry.html` (`$previewMaxW` / `$previewMaxH`, default 960×720). Masters larger than the box are downscaled to WebP; smaller masters keep native pixel size inside the box.
+2. **CSS display caps** — `static/css/blog-index.css`:
+   - `.blog-entry__figure { max-width: … }` — how wide the card image may run in the column
+   - `.blog-entry__thumb > img { max-height: … }` — vertical cap (phone rules in the same file’s media query)
+
+Bump `blog-index.css?v=` in `layouts/blog/list.html` after CSS edits so SPA/cache picks them up. Lightbox still uses the larger Fit (`2400x2400`) full URL from the same partial.
 
 ## Footer SkiFree
 
@@ -345,7 +392,7 @@ Vajra-style feed (not a bare link list). Layout: `layouts/blog/list.html` + `lay
 | `title` | Linked heading |
 | `date` | Date line |
 | `summary` | Teaser under the thumb (fallback: `description` or `index_summary` only — never the article body) |
-| `index_image` | Page-resource filename (or `static/` path); rendered as a small thumb, never full-fold |
+| `index_image` | Page-resource filename (or `static/` path); natural size up to Fit/CSS caps (see **Writing-index thumbnails**) |
 | `index_caption` | Figcaption under the thumb (fallback: resource `title`) |
 
 Thumb click opens the existing article lightbox; title links into the post. Example: `content/blog/1126/index.md`.
@@ -390,6 +437,8 @@ or deleting the `image` line and keeping the rest of that corner's block. Deleti
 The player stays above the pictures. On a short window the skin can cover the corner it sits in.
 
 ## Player
+
+Playlist continuity: HTML `<audio>` is the only real transport (play / pause / skip / auto-next) and survives SPA navigations. Winamp is visual chrome only — no `initialTracks` / no `setTracksToPlay` handoff (those autoplayed on load and on every inner-page visit). On desktop inner pages, when the skin scrolls out of view an `IntersectionObserver` adds `site-player--docked`: the minimalist chrome is `position: fixed; top: 50%` (mid-viewport / scrollbar axis) and `placeDockedChrome()` centers it horizontally on the Winamp / `.page__aside` column (`transform: translate(-50%, -50%)`). Orange Grundo (`grundo-idle`) sits left of the controls; play / pause / stop / skip briefly plays `grundo-kick` then returns to idle. When the skin returns, the dock hides. Same buttons / same audio — reading scroll position is untouched. Mobile keeps the bottom simple bar.
 
 Two looks, one player. The homepage shows a simple icon bar (play/pause, stop, skip) in the footer dock beside Visitors — no outer player border, button borders stay. Long titles scroll right-to-left inside a fixed 4.75rem slot (`is-marquee` when the text overflows). Desktop inner pages show the Winamp skin in the right column, document-absolute at the top of the content body / aside so it scrolls with the page (not sticky). Closing Winamp (its own ×) swaps it for a ♡ that calls `webamp.reopen()` — playback is left alone. On viewports under `45rem`, non-home pages keep the same simple icon bar fixed bottom-right (no skin). Simple chrome has a subtle corner × that collapses it to a ♡ the same way. Homepage always opens on the minimalist chrome. On the homepage the icon player stays in simple mode while Webamp mounts off-screen, and CSS anchor positioning pins it to `.home-player-slot` beside Visitors (JS placement is the fallback). On first load of a desktop inner page the icon chrome stays hidden (`site-player--booting`) until the skin frame is ready. Webamp still boots once and stays mounted; `applyPlayerChrome()` swaps `site-player--simple` and `site-player--skin` from `body.home` and the mobile breakpoint. The icon buttons call the Webamp API when it is ready, and fall back to the HTML audio element before that. The player lives outside `#page-root`. Same-site link clicks swap `#page-root` and leave the player in place, so the track keeps playing. A new tab, an external link, or a page with no `#page-root` loads a fresh document and the music stops.
 

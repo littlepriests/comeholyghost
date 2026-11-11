@@ -43,7 +43,9 @@ content/blog/<slug>/
 
 ### Image size (masters)
 
-Prefer **WebP** (or compressed JPEG) under ~300–500 KB for article masters. Multi‑MB PNGs hurt first paint even when shortcodes serve Hugo-resized WebP thumbs — the original still ships in the repo/deploy. `photo` / `photo-grid` / `figcaption` / writing-index thumbs already emit processed WebP display sizes from page resources; keep the source file reasonable too.
+Prefer **WebP** (or compressed JPEG) under ~300–500 KB for article masters. Multi‑MB PNGs hurt first paint even when shortcodes serve Hugo-resized WebP thumbs — the original still ships in the repo/deploy. `photo` / `photo-grid` / `figcaption` / writing-index previews already emit processed WebP display sizes from page resources; keep the source file reasonable too.
+
+Writing-index (`/blog/`) preview: shows near-full size with `object-fit: contain` (no crop/stretch). Oversized masters are Fit-capped in `layouts/partials/blog-entry.html`; on-page max width/height live in `static/css/blog-index.css`. Adjust those when a card looks too big or too small — details in `docs/resources.md`.
 
 ## Front matter
 
@@ -54,8 +56,8 @@ TOML between `+++` fences (YAML `---` also works). Fields this site cares about:
 | `title` | yes | Article `<h1>` and writing-index link |
 | `date` | yes | Sort order + date line on `/blog/` |
 | `summary` | strongly recommended | Teaser on `/blog/` under the thumb. **Not** the article body — if omitted, the index card has no teaser (body stubs like `soon!` will not leak onto `/blog/`) |
-| `index_image` | strongly recommended | Filename (or `static/` path) for the writing-index thumb |
-| `index_caption` | no | Caption under that thumb (falls back to resource `title`) |
+| `index_image` | strongly recommended | Filename (or `static/` path) for the writing-index image (full-size up to Fit/CSS caps — see `docs/resources.md` **Writing-index thumbnails**) |
+| `index_caption` | no | Caption under that image (falls back to resource `title`) |
 | `description` | no | Fallback teaser if `summary` is empty; also used in some asides |
 | `index_summary` | no | Extra fallback teaser name |
 | `draft` | no | `true` — not built on Netlify / normal `hugo` (only with `hugo server -D` or `-D` builds). Soft “hide from the site.” |

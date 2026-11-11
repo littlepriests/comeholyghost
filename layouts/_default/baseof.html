@@ -5,7 +5,7 @@
         {{- partial "head.html" . -}}
     </head>
 
-    <body>
+    <body class="{{ with .Section }}section-{{ . }} {{ end }}kind-{{ .Kind }}">
         <div id="page-root">
         <div class="page">
 
@@ -43,6 +43,7 @@
         {{ partial "stars.html" . }}
         {{ partial "backdrop.html" . }}
         {{ partial "player.html" . }}
+        <script src="{{ "js/site-tips.js" | relURL }}?v=1"></script>
         <script src="{{ "js/article-media.js" | relURL }}?v=1"></script>
     </body>
 
