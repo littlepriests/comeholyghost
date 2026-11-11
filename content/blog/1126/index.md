@@ -1,4 +1,5 @@
 +++
+draft = true
 title = "stl → smf"
 date = 2026-11-10
 summary = "a first look at amaral's gold weavings at the gallery — notes from the floor, light catching the cloth."
