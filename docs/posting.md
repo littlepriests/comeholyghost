@@ -316,7 +316,7 @@ Local:
 hugo server -D --disableFastRender --navigateToChanged
 ```
 
-Ship when you ask for a zip / proj-zip update (see `docs/resources.md` and the personal-site skill) — this tree is not a public git deploy remote by default.
+Ship with `git push personal main` (see the personal-site skill). Optional zip / proj-zip is backup only.
 
 ## Related
 

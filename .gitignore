@@ -17,6 +17,22 @@ vale
 vale.exe
 vale-rules/
 
+# Secrets / credentials (never commit; keep Docker/work auth out)
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.pfx
+.netrc
+.npmrc.local
+.docker/
+Dockerfile
+docker-compose.yml
+docker-compose.yaml
+docker-compose.*.yml
+docker-compose.*.yaml
+
 # OS / editor
 .DS_Store
 Thumbs.db
