@@ -1,15 +1,20 @@
-/* Floating data-tip labels above Winamp / sprites / images (escapes stacking). */
+/* Floating data-tip labels — follow the pointer, above Winamp / sprites / images. */
 (function () {
     if (window.__siteTips) return;
     window.__siteTips = true;
 
-    var GAP = 8;
+    // Sit ahead of the cursor (LTR): right + slightly above so the tip isn't under it.
+    var OFFSET_X = 16;
+    var OFFSET_Y = -18;
+
     var tip = document.createElement("div");
     tip.className = "site-tip-float";
     tip.setAttribute("aria-hidden", "true");
     document.body.appendChild(tip);
 
     var active = null;
+    var lastX = 0;
+    var lastY = 0;
 
     function hide() {
         active = null;
@@ -18,28 +23,27 @@
         tip.style.transform = "translate(-9999px, -9999px)";
     }
 
-    function place(el) {
-        var text = el.getAttribute("data-tip");
+    function placeAt(clientX, clientY) {
+        if (!active) return;
+        var text = active.getAttribute("data-tip");
         if (!text) {
             hide();
             return;
         }
-        active = el;
         tip.textContent = text;
         tip.classList.add("is-open");
-        // Measure after paint so width/height are real.
         tip.style.transform = "translate(0px, 0px)";
-        var r = el.getBoundingClientRect();
         var tw = tip.offsetWidth || 0;
         var th = tip.offsetHeight || 0;
-        var left = r.left + r.width / 2 - tw / 2;
-        var top = r.top - th - GAP;
-        // Prefer above the control; flip below if that would clip under the viewport top
-        // (also keeps labels clear of Winamp when the control sits just under the skin).
-        if (top < 4) top = r.bottom + GAP;
+        var left = clientX + OFFSET_X;
+        var top = clientY + OFFSET_Y - th;
+        // Flip below / left if we'd clip the viewport.
+        if (top < 4) top = clientY - OFFSET_Y;
+        if (left + tw > window.innerWidth - 4) left = clientX - tw - OFFSET_X;
         left = Math.max(4, Math.min(left, window.innerWidth - tw - 4));
         top = Math.max(4, Math.min(top, window.innerHeight - th - 4));
-        tip.style.transform = "translate(" + Math.round(left) + "px, " + Math.round(top) + "px)";
+        tip.style.transform =
+            "translate(" + Math.round(left) + "px, " + Math.round(top) + "px)";
     }
 
     function fromEvent(event) {
@@ -51,7 +55,18 @@
 
     document.addEventListener("pointerover", function (event) {
         var el = fromEvent(event);
-        if (el) place(el);
+        if (!el) return;
+        active = el;
+        lastX = event.clientX;
+        lastY = event.clientY;
+        placeAt(lastX, lastY);
+    });
+
+    document.addEventListener("pointermove", function (event) {
+        if (!active) return;
+        lastX = event.clientX;
+        lastY = event.clientY;
+        placeAt(lastX, lastY);
     });
 
     document.addEventListener("pointerout", function (event) {
@@ -66,7 +81,10 @@
 
     document.addEventListener("focusin", function (event) {
         var el = fromEvent(event);
-        if (el) place(el);
+        if (!el) return;
+        active = el;
+        var r = el.getBoundingClientRect();
+        placeAt(r.left + r.width / 2, r.top);
     });
 
     document.addEventListener("focusout", function (event) {

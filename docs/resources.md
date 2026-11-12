@@ -115,15 +115,20 @@ article = "Georgia, \"Iowan Old Style\", \"Palatino Linotype\", Palatino, \"Time
 
 Self-host a new article face: drop WOFF2 under `static/fonts/`, add `@font-face` in e.g. `static/css/article-font.css`, set `articleFontUrl` and put that family first in `article`.
 
-## Hover tips (email + icons)
+## Photobook veil (`/gallery/`)
+
+Gallery-only. One SunnyNeo Faerie Krawk GIF (`static/images/glitters/faerie-krawk.gif`) + soft dim + CSS glow/♡. Thumbs stay `loading="lazy"`. Veil stays hidden unless the first thumbs are still unfinished after ~320ms (warm cache → no flash), then lifts ~0.9–2.2s. Markup/JS in `layouts/_default/gallery.html` + `static/js/gallery-veil.js` (inside `#page-root` for SPA). `?veil` freezes it open until you click (preview). Credit SunnyNeo in `content/gallery.md`.
+
+## Hover tips (`data/tips.yaml`)
 
 Native `title=` tooltips sit under the cursor and fight the bubble cursor / Winamp stacking. Use instead:
 
-- Class `site-tip` + attribute `data-tip="label text"` on the control
-- `static/js/site-tips.js` draws a **fixed** `.site-tip-float` on `document.body` (`z-index: 10000`) so labels paint above Winamp, sprites, and images
-- Prefers above the control; flips below if that would clip off-screen (e.g. icon under the skin)
+- **Decorative chrome** (sprites, pets, player, Winamp, logo, email chip): edit **`data/tips.yaml`** keys (`grundo`, `sango`, `kagura`, `winamp`, `player_play`, …). Optional `social:` overrides by hugo.toml link title.
+- **Article photos**: case-by-case on the shortcode — `tip="…"` (and `alt=` / `caption=` as usual), not the YAML map.
+- Templates resolve YAML via `layouts/partials/tip-text.html` → `data-tip` + class `site-tip`
+- `static/js/site-tips.js` draws a **fixed** `.site-tip-float` that **follows the pointer** (ahead of the cursor; `z-index: 13000`)
 
-Wired today: read-me envelope (`layouts/_default/single.html`), social icons (`layouts/partials/about.html`), optional back-to-top. Script is included from `baseof.html` (and mirror on gallery/guestbook if those shells are used). For any other asset hover label, add the same class/attr (keep `aria-label`; omit `title` so you do not get a double tip).
+Script is included from `baseof.html` (and gallery/guestbook shells). Keep `aria-label`; omit native `title` so you do not get a double tip.
 
 ## Writing-index thumbnails (`/blog/` cards)
 

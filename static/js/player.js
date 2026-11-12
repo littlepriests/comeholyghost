@@ -238,6 +238,7 @@
             toggle.classList.toggle("is-playing", playing);
             toggle.setAttribute("aria-label", playing ? "Pause" : "Play");
         }
+        syncWebampHighlight();
         syncDockPet();
         requestAnimationFrame(syncTitleMarquee);
     }
@@ -258,6 +259,28 @@
         try {
             if (typeof w.stop === "function") w.stop();
         } catch (error2) {}
+    }
+
+    // Keep Winamp's white playlist highlight on the same row as HTML <audio>.
+    // Skin stays muted (pause → setCurrentTrack → silence); never setTracksToPlay.
+    var webampSyncedIndex = -1;
+    function syncWebampHighlight() {
+        var w = window.__webamp;
+        if (!w || typeof w.setCurrentTrack !== "function") return;
+        if (!tracks.length) return;
+        if (webampSyncedIndex === index) return;
+        webampSyncedIndex = index;
+        try {
+            if (typeof w.pause === "function") w.pause();
+            w.setCurrentTrack(index);
+        } catch (error) {
+            webampSyncedIndex = -1;
+            return;
+        }
+        silenceWebamp();
+        [40, 120].forEach(function (ms) {
+            window.setTimeout(silenceWebamp, ms);
+        });
     }
 
     // Tiny valid WAV so Webamp can list titles without fetching real song URLs.
@@ -649,6 +672,8 @@
                 }
                 return webamp.renderInto(host).then(function () {
                     silenceWebamp();
+                    webampSyncedIndex = -1;
+                    syncWebampHighlight();
                     [50, 200, 500].forEach(function (ms) {
                         window.setTimeout(silenceWebamp, ms);
                     });

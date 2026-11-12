@@ -2,11 +2,26 @@
 <html lang="{{- site.Language.Lang -}}">
 <head>
     {{- partial "head.html" . -}}
-    <link rel="stylesheet" href="{{ "css/gallery.css" | relURL }}?v=5">
+    <link rel="stylesheet" href="{{ "css/gallery.css" | relURL }}?v=6">
     <link rel="stylesheet" href="{{ "css/article-media.css" | relURL }}?v=6">
 </head>
 <body class="gallery-page">
     <div id="page-root">
+    {{- /* Inside page-root so SPA navigations to /gallery/ bring the veil. */ -}}
+    <div class="gallery-veil" id="gallery-veil" aria-hidden="true">
+        <div class="gallery-veil__dim"></div>
+        <div class="gallery-veil__glow" aria-hidden="true"></div>
+        <div class="gallery-veil__stage">
+            <div class="gallery-veil__hearts" aria-hidden="true"></div>
+            <img
+                class="gallery-veil__krawk"
+                src="{{ "images/glitters/faerie-krawk.gif" | relURL }}"
+                alt=""
+                width="150"
+                height="150"
+                decoding="async">
+        </div>
+    </div>
     <div class="gallery-wrap">
         <header class="gallery-header">
             {{- partial "header.html" . -}}
@@ -57,11 +72,12 @@
             {{ end }}
         </main>
     </div>
+    <script src="{{ "js/gallery-veil.js" | relURL }}?v=5"></script>
     </div>
     {{ partial "stars.html" . }}
     {{ partial "backdrop.html" . }}
     {{ partial "player.html" . }}
-    <script src="{{ "js/site-tips.js" | relURL }}?v=1"></script>
+    <script src="{{ "js/site-tips.js" | relURL }}?v=2"></script>
     <script src="{{ "js/article-media.js" | relURL }}?v=2"></script>
 </body>
 </html>

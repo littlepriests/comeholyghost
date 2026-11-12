@@ -2,7 +2,7 @@
   Medium centered article photo; click opens full size.
 
   {{< photo src="photo.png" caption="Hello" >}}
-  {{< photo src="photo.png" alt="Hello" >}}Caption{{< /photo >}}
+  {{< photo src="photo.png" alt="Hello" tip="fun hover" >}}Caption{{< /photo >}}
 
   Page resources: display thumb is Fit 1400x webp q75; lightbox uses Fit 2400x webp q80
   (or original if already smaller / not processable).
@@ -12,6 +12,7 @@
   {{- errorf "photo shortcode on %q: missing src" .Page.Path -}}
 {{- end -}}
 {{- $alt := .Get "alt" | default "" -}}
+{{- $tip := .Get "tip" | default "" -}}
 {{- $caption := .Get "caption" | default (strings.TrimSpace .Inner) -}}
 {{- $img := false -}}
 {{- with .Page.Resources.GetMatch $src -}}
@@ -32,7 +33,7 @@
   {{- $alt = $caption | plainify -}}
 {{- end -}}
 <figure class="article-photo">
-  <button type="button" class="article-photo__thumb" data-article-photo data-full="{{ $full }}" aria-label="{{ if $alt }}View larger: {{ $alt }}{{ else }}View larger image{{ end }}">
+  <button type="button" class="article-photo__thumb{{ with $tip }} site-tip{{ end }}" data-article-photo data-full="{{ $full }}"{{ with $tip }} data-tip="{{ . }}"{{ end }} aria-label="{{ if $alt }}View larger: {{ $alt }}{{ else }}View larger image{{ end }}">
     <img src="{{ $thumb }}" alt="{{ $alt }}" loading="lazy" decoding="async">
   </button>
   {{- with $caption }}

@@ -100,3 +100,136 @@
 .gallery-empty {
     color: var(--muted);
 }
+
+/* Light photobook veil — one SunnyNeo glitter + CSS ♡ (gallery-only). */
+.gallery-veil {
+    position: fixed;
+    inset: 0;
+    z-index: 11000;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.28s ease;
+}
+
+.gallery-veil.is-open {
+    opacity: 1;
+}
+
+.gallery-veil.is-gone {
+    opacity: 0;
+}
+
+.gallery-veil__dim {
+    position: absolute;
+    inset: 0;
+    background: rgb(18 12 28 / 0.42);
+}
+
+.gallery-veil__glow {
+    position: absolute;
+    width: min(18rem, 70vw);
+    height: min(18rem, 70vw);
+    border-radius: 50%;
+    background:
+        radial-gradient(
+            circle,
+            rgb(255 120 180 / 0.28) 0%,
+            rgb(120 60 180 / 0.16) 42%,
+            transparent 70%
+        );
+    filter: blur(2px);
+    animation: gallery-veil-glow 1.6s ease-in-out infinite alternate;
+}
+
+.gallery-veil__stage {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 10rem;
+    height: 10rem;
+}
+
+.gallery-veil__krawk {
+    position: relative;
+    z-index: 2;
+    width: 150px;
+    height: 150px;
+    image-rendering: auto;
+    filter: drop-shadow(0 0 10px rgb(255 140 200 / 0.45));
+}
+
+.gallery-veil__hearts {
+    position: absolute;
+    inset: -1.25rem;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.gallery-veil__heart {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin: 0;
+    font-family: var(--font-monospace, ui-monospace, "Cascadia Mono", "Fira Mono", monospace);
+    font-size: calc(0.9rem * var(--scale, 1));
+    line-height: 1;
+    color: #ff2a4a;
+    text-shadow:
+        0 0 4px #ff6b81,
+        0 0 10px #ff1744,
+        0 0 16px rgb(255 20 60 / 0.55);
+    --angle: calc((360deg / var(--n, 7)) * var(--i, 0));
+    --radius: 3.6rem;
+    transform:
+        translate(-50%, -50%)
+        rotate(var(--angle))
+        translate(var(--radius))
+        rotate(calc(-1 * var(--angle)))
+        scale(var(--scale, 1));
+    animation: gallery-veil-heart 1.35s ease-in-out var(--delay, 0s) infinite;
+}
+
+.gallery-veil__heart.is-bright {
+    color: #ff4d6d;
+    text-shadow:
+        0 0 5px #fff,
+        0 0 10px #ff2a4a,
+        0 0 18px #ff1744;
+}
+
+@keyframes gallery-veil-glow {
+    from {
+        opacity: 0.75;
+        transform: scale(0.94);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1.06);
+    }
+}
+
+@keyframes gallery-veil-heart {
+    0%,
+    100% {
+        opacity: 0.35;
+        filter: brightness(0.95);
+    }
+    50% {
+        opacity: 1;
+        filter: brightness(1.25);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .gallery-veil__glow,
+    .gallery-veil__heart {
+        animation: none;
+    }
+
+    .gallery-veil__heart {
+        opacity: 0.7;
+    }
+}

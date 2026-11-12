@@ -8,7 +8,8 @@
   {{- end -}}
 {{- end -}}
 {{- with $yeti }}
-<div class="page-footer__skifree" aria-hidden="true">
+{{- $yetiTip := partial "tip-text.html" (dict "key" "skifree" "fallback" "") -}}
+<div class="page-footer__skifree{{ with $yetiTip }} site-tip{{ end }}"{{ with $yetiTip }} data-tip="{{ . }}"{{ end }} aria-hidden="true">
   {{- partial "sprite.html" (dict
     "src" .src
     "frameWidth" .frameWidth
