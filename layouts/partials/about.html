@@ -15,7 +15,8 @@
     {{- $name := "" -}}
     {{- with $item.icon }}{{ $name = partial "icon-name.html" . }}{{ end -}}
     <li>
-        <a class="site-tip" href="{{ $item.url }}" rel="me" aria-label="{{ $item.title }}" data-tip="{{ $item.title }}">{{- with $name }}{{ partial "icon.html" (dict "name" .) }}{{ else }}{{ $item.title }}{{ end -}}</a>&nbsp;
+        {{- $tip := partial "tip-text.html" (dict "social" $item.title "fallback" $item.title) -}}
+        <a class="site-tip" href="{{ $item.url }}" rel="me" aria-label="{{ $tip }}" data-tip="{{ $tip }}">{{- with $name }}{{ partial "icon.html" (dict "name" .) }}{{ else }}{{ $item.title }}{{ end -}}</a>&nbsp;
     </li>
     {{ end }}
 </ul>

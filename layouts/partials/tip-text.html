@@ -1,0 +1,19 @@
+{{- /*
+  Resolve hover tip copy from data/tips.yaml (decorative chrome).
+
+  {{ partial "tip-text.html" (dict "key" "grundo" "fallback" "") }}
+  {{ partial "tip-text.html" (dict "social" $item.title "fallback" $item.title) }}
+
+  Photos: pass tip= on the shortcode — not this file.
+*/ -}}
+{{- $text := .fallback | default "" -}}
+{{- with site.Data.tips -}}
+  {{- if $.social -}}
+    {{- with .social -}}
+      {{- with index . $.social -}}{{- $text = . -}}{{- end -}}
+    {{- end -}}
+  {{- else if $.key -}}
+    {{- with index . $.key -}}{{- $text = . -}}{{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- $text -}}

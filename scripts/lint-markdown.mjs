@@ -169,6 +169,19 @@ function isNoWrapLine(line) {
   if (/^</.test(t) || /<\/?[a-zA-Z][^>]*>/.test(t)) return true;
   // Braille / block ASCII art lines (U+2800–U+28FF)
   if (/^[\u2800-\u28FF\s]+$/.test(t)) return true;
+  // Never reflow markdown links / images / bare URLs (wrap ate footnotes once).
+  if (
+    /\]\([^)]*\)?/.test(t)
+    || /\[[^\]]*$/.test(t)
+    || /!\[[^\]]*\]?/.test(t)
+    || /https?:\/\//i.test(t)
+    || /<https?:\/\//i.test(t)
+    || /\[\^[^\]]+\]/.test(t)
+  ) {
+    return true;
+  }
+  // HTML comments / Hugo alternate shortcodes
+  if (/^<!--/.test(t) || /^\{\{%/.test(t)) return true;
   // Bare resource filenames inside photo-grid bodies
   if (/^[\w./@+-]+\.(webp|png|jpe?g|gif|avif|svg)$/i.test(t)) return true;
   return false;

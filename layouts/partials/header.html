@@ -36,7 +36,8 @@
     {{- end -}}
     <h1 class="page__logo{{ with $logoSprite }} page__logo--sprite{{ end }}">
       {{ if $logoSprite }}
-      <a href="{{ "/" | relURL }}" class="page__logo-inner page__logo-inner--sprite" aria-label="Home">
+      {{- $logoTip := partial "tip-text.html" (dict "key" "logo" "fallback" "home") -}}
+      <a href="{{ "/" | relURL }}" class="page__logo-inner page__logo-inner--sprite site-tip" aria-label="{{ $logoTip }}" data-tip="{{ $logoTip }}">
         {{- partial "sprite.html" (merge $logoSprite (dict "scale" "")) -}}
       </a>
       {{ else }}

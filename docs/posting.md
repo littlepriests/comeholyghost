@@ -91,7 +91,7 @@ First run may `vale sync` package styles. Flags: `--vale-only`, `--density-only`
 
 ### Markdown structure (`corn md`)
 
-`markdownlint-cli2` (config: `.markdownlint-cli2.yaml`) plus an 80-column prose wrap that leaves Hugo shortcodes, front matter, fences, tables, lists, and headings alone. **Only `content/`.** Style/spelling stay with `corn edit`.
+`markdownlint-cli2` (config: `.markdownlint-cli2.yaml`) plus an 80-column prose wrap that leaves Hugo shortcodes, front matter, fences, tables, lists, headings, HTML/`<pre>`/braille ASCII, and markdown links/URLs alone. **Only `content/`.** Style/spelling stay with `corn edit`. Prefer `--wrap-only` or a dry-run before `--fix` on link-heavy pages (footnotes).
 
 Whitespace / lists (fixable with `--fix`): unordered markers are `-`, nested lists indent with 2 spaces (no tabs), strip stray trailing spaces (exactly two spaces still OK for a hard break), collapse extra blank lines, one space after list markers.
 
@@ -232,7 +232,7 @@ Self-closing form is fine when there is no inner body: `{{< photo src="x.png" />
 
 ```
 {{< photo src="weaving-infinite-gold.png" caption="Amaral Gold" />}}
-{{< photo src="shot.png" alt="Alt text" >}}Caption with **markdown**{{< /photo >}}
+{{< photo src="shot.png" alt="Alt text" tip="fun hover" >}}Caption with **markdown**{{< /photo >}}
 ```
 
 | Param | Notes |
