@@ -1,11 +1,34 @@
 <!DOCTYPE html>
 <html lang="{{- site.Language.Lang -}}">
+{{- /* Banner pick in Hugo so first paint is already the chosen file (no JS src swap). */ -}}
+{{- $bannerFallback := .Site.Params.home.banner | default "images/banner.svg" -}}
+{{- $bannerDir := .Site.Params.home.bannerDir | default "" -}}
+{{- $bannerAlt := .Site.Params.home.bannerAlt | default "Site banner" -}}
+{{- $bannerPool := slice -}}
+{{- if $bannerDir -}}
+    {{- $dirPath := printf "static/%s" (strings.TrimPrefix "/" $bannerDir) -}}
+    {{- if fileExists $dirPath -}}
+        {{- range readDir $dirPath -}}
+            {{- $n := .Name | lower -}}
+            {{- if or (strings.HasSuffix $n ".png") (strings.HasSuffix $n ".jpg") (strings.HasSuffix $n ".jpeg") (strings.HasSuffix $n ".webp") (strings.HasSuffix $n ".gif") -}}
+                {{- $bannerPool = $bannerPool | append ((path.Join $bannerDir .Name) | relURL) -}}
+            {{- end -}}
+        {{- end -}}
+    {{- end -}}
+{{- end -}}
+{{- if eq (len $bannerPool) 0 -}}
+    {{- $bannerPool = $bannerPool | append ($bannerFallback | relURL) -}}
+{{- end -}}
+{{- $bannerPool = shuffle $bannerPool -}}
+{{- $bannerSrc := index $bannerPool 0 -}}
 <head>
     {{- partial "head.html" . -}}
     {{ $home := resources.Get "css/home.css" | minify | fingerprint }}
     <link rel="stylesheet" href="{{ $home.RelPermalink }}" integrity="{{ $home.Data.Integrity }}">
+    <link rel="stylesheet" href="{{ "css/retro.css" | relURL }}?v=13">
+    <link rel="preload" as="image" href="{{ $bannerSrc }}" fetchpriority="high">
     {{- with .Site.Params.home.titleFontUrl }}
-    <link rel="preload" href="{{ "fonts/DotMatrixNarrow.ttf" | relURL }}" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" href="{{ "fonts/DotMatrixNarrow.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="{{ . | relURL }}">
     {{- end }}
     {{- $homeTitle := .Site.Params.home -}}
@@ -46,28 +69,16 @@
 jgs   `'-..._____.-`</pre>
         </aside>
     <div class="home-page">
-        {{- /* Banner pool from bannerDir (under static/); JS picks one on each page load. */ -}}
-        {{- $banner := .Site.Params.home.banner | default "images/banner.svg" -}}
-        {{- $bannerDir := .Site.Params.home.bannerDir | default "" -}}
-        {{- $bannerAlt := .Site.Params.home.bannerAlt | default "Site banner" -}}
-        {{- $pool := slice -}}
-        {{- if $bannerDir -}}
-            {{- $dirPath := printf "static/%s" (strings.TrimPrefix "/" $bannerDir) -}}
-            {{- if fileExists $dirPath -}}
-                {{- range readDir $dirPath -}}
-                    {{- $n := .Name | lower -}}
-                    {{- if or (strings.HasSuffix $n ".png") (strings.HasSuffix $n ".jpg") (strings.HasSuffix $n ".jpeg") (strings.HasSuffix $n ".webp") (strings.HasSuffix $n ".gif") -}}
-                        {{- $pool = $pool | append ((path.Join $bannerDir .Name) | relURL) -}}
-                    {{- end -}}
-                {{- end -}}
-            {{- end -}}
-        {{- end -}}
-        {{- if eq (len $pool) 0 -}}
-            {{- $pool = $pool | append ($banner | relURL) -}}
-        {{- end -}}
-        <div class="home-banner" data-banner-pool="{{ delimit $pool "," }}" data-banner-alt="{{ $bannerAlt }}">
-            {{- $first := index $pool 0 -}}
-            <img src="{{ $first }}" alt="{{ $bannerAlt }}" data-home-banner>
+        {{- /* Chosen above in <head> (shuffle + preload). Decode-gated reveal is home.js. */ -}}
+        <div class="home-banner is-pending">
+            <img
+                src="{{ $bannerSrc }}"
+                alt="{{ $bannerAlt }}"
+                width="1200"
+                height="280"
+                fetchpriority="high"
+                decoding="async"
+                data-home-banner>
         </div>
 
         {{- $line1 := .Site.Params.home.displayTitle | default .Site.Title -}}
@@ -180,7 +191,7 @@ jgs   `'-..._____.-`</pre>
         </footer>
     </div>
     {{- partial "home-clouds.html" . -}}
-    <script src="{{ "js/home.js" | relURL }}?v=47"></script>
+    <script src="{{ "js/home.js" | relURL }}?v=48"></script>
     </div>
     {{ partial "stars.html" . }}
     {{ partial "backdrop.html" . }}

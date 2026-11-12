@@ -196,8 +196,10 @@ body.home .ascii-angel__cta-art {
 .home-banner {
     position: relative;
     margin-bottom: 0;
-    min-height: 8rem;
+    width: 100%;
     max-width: 100%;
+    /* Shared banner display size — reserve space before decode. */
+    aspect-ratio: 1200 / 280;
     overflow: hidden;
     /* Frame / sparkle come from static/css/retro.css */
 }
@@ -210,9 +212,10 @@ body.home .ascii-angel__cta-art {
     display: block;
     width: 100%;
     max-width: 100%;
-    height: auto;
-    max-height: 280px;
+    height: 100%;
+    max-height: none;
     object-fit: cover;
+    object-position: center;
     opacity: 1;
     transition: opacity 0.2s ease;
 }
@@ -1619,12 +1622,12 @@ body.home .music-prompt__btn[data-music-no]:focus-visible {
 
     .home-banner {
         max-width: 100%;
-        min-height: 5.5rem;
+        /* Keep 1200/280 box; don’t fight aspect-ratio with a hard max-height. */
     }
 
     .home-banner img {
-        max-height: 9.5rem;
         width: 100%;
+        height: 100%;
     }
 
     .home-site-title {

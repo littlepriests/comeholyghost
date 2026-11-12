@@ -1,0 +1,46 @@
+extends: capitalization
+message: "prefer lowercase here ('%s') — house style is lowercase, +/@, and light chatspeak."
+link: ""
+level: suggestion
+# Body sentences (your posts start lowercase: "where is the beauty!")
+scope: sentence
+match: $lower
+# How many tokens must already be lowercase for the sentence to pass.
+threshold: 0.9
+# capitalize's bare `replace` leaves Suggestions empty on $lower (vale 3.23);
+# `edit`/`lower` fills the quick-fix / corn edit --review suggestion.
+action:
+  name: edit
+  params:
+    - lower
+exceptions:
+  # chatspeak / internet shorthand (any casing)
+  - '(?i)tl;dr'
+  - '(?i)tldr'
+  - '(?i)ppl'
+  - '(?i)idk'
+  - '(?i)imo'
+  - '(?i)imho'
+  - '(?i)fwiw'
+  - '(?i)tbh'
+  - '(?i)ngl'
+  - '(?i)lol'
+  - '(?i)lmao'
+  - '(?i)omg'
+  - '(?i)btw'
+  - '(?i)aka'
+  - '(?i)diy'
+  - '(?i)asap'
+  - '(?i)faq'
+  - '(?i)ok'
+  - '(?i)okay'
+  - '(?i)sry'
+  # +tags and @handles stay as written
+  - '\+\S+'
+  - '@\S+'
+  # urls / emails
+  - 'https?://\S+'
+  - '\S+@\S+\.\S+'
+  # light proper-noun escapes when you really need them (add more as needed)
+  - 'I'
+  - 'OK'

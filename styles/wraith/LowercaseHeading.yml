@@ -1,0 +1,39 @@
+extends: capitalization
+message: "prefer lowercase heading ('%s') — house style is lowercase, +/@, and light chatspeak."
+level: suggestion
+scope: heading
+match: $lower
+threshold: 0.9
+# capitalize's bare `replace` leaves Suggestions empty on $lower (vale 3.23);
+# `edit`/`lower` fills the quick-fix / corn edit --review suggestion.
+action:
+  name: edit
+  params:
+    - lower
+exceptions:
+  - '(?i)tl;dr'
+  - '(?i)tldr'
+  - '(?i)ppl'
+  - '(?i)idk'
+  - '(?i)imo'
+  - '(?i)imho'
+  - '(?i)fwiw'
+  - '(?i)tbh'
+  - '(?i)ngl'
+  - '(?i)lol'
+  - '(?i)lmao'
+  - '(?i)omg'
+  - '(?i)btw'
+  - '(?i)aka'
+  - '(?i)diy'
+  - '(?i)asap'
+  - '(?i)faq'
+  - '(?i)ok'
+  - '(?i)okay'
+  - '(?i)sry'
+  - '\+\S+'
+  - '@\S+'
+  - 'https?://\S+'
+  - '\S+@\S+\.\S+'
+  - 'I'
+  - 'OK'

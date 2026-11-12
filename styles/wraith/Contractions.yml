@@ -1,0 +1,14 @@
+extends: substitution
+message: "Use '%s' instead of '%s'."
+level: warning
+ignorecase: true
+action:
+  name: replace
+swap:
+  do not: don't
+  does not: doesn't
+  did not: didn't
+  is not: isn't
+  are not: aren't
+  cannot: can't
+  will not: won't

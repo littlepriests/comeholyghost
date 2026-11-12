@@ -36,37 +36,32 @@
         window.addEventListener("load", fitHomeDock);
     }
 
-    // Pick a random homepage banner from the toml-configured folder pool.
-    // Keep the frame pending until the chosen image is decoded so the src swap
-    // does not flash the Hugo-default first pool entry.
-    var bannerHost = document.querySelector(".home-banner[data-banner-pool]");
-    var bannerImg = document.querySelector("[data-home-banner]");
-    if (bannerHost && bannerImg) {
+    // Banner URL is chosen in Hugo (shuffle + preload). Hold .is-pending until
+    // decode so cold paint and SPA home returns do not flash an empty/half frame.
+    function revealHomeBanner() {
+        var bannerHost = document.querySelector(".home-banner");
+        var bannerImg = document.querySelector("[data-home-banner]");
+        if (!bannerHost || !bannerImg) return;
         bannerHost.classList.add("is-pending");
-        var pool = (bannerHost.getAttribute("data-banner-pool") || "")
-            .split(",")
-            .map(function (s) {
-                return s.trim();
-            })
-            .filter(Boolean);
-        if (pool.length > 1) {
-            var pick = pool[Math.floor(Math.random() * pool.length)];
-            if (pick && pick !== bannerImg.getAttribute("src")) {
-                bannerImg.setAttribute("src", pick);
-            }
-        }
-        var alt = bannerHost.getAttribute("data-banner-alt");
-        if (alt) bannerImg.setAttribute("alt", alt);
-        function revealBanner() {
+        function reveal() {
             bannerHost.classList.remove("is-pending");
         }
+        function afterReady() {
+            if (typeof bannerImg.decode === "function") {
+                bannerImg.decode().then(reveal).catch(reveal);
+            } else {
+                reveal();
+            }
+        }
         if (bannerImg.complete && bannerImg.naturalWidth) {
-            revealBanner();
+            afterReady();
         } else {
-            bannerImg.addEventListener("load", revealBanner, { once: true });
-            bannerImg.addEventListener("error", revealBanner, { once: true });
+            bannerImg.addEventListener("load", afterReady, { once: true });
+            bannerImg.addEventListener("error", reveal, { once: true });
         }
     }
+    revealHomeBanner();
+    window.revealHomeBanner = revealHomeBanner;
 
     // Sit the moon beside the content body, midway between Misdreavus and the ASCII angel.
     var moonCol = document.querySelector(".home-moon-col");

@@ -9,8 +9,12 @@
 # Netlify function deps
 /node_modules/
 
-# Vale (local lint packs / binary — keep out of git and proj-zip)
-Styles/
+# Vale binary + sync cache (reinstall Vale, then `vale sync` / `corn edit`).
+# House rules live in styles/wraith/ and DO ship. Do not ignore that folder.
+# (Old `Styles/` entry matched styles/ on Windows and hid wraith.)
+styles/*
+!styles/wraith/
+!styles/wraith/**
 .vale.ini
 .vale/
 vale

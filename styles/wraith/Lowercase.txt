@@ -1,0 +1,13 @@
+Lowercase house style (Vale)
+
+  styles/wraith/Lowercase.yml         → sentence scope ($lower)
+  styles/wraith/LowercaseHeading.yml  → heading scope ($lower)
+
+Flags Title Case / Capitalized prose. Allows chatspeak (tl;dr, ppl, …),
++tags, @handles, and URLs. Add more escapes under `exceptions:` in both
+YAMLs (or Voices vocab) when a proper noun must stay capped.
+
+Both rules use action edit/lower so corn edit --review and vale-ls can
+apply a lowercase fix. Contractions live in Contractions.yml (replace).
+
+BeDensity / EmDash / etc. are separate wraith rules.

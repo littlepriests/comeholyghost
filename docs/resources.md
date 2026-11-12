@@ -9,7 +9,7 @@ The dev server is `hugo server -D --disableFastRender --navigateToChanged` from 
 What we tightened (keep the GeoCities vibe; don’t gut atmosphere):
 
 - **Images:** article masters as WebP where possible; `photo` / `figcaption` / `photo-grid` / writing-index serve Hugo-processed WebP display sizes from page resources. Prefer masters under ~300–500 KB (see `docs/posting.md`).
-- **Fonts / icons:** self-hosted Fira Mono WOFF2 (`static/fonts/fira-mono-*.woff2`, `static/css/site-fonts.css`). Site vs article faces via `[params.fonts]` (see **Fonts** below). No Google Fonts / Font Awesome / Academicons CDN. Icons via `layouts/partials/icon.html`.
+- **Fonts / icons:** self-hosted WOFF2 only — Fira Mono (`static/fonts/fira-mono-*.woff2`, `static/css/site-fonts.css`), Montserrat variable (`article-font.css`), DotMatrixNarrow (homepage title). Site vs article faces via `[params.fonts]` (see **Fonts** below). No Google Fonts / Font Awesome / Academicons CDN. Icons via `layouts/partials/icon.html`.
 - **CSS scope:** always-on chrome in theme `head.html` (player, reading, retro, stars, sprites, buttons). `article-reading` (blog posts), `article-media` / `blog-index` load from their layouts (inside `#page-root` for SPA). Gallery / guestbook keep their own sheets. Prefer site-owned sheets over editing Risotto core.
 - **Atmosphere JS:** bubble cursor self-hosted (`static/js/vendor/cursor-effects.esm.js` v1.0.18), homepage + desktop only. Stars: fewer on phone / `prefers-reduced-motion`; no scroll voiding on narrow viewports.
 - **npm:** project `.npmrc` → `registry.npmjs.org` only. Before any zip, confirm lockfile `resolved` URLs are all `registry.npmjs.org` (no private registry hosts).
@@ -231,9 +231,9 @@ banner = "images/banner.svg"
 bannerAlt = "Site banner"
 ```
 
-- `bannerDir` is a folder under `static/` (starter: `static/images/banners/`). On each homepage render Hugo shuffles that folder and picks one image (png/jpg/webp/gif). Drop more same-size banners in the folder to rotate on refresh.
+- `bannerDir` is a folder under `static/` (starter: `static/images/banners/`). On each homepage render Hugo shuffles that folder, preloads one image (png/jpg/webp/gif), and embeds it — no JS src swap. Prefer ~1200×280 WebP. Drop more same-size banners in the folder to rotate on refresh.
 - `banner` is the fallback single file if `bannerDir` is empty or missing.
-- `bannerAlt` is the image description.
+- `bannerAlt` is the image description. `home.js` only holds `.is-pending` until decode (SPA-safe).
 - Homepage title under the banner: `displayTitle` (defaults to site title), `titleFont` (CSS `font-family` stack — change in toml to experiment), optional `titleFontUrl` (stylesheet link for that face).
 - The markup is in `layouts/index.html`. If the file is missing, the page shows an empty frame that names the path it expected.
 
@@ -438,7 +438,7 @@ The player stays above the pictures. On a short window the skin can cover the co
 
 ## Player
 
-Playlist continuity: HTML `<audio>` is the only real transport (play / pause / skip / auto-next) and survives SPA navigations. Winamp is visual chrome only — no `initialTracks` / no `setTracksToPlay` handoff (those autoplayed on load and on every inner-page visit). On desktop inner pages, when the skin scrolls out of view an `IntersectionObserver` adds `site-player--docked`: the minimalist chrome is `position: fixed; top: 50%` (mid-viewport / scrollbar axis) and `placeDockedChrome()` centers it horizontally on the Winamp / `.page__aside` column (`transform: translate(-50%, -50%)`). Orange Grundo (`grundo-idle`) sits left of the controls; play / pause / stop / skip briefly plays `grundo-kick` then returns to idle. When the skin returns, the dock hides. Same buttons / same audio — reading scroll position is untouched. Mobile keeps the bottom simple bar.
+Playlist continuity: HTML `<audio>` is the only real transport (play / pause / skip / auto-next) and survives SPA navigations. Winamp is visual chrome only — no `initialTracks` / no `setTracksToPlay` handoff (those autoplayed on load and on every inner-page visit). On desktop inner pages, when the skin scrolls out of view an `IntersectionObserver` adds `site-player--docked`: the minimalist chrome is `position: fixed; top: 50%` (mid-viewport / scrollbar axis) and `placeDockedChrome()` centers it horizontally on the Winamp column (`#winamp-host` / `#site-player` — not `<main>`, so /gallery and /guestbook stay on the right skin gutter). Orange Grundo (`grundo-idle`) sits above the controls; play / pause / stop / skip briefly plays `grundo-kick` then returns to idle. A ⌃ **back to top** control docks under that chrome once you’ve scrolled (~160px); same control sits under the simple/mobile bar. When the skin returns, the dock hides. Same buttons / same audio — reading scroll position is untouched. Mobile keeps the bottom simple bar. Per-article end-of-body ⌃ remains optional via front matter `back_to_top = true`.
 
 Two looks, one player. The homepage shows a simple icon bar (play/pause, stop, skip) in the footer dock beside Visitors — no outer player border, button borders stay. Long titles scroll right-to-left inside a fixed 4.75rem slot (`is-marquee` when the text overflows). Desktop inner pages show the Winamp skin in the right column, document-absolute at the top of the content body / aside so it scrolls with the page (not sticky). Closing Winamp (its own ×) swaps it for a ♡ that calls `webamp.reopen()` — playback is left alone. On viewports under `45rem`, non-home pages keep the same simple icon bar fixed bottom-right (no skin). Simple chrome has a subtle corner × that collapses it to a ♡ the same way. Homepage always opens on the minimalist chrome. On the homepage the icon player stays in simple mode while Webamp mounts off-screen, and CSS anchor positioning pins it to `.home-player-slot` beside Visitors (JS placement is the fallback). On first load of a desktop inner page the icon chrome stays hidden (`site-player--booting`) until the skin frame is ready. Webamp still boots once and stays mounted; `applyPlayerChrome()` swaps `site-player--simple` and `site-player--skin` from `body.home` and the mobile breakpoint. The icon buttons call the Webamp API when it is ready, and fall back to the HTML audio element before that. The player lives outside `#page-root`. Same-site link clicks swap `#page-root` and leave the player in place, so the track keeps playing. A new tab, an external link, or a page with no `#page-root` loads a fresh document and the music stops.
 
@@ -447,8 +447,8 @@ Files:
 - `layouts/partials/player.html` — the icon buttons and Winamp host
 - `static/css/player.css` — position and look for both modes
 - `static/js/player.js` — playlist load, playback, chrome swap, and the page swap
-- `static/audio/playlist.json` — the current list
-- `static/audio/tone-a.wav` and `tone-b.wav` — dummy tones for local testing
+- `static/js/vendor/webamp.bundle.min.mjs` + `jszip.min.js` — self-hosted Winamp (no unpkg)
+- `static/audio/playlist.json` — local fallback list (`[]` until you add tracks or point the fetch at a remote list)
 - `static/skins/Opaline.wsz` — the skin used on inner pages
 
 Every layout that should keep music playing must wrap its page in `<div id="page-root">` and include `{{ partial "player.html" . }}` after that wrapper. Those layouts today are `layouts/index.html`, `layouts/_default/baseof.html`, `layouts/_default/gallery.html`, and `layouts/_default/guestbook.html`.
@@ -459,12 +459,11 @@ The player loads a JSON list, then sets the audio source to each track's `src`.
 
 ```json
 [
-  { "title": "Tone A", "src": "/audio/tone-a.wav" },
-  { "title": "Tone B", "src": "/audio/tone-b.wav" }
+  { "title": "Hello", "src": "/audio/hello.mp3" }
 ]
 ```
 
-`title` is the label on the button row. `src` is the file the browser plays. The fetch is hardcoded in `static/js/player.js`:
+`title` is the label on the button row. `src` is the file the browser plays. Local fallback ships as `[]`. The fetch is hardcoded in `static/js/player.js`:
 
 ```js
 fetch("/audio/playlist.json")
@@ -500,7 +499,7 @@ C:\music-site\
 
 Use a folder you can empty or rebuild. After the test works, point the same web server at the real library folder, or keep copying files into this one.
 
-`mp3` is the format to use. The `.wav` files in `static/audio/` are only the local dummy tones.
+`mp3` is the format to use for real tracks.
 
 #### 2. Write the playlist by hand
 
@@ -607,9 +606,7 @@ Change the address inside the quotes to your playlist URL:
 fetch("http://192.168.1.20:8080/playlist.json")
 ```
 
-Save. Hugo rebuilds on save. Reload the site, press Play, and the label should be the first `title` from your file. Skip should play the second track. Moving from the homepage to Blog should keep the song going, the same as it does with the dummy tones.
-
-The local dummy files can stay in `static/audio/`. The player ignores them once it is fetching the other list.
+Save. Hugo rebuilds on save. Reload the site, press Play, and the label should be the first `title` from your file. Skip should play the second track. Moving from the homepage to Blog should keep the song going.
 
 #### 7. Add a track later
 

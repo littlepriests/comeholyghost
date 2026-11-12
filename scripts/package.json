@@ -1,5 +1,12 @@
 {
+  "private": true,
+  "type": "module",
+  "bin": {
+    "corn": "./corn.mjs"
+  },
   "dependencies": {
-    "pngjs": "7.0.0"
+    "markdownlint-cli2": "0.24.1",
+    "pngjs": "7.0.0",
+    "sharp": "^0.34.4"
   }
 }

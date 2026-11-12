@@ -20,6 +20,13 @@
     padding-right: 0.85rem;
 }
 
+#site-player .player-chrome__dock {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
 #site-player .player-title {
     margin: 0;
     width: 4.75rem;
@@ -77,6 +84,59 @@
     border-color: color-mix(in srgb, var(--highlight) 55%, transparent);
 }
 
+/*
+  Back-to-top sits under the dock; stop □ hides the player (♡ reopens).
+  Absolutely under the chrome so docked Grundo + controls keep their center.
+*/
+#site-player .player-back-top {
+    display: none;
+    position: absolute;
+    left: 50%;
+    top: calc(100% + 2.2rem);
+    z-index: 2;
+    width: 1.65rem;
+    height: 1.65rem;
+    margin: 0;
+    padding: 0;
+    font: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--highlight);
+    background: transparent;
+    border: 1px solid color-mix(in srgb, var(--highlight) 70%, transparent);
+    border-radius: 50%;
+    cursor: pointer;
+    opacity: 0.9;
+    transform: translateX(-50%);
+    box-sizing: border-box;
+}
+
+#site-player .player-back-top span {
+    display: block;
+    line-height: 1;
+}
+
+#site-player .player-back-top:hover,
+#site-player .player-back-top:focus-visible {
+    color: var(--highlight);
+    background: transparent;
+    border-color: var(--highlight);
+    opacity: 1;
+    text-shadow: 0 0 8px color-mix(in srgb, var(--highlight) 55%, transparent);
+}
+
+#site-player .player-back-top[hidden] {
+    display: none !important;
+}
+
+#site-player.site-player--simple:not(.site-player--closed) .player-back-top:not([hidden]),
+body.home #site-player.site-player--simple:not(.site-player--closed) .player-back-top:not([hidden]) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
 #site-player button i,
 #site-player button .site-icon {
     font-size: 0.75rem;
@@ -94,43 +154,6 @@
     display: none !important;
 }
 
-#site-player .player-close {
-    display: none;
-    position: absolute;
-    top: -0.45rem;
-    right: -0.45rem;
-    z-index: 2;
-    width: 1.35rem;
-    height: 1.35rem;
-    margin: 0;
-    padding: 0;
-    font: inherit;
-    font-size: 1.05rem;
-    font-weight: 400;
-    line-height: 1;
-    color: var(--highlight);
-    background: transparent;
-    border: 0;
-    border-radius: 0;
-    cursor: pointer;
-    opacity: 0.9;
-}
-
-#site-player .player-close span {
-    display: block;
-    line-height: 1;
-    transform: translateY(-0.05rem);
-}
-
-#site-player .player-close:hover,
-#site-player .player-close:focus-visible {
-    color: var(--highlight);
-    background: transparent;
-    border: 0;
-    opacity: 1;
-    text-shadow: 0 0 8px color-mix(in srgb, var(--highlight) 55%, transparent);
-}
-
 #site-player .player-reopen {
     display: none;
     align-items: center;
@@ -142,17 +165,18 @@
     font: inherit;
     font-size: 0.95rem;
     line-height: 1;
-    color: color-mix(in srgb, var(--fg) 55%, transparent);
+    color: var(--logo, #18ff6d);
     background: transparent;
     border: 0;
     border-radius: 999px;
     cursor: pointer;
-    opacity: 0.7;
+    opacity: 0.85;
 }
 
 #site-player .player-reopen:hover {
-    color: var(--highlight);
+    color: var(--logo, #18ff6d);
     opacity: 1;
+    text-shadow: 0 0 8px color-mix(in srgb, var(--logo, #18ff6d) 55%, transparent);
 }
 
 #winamp-host {
@@ -164,7 +188,8 @@ body:not(.home) #site-player:not(.site-player--simple) .player-chrome {
     display: none !important;
 }
 
-#site-player.site-player--booting,
+/* Hide only while booting into skin with no simple dock yet. Simple+booting stays visible. */
+#site-player.site-player--booting:not(.site-player--simple),
 body:not(.home) #site-player:not(.site-player--skin):not(.site-player--simple) {
     visibility: hidden;
     pointer-events: none;
@@ -176,8 +201,8 @@ body:not(.home) #site-player:not(.site-player--skin):not(.site-player--simple) {
 
 #site-player.site-player--closed > .player-reopen {
     display: inline-flex;
-    color: var(--highlight);
-    opacity: 0.85;
+    color: var(--logo, #18ff6d);
+    opacity: 0.9;
 }
 
 #site-player.site-player--closed > .player-reopen:hover {
@@ -203,12 +228,6 @@ body:not(.home) #site-player:not(.site-player--skin):not(.site-player--simple) {
     height: 348px !important;
     visibility: hidden !important;
     pointer-events: none !important;
-}
-
-#site-player.site-player--simple .player-close {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
 }
 
 body.home #site-player.site-player--simple.site-player--home-pending {
@@ -277,6 +296,8 @@ body {
     border: 0;
     background: transparent;
     display: block;
+    /* Resting Grundo docks below the skin box. */
+    overflow: visible;
 }
 
 /* Audio stays hidden but keeps playing (HTML <audio> owns sound). */
@@ -285,9 +306,8 @@ body {
 }
 
 /*
-  Desktop skin: Winamp scrolls away with the article. When it leaves the
-  viewport, JS adds --docked: chrome is fixed mid-viewport (scrollbar axis)
-  and horizontally centered on the Winamp / aside column via placeDockedChrome.
+  Desktop skin: Winamp is decorative. JS keeps --docked on so the HTML-audio
+  dock is visible; --dock-stuck switches rest (under Winamp) → fixed mid-column.
 */
 #site-player.site-player--skin > .player-chrome {
     display: none;
@@ -340,33 +360,171 @@ body {
     animation-fill-mode: forwards;
 }
 
+/* Sword ♡ spill from Grundo’s feet — brief lift, then cascading waterfall. */
+#site-player .player-dock-pet__hearts {
+    position: absolute;
+    left: 50%;
+    bottom: 0.15rem;
+    width: 0;
+    height: 0;
+    overflow: visible;
+    pointer-events: none;
+    z-index: 6;
+}
+
+#site-player .player-dock-pet__heart {
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin: 0;
+    pointer-events: none;
+    font-family: var(--font-monospace, ui-monospace, "Cascadia Mono", "Fira Mono", monospace);
+    font-size: 0.95rem;
+    line-height: 1;
+    color: #ff2a4a;
+    text-shadow:
+        0 0 4px #ff6b81,
+        0 0 10px #ff1744,
+        0 0 18px rgb(255 20 60 / 0.75),
+        0 0 28px rgb(255 20 60 / 0.45);
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.35);
+    will-change: transform, opacity;
+}
+
+#site-player .player-dock-pet__heart.is-bright {
+    color: #ff4d6d;
+    font-size: 1.2rem;
+    text-shadow:
+        0 0 5px #fff,
+        0 0 10px #ff2a4a,
+        0 0 18px #ff1744,
+        0 0 28px rgb(255 20 60 / 0.9),
+        0 0 40px rgb(255 40 80 / 0.55);
+}
+
+#site-player .player-dock-pet__hearts.is-stomp .player-dock-pet__heart {
+    animation: player-dock-heart-spill var(--hspurt, 1.8s) cubic-bezier(0.2, 0.75, 0.2, 1) var(--hd, 0s) 1 both;
+}
+
+/* Pop up from the stomp, then pour outward and down. */
+@keyframes player-dock-heart-spill {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.2) rotate(0deg);
+        filter: brightness(1.2);
+    }
+    6% {
+        opacity: 1;
+        transform:
+            translate(
+                calc(-50% + var(--dx, 0rem) * 0.35),
+                calc(-50% + var(--lift, -1.2rem) * 0.55)
+            )
+            scale(1.35)
+            rotate(calc(var(--rot, 0deg) * 0.2));
+        filter: brightness(1.7);
+    }
+    18% {
+        opacity: 1;
+        transform:
+            translate(
+                calc(-50% + var(--dx, 0rem)),
+                calc(-50% + var(--lift, -1.2rem))
+            )
+            scale(1.15)
+            rotate(calc(var(--rot, 0deg) * 0.55));
+        filter: brightness(1.45);
+    }
+    42% {
+        opacity: 0.95;
+        transform:
+            translate(
+                calc(-50% + var(--dx2, var(--dx, 0rem)) * 0.55),
+                calc(-50% + var(--lift, -1.2rem) * 0.15 + var(--fall, 5rem) * 0.35)
+            )
+            scale(1)
+            rotate(var(--rot, 0deg));
+        filter: brightness(1.25);
+    }
+    72% {
+        opacity: 0.7;
+        transform:
+            translate(
+                calc(-50% + var(--dx2, var(--dx, 0rem)) * 0.85),
+                calc(-50% + var(--fall, 5rem) * 0.75)
+            )
+            scale(0.85)
+            rotate(calc(var(--rot, 0deg) * 1.25));
+        filter: brightness(1.05);
+    }
+    100% {
+        opacity: 0;
+        transform:
+            translate(
+                calc(-50% + var(--dx2, var(--dx, 0rem))),
+                calc(-50% + var(--fall, 5rem))
+            )
+            scale(0.35)
+            rotate(calc(var(--rot, 0deg) * 1.6));
+        filter: brightness(0.9);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #site-player .player-dock-pet__hearts.is-stomp .player-dock-pet__heart {
+        animation: none;
+        opacity: 0;
+    }
+}
+
 @media (min-width: 45rem) {
-    /* Mid-viewport vertically; left set in JS to the skin column center.
-       Grundo centered on top; title + buttons on the row beneath. */
+    /* Shared dock layout (Grundo + controls). Rest vs stuck only change position. */
     body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) > .player-chrome {
-        display: grid !important;
+        display: flex !important;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+        width: max-content;
+        max-width: calc(100vw - 1.5rem);
+        box-sizing: border-box;
+        padding-right: 0;
+        z-index: 35;
+        opacity: 0.97;
+        transition: opacity 0.15s ease;
+    }
+
+    /* Rest: park under Winamp, scroll with the page. */
+    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--dock-stuck):not(.site-player--closed) > .player-chrome {
+        position: absolute;
+        top: calc(100% + 2.75rem);
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+    }
+
+    /* Stuck: mid-viewport; horizontal center set in JS to the skin column. */
+    body:not(.home) #site-player.site-player--skin.site-player--docked.site-player--dock-stuck:not(.site-player--closed) > .player-chrome {
+        position: fixed;
+        top: 50%;
+        left: 0;
+        right: auto;
+        transform: translate(-50%, -50%);
+    }
+
+    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) > .player-chrome .player-chrome__dock {
+        display: grid;
         grid-template-columns: auto auto;
         grid-template-rows: auto auto;
         justify-items: center;
         align-items: end;
         column-gap: 0.22rem;
         row-gap: 0.2rem;
-        position: fixed;
-        top: 50%;
-        left: 0;
-        right: auto;
-        width: max-content;
-        max-width: calc(100vw - 1.5rem);
-        box-sizing: border-box;
         padding-right: 0.3rem;
-        transform: translate(-50%, -50%);
-        z-index: 35;
-        opacity: 0.97;
-        transition: opacity 0.15s ease;
     }
 
     body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) .player-dock-pet {
-        display: flex;
+        display: flex !important;
         grid-column: 1 / -1;
         grid-row: 1;
         justify-self: center;
@@ -389,26 +547,49 @@ body {
         gap: 0.12rem;
     }
 
-    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) > .player-chrome button:not(.player-close) {
+    /* Quiet ↑ under the dock, centered with Grundo. */
+    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) > .player-chrome .player-back-top:not([hidden]) {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        left: 50%;
+        top: calc(100% + 2rem);
+        width: 1.35rem;
+        height: 1.35rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        opacity: 0.9;
+        transform: translateX(-50%);
+    }
+
+    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) > .player-chrome button:not(.player-back-top) {
         width: 1.15rem;
         height: 1.15rem;
     }
 
-    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) > .player-chrome button:not(.player-close) i,
-    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) > .player-chrome button:not(.player-close) .site-icon {
+    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) > .player-chrome button:not(.player-back-top) i,
+    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) > .player-chrome button:not(.player-back-top) .site-icon {
         font-size: 0.52rem;
     }
 
-    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) > .player-chrome .player-close {
-        top: auto;
-        bottom: 0.15rem;
-        right: -0.1rem;
-        width: 0.8rem;
-        height: 0.8rem;
-        font-size: 0.6rem;
+    /* Rest: green ♡ parks under Winamp where the dock sat. */
+    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--dock-stuck).site-player--closed > .player-reopen {
+        display: inline-flex !important;
+        position: absolute;
+        top: calc(100% + 2.75rem);
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        z-index: 35;
+        width: 1.15rem;
+        height: 1.15rem;
+        font-size: 0.75rem;
+        color: var(--logo, #18ff6d);
     }
 
-    body:not(.home) #site-player.site-player--skin.site-player--docked.site-player--closed > .player-reopen {
+    /* Stuck: green ♡ stays mid-viewport on the skin column. */
+    body:not(.home) #site-player.site-player--skin.site-player--docked.site-player--dock-stuck.site-player--closed > .player-reopen {
         display: inline-flex !important;
         position: fixed;
         top: 50%;
@@ -418,7 +599,8 @@ body {
         z-index: 35;
         width: 1.15rem;
         height: 1.15rem;
-        font-size: 0.65rem;
+        font-size: 0.75rem;
+        color: var(--logo, #18ff6d);
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -522,8 +704,8 @@ body {
     }
 
     /* ~44px touch targets (was 1.5rem / 24px). */
-    body:not(.home) #site-player.site-player--simple button:not(.player-close):not(.player-reopen),
-    body.home #site-player.site-player--simple button:not(.player-close):not(.player-reopen) {
+    body:not(.home) #site-player.site-player--simple button:not(.player-reopen),
+    body.home #site-player.site-player--simple button:not(.player-reopen) {
         width: 2.75rem;
         height: 2.75rem;
     }
@@ -533,9 +715,7 @@ body {
         font-size: 0.85rem;
     }
 
-    body:not(.home) #site-player.site-player--simple .player-close,
     body:not(.home) #site-player.site-player--simple .player-reopen,
-    body.home #site-player.site-player--simple .player-close,
     body.home #site-player.site-player--simple .player-reopen {
         width: 2rem;
         height: 2rem;
