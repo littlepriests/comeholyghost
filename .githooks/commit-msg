@@ -1,0 +1,4 @@
+#!/bin/sh
+# Strip Cursor agent attribution trailers; keep any human Co-authored-by lines.
+tmp="$1.tmp"
+grep -viE '^(Co-authored-by: Cursor[[:space:]]*<cursoragent@cursor\.com>|Made-with:[[:space:]]*Cursor)[[:space:]]*$' "$1" > "$tmp" && mv "$tmp" "$1"

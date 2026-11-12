@@ -2,13 +2,14 @@
 name: personal-site
 description: >-
   Workflow and hard boundaries for this personal Hugo site (agent prompting /
-  frontend experiments). Use when editing this repo, syncing from or writing
-  zips to akristen/proj-zip, regenerating package-lock.json, deploying via
-  Netlify zip upload, or when employer/docs skills might otherwise leak in.
-  Never apply freshness, ENGDOCS, docs-data, or other company skills here.
+  frontend experiments). Use when editing this repo, syncing with
+  littlepriests/comeholyghost, optional proj-zip backup, regenerating
+  package-lock.json, Netlify deploy, or when employer/docs skills might
+  otherwise leak in. Never apply freshness, ENGDOCS, docs-data, or other
+  company skills here.
 ---
 
-# Personal site (local → zip → proj-zip)
+# Personal site (git → littlepriests/comeholyghost)
 
 This workspace is a **personal** Hugo + Netlify playground for practicing
 agent-driven frontend work and prompting. It is not a work/docs project and
@@ -30,19 +31,37 @@ those over inventing new patterns.
   is only for this site’s Netlify deps (`@netlify/blobs` and friends) from
   **public** `registry.npmjs.org`. Never point npm at a private/work registry
   or copy a work lockfile into this tree.
-- Site source of truth for transfer is the private zip dump
-  [`akristen/proj-zip`](https://github.com/akristen/proj-zip) — not a site git
-  remote, and not any employer remote.
+- **Do not** run Docker, Docker Compose, or private container registries from
+  this tree. Do not copy `~/.docker`, work kube configs, or work tokens into
+  the project. Do not `gh auth login` / switch to the personal GitHub account
+  as this machine’s default — git uses a **repo deploy key** via the
+  `github.com-personal` SSH host alias.
+- **Do not** leave Cursor `Co-authored-by` / `Made-with: Cursor` trailers on
+  commits. Repo `.githooks/commit-msg` strips them; also keep Cursor Settings →
+  Git & PRs → Attribution (commit + PR) off for this machine if possible.
+- Site source of truth is the private GitHub repo
+  [`littlepriests/comeholyghost`](https://github.com/littlepriests/comeholyghost)
+  on branch `main`, remote name **`personal`**. Optional backup only:
+  [`akristen/proj-zip`](https://github.com/akristen/proj-zip). Never add an
+  employer remote.
 
 ## Working model
 
-1. Edit **only** under this local folder (`personal-development`).
-2. Keep work local until the user asks to package or upload.
-3. When asked to ship/backup: zip this tree, then put the zip into
-   `akristen/proj-zip` (replace `personal-development.zip` or the name the
-   user specifies). Do not invent a public site remote.
+1. Edit **only** under this clone (`comeholyghost`).
+2. Day-to-day sync: `git pull personal main` / commit / `git push personal main`.
+3. Keep work GitHub (`gh`, default `github.com` SSH) as the machine default.
+   Pushes here must use `git@github.com-personal:littlepriests/comeholyghost.git`
+   (deploy key). Do not force-push `main` unless the user explicitly asks.
+4. Optional backup: when asked to zip / update proj-zip, build a zip and upload
+   via `gh api` — that path is backup, not the primary ship loop.
 
-### Zip contents
+### Ship checks (before commit/push)
+
+- Lockfile `resolved` URLs are all `registry.npmjs.org` (no private registry).
+- No `.env`, tokens, `*.pem`, docker/kube configs, or work credentials staged.
+- Remotes: only `personal` → littlepriests/comeholyghost (plus none from work).
+
+### Zip contents (optional backup)
 
 Include source the site needs to build/deploy. Exclude:
 
@@ -55,29 +74,6 @@ Include source the site needs to build/deploy. Exclude:
 
 Keep `package.json` and `package-lock.json` in the zip when Netlify functions
 are in play.
-
-### Pull updated code from proj-zip
-
-When the user says a new zip landed in `proj-zip`:
-
-1. List `akristen/proj-zip` contents/commits; pick the newest relevant zip
-   (confirm name if several).
-2. Download and extract to a temp folder under `Projects` (not inside employer
-   doc paths).
-3. Replace this local tree’s tracked/source files with the zip contents,
-   preserving `.git` if present and not wiping unrequested local-only notes
-   unless the user said “replace everything.”
-4. Reinstall deps with public npm if `package-lock.json` changed:
-   `npm ci` or `npm install` from this repo root only.
-
-### Push local changes as a zip
-
-When the user asks to zip / update proj-zip:
-
-1. Build `personal-development.zip` (or requested name) next to this folder.
-2. Upload/update the file in `akristen/proj-zip` via `gh api` (private repo).
-3. Do not push this working tree to employer remotes; this folder typically has
-   **no** deploy git remote.
 
 ## npm / lockfile (this site only)
 
@@ -106,4 +102,4 @@ When the user asks to zip / update proj-zip:
   GeoCities-meets-restraint vibe from `docs/resources.md`.
 - Do not start backlog items in `docs/resources.md` unless explicitly asked.
 - When unsure whether a path or skill belongs to employer/docs work, skip it
-  and stay in this repo + `proj-zip`.
+  and stay in this repo (+ optional proj-zip backup).
