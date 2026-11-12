@@ -152,7 +152,7 @@ function runMarkdownlint(files, { fix }) {
   return r.status ?? 1;
 }
 
-/** Lines we never soft-wrap (Hugo / structure). */
+/** Lines we never soft-wrap (Hugo / structure / ASCII). */
 function isNoWrapLine(line) {
   const t = line.trim();
   if (!t) return true;
@@ -165,9 +165,21 @@ function isNoWrapLine(line) {
   if (/^\s*([-*+]|\d+\.)\s/.test(line)) return true; // lists
   if (/^\s*{{[<%]/.test(line)) return true; // Hugo shortcode open/close/self
   if (/^\s*{{<[/%]/.test(line)) return true;
+  // Raw HTML (homepage ascii-angel figure, etc.) — never reflow
+  if (/^</.test(t) || /<\/?[a-zA-Z][^>]*>/.test(t)) return true;
+  // Braille / block ASCII art lines (U+2800–U+28FF)
+  if (/^[\u2800-\u28FF\s]+$/.test(t)) return true;
   // Bare resource filenames inside photo-grid bodies
   if (/^[\w./@+-]+\.(webp|png|jpe?g|gif|avif|svg)$/i.test(t)) return true;
   return false;
+}
+
+function opensPre(line) {
+  return /<pre[\s>]/i.test(line);
+}
+
+function closesPre(line) {
+  return /<\/pre>/i.test(line);
 }
 
 function isFrontMatterFence(line) {
@@ -217,6 +229,7 @@ function wrapFile(absPath, { dryRun }) {
 
   let i = 0;
   let inFence = false;
+  let inPre = false;
   let inFrontMatter = false;
   let frontMatterStarted = false;
 
@@ -248,6 +261,15 @@ function wrapFile(absPath, { dryRun }) {
       continue;
     }
 
+    // Preserve <pre>…</pre> byte-for-byte (homepage ASCII art).
+    if (inPre || opensPre(line)) {
+      inPre = true;
+      out.push(line);
+      if (closesPre(line)) inPre = false;
+      i++;
+      continue;
+    }
+
     if (inFence || isNoWrapLine(line)) {
       out.push(line);
       i++;
@@ -262,6 +284,7 @@ function wrapFile(absPath, { dryRun }) {
         !L.trim() ||
         isNoWrapLine(L) ||
         isFrontMatterFence(L) ||
+        opensPre(L) ||
         /^```/.test(L.trim()) ||
         /^~~~/.test(L.trim())
       ) {
@@ -296,6 +319,7 @@ function reportLongLines(files) {
     const rel = path.relative(root, abs).replace(/\\/g, "/");
     const lines = fs.readFileSync(abs, "utf8").split(/\r?\n/);
     let inFence = false;
+    let inPre = false;
     let inFrontMatter = false;
     let fmStarted = false;
     for (let i = 0; i < lines.length; i++) {
@@ -310,6 +334,11 @@ function reportLongLines(files) {
       if (inFrontMatter) continue;
       if (/^```/.test(line.trim()) || /^~~~/.test(line.trim())) {
         inFence = !inFence;
+        continue;
+      }
+      if (inPre || opensPre(line)) {
+        inPre = true;
+        if (closesPre(line)) inPre = false;
         continue;
       }
       if (inFence || isNoWrapLine(line)) continue;
