@@ -125,13 +125,17 @@
         playDockKickThenIdle();
     }
 
+    function prefersReducedMotion() {
+        try {
+            return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        } catch (error) {
+            return false;
+        }
+    }
+
     function burstDockHearts() {
         if (!dockHearts) return;
-        var reduce = false;
-        try {
-            reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        } catch (error) {}
-        if (reduce) return;
+        if (prefersReducedMotion()) return;
         window.clearTimeout(dockHeartsTimer);
         dockHearts.classList.remove("is-stomp");
         void dockHearts.offsetWidth;
@@ -141,15 +145,80 @@
         }, 2800);
     }
 
-    function stompDockPet() {
-        if (!player.classList.contains("site-player--docked")) return;
+    var pageHeartsTimer = 0;
+    var pageHeartsLayer = null;
+
+    /**
+     * Transient full-viewport ♡ fountain (no markup bloat).
+     * Hearts rise so the scroll reads as floating the page up.
+     * Works on mobile simple chrome too (Grundo is desktop-dock only).
+     */
+    function burstPageHeartsThen(done) {
+        var finish = typeof done === "function" ? done : function () {};
+        if (prefersReducedMotion()) {
+            finish();
+            return;
+        }
+        window.clearTimeout(pageHeartsTimer);
+        if (pageHeartsLayer && pageHeartsLayer.parentNode) {
+            pageHeartsLayer.parentNode.removeChild(pageHeartsLayer);
+        }
+        var layer = document.createElement("div");
+        layer.className = "player-page-hearts";
+        layer.setAttribute("aria-hidden", "true");
+        var count = isMobileViewport() ? 40 : 64;
+        for (var i = 0; i < count; i++) {
+            var heart = document.createElement("span");
+            heart.className = "player-page-hearts__heart"
+                + (Math.random() > 0.5 ? " is-bright" : "");
+            heart.textContent = "♡";
+            heart.style.setProperty("--x", (Math.random() * 100).toFixed(2) + "%");
+            heart.style.setProperty("--delay", (Math.random() * 0.55).toFixed(2) + "s");
+            heart.style.setProperty("--dur", (1.7 + Math.random() * 1.3).toFixed(2) + "s");
+            heart.style.setProperty(
+                "--drift",
+                ((Math.random() * 56) - 28).toFixed(1) + "px",
+            );
+            heart.style.setProperty(
+                "--scale",
+                (0.65 + Math.random() * 1.05).toFixed(2),
+            );
+            layer.appendChild(heart);
+        }
+        document.body.appendChild(layer);
+        pageHeartsLayer = layer;
+        // Start scroll once the rise is readable.
+        window.setTimeout(finish, isMobileViewport() ? 260 : 360);
+        pageHeartsTimer = window.setTimeout(function () {
+            if (layer.parentNode) layer.parentNode.removeChild(layer);
+            if (pageHeartsLayer === layer) pageHeartsLayer = null;
+        }, 3400);
+    }
+
+    /**
+     * Back-to-top beat: (desktop dock) stomp → dock spill → page hearts → scroll.
+     * Mobile / undocked: page hearts → scroll (Grundo isn't shown on simple chrome).
+     */
+    function stompDockPetThen(done) {
+        var finish = typeof done === "function" ? done : function () {};
+        var canStomp = player.classList.contains("site-player--docked")
+            && dockIdle
+            && dockKick
+            && !prefersReducedMotion();
+
+        function afterPet() {
+            burstPageHeartsThen(finish);
+        }
+
+        if (!canStomp) {
+            afterPet();
+            return;
+        }
         window.clearTimeout(dockHeartsTimer);
         if (dockHearts) dockHearts.classList.remove("is-stomp");
-        // Kick first; hearts wait until idle is back, then the second idle frame.
-        playDockKickThenIdle(function (timing) {
-            var fps = (timing && timing.fps) || 8;
-            var secondIdleFrameMs = Math.round((2 / fps) * 1000);
-            dockHeartsTimer = window.setTimeout(burstDockHearts, secondIdleFrameMs);
+        playDockKickThenIdle(function () {
+            burstDockHearts();
+            window.setTimeout(afterPet, 200);
         });
     }
 
@@ -353,12 +422,10 @@
 
     if (backTopBtn) {
         backTopBtn.addEventListener("click", function () {
-            var reduce = false;
-            try {
-                reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-            } catch (error) {}
-            stompDockPet();
-            window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+            var reduce = prefersReducedMotion();
+            stompDockPetThen(function () {
+                window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+            });
         });
     }
 
