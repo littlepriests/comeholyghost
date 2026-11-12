@@ -134,13 +134,18 @@
     padding: 0;
 }
 
-.article-photo-lightbox__inner img {
+.article-photo-lightbox__inner img,
+.article-photo-lightbox__img {
     display: block;
     max-width: min(96vw, 72rem);
     max-height: min(90vh, 96vh);
     width: auto;
     height: auto;
     margin: 0 auto;
+}
+
+.article-photo-lightbox__img.is-carousel {
+    cursor: pointer;
 }
 
 .article-photo-lightbox__close {

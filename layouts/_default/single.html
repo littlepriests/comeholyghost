@@ -1,8 +1,11 @@
 {{ define "main" }}
     {{/* Page-scoped: article media + lightbox (not on home / blog index). */}}
-    <link rel="stylesheet" href="{{ "css/article-media.css" | relURL }}?v=5">
+    <link rel="stylesheet" href="{{ "css/article-media.css" | relURL }}?v=6">
     {{- if eq .Section "blog" }}
     <link rel="stylesheet" href="{{ "css/article-reading.css" | relURL }}?v=1">
+    {{- with site.Params.fonts.articleFontUrl }}
+    <link rel="stylesheet" href="{{ . | relURL }}">
+    {{- end }}
     {{- end }}
     <header class="content__header">
         <h1>{{ .Title | markdownify }}</h1>

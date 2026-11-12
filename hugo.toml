@@ -43,7 +43,7 @@ image = "images/cursor.gif"
 x = 0
 y = 0
 
-# Homepage banner + title. Banner picks a random image from bannerDir on each build/refresh.
+# Homepage banner + title. Hugo shuffles bannerDir and preloads one image per render.
 [params.home]
 # Folder under static/ with banner-sized images (png/jpg/webp/gif). Falls back to `banner` if empty.
 bannerDir = "images/banners"

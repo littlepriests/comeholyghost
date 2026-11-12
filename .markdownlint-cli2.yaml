@@ -1,0 +1,54 @@
+# Structural markdown lint for content/ (corn md).
+# Line length / wrap is handled by corn md itself (Hugo shortcode–aware).
+config:
+  default: true
+
+  # Posts start with front matter, then lowercase prose — not an H1.
+  MD041: false
+  # Title lives in front matter; body often starts at ##.
+  MD025: false
+  # House style allows trailing ?! in headings if you want them.
+  MD026: false
+  # Inline HTML / raw bits show up with Hugo occasionally.
+  MD033: false
+  # Bare URLs in posts are fine.
+  MD034: false
+  # Emphasis-as-heading false positives on short italic asides.
+  MD036: false
+  # Line length: corn md --fix wraps; skip MD013 here.
+  MD013: false
+  # Duplicate heading text across a long post is OK.
+  MD024: false
+
+  # House list marker: "-" everywhere (corn md --fix can normalize).
+  MD004:
+    style: dash
+  # Nested lists: 2 spaces (no tabs — see MD010).
+  MD007:
+    indent: 2
+  # Trailing spaces: allow exactly 2 for a hard break; strip random leftovers.
+  MD009:
+    br_spaces: 2
+    strict: true
+  # No hard tabs (nested lists in content/ have used tabs before).
+  MD010: true
+  # At most one blank line between blocks.
+  MD012:
+    maximum: 1
+  # One space after list markers ("- item", not "-  item").
+  MD030:
+    ul_single: 1
+    ol_single: 1
+  MD022: true
+  MD031: true
+  MD032: true
+  MD047: true
+
+globs:
+  - content/**/*.md
+  - content/**/*.mdx
+
+ignores:
+  - node_modules/**
+  - public/**
+  - resources/**

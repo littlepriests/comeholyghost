@@ -1,11 +1,12 @@
 BeDensity — not a Vale .yml rule (Vale cannot POS-count verbs for a document ratio).
 
-Checker: ../scripts/be-density/
-  node be-density.mjs [--threshold 0.5] [--min-verbs 20] <files...>
+Checker: tools/be-density/ (also: corn edit)
 
-Copy that folder into the target repo (e.g. tools/be-density/), run npm install,
-and invoke beside Vale in CI or locally. Do not put it under styles/config/scripts/
-(that path is for Vale Tengo only).
+  corn edit [path…]
+  node tools/be-density/be-density.mjs [--threshold 0.5] [--min-verbs 20] <files...>
+
+Run npm install in tools/be-density/ once (corn edit does this if needed).
+Do not put it under styles/config/scripts/ (that path is for Vale Tengo only).
 
 Method: wink-pos-tagger (Penn VB*). Be-verbs = lemma "be".
 Fail when be/verbs > threshold (default 50%).
