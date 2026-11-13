@@ -461,6 +461,10 @@ Remote is **`personal`** → `littlepriests/comeholyghost`. There is no separate
 
 You still **merge feature PRs into `preview` in GitHub** yourself. `corn deploy` only promotes already-merged preview work to production when checks pass — it does not auto-merge feature branches.
 
+**PR base must be `preview`.** GitHub’s default compare URL targets `main` (the default branch). Prefer `corn push`, or open `compare/preview...<branch>?expand=1`. Cadence: land many feature PRs on `preview` through the month; one `corn deploy` (`preview` → `main`) when you want production.
+
+**Vale CI:** `.github/workflows/vale.yml` runs Vale on `content/` for PRs/pushes (added lines only). It posts a check with annotations; it does **not** fail the job yet (house-style lowercase still looks like spelling errors). Local: `corn edit`.
+
 ### Do Deploy Previews burn credits?
 
 **The deploy itself: no.** On credit-based plans, Netlify lists Deploy Previews and branch deploys as **0 credits** (same for failed deploys). Production publishes are what cost 15 credits each.

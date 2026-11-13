@@ -6,6 +6,11 @@ locale = "en-us"
 DefaultContentLanguage = "en"
 enableInlineShortcodes = true
 
+# Netlify sets CONTEXT (production | deploy-preview | branch-deploy). head.html
+# reads it so preview skips metered APIs. Hugo only allows getenv for listed names.
+[security.funcs]
+  getenv = ['^HUGO_', '^CI$', '^CONTEXT$']
+
 [privacy.x]
 disable = true
 
