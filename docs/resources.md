@@ -82,10 +82,6 @@ Nav and in-site list links should stay **relative** (`relURL` / `relLangURL` / `
 
 Twinkling starfield is sitewide: `layouts/partials/stars.html` (outside `#page-root` so SPA nav keeps it), `static/css/stars.css`, `static/js/stars.js`. Linked from `head.html`. Homepage visitor ticker stays in `static/js/home.js`. On non-home pages, `stars.js` voids twinkles behind `.page__body` (title + prose + figures) and punches a CSS mask hole in `.home-stars` so glows cannot sit in letter gaps; gutters / aside keep the sky. SPA nav re-runs `refreshStarReadingVoids` from `player.js`.
 
-## Music prompt (first homepage landing)
-
-On the first homepage view in a browser session (desktop / ≥45rem), one ASCII thought bubble sits by Misdreavus (“⋆｡˚ play music? ˚｡⋆” with **y** / **n**). Phone (≤44.99rem): cloud CTA is omitted — use the bottom player. Cloud + pink fill + CTA are one unit (`.music-prompt__bubble`); move with `--bubble-left` / `--bubble-top`. Grow ASCII+fill with `--cloud-scale` (panel/buttons stay fixed; `--dot-*` are scale-1 bases). Nudge ask + buttons with `--panel-nudge-x` / `--panel-nudge-y`. Pink fill is `.music-prompt__fill` (CSS radials). Trail dots: `--dot-mid-*` / `--dot-tip-*`. `--thought-bob` syncs to Misdreavus frame centroids in `home.js`. Invisible `.music-prompt__hits` halves cover the ASCII cloud (left = yes, right = no) so approximate clicks work; visible **y** / **n** still work. **y** → `window.sitePlayerPlay` then dismiss; **n** dismiss only. `sessionStorage` `home-music-prompt-seen` (not set on phone); retest `?replay-music=1`.
-
 ## Read-me email CTA
 
 `content/read-me.md` sets `email_cta = true`. The aside (under Winamp on desktop) shows a mailto link from `[params.about] email` in `hugo.toml` — envelope + ♥ icon only. Address is public on purpose; keep secrets out of `content/` / `hugo.toml` if you ever need a private inbox. Hover label uses `.site-tip` / `data-tip` (see **Hover tips**).
@@ -114,10 +110,6 @@ article = "Georgia, \"Iowan Old Style\", \"Palatino Linotype\", Palatino, \"Time
 `head.html` writes the CSS variables; `static/css/reading.css` applies `--font-site` on `body`. Blog posts also load `static/css/article-reading.css` (linked from `layouts/_default/single.html` when `.Section == "blog"`). **Ad-hoc article readability fixes** (line-height, measure, heading weight, code face) go in `article-reading.css` — leave Risotto `typography.css` alone unless you intentionally want a theme-wide change. Writing-index face stays on `.blog-index` in `static/css/blog-index.css` (still site mono by default).
 
 Self-host a new article face: drop WOFF2 under `static/fonts/`, add `@font-face` in e.g. `static/css/article-font.css`, set `articleFontUrl` and put that family first in `article`.
-
-## Photobook veil (`/gallery/`)
-
-Gallery-only. One SunnyNeo Faerie Krawk GIF (`static/images/glitters/faerie-krawk.gif`) + soft dim + CSS glow/♡. Thumbs stay `loading="lazy"`. Veil stays hidden unless the first thumbs are still unfinished after ~320ms (warm cache → no flash), then lifts ~0.9–2.2s. Markup/JS in `layouts/_default/gallery.html` + `static/js/gallery-veil.js` (inside `#page-root` for SPA). `?veil` freezes it open until you click (preview). Credit SunnyNeo in `content/gallery.md`.
 
 ## Hover tips (`data/tips.yaml`)
 

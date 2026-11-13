@@ -297,9 +297,6 @@
         }
     }
 
-    // Homepage music-prompt (and anything else) can start playback after a gesture.
-    window.sitePlayerPlay = playMedia;
-
     function pauseMedia() {
         // Set playing first so the audio "pause" listener does not run a second show()
         // that would cancel the dock kick animation.
