@@ -103,17 +103,7 @@ body:not(.home) .page__aside {
     overflow: visible;
 }
 
-/* SkiFree yeti where $ echo $LANG used to sit (articles + read-me). */
-.page-footer__skifree {
-    display: flex;
-    justify-content: flex-start;
-    align-items: flex-end;
-    margin: 0.35rem 0 0.75rem;
-    min-height: calc(43px * 2);
-    /* Native yeti cell is 32×43; scale-2 keeps pixel aspect. */
-    line-height: 0;
-}
-
+/* SkiFree yeti chrome lives in subscribe.css (clickable subscribe + badge). */
 .page-footer__skifree .sprite-anim {
     image-rendering: pixelated;
     image-rendering: crisp-edges;

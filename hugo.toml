@@ -246,31 +246,49 @@ maxheight = "24rem"
 # url = "https://github.com/"
 # icon = "fa-brands fa-github"
 
+# Newsletter (Resend). Form opens from nav + SkiFree yeti; API key stays in Netlify env.
+# yetiIcon: word (DotMatrix “subscribe”, scroll-reveal) | plane | bell | rss | at
+#   (skip envelope — read-me already uses that for mailto)
+# yetiIconPos: bottom | top | left | right
+[params.subscribe]
+yetiIcon = "word"
+yetiIconPos = "right"
+
 [menu]
 
+  # Row 1 — primary sections
   [[menu.main]]
     identifier = "blog"
     name = "writing"
     url = "/blog/"
     weight = 5
+    [menu.main.params]
+      row = 1
 
   [[menu.main]]
     identifier = "gallery"
     name = "photobook"
     url = "/gallery/"
     weight = 6
+    [menu.main.params]
+      row = 1
 
   [[menu.main]]
     identifier = "guestbook"
-    name = "Guestbook"
+    name = "guestbook"
     url = "/guestbook/"
     weight = 10
+    [menu.main.params]
+      row = 1
 
+  # Row 2 — meta
   [[menu.main]]
     identifier = "read-me"
     name = "read-me.txt"
     url = "/read-me/"
     weight = 11
+    [menu.main.params]
+      row = 2
 
 [taxonomies]
 category = "categories"

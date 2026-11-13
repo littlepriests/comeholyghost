@@ -5,6 +5,7 @@
 #   {{</* photo src="x.webp" caption="…" tip="fun hover" */>}}
 
 email: email me
+subscribe: get new posts by email
 back_to_top: back to top
 logo: home
 
@@ -18,7 +19,7 @@ winamp: little winamp
 grundo: orange menace
 sango: throw it
 kagura: wind witch
-skifree: yeti!
+skifree: subscribe (yeti mail)
 
 # Optional: override a social link by its hugo.toml `title` string.
 # social:

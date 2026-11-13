@@ -1,4 +1,5 @@
 import { getStore } from "@netlify/blobs";
+import { isPreviewDeploy } from "../lib/preview-guard.mjs";
 
 const STORE_NAME = "guestbook";
 const ENTRIES_KEY = "entries";
@@ -35,6 +36,21 @@ export default async (request) => {
             headers: {
                 Allow: "GET, POST, OPTIONS"
             }
+        });
+    }
+
+    // Deploy preview / branch: no shared Blobs — keep production signatures clean.
+    if (isPreviewDeploy()) {
+        if (request.method === "GET") {
+            return json(200, { entries: [], preview: true });
+        }
+        if (request.method !== "POST") {
+            return json(405, { error: "Method not allowed." });
+        }
+        return json(200, {
+            entries: [],
+            preview: true,
+            error: "Preview deploy — signatures aren’t saved. Try production or local storage."
         });
     }
 
