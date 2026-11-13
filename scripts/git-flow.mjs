@@ -281,24 +281,39 @@ async function cmdPush() {
   );
   prUrl = (existing.stdout || "").trim();
 
+  const compareUrl = `https://github.com/littlepriests/comeholyghost/compare/${INTEGRATION}...${branch}?expand=1`;
+
   if (!prUrl) {
     const title = gitOut("log", "-1", "--pretty=%s") || branch;
-    const created = ghOut(
-      "pr",
-      "create",
-      "--repo",
-      "littlepriests/comeholyghost",
-      "--base",
-      INTEGRATION,
-      "--head",
-      branch,
-      "--title",
-      title,
-      "--body",
-      `## Summary\n- ${title}\n\n## Test plan\n- [ ] Deploy Preview looks right\n- [ ] No production-only secrets in the diff\n`
+    const created = run(
+      "gh",
+      [
+        "pr",
+        "create",
+        "--repo",
+        "littlepriests/comeholyghost",
+        "--base",
+        INTEGRATION,
+        "--head",
+        branch,
+        "--title",
+        title,
+        "--body",
+        `## Summary\n- ${title}\n\n## Test plan\n- [ ] Deploy Preview looks right\n- [ ] No production-only secrets in the diff\n`
+      ],
+      { allowFail: true }
     );
-    prUrl = created.split("\n").filter(Boolean).pop() || created;
-    console.log(`Opened PR → ${INTEGRATION}: ${prUrl}`);
+    prUrl = (created.stdout || "").trim().split("\n").filter(Boolean).pop() || "";
+    if (prUrl && created.status === 0) {
+      console.log(`Opened PR → ${INTEGRATION}: ${prUrl}`);
+    } else {
+      console.warn(
+        `gh could not open the PR (wrong GitHub login?). Open this — base is ${INTEGRATION}, not ${PRODUCTION}:\n  ${compareUrl}`
+      );
+      if ((created.stderr || "").trim()) {
+        console.warn((created.stderr || "").trim());
+      }
+    }
   } else {
     console.log(`PR already open → ${INTEGRATION}: ${prUrl}`);
   }
