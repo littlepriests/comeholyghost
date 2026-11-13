@@ -201,7 +201,7 @@ They are **not** a universal “any TSR download” button. Each script is tuned
 | --- | --- | --- |
 | `scripts/slice-misdreavus.mjs` | `assets-src/sprites/misdreavus-sheet.png` | `misdreavus.png` |
 | `scripts/slice-kagura.mjs` | `assets-src/sprites/kagura-sheet.png` | `kagura-walk`, `kagura-down`, `kagura-attack` |
-| `scripts/slice-sango.mjs` | `assets-src/sprites/sango-sheet.png` | `sango-idle`, `sango-hurt`, `sango-boomerang`, `sango-attack` |
+| `scripts/slice-sango.mjs` | `assets-src/sprites/sango-sheet.png` | `sango-idle`, `sango-boomerang`, `sango-attack` |
 | `scripts/slice-skifree.mjs` | `assets-src/sprites/skifree-sheet.png` | `skifree-yeti` |
 
 ### B1. Install the dependency once

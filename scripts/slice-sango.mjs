@@ -1,4 +1,5 @@
 import fs from "fs";
+import sharp from "sharp";
 import { PNG } from "./node_modules/pngjs/lib/png.js";
 
 const sheet = PNG.sync.read(fs.readFileSync("assets-src/sprites/sango-sheet.png"));
@@ -68,14 +69,11 @@ if (spriteRows.length < 4) {
 
 // Row order on the sheet: idle(+spinning Hiraikotsu), hurt/brace, walk, attack.
 const idleRow = spriteRows[0].frames;
-const hurtRow = spriteRows[1].frames;
 const plans = [
   { id: "sango-idle", frames: idleRow.slice(0, 3), fps: 4, alt: "Sango idle" },
-  // Only the impact pose — earlier cells in this row look like idle and hid the flinch.
-  { id: "sango-hurt", frames: hurtRow.slice(-1), fps: 1, alt: "Sango hurt" },
   // Separate spinning boomerang cells (thrown projectile).
   { id: "sango-boomerang", frames: idleRow.slice(3), fps: 10, alt: "Hiraikotsu" },
-  // Row 2 is walk on the sheet; unused on the site. Attack stays row 3.
+  // Rows 1–2 (hurt, walk) are unused on the site. Attack stays row 3.
   { id: "sango-attack", frames: spriteRows[3].frames, fps: 8, alt: "Sango attack" },
 ];
 
@@ -105,7 +103,8 @@ for (const plan of plans) {
   }
 
   const file = `static/images/sprites/${plan.id}.png`;
-  fs.writeFileSync(file, PNG.sync.write(strip));
+  const packed = await sharp(PNG.sync.write(strip)).png({ compressionLevel: 9, effort: 10 }).toBuffer();
+  fs.writeFileSync(file, packed);
   meta.push({
     id: plan.id,
     src: `images/sprites/${plan.id}.png`,

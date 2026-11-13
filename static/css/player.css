@@ -494,7 +494,8 @@ body {
 
     body:not(.home) #site-player.site-player--simple .player-dock-pet {
         display: flex;
-        grid-column: 1 / -1;
+        /* Button column only, so the pet sits on the stop button (middle of the three). */
+        grid-column: 2;
         grid-row: 1;
         justify-self: center;
     }
@@ -509,6 +510,33 @@ body {
     body:not(.home) #site-player.site-player--simple:not(.site-player--closed) .player-chrome__buttons {
         grid-column: 2;
         grid-row: 2;
+    }
+
+    /* ↑ hangs under the stop button. Lift the bar so both stay on screen. */
+    body:not(.home) #site-player.site-player--simple {
+        transition: transform 0.2s ease;
+    }
+
+    body:not(.home) #site-player [data-player-stop] {
+        anchor-name: --player-stop;
+    }
+
+    body:not(.home) #site-player.site-player--simple:not(.site-player--closed) .player-back-top:not([hidden]) {
+        top: calc(100% + 0.35rem);
+        /* Title width + column gap + one button + half a gap + half a button. */
+        left: calc(4.25rem + 0.35rem + 2rem + 0.125rem + 1rem);
+        left: anchor(center);
+        position-anchor: --player-stop;
+    }
+
+    body:not(.home) #site-player.site-player--simple:not(.site-player--closed):has(.player-back-top:not([hidden])) {
+        transform: translateY(calc(-1 * (1.65rem + 0.35rem)));
+    }
+}
+
+@media (min-width: 45rem) and (prefers-reduced-motion: reduce) {
+    body:not(.home) #site-player.site-player--simple {
+        transition: none;
     }
 }
 

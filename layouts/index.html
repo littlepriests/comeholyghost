@@ -107,7 +107,6 @@ jgs   `'-..._____.-`</pre>
                 {{- $kWalk := dict -}}
                 {{- $kDown := dict -}}
                 {{- $sIdle := dict -}}
-                {{- $sHurt := dict -}}
                 {{- $sAttack := dict -}}
                 {{- $sBoom := dict -}}
                 {{- range .Site.Params.sprites -}}
@@ -115,7 +114,6 @@ jgs   `'-..._____.-`</pre>
                 {{- if eq .id "kagura-walk" }}{{ $kWalk = . }}{{ end -}}
                 {{- if eq .id "kagura-down" }}{{ $kDown = . }}{{ end -}}
                 {{- if eq .id "sango-idle" }}{{ $sIdle = . }}{{ end -}}
-                {{- if eq .id "sango-hurt" }}{{ $sHurt = . }}{{ end -}}
                 {{- if eq .id "sango-attack" }}{{ $sAttack = . }}{{ end -}}
                 {{- if eq .id "sango-boomerang" }}{{ $sBoom = . }}{{ end -}}
                 {{- end -}}
@@ -124,11 +122,6 @@ jgs   `'-..._____.-`</pre>
                     <button type="button" class="dock-sango is-idle site-tip" data-dock-sango aria-label="{{ $sangoTip }}" data-tip="{{ $sangoTip }}">
                         {{- with $sIdle -}}
                         <span class="dock-sango__strip dock-sango__strip--idle is-active">
-                            {{- partial "sprite.html" (dict "src" .src "frameWidth" .frameWidth "frameHeight" .frameHeight "frames" .frames "fps" .fps "alt" "" "scale" "3") -}}
-                        </span>
-                        {{- end -}}
-                        {{- with $sHurt -}}
-                        <span class="dock-sango__strip dock-sango__strip--hurt">
                             {{- partial "sprite.html" (dict "src" .src "frameWidth" .frameWidth "frameHeight" .frameHeight "frames" .frames "fps" .fps "alt" "" "scale" "3") -}}
                         </span>
                         {{- end -}}
