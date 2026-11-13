@@ -1,4 +1,5 @@
 import fs from "fs";
+import sharp from "sharp";
 import { PNG } from "./node_modules/pngjs/lib/png.js";
 
 const sheet = PNG.sync.read(fs.readFileSync("assets-src/sprites/misdreavus-sheet.png"));
@@ -93,7 +94,9 @@ for (let fi = 0; fi < frames.length; fi++) {
   }
 }
 
-fs.writeFileSync("static/images/sprites/misdreavus.png", PNG.sync.write(strip));
+// pngjs writes a loose RGBA file (~18KB). Recompress; pixels stay the same (~3.5KB).
+const packed = await sharp(PNG.sync.write(strip)).png({ compressionLevel: 9, effort: 10 }).toBuffer();
+fs.writeFileSync("static/images/sprites/misdreavus.png", packed);
 fs.writeFileSync(
   "static/images/sprites/misdreavus.json",
   JSON.stringify(

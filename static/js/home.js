@@ -346,7 +346,6 @@
     var kWalkStrip = kagura && kagura.querySelector(".dock-kagura__strip--walk");
     var kDownStrip = kagura && kagura.querySelector(".dock-kagura__strip--down");
     var sIdleStrip = sango && sango.querySelector(".dock-sango__strip--idle");
-    var sHurtStrip = sango && sango.querySelector(".dock-sango__strip--hurt");
     var sAttackStrip = sango && sango.querySelector(".dock-sango__strip--attack");
 
     if (!digits) return;
@@ -365,7 +364,6 @@
     var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     var slashMs = 2600;
     var bumpAt = 0.38;
-    var hurtAt = 0.28;
     var sangoBusy = false;
     var kaguraRecoverTimer = 0;
     var boomTimer = 0;
@@ -466,7 +464,6 @@
 
     function setSangoStrip(mode) {
         if (sIdleStrip) sIdleStrip.classList.toggle("is-active", mode === "idle");
-        if (sHurtStrip) sHurtStrip.classList.toggle("is-active", mode === "hurt");
         if (sAttackStrip) sAttackStrip.classList.toggle("is-active", mode === "attack");
     }
 
@@ -537,21 +534,10 @@
 
     function setSangoIdle() {
         if (!sango) return;
-        sango.classList.remove("is-hurt", "is-attacking", "is-busy");
+        sango.classList.remove("is-attacking", "is-busy");
         sango.classList.add("is-idle");
         setSangoStrip("idle");
         sangoBusy = false;
-    }
-
-    function playSangoHurt() {
-        if (!sango || reduceMotion) return;
-        sangoBusy = true;
-        sango.classList.add("is-busy");
-        sango.classList.remove("is-idle", "is-attacking");
-        sango.classList.add("is-hurt");
-        setSangoStrip("hurt");
-        // Hold the impact pose — the sheet's "hurt row" is mostly idle cells.
-        window.setTimeout(setSangoIdle, 900);
     }
 
     function knockKaguraDown() {
@@ -576,7 +562,7 @@
 
         sangoBusy = true;
         sango.classList.add("is-busy");
-        sango.classList.remove("is-idle", "is-hurt");
+        sango.classList.remove("is-idle");
         sango.classList.add("is-attacking");
         setSangoStrip("attack");
         restartStripAnim(sAttackStrip);
@@ -677,11 +663,6 @@
                     "transform " + slashMs / 1000 + "s cubic-bezier(0.33, 0.12, 0.2, 1)";
                 kagura.style.transform = "translateX(" + travel.endX + "px)";
                 ticker && ticker.classList.add("is-attacking");
-
-                // Wind reaches Sango first (baked into kagura-attack frames), then the ticker.
-                window.setTimeout(function () {
-                    playSangoHurt();
-                }, slashMs * hurtAt);
 
                 window.setTimeout(function () {
                     if (bumped) return;

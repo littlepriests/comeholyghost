@@ -17,7 +17,7 @@
                 {{- with $idle }}
                 <span class="player-dock-pet__strip player-dock-pet__strip--idle" data-player-dock-idle>
                     {{- partial "sprite.html" (dict
-                        "src" (printf "%s?v=4" .src)
+                        "src" (printf "%s?v=5" .src)
                         "frameWidth" .frameWidth
                         "frameHeight" .frameHeight
                         "frames" 1
@@ -31,7 +31,7 @@
                 <span class="player-dock-pet__strip player-dock-pet__strip--kick" data-player-dock-kick hidden>
                     {{- /* Hidden + static until click adds .is-kick-play for one cycle. */ -}}
                     {{- partial "sprite.html" (dict
-                        "src" (printf "%s?v=4" .src)
+                        "src" (printf "%s?v=5" .src)
                         "frameWidth" .frameWidth
                         "frameHeight" .frameHeight
                         "frames" .frames
@@ -94,7 +94,7 @@
                 </button>
             </div>
         </div>
-        {{- /* Outside the dock grid: hangs under chrome, centered with Grundo. */ -}}
+        {{- /* Outside the dock grid: hangs under the stop button, with Grundo. */ -}}
         {{- $backTip := partial "tip-text.html" (dict "key" "player_back_top" "fallback" "back to top") -}}
         <button
             type="button"

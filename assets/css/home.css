@@ -1431,14 +1431,6 @@ body.home .music-prompt__btn[data-music-no]:focus-visible {
     animation-iteration-count: infinite;
 }
 
-.dock-sango.is-hurt .dock-sango__strip--hurt .sprite-anim {
-    filter: brightness(1.15);
-}
-
-.dock-sango.is-hurt {
-    animation: sango-flinch 0.35s ease;
-}
-
 .dock-sango.is-attacking .dock-sango__strip--attack .sprite-anim {
     animation-name: sprite-anim-play-hold;
     animation-timing-function: steps(var(--sprite-steps, 1), end);
@@ -1479,18 +1471,6 @@ body.home .music-prompt__btn[data-music-no]:focus-visible {
 .dock-boomerang .sprite-anim.is-scale-2 {
     transform: scale(2);
     transform-origin: bottom center;
-}
-
-@keyframes sango-flinch {
-    0% {
-        transform: translateX(0);
-    }
-    35% {
-        transform: translateX(-6px);
-    }
-    100% {
-        transform: translateX(0);
-    }
 }
 
 .ticker__count {
@@ -1574,11 +1554,6 @@ body.home .music-prompt__btn[data-music-no]:focus-visible {
     .dock-boomerang {
         display: none;
     }
-
-    .dock-sango.is-hurt {
-        animation: none;
-    }
-
     body.home pre.ascii-moon {
         text-shadow: none;
     }

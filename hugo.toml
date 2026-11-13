@@ -115,15 +115,6 @@ fps = 4
 alt = "Sango idle"
 
 [[params.sprites]]
-id = "sango-hurt"
-src = "images/sprites/sango-hurt.png"
-frameWidth = 30
-frameHeight = 41
-frames = 1
-fps = 1
-alt = "Sango hurt"
-
-[[params.sprites]]
 id = "sango-boomerang"
 src = "images/sprites/sango-boomerang.png"
 frameWidth = 45

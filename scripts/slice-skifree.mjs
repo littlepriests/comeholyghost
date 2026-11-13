@@ -1,4 +1,5 @@
 import fs from "fs";
+import sharp from "sharp";
 import { PNG } from "./node_modules/pngjs/lib/png.js";
 
 const sheet = PNG.sync.read(fs.readFileSync("assets-src/sprites/skifree-sheet.png"));
@@ -70,7 +71,7 @@ console.log(
   }))
 );
 
-function writeStrip(id, frames, fps, alt) {
+async function writeStrip(id, frames, fps, alt) {
   if (!frames.length) throw new Error("no frames for " + id);
   const cellW = Math.max(...frames.map((f) => f.w));
   const cellH = Math.max(...frames.map((f) => f.h));
@@ -93,7 +94,8 @@ function writeStrip(id, frames, fps, alt) {
     }
   }
   const file = `static/images/sprites/${id}.png`;
-  fs.writeFileSync(file, PNG.sync.write(strip));
+  const packed = await sharp(PNG.sync.write(strip)).png({ compressionLevel: 9, effort: 10 }).toBuffer();
+  fs.writeFileSync(file, packed);
   console.log("wrote", file, cellW, "x", cellH, "*", frames.length);
   return {
     id,
@@ -117,7 +119,7 @@ const yetiRow = original
   .filter((r) => r.h >= 40 && r.frames.length >= 3)
   .sort((a, b) => b.frames.length - a.frames.length)[0];
 if (yetiRow) {
-  meta.push(writeStrip("skifree-yeti", yetiRow.frames, 3, "SkiFree yeti"));
+  meta.push(await writeStrip("skifree-yeti", yetiRow.frames, 3, "SkiFree yeti"));
 }
 
 if (!meta.length) {
