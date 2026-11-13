@@ -258,6 +258,14 @@ yetiIconPos = "right"
     [menu.main.params]
       row = 2
 
+# Article photos live in the post folder. Publish only the resized files
+# templates ask for, not the master next to index.md.
+[[cascade]]
+  [cascade.build]
+    publishResources = false
+  [cascade.target]
+    path = "/blog/**"
+
 [taxonomies]
 category = "categories"
 tag = "tags"

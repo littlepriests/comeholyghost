@@ -332,3 +332,81 @@ body.section-blog.kind-page .page-footer__yeti-badge--word {
 .subscribe-dialog__cancel:focus-visible {
     color: var(--fg, #eee);
 }
+
+/* /unsubscribe/ — same dialog vibe, page form */
+.unsubscribe-page__lede {
+    margin: 0 0 1rem;
+    color: var(--muted, #9a93a8);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.unsubscribe-page__form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-width: 22rem;
+}
+
+.unsubscribe-page__label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    color: var(--muted, #9a93a8);
+}
+
+.unsubscribe-page__label input {
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--fg, #eee);
+    background: color-mix(in srgb, var(--inner-bg, #44355B) 55%, transparent);
+    border: 1px solid color-mix(in srgb, var(--fg, #eee) 18%, transparent);
+    border-radius: 0.15rem;
+    padding: 0.45rem 0.55rem;
+}
+
+.unsubscribe-page__hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+.unsubscribe-page__error,
+.unsubscribe-page__ok {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.unsubscribe-page__error {
+    color: #ff7a8a;
+}
+
+.unsubscribe-page__ok {
+    color: var(--highlight, #18ff6d);
+}
+
+.unsubscribe-page__submit {
+    appearance: none;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 0.4rem 0.7rem;
+    border-radius: 0.15rem;
+    border: 1px solid var(--highlight, #18ff6d);
+    background: transparent;
+    color: var(--highlight, #18ff6d);
+}
+
+.unsubscribe-page__submit:hover,
+.unsubscribe-page__submit:focus-visible {
+    background: color-mix(in srgb, var(--highlight, #18ff6d) 14%, transparent);
+}
+
+.unsubscribe-page__submit:disabled {
+    opacity: 0.55;
+    cursor: wait;
+}

@@ -43,7 +43,7 @@ content/blog/<slug>/
 
 ### Image size (masters)
 
-Prefer **WebP** (or compressed JPEG) under ~300–500 KB for article masters. Multi‑MB PNGs hurt first paint even when shortcodes serve Hugo-resized WebP thumbs — the original still ships in the repo/deploy. `photo` / `photo-grid` / `figcaption` / writing-index previews already emit processed WebP display sizes from page resources; keep the source file reasonable too.
+Prefer **WebP** (or compressed JPEG) under ~300–500 KB for article masters so the repo stays small. Blog bundles set `publishResources = false`, so the build does not publish that master. `photo` serves a 1400px WebP and a 1600px click-to-expand WebP; `photo-grid` uses an 800px tile and the same 1600px expand; `figcaption` and the writing-index preview use their own resized WebP. Keep the source file reasonable so Hugo has less to resize.
 
 **In-place recompress (keep the repo lean):** drop camera files into the post folder, then:
 
@@ -58,6 +58,8 @@ Default path is `content/blog`. Converts `.jpg`/`.png` → lossy WebP (long edge
 - **`--force`:** recompress even corn-marked WebP (opt-in; can soften).
 
 Use `--dry-run` first. One-time alias install (PowerShell, any cwd): `powershell -ExecutionPolicy Bypass -File scripts/install-corn.ps1` — or from the repo root run `.\corn compress …`.
+
+A commit runs that same check on staged images under `content/`. If `corn compress` would still change one, the commit stops. Corn-marked WebPs and already-small unmarked WebPs pass with nothing to do.
 
 Writing-index (`/blog/`) preview: shows near-full size with `object-fit: contain` (no crop/stretch). Oversized masters are Fit-capped in `layouts/partials/blog-entry.html`; on-page max width/height live in `static/css/blog-index.css`. Adjust those when a card looks too big or too small — details in `docs/resources.md`.
 

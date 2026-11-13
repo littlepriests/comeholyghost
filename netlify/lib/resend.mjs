@@ -49,12 +49,24 @@ export async function addContact(cfg, email) {
     return { ok: false, created: false, status: result.status, body: result.body };
 }
 
+/** Mark a contact unsubscribed (stops Broadcasts). */
+export async function unsubscribeContact(cfg, email) {
+    const encoded = encodeURIComponent(String(email || "").trim().toLowerCase());
+    return resendRequest(cfg.apiKey, `/contacts/${encoded}`, { unsubscribed: true }, "PATCH");
+}
+
 export async function sendWelcomeEmail(cfg, email, html) {
+    const origin = (cfg.siteOrigin || "https://cornfieldjournal.com").replace(/\/$/, "");
+    const unsubApi = `${origin}/api/unsubscribe?email=${encodeURIComponent(email)}`;
     return resendRequest(cfg.apiKey, "/emails", {
         from: cfg.from,
         to: [email],
         subject: "welcome to the FIELD",
-        html
+        html,
+        headers: {
+            "List-Unsubscribe": `<${unsubApi}>`,
+            "List-Unsubscribe-Post": "List-Unsubscribe=One-Click"
+        }
     });
 }
 

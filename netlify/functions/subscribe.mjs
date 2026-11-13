@@ -85,7 +85,10 @@ export default async (request) => {
     // Welcome only for brand-new contacts (409 = already on the list).
     if (contact.created) {
         try {
-            const welcomeHtml = await renderWelcomeEmail();
+            const welcomeHtml = await renderWelcomeEmail({
+                email,
+                origin: cfg.siteOrigin
+            });
             const sent = await sendWelcomeEmail(cfg, email, welcomeHtml);
             if (!sent.ok) {
                 return json(502, {
