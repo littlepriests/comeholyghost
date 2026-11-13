@@ -24,5 +24,6 @@ if (!dataUrl) {
 
 const b64 = dataUrl.slice(dataUrl.indexOf(",") + 1);
 fs.mkdirSync("static/images/sprites", { recursive: true });
-fs.writeFileSync("static/images/sprites/misdreavus-sheet.png", Buffer.from(b64, "base64"));
-console.log("wrote", fs.statSync("static/images/sprites/misdreavus-sheet.png").size, "bytes");
+fs.mkdirSync("assets-src/sprites", { recursive: true });
+fs.writeFileSync("assets-src/sprites/misdreavus-sheet.png", Buffer.from(b64, "base64"));
+console.log("wrote", fs.statSync("assets-src/sprites/misdreavus-sheet.png").size, "bytes");

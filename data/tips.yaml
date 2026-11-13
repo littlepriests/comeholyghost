@@ -1,4 +1,4 @@
-# Hover flavor for decorative site chrome (sprites, pets, player, skin, UI chips).
+# Hover flavor for decorative site chrome (sprites, pets, player, UI chips).
 # Edit here → corn run / Hugo rebuild. Tips follow the cursor (site-tips.js).
 #
 # Photos/posts: use shortcode params instead, e.g.
@@ -14,7 +14,6 @@ player_reopen: show player
 player_play: play
 player_stop: hide player
 player_skip: next track
-winamp: little winamp
 
 grundo: orange menace
 sango: throw it

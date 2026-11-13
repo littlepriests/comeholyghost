@@ -1,7 +1,7 @@
 import fs from "fs";
 import { PNG } from "./node_modules/pngjs/lib/png.js";
 
-const sheet = PNG.sync.read(fs.readFileSync("static/images/sprites/misdreavus-sheet.png"));
+const sheet = PNG.sync.read(fs.readFileSync("assets-src/sprites/misdreavus-sheet.png"));
 const { width, height, data } = sheet;
 
 const px = (x, y) => {

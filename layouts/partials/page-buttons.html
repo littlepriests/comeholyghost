@@ -1,4 +1,5 @@
 {{ with .Params.buttons }}
+<link rel="stylesheet" href="{{ "css/buttons.css" | relURL }}?v=3">
 <p class="site-buttons">
     {{ range . }}
     {{- $name := "" -}}

@@ -10,8 +10,8 @@
         padding-right: 0;
         padding-left: 0;
         display: grid;
-        grid-template-columns: minmax(0, 1fr) var(--skin-width);
-        column-gap: var(--skin-gap, 1.5rem);
+        grid-template-columns: minmax(0, 1fr) var(--aside-width);
+        column-gap: var(--aside-gap, 1.5rem);
         align-items: start;
     }
 

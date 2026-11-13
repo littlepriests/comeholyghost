@@ -287,8 +287,8 @@ Registered ids (today):
 
 - `misdreavus`
 - `kagura-walk`, `kagura-down`, `kagura-attack`
-- `sango-idle`, `sango-walk`, `sango-hurt`, `sango-attack`, `sango-boomerang`
-- `skifree-ski`, `skifree-yeti`, `skifree-crash`
+- `sango-idle`, `sango-hurt`, `sango-attack`, `sango-boomerang`
+- `skifree-yeti`
 
 `scale` is optional (`2` or `3`). Unknown ids render a visible missing marker.
 
