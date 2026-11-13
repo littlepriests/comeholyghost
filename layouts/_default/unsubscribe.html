@@ -1,0 +1,22 @@
+{{ define "main" }}
+<header class="content__header">
+  <h1>{{ .Title }}</h1>
+</header>
+<div class="content__body unsubscribe-page" data-unsubscribe-page>
+  <p class="unsubscribe-page__lede">accident? no hard feelings — leave the FIELD list here.</p>
+  <form class="unsubscribe-page__form" data-unsubscribe-form>
+    <label class="unsubscribe-page__label">email
+      <input type="email" name="email" required autocomplete="email" maxlength="200" placeholder="you@example.com" data-unsubscribe-email>
+    </label>
+    <label class="unsubscribe-page__hp" aria-hidden="true">Leave blank
+      <input type="text" name="website" tabindex="-1" autocomplete="off">
+    </label>
+    <p class="unsubscribe-page__error" data-unsubscribe-error hidden></p>
+    <p class="unsubscribe-page__ok" data-unsubscribe-ok hidden></p>
+    <div class="unsubscribe-page__actions">
+      <button type="submit" class="unsubscribe-page__submit" data-unsubscribe-submit>unsubscribe</button>
+    </div>
+  </form>
+  <script src="{{ "js/unsubscribe.js" | relURL }}?v=1"></script>
+</div>
+{{ end }}

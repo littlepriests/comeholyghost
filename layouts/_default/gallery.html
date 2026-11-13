@@ -46,12 +46,14 @@
                 {{ $img := .img }}
                 {{ $post := .post }}
                 {{ $thumb := $img }}
-                {{ $full := $img.RelPermalink }}
+                {{ $full := "" }}
                 {{ if ne $img.MediaType.SubType "svg" }}
                     {{/* Center-crop to a square so the thumb never distorts. */}}
                     {{ $thumb = $img.Fill "600x600 Center" }}
-                    {{ $large := $img.Fit "2400x2400 webp q80" }}
+                    {{ $large := $img.Fit "1600x1600 webp q70" }}
                     {{ $full = $large.RelPermalink }}
+                {{ else }}
+                    {{ $full = $img.RelPermalink }}
                 {{ end }}
                 {{ $alt := $post.Title }}
                 {{ with $img.Title }}{{ $alt = . }}{{ end }}
@@ -73,6 +75,7 @@
         </main>
     </div>
     <script src="{{ "js/gallery-veil.js" | relURL }}?v=5"></script>
+    <script src="{{ "js/article-media.js" | relURL }}?v=2"></script>
     </div>
     {{ partial "stars.html" . }}
     {{ partial "backdrop.html" . }}
@@ -80,6 +83,5 @@
     {{ partial "subscribe-dialog.html" . }}
     <script src="{{ "js/site-tips.js" | relURL }}?v=2"></script>
     <script src="{{ "js/subscribe.js" | relURL }}?v=4"></script>
-    <script src="{{ "js/article-media.js" | relURL }}?v=2"></script>
 </body>
 </html>

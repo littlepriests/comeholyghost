@@ -1,6 +1,7 @@
 import { readdir, readFile, access } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { publishedImageUrl } from "./email-templates.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const BLOG_DIR = path.join(ROOT, "content", "blog");
@@ -86,7 +87,9 @@ export async function listBlogPosts(origin) {
 
         const heroFile = parsed.meta.index_image || parsed.meta.image || "";
         const heroUrl = heroFile
-            ? `${site}/blog/${slug}/${String(heroFile).replace(/^\.\//, "")}`
+            ? publishedImageUrl(String(heroFile).replace(/^\.\//, ""), `${site}/blog/${slug}`, {
+                  email: true
+              })
             : "";
 
         posts.push({

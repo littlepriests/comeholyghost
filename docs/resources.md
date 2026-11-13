@@ -8,7 +8,7 @@ The dev server is `hugo server -D --disableFastRender --navigateToChanged` from 
 
 What we tightened (keep the GeoCities vibe; don’t gut atmosphere):
 
-- **Images:** article masters as WebP where possible; `photo` / `figcaption` / `photo-grid` / writing-index serve Hugo-processed WebP display sizes from page resources. Prefer masters under ~300–500 KB (see `docs/posting.md`).
+- **Images:** article masters stay in the repo as WebP and are not published. `photo` / `figcaption` / `photo-grid` / writing-index serve Hugo-processed WebP only (click-to-expand is 1600px q70). Prefer masters under ~300–500 KB (see `docs/posting.md`).
 - **Fonts / icons:** self-hosted WOFF2 only — Fira Mono (`static/fonts/fira-mono-*.woff2`, `static/css/site-fonts.css`), Montserrat variable (`article-font.css`), DotMatrixNarrow (homepage title). Site vs article faces via `[params.fonts]` (see **Fonts** below). No Google Fonts / Font Awesome / Academicons CDN. Icons via `layouts/partials/icon.html`.
 - **CSS scope:** always-on chrome in `layouts/partials/head.html` (player, reading, subscribe, stars, sprites, backdrop). `retro.css` is homepage-only and scoped to `body.home`. `buttons.css` loads only with button markup. `article-reading` (blog posts), `article-media` / `blog-index` load from their layouts. Gallery / guestbook keep their own sheets. Base layout CSS lives in `assets/css/` (forked from Risotto; unused palettes dropped).
 - **Atmosphere JS:** bubble cursor self-hosted (`static/js/vendor/cursor-effects.esm.js` v1.0.18), homepage + desktop only. Stars: fewer on phone / `prefers-reduced-motion`; no scroll voiding on narrow viewports.
@@ -305,7 +305,7 @@ The look is `static/css/buttons.css`, linked from `themes/risotto/layouts/partia
 
 ## Article media shortcodes
 
-Posts and pages can embed framed pictures without raw HTML. Both shortcodes live under `layouts/shortcodes/`. Styles are `static/css/article-media.css`; the photo lightbox is `static/js/article-media.js` (loaded from the theme head on pages that need it).
+Posts and pages can embed framed pictures without raw HTML. Both shortcodes live under `layouts/shortcodes/`. Styles are `static/css/article-media.css`; the photo lightbox is `static/js/article-media.js`. The script tag sits inside `#page-root` (home, base layout, gallery) so same-site navigation, which only swaps that node, still loads it.
 
 Put the image next to the markdown as a **page resource** (same folder as `index.md`, or listed in front matter `[[resources]]`), or use a path under `static/` (for example `images/foo.png`).
 
@@ -474,7 +474,7 @@ You still **merge feature PRs into `preview` in GitHub** yourself. `corn deploy`
 
 `netlify.toml` already uses a separate build command for deploy-preview / branch-deploy (no newsletter auto-send). Keep `NEWSLETTER_AUTO_SEND` on **production** only.
 
-**Metered APIs on preview:** builds bake `CONTEXT` into the page. On `deploy-preview` / `branch-deploy`, the browser **skips** `/api/visitors`, `/api/guestbook`, and `/api/subscribe` (local fallbacks / “preview only” messages). Functions also no-op Blobs/Resend if something still hits them. Production is unchanged. Static page views still count as normal web requests/bandwidth.
+**Metered APIs on preview:** builds bake `CONTEXT` into the page. On `deploy-preview` / `branch-deploy`, the browser **skips** `/api/visitors`, `/api/guestbook`, `/api/subscribe`, and `/api/unsubscribe` (local fallbacks / “preview only” messages). Functions also no-op Blobs/Resend if something still hits them. Production is unchanged. Static page views still count as normal web requests/bandwidth.
 
 ## Newsletter (Resend)
 
@@ -499,7 +499,7 @@ Optional local: same vars in a gitignored `.env` for `netlify dev` / `--send`.
 
 ### Behavior
 
-- **Subscribe:** adds the contact to the segment; sends `emails/welcome.html` once (skipped if they were already on the list).
+- **Subscribe:** adds the contact to the segment; sends the welcome letter once (skipped if they were already on the list). Edit copy in `emails/welcome.md`; chrome is `emails/welcome.html`. Welcome is transactional (not a Broadcast), so unsub is a site link to `/unsubscribe/` + `POST /api/unsubscribe` (marks the Resend contact `unsubscribed`). Post letters still use `{{{RESEND_UNSUBSCRIBE_URL}}}`.
 - **New posts:** `scripts/newsletter-on-deploy.mjs` runs after Hugo. First run **seeds** a ledger with every existing post (nothing historical is emailed). Later deploys broadcast only slugs not yet in the ledger via Resend **Broadcasts** (not transactional `/emails`). Skip a post with front matter `newsletter = false`.
 - **Ledger:** Netlify Blobs store `newsletter` / key `sent` on deploy; locally `.newsletter-sent.json` (gitignored).
 
@@ -509,7 +509,7 @@ Optional local: same vars in a gitignored `.env` for `netlify dev` / `--send`.
 corn email
 ```
 
-(or `npm run emails:preview`) Rebuilds `emails/preview/`. Open `emails/preview/index.html`. Edit `emails/welcome.html` / `emails/post.html`, re-run. Post template placeholders: `{{TITLE}}` `{{DATE}}` `{{SUMMARY}}` `{{PERMALINK}}` `{{HERO_BLOCK}}` `{{BODY}}`; leave `{{{RESEND_UNSUBSCRIBE_URL}}}` for Broadcasts.
+(or `npm run emails:preview`) Rebuilds `emails/preview/`. Serve HTML with `npx serve emails/preview -p 3939` and local Hugo assets with `npx serve public -p 3940` (preview image URLs point at `:3940` so Fit hashes match this build). Welcome copy: `emails/welcome.md`. Post chrome: `emails/post.html` (body comes from the Hugo post). Placeholders: `{{TITLE}}` `{{DATE}}` `{{SUMMARY}}` `{{PERMALINK}}` `{{HERO_BLOCK}}` `{{BODY}}`; leave `{{{RESEND_UNSUBSCRIBE_URL}}}` for Broadcasts. Photo-grids render as 2-up tables (no lightbox); img `alt` is “go to site for full image”.
 
 ```bash
 npm run newsletter:dry    # list what would send

@@ -43,7 +43,8 @@ Local site
   run --cache        Wipe Hugo image cache, then server (stale thumbs)
 
 Content / assets
-  compress [path…]   In-place WebP recompress (default: content/blog)
+  compress [path…]   In-place WebP recompress (default: content/blog).
+                     Commits refuse staged content/ images this would still change.
   edit [path…]       Vale + be-density prose check (default: content/)
   md [path…]         markdownlint + wrap prose to 80 cols
   email              Rebuild newsletter HTML under emails/preview/

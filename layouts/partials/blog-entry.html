@@ -34,13 +34,13 @@
 {{- $previewMaxH := 720 -}}
 {{- if $imgSrc -}}
   {{- with .Resources.GetMatch $imgSrc -}}
-    {{- $full = .RelPermalink -}}
     {{- if ge .Width 1 -}}
       {{- /* Fit downscales only; smaller masters keep native pixel size. */ -}}
       {{- $thumb = (.Fit (printf "%dx%d webp q80" $previewMaxW $previewMaxH)).RelPermalink -}}
-      {{- $full = (.Fit "2400x2400 webp q80").RelPermalink -}}
+      {{- $full = (.Fit "1600x1600 webp q70").RelPermalink -}}
     {{- else -}}
       {{- $thumb = .RelPermalink -}}
+      {{- $full = $thumb -}}
     {{- end -}}
   {{- else -}}
     {{- $full = $imgSrc | relURL -}}

@@ -1,5 +1,5 @@
 /**
- * Preview / branch deploys skip Netlify Function calls (visitors, guestbook, subscribe)
+ * Preview / branch deploys skip Netlify Function calls (visitors, guestbook, subscribe, unsubscribe)
  * so they don't burn function compute. Set at build time in head.html.
  */
 (function () {

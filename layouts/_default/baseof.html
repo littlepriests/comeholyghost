@@ -39,6 +39,8 @@
             </footer>
 
         </div>
+        {{- /* Inside #page-root so same-site nav (which only swaps that node) loads the lightbox. */ -}}
+        <script src="{{ "js/article-media.js" | relURL }}?v=2"></script>
         </div>
         {{ partial "stars.html" . }}
         {{ partial "backdrop.html" . }}
@@ -46,7 +48,6 @@
         {{ partial "subscribe-dialog.html" . }}
         <script src="{{ "js/site-tips.js" | relURL }}?v=2"></script>
         <script src="{{ "js/subscribe.js" | relURL }}?v=4"></script>
-        <script src="{{ "js/article-media.js" | relURL }}?v=2"></script>
     </body>
 
 </html>
