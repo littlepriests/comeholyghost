@@ -9,7 +9,7 @@ this site is inspired by commonplace journals, tumblr + livejournal, jenny nicho
 
 ## footnotes
 
-- hugo with [risotto theme](https://themes.gohugo.io/themes/risotto/)
+- hugo (layout started from the [risotto theme](https://themes.gohugo.io/themes/risotto/), now site-owned)
 - music: _symphonic suite akira_ (1988) by geinoh yamashirogumi
 - kagura banner from inuyasha ep67, "the howling wind of betrayal"
 - ascii art roundup
@@ -21,8 +21,3 @@ this site is inspired by commonplace journals, tumblr + livejournal, jenny nicho
   - [misdreavus](https://www.spriters-resource.com/ds_dsi/pokemonblackwhite/asset/35479/) by ploaj
   - [kagura](https://www.spriters-resource.com/wonderswan_wsc/inuyashafuuunemaki/asset/13358/) by unknown
   - [sango](https://www.spriters-resource.com/wonderswan_wsc/inuyashafuuunemaki/asset/13363/) by dee
-- opaline winamp skin from [winamp skins museum](https://skins.webamp.org/)
-  - cover art by michael godard http://www.michaelgodard.com
-  - opaline by dishwalla http://www.dishwalla.com
-  - skin created by jared harley
-  - i don't know this group, but i loved the art

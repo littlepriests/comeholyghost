@@ -1,7 +1,7 @@
 import fs from "fs";
 import { PNG } from "./node_modules/pngjs/lib/png.js";
 
-const sheet = PNG.sync.read(fs.readFileSync("static/images/sprites/sango-sheet.png"));
+const sheet = PNG.sync.read(fs.readFileSync("assets-src/sprites/sango-sheet.png"));
 const { width, height, data } = sheet;
 
 const px = (x, y) => {
@@ -75,7 +75,7 @@ const plans = [
   { id: "sango-hurt", frames: hurtRow.slice(-1), fps: 1, alt: "Sango hurt" },
   // Separate spinning boomerang cells (thrown projectile).
   { id: "sango-boomerang", frames: idleRow.slice(3), fps: 10, alt: "Hiraikotsu" },
-  { id: "sango-walk", frames: spriteRows[2].frames, fps: 6, alt: "Sango walk" },
+  // Row 2 is walk on the sheet; unused on the site. Attack stays row 3.
   { id: "sango-attack", frames: spriteRows[3].frames, fps: 8, alt: "Sango attack" },
 ];
 

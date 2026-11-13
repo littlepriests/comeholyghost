@@ -4,12 +4,12 @@
   Sitewide stars live in stars.css / stars.js. Bubble cursor is layouts/partials/cursor-effects.html.
 */
 
-.retro-media,
-.home-banner,
-.gallery a,
-.article-photo__thumb,
-.content__body p:has(> img:only-child),
-.page__body p:has(> img:only-child) {
+body.home .retro-media,
+body.home .home-banner,
+body.home .gallery a,
+body.home .article-photo__thumb,
+body.home .content__body p:has(> img:only-child),
+body.home .page__body p:has(> img:only-child) {
     position: relative;
     display: block;
     max-width: 100%;
@@ -17,23 +17,23 @@
     overflow: hidden;
 }
 
-.retro-media > img,
-.home-banner > img,
-.gallery a > img,
-.article-photo__thumb > img,
-.content__body p:has(> img:only-child) > img,
-.page__body p:has(> img:only-child) > img {
+body.home .retro-media > img,
+body.home .home-banner > img,
+body.home .gallery a > img,
+body.home .article-photo__thumb > img,
+body.home .content__body p:has(> img:only-child) > img,
+body.home .page__body p:has(> img:only-child) > img {
     display: block;
     width: 100%;
     max-width: 100%;
     height: auto;
 }
 
-.home-banner > img {
+body.home .home-banner > img {
     filter: contrast(1.04) saturate(1.06) brightness(1.01);
 }
 
-.gallery a {
+body.home .gallery a {
     background: var(--inner-bg, #44355B);
 }
 

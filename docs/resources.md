@@ -10,7 +10,7 @@ What we tightened (keep the GeoCities vibe; don’t gut atmosphere):
 
 - **Images:** article masters as WebP where possible; `photo` / `figcaption` / `photo-grid` / writing-index serve Hugo-processed WebP display sizes from page resources. Prefer masters under ~300–500 KB (see `docs/posting.md`).
 - **Fonts / icons:** self-hosted WOFF2 only — Fira Mono (`static/fonts/fira-mono-*.woff2`, `static/css/site-fonts.css`), Montserrat variable (`article-font.css`), DotMatrixNarrow (homepage title). Site vs article faces via `[params.fonts]` (see **Fonts** below). No Google Fonts / Font Awesome / Academicons CDN. Icons via `layouts/partials/icon.html`.
-- **CSS scope:** always-on chrome in theme `head.html` (player, reading, retro, stars, sprites, buttons). `article-reading` (blog posts), `article-media` / `blog-index` load from their layouts (inside `#page-root` for SPA). Gallery / guestbook keep their own sheets. Prefer site-owned sheets over editing Risotto core.
+- **CSS scope:** always-on chrome in `layouts/partials/head.html` (player, reading, subscribe, stars, sprites, backdrop). `retro.css` is homepage-only and scoped to `body.home`. `buttons.css` loads only with button markup. `article-reading` (blog posts), `article-media` / `blog-index` load from their layouts. Gallery / guestbook keep their own sheets. Base layout CSS lives in `assets/css/` (forked from Risotto; unused palettes dropped).
 - **Atmosphere JS:** bubble cursor self-hosted (`static/js/vendor/cursor-effects.esm.js` v1.0.18), homepage + desktop only. Stars: fewer on phone / `prefers-reduced-motion`; no scroll voiding on narrow viewports.
 - **npm:** project `.npmrc` → `registry.npmjs.org` only. Before any zip, confirm lockfile `resolved` URLs are all `registry.npmjs.org` (no private registry hosts).
 
@@ -66,8 +66,8 @@ Refresh strips from source sheets (fan-use test assets; Nintendo / game publishe
 
 - Misdreavus: `node scripts/slice-misdreavus.mjs` (needs `misdreavus-sheet.png`; front hover loop only, no shiny/back)
 - Kagura rows: `node scripts/slice-kagura.mjs` (needs `kagura-sheet.png`; each row → `kagura-walk`, `kagura-down`, `kagura-attack`)
-- Sango (TSR #13363 InuYasha: Fūun Emaki): `node scripts/slice-sango.mjs` → `sango-idle`, `sango-hurt` (impact pose only), `sango-boomerang` (flying Hiraikotsu spin), `sango-walk`, `sango-attack`
-- SkiFree (TSR #26926): `node scripts/slice-skifree.mjs` → `skifree-ski`, `skifree-yeti`, `skifree-crash` (original block only)
+- Sango (TSR #13363 InuYasha: Fūun Emaki): `node scripts/slice-sango.mjs` → `sango-idle`, `sango-hurt` (impact pose only), `sango-boomerang` (flying Hiraikotsu spin), `sango-attack`
+- SkiFree (TSR #26926): `node scripts/slice-skifree.mjs` → `skifree-yeti` (original block only)
 - Grundo (TSR #186604, LonelyMarowak): `node scripts/slice-grundo.mjs` → `grundo-idle`, `grundo-kick` (orange row; dock pet)
 
 `pngjs` for the slicers lives under `scripts/node_modules` (`npm install pngjs --prefix scripts`).
@@ -121,9 +121,9 @@ Gallery-only. One SunnyNeo Faerie Krawk GIF (`static/images/glitters/faerie-kraw
 
 ## Hover tips (`data/tips.yaml`)
 
-Native `title=` tooltips sit under the cursor and fight the bubble cursor / Winamp stacking. Use instead:
+Native `title=` tooltips sit under the cursor and fight the bubble cursor. Use instead:
 
-- **Decorative chrome** (sprites, pets, player, Winamp, logo, email chip): edit **`data/tips.yaml`** keys (`grundo`, `sango`, `kagura`, `winamp`, `player_play`, …). Optional `social:` overrides by hugo.toml link title.
+- **Decorative chrome** (sprites, pets, player, logo, email chip): edit **`data/tips.yaml`** keys (`grundo`, `sango`, `kagura`, `player_play`, …). Optional `social:` overrides by hugo.toml link title.
 - **Article photos**: case-by-case on the shortcode — `tip="…"` (and `alt=` / `caption=` as usual), not the YAML map.
 - Templates resolve YAML via `layouts/partials/tip-text.html` → `data-tip` + class `site-tip`
 - `static/js/site-tips.js` draws a **fixed** `.site-tip-float` that **follows the pointer** (ahead of the cursor; `z-index: 13000`)
@@ -198,10 +198,9 @@ Sizes the layout actually uses. `1rem` is 16px unless the browser's default font
 - Cursor image: 32×32. Hotspot `x` and `y` are pixels from the top left. The starter arrow is `0` `0`.
 - Banner file: the starter SVG is 1200×280. On the page it fills the homepage column, which is at most 40rem wide, and its height follows the picture, capped at 16rem. The empty frame is at least 8rem tall.
 - Homepage writing column: at most 38rem wide, centered under the banner. That is about 60 characters of the monospace face, which is the reading width the column keeps.
-- Inner pages: the page is at most 53rem wide. At 45rem and wider the aside column is exactly `--skin-width` (275px) with `--skin-gap` (1.5rem) padding from the body; the Opaline skin sits in that column and sidebar matter (date, etc.) stacks under it. Body is clipped so images can’t spill into the skin. Below 45rem the skin drops to the bottom right.
+- Inner pages: the page is at most 53rem wide. At 45rem and wider the aside column is `--aside-width` (275px) with `--aside-gap` (1.5rem) from the body. Sidebar matter (date, etc.) sits in that column. Body is clipped so images don’t spill into the aside. Below 45rem the simple player sits fixed bottom-right.
 - Gallery tiles: 9.5rem square. Each thumb is cropped to 600×600 before it is shown.
-- Guestbook: below 45rem the column is at most 40rem. At 45rem and wider the page uses the same 53rem middle column as the other inner pages, with the 15rem right column, so the form stays to the left of the skin and between the corner pictures.
-- Winamp skin (inner pages only): a classic main window is 275×116. This site stacks the main window, the equalizer, and the playlist, so the unscaled stack is 275×348. On screen the width is 15rem, or the viewport minus 2rem when that is smaller, and the height scales with the width. After the skin loads, `static/js/player.js` measures the open windows and writes `--skin-box-width` and `--skin-box-height`.
+- Guestbook: below 45rem the column is at most 40rem. At 45rem and wider the page uses the same 53rem middle column as the other inner pages, with the 275px right column, so the form stays left of the aside.
 - Homepage player: a compact icon bar (play/pause, stop, skip) sits in `.home-player-slot` beside the visitor-count digits (no “Visitors” label). JS measures it into `--simple-player-width` and `--simple-player-height` so the dock stays vertically centered as a pair.
 - Atmosphere: `.home-stars` via `layouts/partials/stars.html` / `static/js/stars.js` (~153 CSS dots + ~5 sparse Joan-style `\/` ASCII stars in the side gutters, away from text). Homepage moon is Joan G. Stark’s “man in the moon” (`.ascii-moon`, `jgs` kept), centered in the left grid column and scrolling with the page. First homepage session only: when the visitor ticker scrolls into view, large Kagura attacks across the dock with feet on the player/ticker baseline, the count bumps mid-slash with `+1` (Sango in `.home-dock__pet--left` flinches into `sango-hurt` then returns to idle), then Kagura crossfades to a ~30% smaller `kagura-walk` and parks in `.home-dock__pet--right` (`static/js/home.js`). Returning visits keep Kagura idle-walking right and Sango idle left. Click Sango to play `sango-attack`; mid-swing knocks Kagura into `kagura-down`, then she gets back up to walk; Sango returns to idle when the attack strip finishes (Hiraikotsu home). Sword figure is vertically aligned to that dock band. If they leave without seeing the attack, the count still bumps once with no park. Counts 10 / 100 / 1000 also get a green milestone glow.
 - Media polish: `static/css/retro.css` adds twinkling corner sparkles on the **homepage banner only** — not gallery, article, or writing-index thumbs. No border, no purple wash, no scanlines.
@@ -519,18 +518,14 @@ npm run newsletter:send -- --slug my-post   # force one (needs Resend env)
 
 ## Player
 
-Playlist continuity: HTML `<audio>` is the only real transport (play / pause / skip / auto-next) and survives SPA navigations. Winamp is visual chrome only — no `initialTracks` / no `setTracksToPlay` handoff (those autoplayed on load and on every inner-page visit). On desktop inner pages, when the skin scrolls out of view an `IntersectionObserver` adds `site-player--docked`: the minimalist chrome is `position: fixed; top: 50%` (mid-viewport / scrollbar axis) and `placeDockedChrome()` centers it horizontally on the Winamp column (`#winamp-host` / `#site-player` — not `<main>`, so /gallery and /guestbook stay on the right skin gutter). Orange Grundo (`grundo-idle`) sits above the controls; play / pause / stop / skip briefly plays `grundo-kick` then returns to idle. A ⌃ **back to top** control docks under that chrome once you’ve scrolled (~160px); same control sits under the simple/mobile bar. When the skin returns, the dock hides. Same buttons / same audio — reading scroll position is untouched. Mobile keeps the bottom simple bar. Per-article end-of-body ⌃ remains optional via front matter `back_to_top = true`.
-
-Two looks, one player. The homepage shows a simple icon bar (play/pause, stop, skip) in the footer dock beside Visitors — no outer player border, button borders stay. Long titles scroll right-to-left inside a fixed 4.75rem slot (`is-marquee` when the text overflows). Desktop inner pages show the Winamp skin in the right column, document-absolute at the top of the content body / aside so it scrolls with the page (not sticky). Closing Winamp (its own ×) swaps it for a ♡ that calls `webamp.reopen()` — playback is left alone. On viewports under `45rem`, non-home pages keep the same simple icon bar fixed bottom-right (no skin). Simple chrome has a subtle corner × that collapses it to a ♡ the same way. Homepage always opens on the minimalist chrome. On the homepage the icon player stays in simple mode while Webamp mounts off-screen, and CSS anchor positioning pins it to `.home-player-slot` beside Visitors (JS placement is the fallback). On first load of a desktop inner page the icon chrome stays hidden (`site-player--booting`) until the skin frame is ready. Webamp still boots once and stays mounted; `applyPlayerChrome()` swaps `site-player--simple` and `site-player--skin` from `body.home` and the mobile breakpoint. The icon buttons call the Webamp API when it is ready, and fall back to the HTML audio element before that. The player lives outside `#page-root`. Same-site link clicks swap `#page-root` and leave the player in place, so the track keeps playing. A new tab, an external link, or a page with no `#page-root` loads a fresh document and the music stops.
+One chrome: HTML `<audio>` owns play / pause / stop / skip / auto-next and survives SPA navigations. Homepage pins that bar in `.home-player-slot` beside the visitor ticker (CSS anchor, JS fallback). Desktop inner pages keep the same bar fixed bottom-right, with Grundo (`grundo-idle`) above the controls; play / pause / stop / skip briefly plays `grundo-kick`. Mobile inner pages use the same bar without Grundo. Stop hides the bar for a green ♡ (no autoplay on reopen). A ↑ back-to-top control hangs under the chrome once you’ve scrolled (~160px). Long titles scroll inside a fixed slot (`is-marquee`). The player lives outside `#page-root`. Same-site link clicks swap `#page-root` and leave the player in place. A new tab, an external link, or a page with no `#page-root` loads a fresh document and the music stops.
 
 Files:
 
-- `layouts/partials/player.html` — the icon buttons and Winamp host
-- `static/css/player.css` — position and look for both modes
-- `static/js/player.js` — playlist load, playback, chrome swap, and the page swap
-- `static/js/vendor/webamp.bundle.min.mjs` + `jszip.min.js` — self-hosted Winamp (no unpkg)
+- `layouts/partials/player.html` — icon buttons and Grundo
+- `static/css/player.css` — position and look
+- `static/js/player.js` — playlist load, playback, and the page swap
 - `static/audio/playlist.json` — local fallback list (`[]` until you add tracks or point the fetch at a remote list)
-- `static/skins/Opaline.wsz` — the skin used on inner pages
 
 Every layout that should keep music playing must wrap its page in `<div id="page-root">` and include `{{ partial "player.html" . }}` after that wrapper. Those layouts today are `layouts/index.html`, `layouts/_default/baseof.html`, `layouts/_default/gallery.html`, and `layouts/_default/guestbook.html`.
 

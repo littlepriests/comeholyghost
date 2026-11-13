@@ -179,22 +179,6 @@ body.home #site-player.site-player--simple:not(.site-player--closed) .player-bac
     text-shadow: 0 0 8px color-mix(in srgb, var(--logo, #18ff6d) 55%, transparent);
 }
 
-#winamp-host {
-    display: none;
-    position: relative;
-}
-
-body:not(.home) #site-player:not(.site-player--simple) .player-chrome {
-    display: none !important;
-}
-
-/* Hide only while booting into skin with no simple dock yet. Simple+booting stays visible. */
-#site-player.site-player--booting:not(.site-player--simple),
-body:not(.home) #site-player:not(.site-player--skin):not(.site-player--simple) {
-    visibility: hidden;
-    pointer-events: none;
-}
-
 #site-player.site-player--closed > .player-chrome {
     display: none !important;
 }
@@ -209,27 +193,6 @@ body:not(.home) #site-player:not(.site-player--skin):not(.site-player--simple) {
     opacity: 1;
 }
 
-/* Closed Winamp: keep the heart where the skin sat; park the host. */
-#site-player.site-player--skin.site-player--closed {
-    width: auto;
-    height: auto;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-}
-
-#site-player.site-player--skin.site-player--closed #winamp-host {
-    display: block !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: -10000px !important;
-    right: auto !important;
-    width: 275px !important;
-    height: 348px !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-}
-
 body.home #site-player.site-player--simple.site-player--home-pending {
     visibility: hidden;
     pointer-events: none;
@@ -241,23 +204,18 @@ body {
 
 :root {
     --middle-column: min(53rem, calc(100vw - 2.5rem));
-    /* Native Winamp size — no CSS scale (scale was splitting the three windows). */
-    --skin-width: 275px;
-    --skin-height: 348px;
-    /* Gap between article body and the skin / aside column */
-    --skin-gap: 1.5rem;
+    --aside-width: 275px;
+    /* Gap between article body and the aside column */
+    --aside-gap: 1.5rem;
     --simple-player-width: 10rem;
     --simple-player-height: 1.75rem;
 }
 
-/*
-  Skin sits in the aside column (same width), with --skin-gap padding
-  from the body. Sidebar matter stacks under the skin in that column.
-*/
+/* Inner pages: aside column stays the old skin width so reading layout holds. */
 @media (min-width: 45rem) {
     body:not(.home) .page {
-        grid-template-columns: minmax(0, 1fr) var(--skin-width);
-        column-gap: var(--skin-gap);
+        grid-template-columns: minmax(0, 1fr) var(--aside-width);
+        column-gap: var(--aside-gap);
     }
 
     body:not(.home) .page__body {
@@ -266,10 +224,8 @@ body {
     }
 
     body:not(.home) .page__aside {
-        width: var(--skin-width);
-        max-width: var(--skin-width);
-        /* --skin-offset-top = distance from aside top down to where the skin sits */
-        padding-top: calc(var(--skin-offset-top, 0px) + var(--skin-height) + 1rem);
+        width: var(--aside-width);
+        max-width: var(--aside-width);
         box-sizing: border-box;
         text-align: center;
     }
@@ -281,39 +237,7 @@ body {
     }
 }
 
-/* Document-absolute so the skin sits with the content body and scrolls away. */
-#site-player.site-player--skin {
-    position: absolute;
-    top: 0;
-    /* Right edge of the centered middle column = aside column */
-    right: max(1rem, calc((100% - var(--middle-column)) / 2));
-    bottom: auto;
-    left: auto;
-    transform: none;
-    width: var(--skin-width);
-    height: var(--skin-height);
-    padding: 0;
-    border: 0;
-    background: transparent;
-    display: block;
-    /* Resting Grundo docks below the skin box. */
-    overflow: visible;
-}
-
-/* Audio stays hidden but keeps playing (HTML <audio> owns sound). */
-#site-player.site-player--skin > audio {
-    display: none;
-}
-
-/*
-  Desktop skin: Winamp is decorative. JS keeps --docked on so the HTML-audio
-  dock is visible; --dock-stuck switches rest (under Winamp) → fixed mid-column.
-*/
-#site-player.site-player--skin > .player-chrome {
-    display: none;
-}
-
-/* Dock pet (Grundo) — sits above the chrome controls when docked. */
+/* Dock pet (Grundo) — above the simple chrome on desktop inner pages. */
 #site-player .player-dock-pet {
     --dock-pet-size: 100px;
     display: none;
@@ -550,202 +474,49 @@ body {
 }
 
 @media (min-width: 45rem) {
-    /* Shared dock layout (Grundo + controls). Rest vs stuck only change position. */
-    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) > .player-chrome {
-        display: flex !important;
+    /* Desktop inner pages: Grundo sits above the fixed simple chrome. */
+    body:not(.home) #site-player.site-player--simple:not(.site-player--closed) > .player-chrome {
         flex-direction: column;
         align-items: center;
-        gap: 0;
-        width: max-content;
-        max-width: calc(100vw - 1.5rem);
-        box-sizing: border-box;
+        gap: 0.15rem;
         padding-right: 0;
-        z-index: 35;
-        opacity: 0.97;
-        transition: opacity 0.15s ease;
     }
 
-    /* Rest: park under Winamp, scroll with the page. */
-    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--dock-stuck):not(.site-player--closed) > .player-chrome {
-        position: absolute;
-        top: calc(100% + 2.75rem);
-        left: 50%;
-        right: auto;
-        transform: translateX(-50%);
-    }
-
-    /* Stuck: mid-viewport; horizontal center set in JS to the skin column. */
-    body:not(.home) #site-player.site-player--skin.site-player--docked.site-player--dock-stuck:not(.site-player--closed) > .player-chrome {
-        position: fixed;
-        top: 50%;
-        left: 0;
-        right: auto;
-        transform: translate(-50%, -50%);
-    }
-
-    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) > .player-chrome .player-chrome__dock {
+    body:not(.home) #site-player.site-player--simple:not(.site-player--closed) .player-chrome__dock {
         display: grid;
         grid-template-columns: auto auto;
         grid-template-rows: auto auto;
         justify-items: center;
         align-items: end;
-        column-gap: 0.22rem;
-        row-gap: 0.2rem;
-        padding-right: 0.3rem;
+        column-gap: 0.35rem;
+        row-gap: 0.15rem;
     }
 
-    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) .player-dock-pet {
-        display: flex !important;
+    body:not(.home) #site-player.site-player--simple .player-dock-pet {
+        display: flex;
         grid-column: 1 / -1;
         grid-row: 1;
         justify-self: center;
-        width: var(--dock-pet-size);
-        height: var(--dock-pet-size);
-        margin: 0;
     }
 
-    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) > .player-chrome .player-title {
+    body:not(.home) #site-player.site-player--simple:not(.site-player--closed) .player-title {
         grid-column: 1;
         grid-row: 2;
-        width: 2.6rem;
-        font-size: 0.62rem;
+        width: 4.25rem;
+        font-size: 0.75rem;
     }
 
-    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) > .player-chrome .player-chrome__buttons {
+    body:not(.home) #site-player.site-player--simple:not(.site-player--closed) .player-chrome__buttons {
         grid-column: 2;
         grid-row: 2;
-        display: flex;
-        gap: 0.12rem;
-    }
-
-    /* Quiet ↑ under the dock, centered with Grundo. */
-    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) > .player-chrome .player-back-top:not([hidden]) {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        position: absolute;
-        left: 50%;
-        top: calc(100% + 2rem);
-        width: 1.35rem;
-        height: 1.35rem;
-        font-size: 0.85rem;
-        font-weight: 600;
-        opacity: 0.9;
-        transform: translateX(-50%);
-    }
-
-    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) > .player-chrome button:not(.player-back-top) {
-        width: 1.15rem;
-        height: 1.15rem;
-    }
-
-    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) > .player-chrome button:not(.player-back-top) i,
-    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) > .player-chrome button:not(.player-back-top) .site-icon {
-        font-size: 0.52rem;
-    }
-
-    /* Rest: green ♡ parks under Winamp where the dock sat. */
-    body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--dock-stuck).site-player--closed > .player-reopen {
-        display: inline-flex !important;
-        position: absolute;
-        top: calc(100% + 2.75rem);
-        left: 50%;
-        right: auto;
-        transform: translateX(-50%);
-        z-index: 35;
-        width: 1.15rem;
-        height: 1.15rem;
-        font-size: 0.75rem;
-        color: var(--logo, #18ff6d);
-    }
-
-    /* Stuck: green ♡ stays mid-viewport on the skin column. */
-    body:not(.home) #site-player.site-player--skin.site-player--docked.site-player--dock-stuck.site-player--closed > .player-reopen {
-        display: inline-flex !important;
-        position: fixed;
-        top: 50%;
-        left: 0;
-        right: auto;
-        transform: translate(-50%, -50%);
-        z-index: 35;
-        width: 1.15rem;
-        height: 1.15rem;
-        font-size: 0.75rem;
-        color: var(--logo, #18ff6d);
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        body:not(.home) #site-player.site-player--skin.site-player--docked:not(.site-player--closed) > .player-chrome {
-            transition: none;
-        }
     }
 }
 
-#site-player.site-player--skin #winamp-host {
-    display: block;
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 275px;
-    height: 348px;
-    transform: none;
-}
-
-#site-player.site-player--skin #webamp {
-    position: absolute;
-    inset: 0;
-    width: 275px;
-    height: 348px;
-    overflow: visible;
-}
-
-/* Park the mounted skin off-screen in simple mode; keep layout so windows stay stacked. */
-#site-player.site-player--simple #winamp-host {
-    display: block !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: -10000px !important;
-    right: auto !important;
-    width: 275px !important;
-    height: 348px !important;
-    transform: none !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-}
-
-/* Mobile inner pages: homepage-style icon bar instead of the Winamp skin. */
+/* Mobile inner pages: simple icon bar, fixed bottom-right. */
 @media (max-width: 44.99rem) {
     html,
     body:not(.home) {
         overflow-x: clip;
-    }
-
-    /* If JS is late or skin class sticks, never leave Winamp parked on phones. */
-    body:not(.home) #site-player.site-player--skin,
-    body:not(.home) #site-player.site-player--booting {
-        position: fixed !important;
-        top: auto !important;
-        right: max(0.75rem, env(safe-area-inset-right)) !important;
-        bottom: max(0.75rem, env(safe-area-inset-bottom)) !important;
-        left: auto !important;
-        width: max-content !important;
-        height: auto !important;
-        visibility: visible !important;
-        pointer-events: auto !important;
-    }
-
-    body:not(.home) #site-player.site-player--skin > .player-chrome,
-    body:not(.home) #site-player.site-player--booting > .player-chrome {
-        display: flex !important;
-    }
-
-    body:not(.home) #site-player.site-player--skin #winamp-host {
-        display: block !important;
-        position: fixed !important;
-        top: 0 !important;
-        left: -10000px !important;
-        visibility: hidden !important;
-        pointer-events: none !important;
     }
 
     body:not(.home) #site-player.site-player--simple {

@@ -13,10 +13,7 @@
     var playing = false;
     var trackTitle = "";
     var slotObserver = null;
-    var skinDockObserver = null;
     var chromeClosed = false;
-    var skinUnavailable = false;
-    var syncingWebampClose = false;
     var mobileQuery = window.matchMedia("(max-width: 44.99rem)");
     var playlistRemote = "https://administrator-corporation-syntax-page.trycloudflare.com/playlist.json";
     var playlistLocal = "/audio/playlist.json";
@@ -238,91 +235,11 @@
             toggle.classList.toggle("is-playing", playing);
             toggle.setAttribute("aria-label", playing ? "Pause" : "Play");
         }
-        syncWebampHighlight();
         syncDockPet();
         requestAnimationFrame(syncTitleMarquee);
     }
 
-    // HTML <audio> always owns real playback + auto-next (survives SPA).
-    // Winamp is chrome/visual only — never start it, never hand off into setTracksToPlay
-    // (that API always autoplays and caused idle navigations / cold loads to start music).
-    function useWebampTransport() {
-        return false;
-    }
-
-    function silenceWebamp() {
-        var w = window.__webamp;
-        if (!w) return;
-        try {
-            if (typeof w.pause === "function") w.pause();
-        } catch (error) {}
-        try {
-            if (typeof w.stop === "function") w.stop();
-        } catch (error2) {}
-    }
-
-    // Keep Winamp's white playlist highlight on the same row as HTML <audio>.
-    // Skin stays muted (pause → setCurrentTrack → silence); never setTracksToPlay.
-    var webampSyncedIndex = -1;
-    function syncWebampHighlight() {
-        var w = window.__webamp;
-        if (!w || typeof w.setCurrentTrack !== "function") return;
-        if (!tracks.length) return;
-        if (webampSyncedIndex === index) return;
-        webampSyncedIndex = index;
-        try {
-            if (typeof w.pause === "function") w.pause();
-            w.setCurrentTrack(index);
-        } catch (error) {
-            webampSyncedIndex = -1;
-            return;
-        }
-        silenceWebamp();
-        [40, 120].forEach(function (ms) {
-            window.setTimeout(silenceWebamp, ms);
-        });
-    }
-
-    // Tiny valid WAV so Webamp can list titles without fetching real song URLs.
-    function silentWavBlob() {
-        var sampleRate = 8000;
-        var dataSize = 2;
-        var buffer = new ArrayBuffer(44 + dataSize);
-        var view = new DataView(buffer);
-        function writeStr(offset, text) {
-            for (var i = 0; i < text.length; i++) view.setUint8(offset + i, text.charCodeAt(i));
-        }
-        writeStr(0, "RIFF");
-        view.setUint32(4, 36 + dataSize, true);
-        writeStr(8, "WAVE");
-        writeStr(12, "fmt ");
-        view.setUint32(16, 16, true);
-        view.setUint16(20, 1, true);
-        view.setUint16(22, 1, true);
-        view.setUint32(24, sampleRate, true);
-        view.setUint32(28, sampleRate * 2, true);
-        view.setUint16(32, 2, true);
-        view.setUint16(34, 16, true);
-        writeStr(36, "data");
-        view.setUint32(40, dataSize, true);
-        return new Blob([buffer], { type: "audio/wav" });
-    }
-
-    function decorativeWebampTracks(list) {
-        return (Array.isArray(list) ? list : [])
-            .map(function (track) {
-                var title = track && track.title ? String(track.title) : "";
-                if (!title) return null;
-                return {
-                    blob: silentWavBlob(),
-                    defaultName: title,
-                    metaData: { title: title, artist: "" },
-                    duration: 1
-                };
-            })
-            .filter(Boolean);
-    }
-
+    // HTML <audio> owns playback + auto-next (survives SPA).
     function load(nextIndex, andPlay) {
         if (!tracks.length) return;
         index = (nextIndex + tracks.length) % tracks.length;
@@ -367,7 +284,6 @@
     }
 
     function playMedia() {
-        silenceWebamp();
         if (!tracks.length) {
             playWhenReady = true;
             return;
@@ -385,7 +301,6 @@
     window.sitePlayerPlay = playMedia;
 
     function pauseMedia() {
-        silenceWebamp();
         // Set playing first so the audio "pause" listener does not run a second show()
         // that would cancel the dock kick animation.
         playing = false;
@@ -396,7 +311,6 @@
     }
 
     function stopMedia() {
-        silenceWebamp();
         playing = false;
         show();
         try {
@@ -406,7 +320,6 @@
     }
 
     function skipMedia() {
-        silenceWebamp();
         load(index + (audio.getAttribute("src") ? 1 : 0), true);
     }
 
@@ -434,11 +347,7 @@
         if (!backTopBtn) return;
         var scrolled = (window.scrollY || document.documentElement.scrollTop || 0) >= BACK_TOP_MIN_SCROLL;
         var chromeOpen = !player.classList.contains("site-player--closed");
-        // Under simple chrome always (when scrolled); under desktop skin only when docked.
-        var skin = player.classList.contains("site-player--skin");
-        var docked = player.classList.contains("site-player--docked");
-        var simple = player.classList.contains("site-player--simple");
-        var show = chromeOpen && scrolled && (simple || (skin && docked));
+        var show = chromeOpen && scrolled;
         if (show) backTopBtn.removeAttribute("hidden");
         else backTopBtn.setAttribute("hidden", "");
     }
@@ -455,40 +364,19 @@
     function setChromeClosed(closed) {
         chromeClosed = !!closed;
         syncClosedChrome();
-        syncWebampClosedState();
         measureSimplePlayer();
         placeHomePlayer();
-        placeSkinPlayer();
         syncBackTop();
     }
 
     function syncClosedChrome() {
-        var canClose = player.classList.contains("site-player--simple")
-            || player.classList.contains("site-player--skin");
-        var closed = canClose && chromeClosed;
+        var closed = chromeClosed;
         player.classList.toggle("site-player--closed", closed);
         if (reopenBtn) {
             if (closed) reopenBtn.removeAttribute("hidden");
             else reopenBtn.setAttribute("hidden", "");
         }
         syncBackTop();
-    }
-
-    function syncWebampClosedState() {
-        if (!window.__webamp || syncingWebampClose) return;
-        var skinMode = player.classList.contains("site-player--skin");
-        syncingWebampClose = true;
-        try {
-            if (skinMode && chromeClosed) {
-                if (typeof window.__webamp.close === "function") window.__webamp.close();
-            } else if (typeof window.__webamp.reopen === "function") {
-                // Simple mode parks an open skin off-screen; skin reopen restores Winamp.
-                window.__webamp.reopen();
-            }
-        } catch (error) {
-        } finally {
-            syncingWebampClose = false;
-        }
     }
 
     if (reopenBtn) {
@@ -502,63 +390,38 @@
     }
 
     audio.addEventListener("play", function () {
-        if (useWebampTransport()) return;
         if (playing) return;
         playing = true;
         show();
     });
     audio.addEventListener("pause", function () {
-        if (useWebampTransport()) return;
         // pauseMedia/stopMedia already updated UI; skip duplicate show().
         if (!playing) return;
         playing = false;
         show();
     });
     audio.addEventListener("ended", function () {
-        if (useWebampTransport()) return;
         load(index + 1, true);
     });
 
-    // Show the dock immediately. Playlist + Webamp load in parallel and must
-    // not gate chrome (remote playlist stays the preferred source when it wins).
+    // Simple chrome only. Playlist must not gate the dock.
     applyPlayerChrome();
+    window.addEventListener("resize", onViewportChange);
+    window.addEventListener("scroll", placeHomePlayer, { passive: true });
 
-    var playlistReady = loadPlaylist()
+    loadPlaylist()
         .then(function (list) {
             tracks = Array.isArray(list) ? list : [];
             show();
             applyPlayerChrome();
             if (playWhenReady && tracks.length) playMedia();
-            return tracks;
         })
         .catch(function (error) {
             console.error(error);
             tracks = [];
             show();
             applyPlayerChrome();
-            return tracks;
         });
-
-    bootSkin(playlistReady).catch(function (error) {
-        console.error(error);
-        skinUnavailable = true;
-        player.classList.remove("site-player--booting");
-        applyPlayerChrome();
-    });
-
-    function loadScript(src, globalName) {
-        return new Promise(function (resolve, reject) {
-            if (window[globalName]) {
-                resolve(window[globalName]);
-                return;
-            }
-            var script = document.createElement("script");
-            script.src = src;
-            script.onload = function () { resolve(window[globalName]); };
-            script.onerror = reject;
-            document.head.appendChild(script);
-        });
-    }
 
     function clearInlinePlacement() {
         player.style.removeProperty("top");
@@ -569,165 +432,24 @@
         player.style.removeProperty("height");
     }
 
-    function clearWebampWindowCache() {
-        try {
-            Object.keys(localStorage).forEach(function (key) {
-                if (/webamp/i.test(key)) localStorage.removeItem(key);
-            });
-        } catch (error) {}
-    }
-
-    function clearForcedWindowStyles() {
-        // Webamp positions each window with a parent translate().
-        // Forcing top/inset on .window doubles that offset and segments the skin.
-        ["main-window", "equalizer-window", "playlist-window"].forEach(function (id) {
-            var node = document.getElementById(id);
-            if (!node) return;
-            node.style.removeProperty("inset");
-            node.style.removeProperty("top");
-            node.style.removeProperty("left");
-            node.style.removeProperty("right");
-            node.style.removeProperty("bottom");
-        });
-    }
-
-    function revealSkin() {
-        clearForcedWindowStyles();
-        void player.offsetWidth;
-        requestAnimationFrame(function () {
-            player.classList.remove("site-player--booting");
-            applyPlayerChrome();
-            requestAnimationFrame(fitSkinBox);
-        });
-    }
-
-    function bootSkin(listOrPromise) {
-        var host = document.getElementById("winamp-host");
-        // Skin is visual only (title list via silent blobs). Do not gate Winamp /
-        // Grundo dock on playlist length — an empty local playlist.json used to
-        // force simple chrome forever after the test tones were removed.
-        if (!host) {
-            skinUnavailable = true;
-            player.classList.remove("site-player--booting");
-            applyPlayerChrome();
-            return Promise.resolve();
-        }
-        var isHome = document.body.classList.contains("home");
-        var staySimple = isHome || isMobileViewport() || skinUnavailable;
-
-        // Home/mobile: simple only. Desktop: show simple dock while the skin boots.
-        player.classList.add("site-player--simple");
-        if (staySimple) {
-            player.classList.remove("site-player--skin", "site-player--booting");
-        } else {
-            player.classList.add("site-player--booting");
-            player.classList.remove("site-player--skin");
-        }
-        applyPlayerChrome();
-
-        clearWebampWindowCache();
-
-        var webampUrl = new URL("/js/vendor/webamp.bundle.min.mjs", location.origin).href;
-        var jszipUrl = new URL("/js/vendor/jszip.min.js", location.origin).href;
-
-        return Promise.resolve(listOrPromise).then(function (list) {
-            return import(webampUrl).then(function (mod) {
-                var Webamp = mod.default;
-                if (!Webamp.browserIsSupported()) {
-                    skinUnavailable = true;
-                    player.classList.remove("site-player--booting");
-                    applyPlayerChrome();
-                    return;
-                }
-                var webamp = new Webamp({
-                    // Titles only (silent blobs). Real URLs here made Winamp audible on boot
-                    // and fought the HTML <audio> transport. Skin stays decorative.
-                    initialTracks: decorativeWebampTracks(list),
-                    initialSkin: { url: new URL("/skins/Opaline.wsz", location.origin).href },
-                    windowLayout: {
-                        main: { position: { left: 0, top: 0 } },
-                        equalizer: { position: { left: 0, top: 116 } },
-                        playlist: { position: { left: 0, top: 232 } },
-                        milkdrop: { position: { left: 0, top: 0 }, closed: true }
-                    },
-                    zIndex: 40,
-                    requireJSZip: function () {
-                        return loadScript(jszipUrl, "JSZip");
-                    },
-                    requireMusicMetadata: function () {
-                        return Promise.resolve({
-                            parseBlob: function () { return Promise.resolve({ common: {} }); }
-                        });
-                    }
-                });
-                window.__webamp = webamp;
-                if (typeof webamp.onClose === "function") {
-                    webamp.onClose(function () {
-                        if (syncingWebampClose) return;
-                        // Winamp's own × — leave HTML audio alone, show the reopen heart.
-                        chromeClosed = true;
-                        syncClosedChrome();
-                        placeSkinPlayer();
-                    });
-                }
-                return webamp.renderInto(host).then(function () {
-                    silenceWebamp();
-                    webampSyncedIndex = -1;
-                    syncWebampHighlight();
-                    [50, 200, 500].forEach(function (ms) {
-                        window.setTimeout(silenceWebamp, ms);
-                    });
-                    if (document.body.classList.contains("home") || isMobileViewport()) {
-                        player.classList.remove("site-player--booting");
-                        applyPlayerChrome();
-                    } else {
-                        revealSkin();
-                    }
-                    window.addEventListener("resize", onViewportChange);
-                    window.addEventListener("scroll", placeHomePlayer, { passive: true });
-                });
-            });
-        }).catch(function (error) {
-            console.error(error);
-            skinUnavailable = true;
-            player.classList.remove("site-player--booting");
-            applyPlayerChrome();
-        });
-    }
 
     function applyPlayerChrome() {
         var isHome = document.body.classList.contains("home");
         var mobile = !isHome && isMobileViewport();
-        // Keep simple until revealSkin() clears --booting (even if __webamp exists mid-mount).
-        var bootingSkin = player.classList.contains("site-player--booting")
-            && !skinUnavailable
-            && !isHome
-            && !mobile;
-        var useSimple = isHome || mobile || skinUnavailable || bootingSkin;
-        player.classList.toggle("site-player--simple", useSimple);
-        player.classList.toggle("site-player--skin", !useSimple);
+        player.classList.add("site-player--simple");
+        player.classList.remove("site-player--skin", "site-player--booting", "site-player--docked", "site-player--dock-stuck");
         player.classList.toggle("site-player--mobile", mobile);
-        if (isHome || mobile || skinUnavailable) {
-            player.classList.remove("site-player--booting");
-        }
         if (isHome) {
             if (!supportsAnchor) player.classList.add("site-player--home-pending");
             else player.classList.remove("site-player--home-pending");
         } else {
             player.classList.remove("site-player--home-pending");
-            if (useSimple) clearInlinePlacement();
-            else clearForcedWindowStyles();
+            clearInlinePlacement();
         }
-        // Never start/stop HTML audio on chrome swap. Keep Winamp muted so it
-        // cannot autoplay under the skin.
-        if (window.__webamp) silenceWebamp();
         syncClosedChrome();
-        syncWebampClosedState();
         watchHomeSlot();
         measureSimplePlayer();
         placeHomePlayer();
-        placeSkinPlayer();
-        watchSkinDock();
         syncBackTop();
     }
 
@@ -737,31 +459,6 @@
         root.style.setProperty("--simple-player-width", Math.ceil(player.offsetWidth || 176) + "px");
         root.style.setProperty("--simple-player-height", Math.ceil(player.offsetHeight || 44) + "px");
     }
-
-    function fitSkinBox() {
-        var skinHost = document.getElementById("winamp-host");
-        if (!skinHost || player.classList.contains("site-player--simple")) return;
-        var nodes = skinHost.querySelectorAll(".window");
-        var top = Infinity;
-        var left = Infinity;
-        var right = -Infinity;
-        var bottom = -Infinity;
-        var any = false;
-        for (var i = 0; i < nodes.length; i++) {
-            var rect = nodes[i].getBoundingClientRect();
-            if (rect.width < 2 || rect.height < 2) continue;
-            any = true;
-            if (rect.top < top) top = rect.top;
-            if (rect.left < left) left = rect.left;
-            if (rect.right > right) right = rect.right;
-            if (rect.bottom > bottom) bottom = rect.bottom;
-        }
-        if (!any) return;
-        var root = document.documentElement;
-        root.style.setProperty("--skin-box-width", Math.ceil(right - left) + "px");
-        root.style.setProperty("--skin-box-height", Math.ceil(bottom - top) + "px");
-    }
-
     function placeHomePlayer() {
         var slot = document.querySelector(".home-player-slot");
         if (!document.body.classList.contains("home") || !slot || !player.classList.contains("site-player--simple")) {
@@ -787,84 +484,6 @@
         player.classList.remove("site-player--home-pending");
     }
 
-    function normalizeText(value) {
-        return String(value || "")
-            .replace(/\s+/g, " ")
-            .replace(/[.\s]+$/g, "")
-            .trim()
-            .toLowerCase();
-    }
-
-    function skinVerticalAnchor() {
-        // Blog articles: flush with the first real body prose (skip a lede that
-        // only repeats the title), so the skin sits beside where text appears.
-        var contentBody = document.querySelector(".page__body .content__body")
-            || document.querySelector(".content__body");
-        if (contentBody) {
-            var title = normalizeText(
-                (document.querySelector(".content__header h1, .page__body h1") || {}).textContent
-            );
-            var blocks = contentBody.querySelectorAll(":scope > p, :scope > ul, :scope > ol, :scope > blockquote");
-            for (var i = 0; i < blocks.length; i++) {
-                var block = blocks[i];
-                if (block.querySelector("img, picture, video, .retro-media")) continue;
-                var text = normalizeText(block.textContent);
-                if (!text) continue;
-                if (title && text === title) continue;
-                return block;
-            }
-            if (blocks.length) return blocks[0];
-            return contentBody;
-        }
-        return document.querySelector(".page__body")
-            || document.querySelector(".gallery-wrap > main")
-            || document.querySelector(".guestbook-wrap > main")
-            || document.querySelector(".page");
-    }
-
-    function skinHorizontalAnchor() {
-        return document.querySelector(".page__aside")
-            || document.querySelector(".page__body")
-            || document.querySelector(".gallery-wrap > main")
-            || document.querySelector(".guestbook-wrap > main");
-    }
-
-    function placeSkinPlayer() {
-        if (!player.classList.contains("site-player--skin")) return;
-        var vertical = skinVerticalAnchor();
-        var horizontal = skinHorizontalAnchor();
-        if (!vertical) return;
-        // Position relative to body (position: relative) so the skin scrolls
-        // with the page, top-aligned to the article content start.
-        var vRect = vertical.getBoundingClientRect();
-        var bodyRect = document.body.getBoundingClientRect();
-        var gap = 24;
-        try {
-            var gapRaw = getComputedStyle(document.documentElement).getPropertyValue("--skin-gap").trim();
-            if (gapRaw) gap = Math.round(parseFloat(gapRaw) * (gapRaw.indexOf("rem") >= 0 ? 16 : 1)) || 24;
-        } catch (error) {}
-        player.style.top = Math.round(vRect.top - bodyRect.top) + "px";
-        if (horizontal && horizontal.classList.contains("page__aside")) {
-            var aRect = horizontal.getBoundingClientRect();
-            player.style.left = Math.round(aRect.left - bodyRect.left) + "px";
-            player.style.right = "auto";
-            document.documentElement.style.setProperty(
-                "--skin-offset-top",
-                Math.max(0, Math.round(vRect.top - aRect.top)) + "px"
-            );
-        } else if (horizontal) {
-            var hRect = horizontal.getBoundingClientRect();
-            player.style.left = Math.round(hRect.right - bodyRect.left + gap) + "px";
-            player.style.right = "auto";
-            document.documentElement.style.removeProperty("--skin-offset-top");
-        } else {
-            player.style.removeProperty("left");
-            player.style.removeProperty("right");
-            document.documentElement.style.removeProperty("--skin-offset-top");
-        }
-        updateDockStick();
-    }
-
     function watchHomeSlot() {
         if (slotObserver) {
             slotObserver.disconnect();
@@ -880,155 +499,11 @@
         }
     }
 
-    // Desktop skin: dock parks under Winamp while that rest spot is on-screen;
-    // once scroll carries the rest spot past mid-viewport, it sticks fixed.
-    var DOCK_REST_GAP_PX = 44; // ~2.75rem — keep in sync with player.css rest top
-
-    function clearDockedChromePlacement() {
-        if (chromeEl) {
-            chromeEl.style.removeProperty("left");
-            chromeEl.style.removeProperty("right");
-            chromeEl.style.removeProperty("top");
-        }
-        if (reopenBtn) {
-            reopenBtn.style.removeProperty("left");
-            reopenBtn.style.removeProperty("right");
-        }
-    }
-
-    function skinColumnCenterX() {
-        var host = document.getElementById("winamp-host");
-        var hostRect = host ? host.getBoundingClientRect() : null;
-        if (hostRect && hostRect.width >= 2) {
-            return Math.round(hostRect.left + hostRect.width / 2);
-        }
-        var playerRect = player.getBoundingClientRect();
-        if (playerRect.width >= 2) {
-            return Math.round(playerRect.left + playerRect.width / 2);
-        }
-        var aside = document.querySelector(".page__aside");
-        if (aside) {
-            var aRect = aside.getBoundingClientRect();
-            if (aRect.width >= 2) return Math.round(aRect.left + aRect.width / 2);
-        }
-        var col = document.querySelector(".gallery-wrap > main")
-            || document.querySelector(".guestbook-wrap > main")
-            || document.querySelector(".page__body");
-        if (!col) return null;
-        var cRect = col.getBoundingClientRect();
-        var gap = 24;
-        try {
-            var gapRaw = getComputedStyle(document.documentElement).getPropertyValue("--skin-gap").trim();
-            if (gapRaw) gap = Math.round(parseFloat(gapRaw) * (gapRaw.indexOf("rem") >= 0 ? 16 : 1)) || 24;
-        } catch (error) {}
-        var skinW = 275;
-        try {
-            var wRaw = getComputedStyle(document.documentElement).getPropertyValue("--skin-width").trim();
-            if (wRaw) skinW = Math.round(parseFloat(wRaw) * (wRaw.indexOf("rem") >= 0 ? 16 : 1)) || skinW;
-        } catch (error2) {}
-        return Math.round(cRect.right + gap + skinW / 2);
-    }
-
-    function dockRestTopViewport() {
-        var host = document.getElementById("winamp-host");
-        var box = host && host.getBoundingClientRect().height >= 2
-            ? host.getBoundingClientRect()
-            : player.getBoundingClientRect();
-        if (box.height < 2) return null;
-        return box.bottom + DOCK_REST_GAP_PX;
-    }
-
-    function placeDockedChrome() {
-        if (!player.classList.contains("site-player--docked") || !player.classList.contains("site-player--skin")) {
-            clearDockedChromePlacement();
-            return;
-        }
-        if (document.body.classList.contains("home") || isMobileViewport()) {
-            clearDockedChromePlacement();
-            return;
-        }
-        if (!player.classList.contains("site-player--dock-stuck")) {
-            // Rest mode: CSS parks under Winamp; clear any stuck inline coords.
-            clearDockedChromePlacement();
-            return;
-        }
-        // Stuck: center on the skin column. Do not use .page__body — that centers
-        // Grundo on the reading column on /gallery and similar layouts.
-        var cx = skinColumnCenterX();
-        if (cx == null) return;
-        var cxPx = cx + "px";
-        if (chromeEl) {
-            chromeEl.style.left = cxPx;
-            chromeEl.style.right = "auto";
-        }
-        if (reopenBtn) {
-            reopenBtn.style.left = cxPx;
-            reopenBtn.style.right = "auto";
-        }
-    }
-
-    function updateDockStick() {
-        if (!player.classList.contains("site-player--docked") || !player.classList.contains("site-player--skin")) {
-            player.classList.remove("site-player--dock-stuck");
-            clearDockedChromePlacement();
-            return;
-        }
-        if (document.body.classList.contains("home") || isMobileViewport()) {
-            player.classList.remove("site-player--dock-stuck");
-            clearDockedChromePlacement();
-            return;
-        }
-        var restTop = dockRestTopViewport();
-        if (restTop == null) return;
-        var chromeH = chromeEl ? chromeEl.offsetHeight : 140;
-        // Stick once the resting dock would sit at/above mid-viewport.
-        var stickLine = window.innerHeight / 2 - chromeH / 2;
-        var stuck = restTop <= stickLine;
-        var wasStuck = player.classList.contains("site-player--dock-stuck");
-        player.classList.toggle("site-player--dock-stuck", stuck);
-        if (stuck) placeDockedChrome();
-        else if (wasStuck) clearDockedChromePlacement();
-        syncBackTop();
-    }
-
-    function setSkinDocked(docked) {
-        player.classList.toggle("site-player--docked", !!docked);
-        if (!docked) {
-            player.classList.remove("site-player--dock-stuck");
-            clearDockedChromePlacement();
-        } else {
-            updateDockStick();
-        }
-        syncBackTop();
-    }
-
-    function watchSkinDock() {
-        if (skinDockObserver) {
-            skinDockObserver.disconnect();
-            skinDockObserver = null;
-        }
-        if (!player.classList.contains("site-player--skin")
-            || document.body.classList.contains("home")
-            || isMobileViewport()) {
-            setSkinDocked(false);
-            return;
-        }
-        setSkinDocked(true);
-    }
-
     function onViewportChange() {
         applyPlayerChrome();
-        if (player.classList.contains("site-player--skin")) {
-            fitSkinBox();
-            placeSkinPlayer();
-            updateDockStick();
-        } else {
-            placeHomePlayer();
-        }
+        placeHomePlayer();
     }
 
-    window.addEventListener("resize", updateDockStick);
-    window.addEventListener("scroll", updateDockStick, { passive: true });
     window.addEventListener("scroll", syncBackTop, { passive: true });
 
     if (typeof mobileQuery.addEventListener === "function") {
@@ -1134,13 +609,6 @@
                                     window.refreshStarReadingVoids();
                                     window.setTimeout(window.refreshStarReadingVoids, 200);
                                 });
-                            });
-                        }
-                        if (player.classList.contains("site-player--skin")) {
-                            requestAnimationFrame(function () {
-                                fitSkinBox();
-                                placeSkinPlayer();
-                                watchSkinDock();
                             });
                         }
                         if (!fromPop) history.pushState({ player: true }, "", href);

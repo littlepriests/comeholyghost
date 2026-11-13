@@ -2,15 +2,6 @@
   "note": "SkiFree characters. TSR #26926. Fan-use test. Original block only (above custom divider).",
   "anims": [
     {
-      "id": "skifree-ski",
-      "src": "images/sprites/skifree-ski.png",
-      "frameWidth": 23,
-      "frameHeight": 34,
-      "frames": 4,
-      "fps": 6,
-      "alt": "SkiFree skier"
-    },
-    {
       "id": "skifree-yeti",
       "src": "images/sprites/skifree-yeti.png",
       "frameWidth": 32,
@@ -18,15 +9,6 @@
       "frames": 9,
       "fps": 3,
       "alt": "SkiFree yeti"
-    },
-    {
-      "id": "skifree-crash",
-      "src": "images/sprites/skifree-crash.png",
-      "frameWidth": 31,
-      "frameHeight": 34,
-      "frames": 3,
-      "fps": 4,
-      "alt": "SkiFree wipeout"
     }
   ]
 }

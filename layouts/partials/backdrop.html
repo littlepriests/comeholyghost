@@ -1,6 +1,5 @@
 {{ $backdrop := .Site.Params.backdrop }}
 {{ if $backdrop }}
-<link rel="stylesheet" href="{{ "css/backdrop.css" | relURL }}?v=19">
 {{ range $name := slice "bottom-right" "bottom-left" "top-right" "top-left" }}
     {{/*
       Bottom-right is always the footer-anchored .home-sword on the homepage —

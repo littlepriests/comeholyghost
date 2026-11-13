@@ -104,7 +104,7 @@ Use this when you’re new, or the sheet doesn’t match an existing slicer.
 1. Open [The Spriters Resource](https://www.spriters-resource.com/).
 2. Find the game → character → sheet you want.
 3. Download the PNG. Keep a note of the sheet ID / game name for your own credits.
-4. Optional: copy it into `static/images/sprites/` as e.g. `my-character-sheet.png` so it lives with the project (the raw sheet is **not** required at runtime — only the finished strip is).
+4. Optional: copy it into `assets-src/sprites/` as e.g. `my-character-sheet.png` so it lives with the project (raw sheets are not published — only the finished strip under `static/images/sprites/` is).
 
 ### A2. Open it and zoom in
 
@@ -199,10 +199,10 @@ They are **not** a universal “any TSR download” button. Each script is tuned
 
 | Script | Expects this file | Writes |
 | --- | --- | --- |
-| `scripts/slice-misdreavus.mjs` | `static/images/sprites/misdreavus-sheet.png` | `misdreavus.png` |
-| `scripts/slice-kagura.mjs` | `…/kagura-sheet.png` | `kagura-walk`, `kagura-down`, `kagura-attack` |
-| `scripts/slice-sango.mjs` | Sango sheet (see script) | `sango-*` strips |
-| `scripts/slice-skifree.mjs` | `…/skifree-sheet.png` | `skifree-ski`, `skifree-yeti`, `skifree-crash` |
+| `scripts/slice-misdreavus.mjs` | `assets-src/sprites/misdreavus-sheet.png` | `misdreavus.png` |
+| `scripts/slice-kagura.mjs` | `assets-src/sprites/kagura-sheet.png` | `kagura-walk`, `kagura-down`, `kagura-attack` |
+| `scripts/slice-sango.mjs` | `assets-src/sprites/sango-sheet.png` | `sango-idle`, `sango-hurt`, `sango-boomerang`, `sango-attack` |
+| `scripts/slice-skifree.mjs` | `assets-src/sprites/skifree-sheet.png` | `skifree-yeti` |
 
 ### B1. Install the dependency once
 

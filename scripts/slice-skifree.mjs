@@ -1,7 +1,7 @@
 import fs from "fs";
 import { PNG } from "./node_modules/pngjs/lib/png.js";
 
-const sheet = PNG.sync.read(fs.readFileSync("static/images/sprites/skifree-sheet.png"));
+const sheet = PNG.sync.read(fs.readFileSync("assets-src/sprites/skifree-sheet.png"));
 const { width, height, data } = sheet;
 
 const px = (x, y) => {
@@ -111,12 +111,6 @@ const original = candidates.filter((r) => r.y1 < 400 && r.h >= 16);
 
 const meta = [];
 
-// Row 0: skier facing / turn poses (narrower cells) then jumps (wider).
-const skiRow = original.find((r) => r.h >= 28 && r.h <= 36 && r.frames.length >= 8);
-if (skiRow) {
-  meta.push(writeStrip("skifree-ski", skiRow.frames.slice(0, 4), 6, "SkiFree skier"));
-}
-
 // Tall yeti row only (stand / walk / grab / eat+blood). Keep native ~32px
 // cells — appending the wider climax row stretched the strip weirdly.
 const yetiRow = original
@@ -124,24 +118,6 @@ const yetiRow = original
   .sort((a, b) => b.frames.length - a.frames.length)[0];
 if (yetiRow) {
   meta.push(writeStrip("skifree-yeti", yetiRow.frames, 3, "SkiFree yeti"));
-}
-
-// Wipeout: tumble + star poses from the end of the skier row, else a short mid row.
-if (skiRow && skiRow.frames.length >= 8) {
-  meta.push(writeStrip("skifree-crash", skiRow.frames.slice(5, 8), 4, "SkiFree wipeout"));
-} else {
-  const crashRow = original.find(
-    (r) =>
-      r !== skiRow &&
-      r !== yetiRow &&
-      r.h >= 18 &&
-      r.h <= 36 &&
-      r.frames.length >= 2 &&
-      r.frames.length <= 6
-  );
-  if (crashRow) {
-    meta.push(writeStrip("skifree-crash", crashRow.frames.slice(0, 4), 4, "SkiFree wipeout"));
-  }
 }
 
 if (!meta.length) {

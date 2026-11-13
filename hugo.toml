@@ -1,5 +1,4 @@
 baseURL = "http://localhost:1313/"
-theme = "risotto"
 # Browser tab (+ default <title> elsewhere). Not the homepage banner header.
 title = "꒰ঌᐢ.ˬ.ᐢ໒꒱"
 locale = "en-us"
@@ -116,15 +115,6 @@ fps = 4
 alt = "Sango idle"
 
 [[params.sprites]]
-id = "sango-walk"
-src = "images/sprites/sango-walk.png"
-frameWidth = 27
-frameHeight = 42
-frames = 4
-fps = 6
-alt = "Sango walk"
-
-[[params.sprites]]
 id = "sango-hurt"
 src = "images/sprites/sango-hurt.png"
 frameWidth = 30
@@ -152,15 +142,6 @@ fps = 8
 alt = "Sango attack"
 
 [[params.sprites]]
-id = "skifree-ski"
-src = "images/sprites/skifree-ski.png"
-frameWidth = 23
-frameHeight = 34
-frames = 4
-fps = 6
-alt = "SkiFree skier"
-
-[[params.sprites]]
 id = "skifree-yeti"
 src = "images/sprites/skifree-yeti.png"
 frameWidth = 32
@@ -168,15 +149,6 @@ frameHeight = 43
 frames = 9
 fps = 3
 alt = "SkiFree yeti"
-
-[[params.sprites]]
-id = "skifree-crash"
-src = "images/sprites/skifree-crash.png"
-frameWidth = 31
-frameHeight = 34
-frames = 3
-fps = 4
-alt = "SkiFree wipeout"
 
 [[params.sprites]]
 id = "grundo-idle"
