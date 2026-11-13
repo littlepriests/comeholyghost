@@ -14,7 +14,11 @@
   }
 </style>
 {{/* articleFontUrl (Montserrat) loads on blog singles only — see single.html. */}}
+{{- /* Netlify sets CONTEXT at build (production | deploy-preview | branch-deploy). */ -}}
+{{- $ctx := getenv "CONTEXT" | default "dev" -}}
 <script>
+  window.__SITE_CONTEXT__ = {{ $ctx | jsonify }};
+  window.__SITE_SKIP_METERED_API__ = {{ if or (eq $ctx "deploy-preview") (eq $ctx "branch-deploy") }}true{{ else }}false{{ end }};
   (function () {
     function ready() { document.documentElement.classList.add("fonts-ready"); }
     ready();
@@ -23,6 +27,7 @@
     }
   })();
 </script>
+<script src="{{ "js/site-context.js" | relURL }}?v=1"></script>
 <!-- risotto theme -->
 {{ $palette := resources.Get (printf "css/palettes/%s.css" (.Site.Params.theme.palette | default "base16-dark")) }}
 {{ $core := slice
@@ -71,7 +76,8 @@
 {{ with .Site.Params.about }}<meta property="og:image" content="{{ with .logo_image }}{{ . | absURL }}{{ end }}" />{{ end }}
 {{/* Always-on chrome. retro.css is home-only (banner sparkles); sprites/stars stay sitewide (Grundo + sky). */}}
 <link rel="stylesheet" href="{{ "css/player.css" | relURL }}?v=58">
-<link rel="stylesheet" href="{{ "css/reading.css" | relURL }}?v=20">
+<link rel="stylesheet" href="{{ "css/reading.css" | relURL }}?v=21">
+<link rel="stylesheet" href="{{ "css/subscribe.css" | relURL }}?v=5">
 <link rel="stylesheet" href="{{ "css/stars.css" | relURL }}?v=10">
 <link rel="stylesheet" href="{{ "css/sprites.css" | relURL }}?v=13">
 <link rel="stylesheet" href="{{ "css/buttons.css" | relURL }}?v=2">

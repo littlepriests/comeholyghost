@@ -441,6 +441,78 @@ or deleting the `image` line and keeping the rest of that corner's block. Deleti
 
 The player stays above the pictures. On a short window the skin can cover the corner it sits in.
 
+## Git branches (preview → main)
+
+Stopgap flow before a heavier release process:
+
+- **`main`** — Netlify **production** branch (`cornfieldjournal.com`). Each production deploy costs **15 credits**.
+- **`preview`** — integration / develop stand-in. Open feature PRs **into `preview`**. When ready, one PR `preview` → `main` for the live release.
+
+### corn git commands
+
+Remote is **`personal`** → `littlepriests/comeholyghost`. There is no separate `develop` branch — **`preview` is develop**.
+
+| Command | What it does |
+| --- | --- |
+| `corn branch` | Fetch; merge `main` into local `preview`; create `update-MMDDYY` (or `-2`, …) from `preview`. |
+| `corn add` | Same preview←main sync; stay on / create an `update-*` branch; stage; **prompt for commit message**; `git push -u` so the remote feature branch exists (PR base = `preview`). |
+| `corn push` | Push current branch; open or reuse a PR **into `preview`**. |
+| `corn deploy` | If `preview` is ahead of `main` **and checks are green**, open/merge the release PR `preview` → `main`. `--pr-only` stops before merge; `--dry-run` prints intent. |
+
+You still **merge feature PRs into `preview` in GitHub** yourself. `corn deploy` only promotes already-merged preview work to production when checks pass — it does not auto-merge feature branches.
+
+### Do Deploy Previews burn credits?
+
+**The deploy itself: no.** On credit-based plans, Netlify lists Deploy Previews and branch deploys as **0 credits** (same for failed deploys). Production publishes are what cost 15 credits each.
+
+**Still metered if you use them:** visiting a preview URL still counts **bandwidth** and **web requests**; hitting Functions still counts **compute**. Light self-checks are cheap; don’t load-test previews.
+
+**Netlify UI:** keep Production branch = `main`. Optionally enable **branch deploys** for `preview` → stable URL like `preview--<site>.netlify.app` (also 0 deploy credits). PR Deploy Previews stay on by default.
+
+`netlify.toml` already uses a separate build command for deploy-preview / branch-deploy (no newsletter auto-send). Keep `NEWSLETTER_AUTO_SEND` on **production** only.
+
+**Metered APIs on preview:** builds bake `CONTEXT` into the page. On `deploy-preview` / `branch-deploy`, the browser **skips** `/api/visitors`, `/api/guestbook`, and `/api/subscribe` (local fallbacks / “preview only” messages). Functions also no-op Blobs/Resend if something still hits them. Production is unchanged. Static page views still count as normal web requests/bandwidth.
+
+## Newsletter (Resend)
+
+Templates live in git under `emails/` (not published by Hugo). Site subscribe UI: nav `./subscribe` + SkiFree yeti → dialog → `POST /api/subscribe`.
+
+### One-time Resend + Netlify setup
+
+1. Create a [Resend](https://resend.com) account (free Marketing tier covers up to 1,000 contacts).
+2. Add and verify a sending domain (e.g. `cornfieldjournal.com` or `mail.cornfieldjournal.com`) — DNS SPF/DKIM as Resend shows.
+3. Marketing → create a **Segment** for the blog list; copy its id.
+4. Create an API key.
+5. Netlify → Site → Environment variables (production):
+
+| Variable | Example |
+|---|---|
+| `RESEND_API_KEY` | `re_…` |
+| `RESEND_FROM` | `FIELD <news@cornfieldjournal.com>` (must be on the verified domain) |
+| `RESEND_SEGMENT_ID` | segment id from step 3 |
+| `NEWSLETTER_AUTO_SEND` | `1` when you want deploys to broadcast **net-new** posts |
+
+Optional local: same vars in a gitignored `.env` for `netlify dev` / `--send`.
+
+### Behavior
+
+- **Subscribe:** adds the contact to the segment; sends `emails/welcome.html` once (skipped if they were already on the list).
+- **New posts:** `scripts/newsletter-on-deploy.mjs` runs after Hugo. First run **seeds** a ledger with every existing post (nothing historical is emailed). Later deploys broadcast only slugs not yet in the ledger via Resend **Broadcasts** (not transactional `/emails`). Skip a post with front matter `newsletter = false`.
+- **Ledger:** Netlify Blobs store `newsletter` / key `sent` on deploy; locally `.newsletter-sent.json` (gitignored).
+
+### Design / preview
+
+```bash
+corn email
+```
+
+(or `npm run emails:preview`) Rebuilds `emails/preview/`. Open `emails/preview/index.html`. Edit `emails/welcome.html` / `emails/post.html`, re-run. Post template placeholders: `{{TITLE}}` `{{DATE}}` `{{SUMMARY}}` `{{PERMALINK}}` `{{HERO_BLOCK}}` `{{BODY}}`; leave `{{{RESEND_UNSUBSCRIBE_URL}}}` for Broadcasts.
+
+```bash
+npm run newsletter:dry    # list what would send
+npm run newsletter:send -- --slug my-post   # force one (needs Resend env)
+```
+
 ## Player
 
 Playlist continuity: HTML `<audio>` is the only real transport (play / pause / skip / auto-next) and survives SPA navigations. Winamp is visual chrome only — no `initialTracks` / no `setTracksToPlay` handoff (those autoplayed on load and on every inner-page visit). On desktop inner pages, when the skin scrolls out of view an `IntersectionObserver` adds `site-player--docked`: the minimalist chrome is `position: fixed; top: 50%` (mid-viewport / scrollbar axis) and `placeDockedChrome()` centers it horizontally on the Winamp column (`#winamp-host` / `#site-player` — not `<main>`, so /gallery and /guestbook stay on the right skin gutter). Orange Grundo (`grundo-idle`) sits above the controls; play / pause / stop / skip briefly plays `grundo-kick` then returns to idle. A ⌃ **back to top** control docks under that chrome once you’ve scrolled (~160px); same control sits under the simple/mobile bar. When the skin returns, the dock hides. Same buttons / same audio — reading scroll position is untouched. Mobile keeps the bottom simple bar. Per-article end-of-body ⌃ remains optional via front matter `back_to_top = true`.

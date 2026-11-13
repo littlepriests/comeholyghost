@@ -1,4 +1,5 @@
 import { getStore } from "@netlify/blobs";
+import { isPreviewDeploy } from "../lib/preview-guard.mjs";
 
 const STORE_NAME = "visitors";
 const COUNT_KEY = "count";
@@ -31,6 +32,17 @@ export default async (request) => {
                 Allow: "GET, POST, OPTIONS"
             }
         });
+    }
+
+    // Deploy preview / branch: no Blobs reads/writes (production counter stays clean).
+    if (isPreviewDeploy()) {
+        if (request.method === "GET") {
+            return json(200, { count: 0, preview: true });
+        }
+        if (request.method === "POST") {
+            return json(200, { count: 1, preview: true });
+        }
+        return json(405, { error: "Method not allowed." });
     }
 
     const store = getStore({ name: STORE_NAME, consistency: "strong" });

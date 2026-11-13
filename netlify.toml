@@ -1,7 +1,8 @@
 [build]
   # Pin the public host so baked absolute URLs (og, feeds) match the custom domain.
   # Nav/home links use relative URLs so a wrong primary domain cannot yank visitors to *.netlify.app.
-  command = "hugo --minify --baseURL https://cornfieldjournal.com/"
+  # newsletter-on-deploy no-ops unless NEWSLETTER_AUTO_SEND=1 (+ Resend env vars).
+  command = "hugo --minify --baseURL https://cornfieldjournal.com/ && node scripts/newsletter-on-deploy.mjs"
   publish = "public"
   functions = "netlify/functions"
 

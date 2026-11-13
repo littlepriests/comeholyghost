@@ -385,7 +385,13 @@
 
     // Global tally via Netlify Blobs (/api/visitors). Plain hugo server has no
     // functions, so GET/POST fall back to the cached localStorage number.
+    // Deploy preview / branch: skip the function entirely (local tally only).
+    function skipMetered() {
+        return typeof window.siteSkipMeteredApi === "function" && window.siteSkipMeteredApi();
+    }
+
     function loadRemoteCount() {
+        if (skipMetered()) return;
         fetch(apiUrl, { headers: { Accept: "application/json" } })
             .then(function (response) {
                 if (!response.ok) throw new Error("visitor GET failed");
@@ -402,6 +408,11 @@
     }
 
     function bumpRemote(withFx, done) {
+        if (skipMetered()) {
+            applyCount(count + 1, withFx);
+            if (done) done();
+            return;
+        }
         fetch(apiUrl, {
             method: "POST",
             headers: { Accept: "application/json" }

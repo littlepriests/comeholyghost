@@ -1,0 +1,334 @@
+/* Nav: two explicit rows (primary sections / meta + subscribe). */
+.main-nav__rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.main-nav__list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem 2rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    min-width: 0;
+}
+
+.main-nav__list--row1,
+.main-nav__list--row2 {
+    grid-template-columns: unset;
+}
+
+@media (max-width: 44.99rem) {
+    .main-nav__list {
+        gap: 0.35rem 1.1rem;
+    }
+}
+
+/* Yeti subscribe badge — move with [params.subscribe] yetiIconPos. */
+.page-footer__skifree {
+    appearance: none;
+    border: 0;
+    background: none;
+    padding: 0;
+    margin: 0.35rem 0 0.75rem;
+    color: inherit;
+    cursor: pointer;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+    min-height: calc(43px * 2);
+    line-height: 0;
+    text-align: left;
+}
+
+.page-footer__skifree:focus-visible {
+    outline: 1px solid var(--highlight, #18ff6d);
+    outline-offset: 3px;
+}
+
+.page-footer__yeti-wrap {
+    position: relative;
+    display: inline-block;
+    line-height: 0;
+}
+
+@font-face {
+    font-family: "DotMatrixNarrow";
+    src: url("/fonts/DotMatrixNarrow.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+.page-footer__yeti-badge {
+    position: absolute;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 1rem;
+    height: 1rem;
+    color: color-mix(in srgb, var(--highlight, #18ff6d) 78%, #fff);
+    opacity: 0.82;
+    pointer-events: none;
+    /* Keep the label outside the sprite box so frame flips stay clean. */
+}
+
+.page-footer__yeti-badge--word {
+    width: auto;
+    height: auto;
+    /* Non-articles: hover/focus only. Blog posts: always on (rule below). */
+    opacity: 0;
+    transition: opacity 0.35s ease, color 0.15s ease, text-shadow 0.2s ease;
+    text-shadow:
+        0 0 4px color-mix(in srgb, var(--highlight, #18ff6d) 55%, transparent),
+        0 0 10px color-mix(in srgb, var(--highlight, #18ff6d) 35%, transparent),
+        0 0 18px color-mix(in srgb, #ffe566 22%, transparent);
+}
+
+.page-footer__skifree:hover .page-footer__yeti-badge--word,
+.page-footer__skifree:focus-visible .page-footer__yeti-badge--word {
+    opacity: 1;
+}
+
+/* Articles only (`section-blog kind-page` from baseof). */
+body.section-blog.kind-page .page-footer__yeti-badge--word {
+    opacity: 1;
+}
+
+.page-footer__yeti-wrap--bottom .page-footer__yeti-badge {
+    left: 50%;
+    bottom: -0.15rem;
+    transform: translateX(-50%);
+}
+
+.page-footer__yeti-wrap--bottom .page-footer__yeti-badge--word {
+    bottom: -1.05rem;
+}
+
+.page-footer__yeti-wrap--top .page-footer__yeti-badge {
+    left: 50%;
+    top: -0.2rem;
+    transform: translateX(-50%);
+}
+
+.page-footer__yeti-wrap--top .page-footer__yeti-badge--word {
+    top: -1.1rem;
+}
+
+.page-footer__yeti-wrap--left .page-footer__yeti-badge {
+    left: -0.15rem;
+    top: 55%;
+    transform: translate(-100%, -50%);
+}
+
+.page-footer__yeti-wrap--left .page-footer__yeti-badge--word {
+    left: -0.45rem;
+    top: auto;
+    bottom: 0.1rem;
+    transform: translateX(-100%);
+}
+
+/* Default word placement: past his right edge, low by the feet. */
+.page-footer__yeti-wrap--right .page-footer__yeti-badge {
+    left: calc(100% + 0.55rem);
+    right: auto;
+    top: auto;
+    bottom: 0.05rem;
+    transform: none;
+}
+
+.page-footer__yeti-wrap--right .page-footer__yeti-badge--word {
+    left: calc(100% + 0.7rem);
+    bottom: 0.02rem;
+}
+
+.page-footer__skifree:hover .page-footer__yeti-badge,
+.page-footer__skifree:focus-visible .page-footer__yeti-badge {
+    opacity: 1;
+    color: var(--highlight, #18ff6d);
+}
+
+.page-footer__skifree:hover .page-footer__yeti-badge--word,
+.page-footer__skifree:focus-visible .page-footer__yeti-badge--word {
+    text-shadow:
+        0 0 5px color-mix(in srgb, var(--highlight, #18ff6d) 70%, transparent),
+        0 0 14px color-mix(in srgb, var(--highlight, #18ff6d) 45%, transparent),
+        0 0 22px color-mix(in srgb, #ffe566 30%, transparent);
+}
+
+.subscribe-icon {
+    display: block;
+}
+
+.subscribe-icon--word {
+    font-family: "DotMatrixNarrow", "Courier New", monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    white-space: nowrap;
+    text-transform: lowercase;
+    color: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .page-footer__yeti-badge--word {
+        transition: none;
+    }
+
+    body.section-blog.kind-page .page-footer__yeti-badge--word {
+        opacity: 1;
+    }
+}
+
+/* Subscribe dialog */
+.subscribe-dialog {
+    border: 1px solid color-mix(in srgb, var(--link, #7ec8ff) 35%, transparent);
+    border-radius: 0.2rem;
+    background: color-mix(in srgb, #120e18 96%, var(--inner-bg, #44355B));
+    color: var(--fg, #eee);
+    padding: 0;
+    max-width: min(22rem, calc(100vw - 1.5rem));
+    width: 100%;
+}
+
+.subscribe-dialog::backdrop {
+    background: rgb(8 6 12 / 0.62);
+}
+
+.subscribe-dialog__form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem 1.1rem 1.05rem;
+    margin: 0;
+    font-family: var(--font-site, "Fira Mono", ui-monospace, monospace);
+}
+
+.subscribe-dialog__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.subscribe-dialog__title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 500;
+    text-transform: lowercase;
+}
+
+.subscribe-dialog__close {
+    appearance: none;
+    border: 0;
+    background: none;
+    color: var(--muted, #9a93a8);
+    font: inherit;
+    font-size: 1.25rem;
+    line-height: 1;
+    padding: 0.1rem 0.25rem;
+    cursor: pointer;
+}
+
+.subscribe-dialog__close:hover,
+.subscribe-dialog__close:focus-visible {
+    color: var(--fg, #eee);
+}
+
+.subscribe-dialog__lede {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.45;
+    color: var(--muted, #9a93a8);
+}
+
+.subscribe-dialog__label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+    color: var(--muted, #9a93a8);
+}
+
+.subscribe-dialog__label input[type="email"] {
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--fg, #eee);
+    background: color-mix(in srgb, #0c0a10 80%, transparent);
+    border: 1px solid var(--line, #3a3348);
+    border-radius: 0.15rem;
+    padding: 0.45rem 0.55rem;
+}
+
+.subscribe-dialog__label input[type="email"]:focus-visible {
+    outline: 1px solid var(--highlight, #18ff6d);
+    outline-offset: 1px;
+}
+
+.subscribe-dialog__hp {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+.subscribe-dialog__error,
+.subscribe-dialog__ok {
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.4;
+}
+
+.subscribe-dialog__error {
+    color: #ff7a8a;
+}
+
+.subscribe-dialog__ok {
+    color: var(--highlight, #18ff6d);
+}
+
+.subscribe-dialog__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem 0.85rem;
+    align-items: center;
+}
+
+.subscribe-dialog__submit,
+.subscribe-dialog__cancel {
+    appearance: none;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 0.4rem 0.7rem;
+    border-radius: 0.15rem;
+}
+
+.subscribe-dialog__submit {
+    border: 1px solid var(--highlight, #18ff6d);
+    background: transparent;
+    color: var(--highlight, #18ff6d);
+}
+
+.subscribe-dialog__submit:hover,
+.subscribe-dialog__submit:focus-visible {
+    background: color-mix(in srgb, var(--highlight, #18ff6d) 14%, transparent);
+}
+
+.subscribe-dialog__cancel {
+    border: 0;
+    background: none;
+    color: var(--muted, #9a93a8);
+    padding-left: 0.15rem;
+}
+
+.subscribe-dialog__cancel:hover,
+.subscribe-dialog__cancel:focus-visible {
+    color: var(--fg, #eee);
+}

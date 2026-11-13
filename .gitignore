@@ -25,6 +25,9 @@ vale-rules/
 .env
 .env.*
 !.env.example
+
+# Local newsletter send ledger (Netlify uses Blobs instead)
+.newsletter-sent.json
 *.pem
 *.p12
 *.pfx
