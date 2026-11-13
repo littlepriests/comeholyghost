@@ -9,31 +9,6 @@
     {{ end }}
   {{ end }}
   <div class="page__logo-slot{{ with $logoSprite }} page__logo-slot--sprite{{ end }}">
-    {{- if .IsHome -}}
-    {{- $cloud := trim (readFile "static/ascii/cloud.txt") "\r\n" -}}
-    <aside class="music-prompt" data-music-prompt hidden>
-      {{- /* One unit: scalloped pink cloud + ASCII rim + text/buttons. Move via --bubble-left / --bubble-top. */ -}}
-      <div class="music-prompt__bubble">
-        {{- /* Soft radial glow (CSS) — no box-edge cut like the old SVG fill. */ -}}
-        <div class="music-prompt__fill" aria-hidden="true"></div>
-        <pre class="music-prompt__cloud" aria-hidden="true">{{ $cloud }}</pre>
-        {{- /* Invisible left/right halves inside the ASCII cloud (yes | no). */ -}}
-        <div class="music-prompt__hits">
-          <button type="button" class="music-prompt__hit music-prompt__hit--yes" data-music-yes aria-label="Yes, play music"></button>
-          <button type="button" class="music-prompt__hit music-prompt__hit--no" data-music-no aria-label="No, dismiss"></button>
-        </div>
-        <div class="music-prompt__panel">
-          <p class="music-prompt__ask">⋆｡˚ play music? ˚｡⋆</p>
-          <div class="music-prompt__actions">
-            <button type="button" class="music-prompt__btn" data-music-yes aria-label="Yes, play music">y</button>
-            <button type="button" class="music-prompt__btn" data-music-no aria-label="No, dismiss">n</button>
-          </div>
-        </div>
-      </div>
-      <span class="music-prompt__dot music-prompt__dot--mid" aria-hidden="true">○</span>
-      <span class="music-prompt__dot music-prompt__dot--tip" aria-hidden="true">◦</span>
-    </aside>
-    {{- end -}}
     <h1 class="page__logo{{ with $logoSprite }} page__logo--sprite{{ end }}">
       {{ if $logoSprite }}
       {{- $logoTip := partial "tip-text.html" (dict "key" "logo" "fallback" "home") -}}
