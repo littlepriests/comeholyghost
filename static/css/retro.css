@@ -16,7 +16,7 @@ body.home .page__body p:has(> img:only-child) {
     overflow: hidden;
 }
 
-/* Banner column width is locked in home.css (--home-content-width); keep sparkle stage only. */
+/* Banner width is the shared content column; keep the sparkle stage only. */
 body.home .home-banner {
     position: relative;
     display: block;

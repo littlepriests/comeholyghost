@@ -12,7 +12,6 @@
     var index = 0;
     var playing = false;
     var trackTitle = "";
-    var slotObserver = null;
     var chromeClosed = false;
     var mobileQuery = window.matchMedia("(max-width: 44.99rem)");
     var playlistRemote = "https://administrator-corporation-syntax-page.trycloudflare.com/playlist.json";
@@ -35,8 +34,6 @@
     var backTopBtn = player.querySelector("[data-player-back-top]");
     var BACK_TOP_MIN_SCROLL = 160;
     var chromeEl = player.querySelector("[data-player-chrome]");
-    var supportsAnchor = typeof CSS !== "undefined" && CSS.supports && CSS.supports("anchor-name", "--home-player-slot");
-
     function isMobileViewport() {
         return mobileQuery.matches;
     }
@@ -341,12 +338,8 @@
     }
 
     function syncBackTop() {
-        if (!backTopBtn) return;
-        var scrolled = (window.scrollY || document.documentElement.scrollTop || 0) >= BACK_TOP_MIN_SCROLL;
-        var chromeOpen = !player.classList.contains("site-player--closed");
-        var show = chromeOpen && scrolled;
-        if (show) backTopBtn.removeAttribute("hidden");
-        else backTopBtn.setAttribute("hidden", "");
+        if (backTopBtn) backTopBtn.hidden = chromeClosed || window.scrollY < BACK_TOP_MIN_SCROLL;
+        placeOnFooter();
     }
 
     if (backTopBtn) {
@@ -360,21 +353,7 @@
 
     function setChromeClosed(closed) {
         chromeClosed = !!closed;
-        syncClosedChrome();
-        measureSimplePlayer();
-        placeHomePlayer();
-        syncBackTop();
-        placeBesideFooter();
-    }
-
-    function syncClosedChrome() {
-        var closed = chromeClosed;
-        player.classList.toggle("site-player--closed", closed);
-        if (reopenBtn) {
-            if (closed) reopenBtn.removeAttribute("hidden");
-            else reopenBtn.setAttribute("hidden", "");
-        }
-        syncBackTop();
+        applyPlayerChrome();
     }
 
     if (reopenBtn) {
@@ -402,10 +381,12 @@
         load(index + 1, true);
     });
 
-    // Simple chrome only. Playlist must not gate the dock.
+    // Playlist must not gate the dock.
     applyPlayerChrome();
-    window.addEventListener("resize", onViewportChange);
-    window.addEventListener("scroll", placeHomePlayer, { passive: true });
+    window.addEventListener("resize", applyPlayerChrome);
+    window.addEventListener("scroll", syncBackTop, { passive: true });
+    window.addEventListener("load", syncBackTop);
+    mobileQuery.addEventListener("change", applyPlayerChrome);
 
     loadPlaylist()
         .then(function (list) {
@@ -421,153 +402,26 @@
             applyPlayerChrome();
         });
 
-    function clearInlinePlacement() {
-        player.style.removeProperty("top");
-        player.style.removeProperty("left");
-        player.style.removeProperty("right");
-        player.style.removeProperty("bottom");
-        player.style.removeProperty("width");
-        player.style.removeProperty("height");
-    }
-
-
     function applyPlayerChrome() {
-        var isHome = document.body.classList.contains("home");
-        var mobile = !isHome && isMobileViewport();
-        player.classList.add("site-player--simple");
-        player.classList.remove("site-player--skin", "site-player--booting", "site-player--docked", "site-player--dock-stuck");
-        player.classList.toggle("site-player--mobile", mobile);
-        if (isHome) {
-            if (!supportsAnchor) player.classList.add("site-player--home-pending");
-            else player.classList.remove("site-player--home-pending");
-        } else {
-            player.classList.remove("site-player--home-pending");
-            clearInlinePlacement();
-        }
-        syncClosedChrome();
-        watchHomeSlot();
-        measureSimplePlayer();
-        placeHomePlayer();
+        player.classList.toggle("site-player--closed", chromeClosed);
+        if (reopenBtn) reopenBtn.hidden = !chromeClosed;
+        document.documentElement.style.setProperty("--simple-player-height", Math.ceil(player.offsetHeight || 44) + "px");
         syncBackTop();
-        placeBesideFooter();
     }
 
-    function measureSimplePlayer() {
-        if (!player.classList.contains("site-player--simple")) return;
-        var root = document.documentElement;
-        root.style.setProperty("--simple-player-width", Math.ceil(player.offsetWidth || 176) + "px");
-        root.style.setProperty("--simple-player-height", Math.ceil(player.offsetHeight || 44) + "px");
-    }
-    function placeHomePlayer() {
-        var slot = document.querySelector(".home-player-slot");
-        if (!document.body.classList.contains("home") || !slot || !player.classList.contains("site-player--simple")) {
-            return;
+    /* Desktop: player and ↑ sit on the footer's bottom line (homepage: the dock row). */
+    function placeOnFooter() {
+        var footer = !isMobileViewport() && document.querySelector("[data-site-footer]");
+        var fromBottom = -1;
+        if (footer) {
+            var dock = footer.querySelector("[data-home-dock]");
+            var line = dock
+                ? dock.getBoundingClientRect().bottom
+                : footer.getBoundingClientRect().bottom - (parseFloat(getComputedStyle(footer).paddingBottom) || 0);
+            fromBottom = Math.round(window.innerHeight - line);
         }
-        // Phone homepage uses the fixed bottom bar, same as inner pages.
-        if (isMobileViewport()) {
-            clearInlinePlacement();
-            player.classList.remove("site-player--home-pending");
-            return;
-        }
-        measureSimplePlayer();
-        // Anchor placement breaks when the dock is CSS-scaled as a group.
-        if (supportsAnchor && !document.body.classList.contains("is-home-dock-scaled")) {
-            clearInlinePlacement();
-            player.classList.remove("site-player--home-pending");
-            return;
-        }
-        var width = player.offsetWidth;
-        var height = player.offsetHeight;
-        var rect = slot.getBoundingClientRect();
-        if (rect.width < 2 || rect.height < 2 || width < 2 || height < 2) {
-            player.classList.add("site-player--home-pending");
-            requestAnimationFrame(placeHomePlayer);
-            return;
-        }
-        player.style.top = rect.top + Math.max(0, (rect.height - height) / 2) + "px";
-        player.style.left = rect.left + Math.max(0, (rect.width - width) / 2) + "px";
-        player.classList.remove("site-player--home-pending");
-    }
-
-    function watchHomeSlot() {
-        if (slotObserver) {
-            slotObserver.disconnect();
-            slotObserver = null;
-        }
-        var slot = document.querySelector(".home-player-slot");
-        if (!slot || !document.body.classList.contains("home") || supportsAnchor) return;
-        if (typeof ResizeObserver === "function") {
-            slotObserver = new ResizeObserver(function () {
-                placeHomePlayer();
-            });
-            slotObserver.observe(slot);
-        }
-    }
-
-    function remPx(value) {
-        var rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-        var n = parseFloat(value);
-        if (!n) return 0;
-        return String(value).indexOf("rem") !== -1 ? n * rem : n;
-    }
-
-    /* Fit Grundo + buttons + ↑ inside the footer band once that band is on screen. */
-    function placeBesideFooter() {
-        if (document.body.classList.contains("home") || isMobileViewport()) {
-            player.style.removeProperty("--player-bottom");
-            return;
-        }
-        var footer = document.querySelector(".site-footer--page");
-        if (!footer) {
-            player.style.removeProperty("--player-bottom");
-            return;
-        }
-        var viewH = window.innerHeight;
-        var docH = document.documentElement.scrollHeight;
-        var fr = footer.getBoundingClientRect();
-        var pageFits = docH <= viewH + 2;
-        var atEnd = window.scrollY + viewH >= docH - 8;
-        var onScreen = fr.top >= -1 && fr.bottom <= viewH + 1;
-        if (!(pageFits || atEnd || onScreen)) {
-            player.style.removeProperty("--player-bottom");
-            return;
-        }
-        var pr = player.getBoundingClientRect();
-        if (pr.height < 2) {
-            player.style.removeProperty("--player-bottom");
-            return;
-        }
-        var styles = getComputedStyle(player);
-        var lift = 0;
-        if (backTopBtn && !backTopBtn.hasAttribute("hidden")) {
-            lift = remPx(styles.getPropertyValue("--player-back-top-size"))
-                + remPx(styles.getPropertyValue("--player-back-top-gap"));
-        }
-        var stack = pr.height + lift;
-        var bandH = fr.height - (parseFloat(getComputedStyle(footer).paddingTop) || 0);
-        var extra = Math.max(0, bandH - stack);
-        /* ↑ sits at --player-bottom; the bar is `lift` above that. Center the stack below the hairline. */
-        var clusterBottom = (viewH - fr.bottom) + extra / 2;
-        if (clusterBottom < 0) {
-            player.style.removeProperty("--player-bottom");
-            return;
-        }
-        player.style.setProperty("--player-bottom", Math.round(clusterBottom) + "px");
-    }
-
-    function onViewportChange() {
-        applyPlayerChrome();
-        placeHomePlayer();
-        placeBesideFooter();
-    }
-
-    window.addEventListener("scroll", syncBackTop, { passive: true });
-    window.addEventListener("scroll", placeBesideFooter, { passive: true });
-
-    if (typeof mobileQuery.addEventListener === "function") {
-        mobileQuery.addEventListener("change", onViewportChange);
-    } else if (typeof mobileQuery.addListener === "function") {
-        mobileQuery.addListener(onViewportChange);
+        if (fromBottom >= 0) player.style.setProperty("--player-bottom", fromBottom + "px");
+        else player.style.removeProperty("--player-bottom");
     }
 
     function stylesheetPresent(absolute) {
@@ -707,12 +561,6 @@
         adopt(location.href, true);
     });
 
-    window.addEventListener("load", function () {
-        placeHomePlayer();
-        placeBesideFooter();
-    });
-
     history.replaceState({ player: true }, "", location.href);
-    applyPlayerChrome();
     show();
 })();

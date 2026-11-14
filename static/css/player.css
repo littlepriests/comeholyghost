@@ -1,17 +1,30 @@
+/*
+  One player on every page. Desktop: Grundo above the stop button, 1rem in
+  from the page's right edge; JS parks --player-bottom on the footer line.
+  Desktop ↑ is halfway between the skip button and the window edge; on a
+  phone it hangs under the stop button.
+  --stop-from-right = skip button + button gap + half the stop button.
+*/
 #site-player {
+    /* 100% (not 100vw) so this matches the centered page, scrollbar included. */
+    --player-edge-right: calc((100% - min(53rem, 100% - 2.5rem)) / 2 + 1rem);
+    --player-bottom: 1rem;
+    --stop-from-right: calc(2rem + 0.25rem + 1rem);
     --player-back-top-size: 1.65rem;
     --player-back-top-gap: 0.85rem;
     position: fixed;
-    right: var(--player-edge-right, 1rem);
-    bottom: var(--player-bottom, 1rem);
+    right: var(--player-edge-right);
+    bottom: var(--player-bottom);
     z-index: 30;
     display: flex;
     align-items: center;
     gap: 0.65rem;
-    margin: 0;
-    padding: 0;
-    background: transparent;
-    border: 0;
+    transition: bottom 0.2s ease;
+}
+
+#site-player [hidden],
+#site-player.site-player--closed > .player-chrome {
+    display: none !important;
 }
 
 #site-player .player-chrome {
@@ -31,11 +44,11 @@
 
 #site-player .player-title {
     margin: 0;
-    width: 4.75rem;
+    width: 4.25rem;
     overflow: hidden;
     white-space: nowrap;
     color: var(--off-fg);
-    font-size: 0.85rem;
+    font-size: 0.75rem;
 }
 
 #site-player .player-title [data-player-title-text] {
@@ -86,68 +99,6 @@
     border-color: color-mix(in srgb, var(--highlight) 55%, transparent);
 }
 
-/*
-  Back-to-top: one spot on every page, including the homepage.
-  On desktop inner pages the whole stack (Grundo, buttons, ↑) sits inside
-  the footer band, 1rem in from the page's right edge. --player-bottom is
-  the ↑ slot (1rem until JS parks it on the footer).
-  --stop-from-right = skip button + button gap + half the stop button.
-*/
-#site-player {
-    /* 100% (not 100vw) so this matches the centered page, scrollbar included. */
-    --player-edge-right: calc((100% - min(53rem, 100% - 2.5rem)) / 2 + 1rem);
-    --player-bottom: 1rem;
-    --back-top-bottom: var(--player-bottom);
-    --stop-from-right: calc(2rem + 0.25rem + 1rem);
-}
-
-#site-player .player-back-top {
-    display: none;
-    position: fixed;
-    right: calc(var(--player-edge-right) + var(--stop-from-right) - var(--player-back-top-size) / 2);
-    bottom: var(--back-top-bottom);
-    z-index: 40;
-    width: var(--player-back-top-size);
-    height: var(--player-back-top-size);
-    margin: 0;
-    padding: 0;
-    font: inherit;
-    font-size: 1rem;
-    font-weight: 600;
-    line-height: 1;
-    color: var(--highlight);
-    background: transparent;
-    border: 1px solid color-mix(in srgb, var(--highlight) 70%, transparent);
-    border-radius: 50%;
-    cursor: pointer;
-    opacity: 0.9;
-    box-sizing: border-box;
-}
-
-#site-player .player-back-top span {
-    display: block;
-    line-height: 1;
-}
-
-#site-player .player-back-top:hover,
-#site-player .player-back-top:focus-visible {
-    color: var(--highlight);
-    background: transparent;
-    border-color: var(--highlight);
-    opacity: 1;
-    text-shadow: 0 0 8px color-mix(in srgb, var(--highlight) 55%, transparent);
-}
-
-#site-player .player-back-top[hidden] {
-    display: none !important;
-}
-
-#site-player.site-player--simple:not(.site-player--closed) .player-back-top:not([hidden]) {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
 #site-player button i,
 #site-player button .site-icon {
     font-size: 0.75rem;
@@ -161,27 +112,44 @@
     line-height: 0;
 }
 
-#site-player [data-player-toggle] .player-toggle-icon[hidden] {
-    display: none !important;
+#site-player .player-back-top {
+    position: fixed;
+    right: calc(var(--player-edge-right) + var(--stop-from-right) - var(--player-back-top-size) / 2);
+    bottom: var(--player-bottom);
+    z-index: 40;
+    width: var(--player-back-top-size);
+    height: var(--player-back-top-size);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--highlight);
+    background: transparent;
+    border-color: color-mix(in srgb, var(--highlight) 70%, transparent);
+    border-radius: 50%;
+    opacity: 0.9;
+    box-sizing: border-box;
+}
+
+#site-player .player-back-top span {
+    display: block;
+    line-height: 1;
+}
+
+#site-player .player-back-top:is(:hover, :focus-visible) {
+    border-color: var(--highlight);
+    opacity: 1;
+    text-shadow: 0 0 8px color-mix(in srgb, var(--highlight) 55%, transparent);
 }
 
 #site-player .player-reopen {
-    display: none;
-    align-items: center;
-    justify-content: center;
     width: 1.5rem;
     height: 1.5rem;
-    margin: 0;
-    padding: 0;
-    font: inherit;
     font-size: 0.95rem;
     line-height: 1;
     color: var(--logo, #18ff6d);
     background: transparent;
     border: 0;
-    border-radius: 999px;
-    cursor: pointer;
-    opacity: 0.85;
+    opacity: 0.9;
 }
 
 #site-player .player-reopen:hover {
@@ -190,65 +158,11 @@
     text-shadow: 0 0 8px color-mix(in srgb, var(--logo, #18ff6d) 55%, transparent);
 }
 
-#site-player.site-player--closed > .player-chrome {
-    display: none !important;
-}
-
-#site-player.site-player--closed > .player-reopen {
-    display: inline-flex;
-    color: var(--logo, #18ff6d);
-    opacity: 0.9;
-}
-
-#site-player.site-player--closed > .player-reopen:hover {
-    opacity: 1;
-}
-
-body.home #site-player.site-player--simple.site-player--home-pending {
-    visibility: hidden;
-    pointer-events: none;
-}
-
 body {
     position: relative;
 }
 
-:root {
-    --middle-column: min(53rem, calc(100vw - 2.5rem));
-    --aside-width: 275px;
-    /* Gap between article body and the aside column */
-    --aside-gap: 1.5rem;
-    --simple-player-width: 10rem;
-    --simple-player-height: 1.75rem;
-}
-
-/* Inner pages: aside column stays the old skin width so reading layout holds. */
-@media (min-width: 45rem) {
-    body:not(.home) .page {
-        grid-template-columns: minmax(0, 1fr) var(--aside-width);
-        column-gap: var(--aside-gap);
-    }
-
-    body:not(.home) .page__body {
-        min-width: 0;
-        overflow-x: clip;
-    }
-
-    body:not(.home) .page__aside {
-        width: var(--aside-width);
-        max-width: var(--aside-width);
-        box-sizing: border-box;
-        text-align: center;
-    }
-
-    body:not(.home) .page__aside .aside__about,
-    body:not(.home) .page__aside .aside__content {
-        margin-left: auto;
-        margin-right: auto;
-    }
-}
-
-/* Dock pet (Grundo) — above the simple chrome on desktop inner pages. */
+/* Dock pet (Grundo) — above the stop button on desktop. */
 #site-player .player-dock-pet {
     --dock-pet-size: 100px;
     display: none;
@@ -276,10 +190,6 @@ body {
 
 #site-player .player-dock-pet__strip .sprite-anim {
     display: block;
-}
-
-#site-player .player-dock-pet__strip[hidden] {
-    display: none !important;
 }
 
 /* Idle is a one-frame static PNG (.is-static). Kick stays frozen until click. */
@@ -485,242 +395,88 @@ body {
 }
 
 @media (min-width: 45rem) {
-    /* Desktop inner pages: Grundo sits above the fixed simple chrome. */
-    body:not(.home) #site-player.site-player--simple:not(.site-player--closed) > .player-chrome {
+    /* Desktop, every page: Grundo sits above the stop button. */
+    #site-player .player-chrome {
         flex-direction: column;
-        align-items: center;
         gap: 0.15rem;
         padding-right: 0;
     }
 
-    body:not(.home) #site-player.site-player--simple:not(.site-player--closed) .player-chrome__dock {
+    #site-player .player-chrome__dock {
         display: grid;
         grid-template-columns: auto auto;
-        grid-template-rows: auto auto;
         justify-items: center;
         align-items: end;
-        column-gap: 0.35rem;
-        row-gap: 0.15rem;
+        gap: 0.15rem 0.35rem;
     }
 
-    body:not(.home) #site-player.site-player--simple .player-dock-pet {
+    /* Button column, so the pet stands on the stop button (middle of the three). */
+    #site-player .player-dock-pet {
         display: flex;
-        /* Button column only, so the pet sits on the stop button (middle of the three). */
-        grid-column: 2;
-        grid-row: 1;
-        justify-self: center;
+        grid-area: 1 / 2;
     }
 
-    body:not(.home) #site-player.site-player--simple:not(.site-player--closed) .player-title {
-        grid-column: 1;
-        grid-row: 2;
-        width: 4.25rem;
-        font-size: 0.75rem;
+    #site-player .player-title {
+        grid-area: 2 / 1;
     }
 
-    body:not(.home) #site-player.site-player--simple:not(.site-player--closed) .player-chrome__buttons {
-        grid-column: 2;
-        grid-row: 2;
+    #site-player .player-chrome__buttons {
+        grid-area: 2 / 2;
     }
 
-}
-
-/*
-  Desktop inner pages: one footer band tall enough for Grundo + buttons + ↑.
-  The yeti and copyright stay in that band. JS fits the player stack into it.
-*/
-@media (min-width: 45rem) {
-    body:not(.home) .site-footer--page {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        box-sizing: border-box;
-        min-height: calc(var(--footer-pad-top) + 100px + 0.15rem + 2rem + 0.85rem + 1.65rem);
-    }
-
-    body:not(.home) .page-footer__skifree {
-        margin: 0 0 0.4rem;
+    /* ↑ sits halfway between the skip button's right edge and the window edge. */
+    #site-player .player-back-top {
+        right: calc(var(--player-edge-right) / 2 - var(--player-back-top-size) / 2);
     }
 }
 
-/*
-  Bottom-fixed chrome only (inner pages): lift Grundo + bar just enough for ↑.
-  Homepage dock sits mid-page, so it does not need this nudge.
-*/
-body:not(.home) #site-player.site-player--simple {
-    transition: bottom 0.2s ease;
-}
-
-body:not(.home) #site-player.site-player--simple:not(.site-player--closed):has(.player-back-top:not([hidden])) {
-    bottom: calc(var(--back-top-bottom) + var(--player-back-top-size) + var(--player-back-top-gap));
-}
-
-@media (prefers-reduced-motion: reduce) {
-    body:not(.home) #site-player.site-player--simple {
-        transition: none;
-    }
-}
-
-/* Mobile inner pages: simple icon bar, fixed bottom-right. */
+/* Phone: bigger touch buttons, and the bar lifts so ↑ can sit under it. */
 @media (max-width: 44.99rem) {
     html,
-    body:not(.home) {
+    body {
         overflow-x: clip;
     }
 
-    /* Bigger touch buttons + chrome padding-right shift the stop □. */
+    /* Bigger buttons + chrome padding-right shift the stop button. */
     #site-player {
         --player-edge-right: max(0.75rem, env(safe-area-inset-right));
-        --back-top-bottom: max(0.75rem, env(safe-area-inset-bottom));
+        --player-bottom: max(0.75rem, env(safe-area-inset-bottom));
         --stop-from-right: calc(0.85rem + 2.75rem + 0.25rem + 1.375rem);
-    }
-
-    body:not(.home) #site-player.site-player--simple {
-        position: fixed;
-        top: auto;
-        right: max(0.75rem, env(safe-area-inset-right));
-        bottom: max(0.75rem, env(safe-area-inset-bottom));
-        left: auto;
-        width: max-content;
         max-width: calc(100vw - 1.5rem);
-        height: auto;
         gap: 0.5rem;
-        display: flex;
-        align-items: center;
         z-index: 40;
     }
 
-    body:not(.home) #site-player.site-player--simple .player-chrome {
-        display: flex;
-        align-items: center;
+    #site-player:not(.site-player--closed):has(.player-back-top:not([hidden])) {
+        bottom: calc(var(--player-bottom) + var(--player-back-top-size) + var(--player-back-top-gap));
+    }
+
+    #site-player.site-player--closed {
+        gap: 0;
+    }
+
+    #site-player .player-chrome {
         gap: 0.5rem;
     }
 
-    body:not(.home) #site-player.site-player--simple .player-title {
-        font-size: 0.75rem;
-        width: 4.25rem;
-    }
-
-    /* ~44px touch targets (was 1.5rem / 24px). Keep ↑ at --player-back-top-size. */
-    body:not(.home) #site-player.site-player--simple button:not(.player-reopen):not(.player-back-top),
-    body.home #site-player.site-player--simple button:not(.player-reopen):not(.player-back-top) {
+    /* ~44px touch targets. ↑ keeps --player-back-top-size. */
+    #site-player button:not(.player-reopen, .player-back-top) {
         width: 2.75rem;
         height: 2.75rem;
     }
 
-    body:not(.home) #site-player.site-player--simple button:not(.player-back-top) i,
-    body.home #site-player.site-player--simple button:not(.player-back-top) i {
+    #site-player button:not(.player-back-top) i {
         font-size: 0.85rem;
     }
 
-    body:not(.home) #site-player.site-player--simple .player-reopen,
-    body.home #site-player.site-player--simple .player-reopen {
+    #site-player .player-reopen {
         width: 2rem;
         height: 2rem;
-        min-width: 2rem;
-        min-height: 2rem;
-    }
-
-    body:not(.home) #site-player.site-player--simple.site-player--closed {
-        gap: 0;
-    }
-
-    body:not(.home) .page,
-    body:not(.home) .gallery-wrap,
-    body:not(.home) .guestbook-wrap {
-        padding-bottom: calc(var(--simple-player-height, 3rem) + 2.5rem + env(safe-area-inset-bottom, 0px));
-    }
-
-    body:not(.home):has(#site-player.site-player--closed) .page,
-    body:not(.home):has(#site-player.site-player--closed) .gallery-wrap,
-    body:not(.home):has(#site-player.site-player--closed) .guestbook-wrap {
-        padding-bottom: calc(3.25rem + env(safe-area-inset-bottom, 0px));
-    }
-
-    /* Stacked aside should not stick over content on phones. */
-    body:not(.home) .page__aside {
-        position: static;
-        max-height: none;
-        overflow: visible;
-        top: auto;
-        right: auto;
-    }
-
-    body:not(.home) .page {
-        margin: 0.75rem auto;
-        padding-left: 0.85rem;
-        padding-right: 0.85rem;
-        max-width: 100%;
-    }
-
-    body:not(.home) .page__header {
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-
-}
-
-body.home #site-player.site-player--simple {
-    position: fixed;
-    right: auto;
-    bottom: auto;
-    width: max-content;
-    height: auto;
-    gap: 0.45rem;
-}
-
-body.home #site-player.site-player--simple .player-chrome {
-    gap: 0.45rem;
-}
-
-body.home #site-player.site-player--simple .player-title {
-    font-size: 0.75rem;
-    width: 4rem;
-}
-
-body.home #site-player.site-player--simple button:not(.player-back-top) {
-    width: 1.5rem;
-    height: 1.5rem;
-}
-
-body.home #site-player.site-player--simple button:not(.player-back-top) i {
-    font-size: 0.65rem;
-}
-
-.home-player-slot {
-    anchor-name: --home-player-slot;
-}
-
-@supports (anchor-name: --home-player-slot) {
-    /* Skip anchors while the dock is CSS-scaled as a group (JS places instead). */
-    body.home:not(.is-home-dock-scaled) #site-player.site-player--simple {
-        position-anchor: --home-player-slot;
-        top: anchor(top);
-        left: anchor(left);
-        visibility: visible;
-        pointer-events: auto;
-    }
-
-    body.home:not(.is-home-dock-scaled) #site-player.site-player--simple.site-player--home-pending {
-        visibility: visible;
-        pointer-events: auto;
     }
 }
 
-/* Phone homepage: same fixed bar as inner pages, not the dock slot. */
-@media (max-width: 44.99rem) {
-    body.home #site-player.site-player--simple,
-    body.home:not(.is-home-dock-scaled) #site-player.site-player--simple {
-        position: fixed;
-        position-anchor: none;
-        top: auto;
-        left: auto;
-        right: max(0.75rem, env(safe-area-inset-right));
-        bottom: max(0.75rem, env(safe-area-inset-bottom));
-        width: max-content;
-        max-width: calc(100vw - 1.5rem);
-        height: auto;
-        visibility: visible;
-        pointer-events: auto;
+@media (prefers-reduced-motion: reduce) {
+    #site-player {
+        transition: none;
     }
 }

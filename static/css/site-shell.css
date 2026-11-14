@@ -1,10 +1,10 @@
 /*
-  Shared page shell. Footer: layouts/partials/site-footer.html on every layout.
-  Photobook + guestbook use the same grid as .page (layout.css): header and
-  footer span both columns, the body sits in the content column.
+  Shared footer: layouts/partials/site-footer.html on every layout.
+  The page grid itself is .site-shell in assets/css/layout.css.
 */
 :root {
     --footer-pad-top: 1.5rem;
+    --footer-pad-bottom: 1.5rem;
 }
 
 .site-footer {
@@ -12,7 +12,6 @@
     box-sizing: border-box;
     width: 100%;
     padding-top: var(--footer-pad-top);
-    border-top: 1px solid color-mix(in srgb, var(--muted) 35%, transparent);
     color: var(--off-fg);
 }
 
@@ -20,33 +19,21 @@
     margin: 0;
 }
 
-:is(.gallery-wrap, .guestbook-wrap) {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    row-gap: 2rem;
-    align-items: start;
-    margin: 1.5rem auto 3rem;
-    padding: 0 0.85rem;
-}
-
-:is(.gallery-header, .guestbook-header, .gallery-wrap > main, .guestbook-wrap > main) {
-    min-width: 0;
-}
-
-:is(.gallery-header, .guestbook-header, .gallery-wrap > .site-footer, .guestbook-wrap > .site-footer) {
-    grid-column: 1 / -1;
-}
-
+/* Desktop: yeti, player, and ↑ (homepage: the dock row) share one bottom line. */
 @media (min-width: 45rem) {
-    :is(.gallery-wrap, .guestbook-wrap) {
-        grid-template-columns: minmax(0, 1fr) var(--aside-width);
-        column-gap: var(--aside-gap);
-        margin: 1rem auto;
-        padding: 0;
+    .site-footer {
+        padding-bottom: var(--footer-pad-bottom);
     }
 
-    :is(.gallery-wrap, .guestbook-wrap) > main {
-        overflow-x: clip;
+    .site-footer--page {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        min-height: calc(var(--footer-pad-top) + 100px + 0.15rem + 2rem + var(--footer-pad-bottom));
+    }
+
+    .site-footer--page .page-footer__skifree {
+        margin: 0;
     }
 }
 
