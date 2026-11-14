@@ -1,10 +1,9 @@
 <title>{{ with .Title }}{{ . }} &ndash; {{end}}{{ .Site.Title }}</title>
-{{ with .Site.Params.about }}<meta name="description" content="{{ .description }}">{{ end }}
+{{ with .Site.Params.about.description }}<meta name="description" content="{{ . }}">{{ end }}
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta charset="UTF-8"/>
 {{ if .Site.Params.noindex }}<meta name="robots" content="noindex" /> {{ end }}
 <link rel="preload" href="{{ "fonts/fira-mono-400.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="{{ "css/site-fonts.css" | relURL }}?v=2">
 {{- $fontSite := .Site.Params.fonts.site | default `"Fira Mono", ui-monospace, monospace` -}}
 {{- $fontArticle := .Site.Params.fonts.article | default `Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, "Times New Roman", serif` -}}
 <style>
@@ -13,7 +12,6 @@
     --font-article: {{ $fontArticle | safeCSS }};
   }
 </style>
-{{/* articleFontUrl (Montserrat) loads on blog singles only — see single.html. */}}
 {{- /* Netlify sets CONTEXT at build (production | deploy-preview | branch-deploy). */ -}}
 {{- $ctx := getenv "CONTEXT" | default "dev" -}}
 <script>
@@ -21,24 +19,32 @@
   window.__SITE_SKIP_METERED_API__ = {{ if or (eq $ctx "deploy-preview") (eq $ctx "branch-deploy") }}true{{ else }}false{{ end }};
 </script>
 <script src="{{ "js/site-context.js" | relURL }}?v=1"></script>
-<!-- site base css (forked from risotto) -->
-{{ $palette := resources.Get (printf "css/palettes/%s.css" (.Site.Params.theme.palette | default "base16-dark")) }}
-{{ $core := slice
-  (resources.Get "css/colours.css")
+{{- /*
+  Sitewide CSS: one fingerprinted bundle (order = cascade order), then the
+  player sheet on its own. Page-only sheets are fingerprinted in their layouts
+  via partial "css.html". Every file lives in assets/css/ except player.css.
+*/ -}}
+{{ $site := slice
+  (resources.Get "css/fonts.css")
+  (resources.Get "css/tokens.css")
   (resources.Get "css/typography.css")
   (resources.Get "css/layout.css")
   (resources.Get "css/header.css")
   (resources.Get "css/logo.css")
   (resources.Get "css/about.css")
-  (resources.Get "css/risotto.css")
-| resources.Concat "css/bundle.css"
+  (resources.Get "css/chrome.css")
+  (resources.Get "css/site-shell.css")
+  (resources.Get "css/subscribe.css")
+  (resources.Get "css/stars.css")
+  (resources.Get "css/sprites.css")
+  (resources.Get "css/backdrop.css")
+  (resources.Get "css/sword.css")
+  (resources.Get "css/buttons.css")
+| resources.Concat "css/site.css"
 | minify
 | fingerprint }}
-<link rel="stylesheet" href="{{ $core.RelPermalink }}" integrity="{{ $core.Data.Integrity }}">
-{{ with $palette }}
-{{ $p := . | minify | fingerprint }}
-<link rel="stylesheet" href="{{ $p.RelPermalink }}" integrity="{{ $p.Data.Integrity }}">
-{{ end }}
+<link rel="stylesheet" href="{{ $site.RelPermalink }}" integrity="{{ $site.Data.Integrity }}">
+<link rel="stylesheet" href="{{ "css/player.css" | relURL }}?v=83">
 <!-- favicon -->
 {{ if os.FileExists "static/favicon.ico" }}<link rel="icon" href="{{ "favicon.ico" | absURL }}">{{ end }}
 {{ if os.FileExists "static/favicon-32x32.png" }}<link rel="icon" type="image/png" sizes="32x32" href="{{ "favicon-32x32.png" | absURL }}">{{ end }}
@@ -55,21 +61,12 @@
 {{ if isset .Params "description" }}
   <meta property="og:description" content="{{ .Params.description }}"/> 
 {{ else }}
-  {{ with .Site.Params.about }}
-    <meta property="og:description" content="{{ .description }}"/> 
+  {{ with .Site.Params.about.description }}
+    <meta property="og:description" content="{{ . }}"/> 
   {{ end }}
 {{ end }}
 {{ with .Site.Language.Locale }}<meta property="og:locale" content="{{ . }}" />{{ end }}
 {{ with .Site.Params.about.logo_image }}<meta property="og:image" content="{{ . | absURL }}" />{{ end }}
-{{/* Always-on chrome. retro.css is home-only. buttons.css loads with button markup. */}}
-<link rel="stylesheet" href="{{ "css/player.css" | relURL }}?v=83">
-<link rel="stylesheet" href="{{ "css/reading.css" | relURL }}?v=24">
-<link rel="stylesheet" href="{{ "css/site-shell.css" | relURL }}?v=13">
-<link rel="stylesheet" href="{{ "css/subscribe.css" | relURL }}?v=8">
-<link rel="stylesheet" href="{{ "css/stars.css" | relURL }}?v=11">
-<link rel="stylesheet" href="{{ "css/sprites.css" | relURL }}?v=13">
-<link rel="stylesheet" href="{{ "css/backdrop.css" | relURL }}?v=25">
-<link rel="stylesheet" href="{{ "css/sword.css" | relURL }}?v=2">
 {{/* Custom cursor image, when static/ holds the file named in params.cursor.image. */}}
 {{ $cursor := .Site.Params.cursor.image }}
 {{ if and $cursor (os.FileExists (printf "static/%s" (strings.TrimPrefix "/" $cursor))) }}

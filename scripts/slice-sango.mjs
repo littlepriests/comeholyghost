@@ -118,7 +118,7 @@ for (const plan of plans) {
 }
 
 fs.writeFileSync(
-  "static/images/sprites/sango.json",
+  "assets-src/sprites/meta/sango.json",
   JSON.stringify(
     {
       note: "Sango from InuYasha: Fūun Emaki (WonderSwan). TSR #13363. Fan-use test.",

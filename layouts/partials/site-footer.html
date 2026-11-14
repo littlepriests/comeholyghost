@@ -1,5 +1,5 @@
 {{- /*
-  One footer for every layout: same top padding and band (static/css/site-shell.css).
+  One footer for every layout: same top padding and band (assets/css/site-shell.css).
   variant "home": homepage dock + [params.home.footer] extras, no yeti row.
   variant "page": yeti + copyright; the player parks in this band on every page (player.js).
 */ -}}
@@ -20,7 +20,6 @@
         {{- else if eq .kind "text" }}
         <p>{{ .text | markdownify }}</p>
         {{- else if eq .kind "button" }}
-        <link rel="stylesheet" href="{{ "css/buttons.css" | relURL }}?v=3">
         {{- $name := "" -}}
         {{- with .icon }}{{ $name = partial "icon-name.html" . }}{{ end -}}
         <a class="site-button" href="{{ .url | safeURL }}">{{- with $name }}{{ partial "icon.html" (dict "name" .) }} {{ end -}}{{ .title }}</a>

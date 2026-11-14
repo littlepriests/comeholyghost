@@ -33,7 +33,6 @@
     var dockPetKicking = false;
     var backTopBtn = player.querySelector("[data-player-back-top]");
     var BACK_TOP_MIN_SCROLL = 160;
-    var chromeEl = player.querySelector("[data-player-chrome]");
     function isMobileViewport() {
         return mobileQuery.matches;
     }
@@ -194,11 +193,13 @@
 
     /**
      * Back-to-top beat: (desktop dock) stomp → dock spill → page hearts → scroll.
-     * Mobile / undocked: page hearts → scroll (Grundo isn't shown on simple chrome).
+     * Mobile / reduced motion: page hearts → scroll (Grundo isn't shown on phones).
      */
     function stompDockPetThen(done) {
         var finish = typeof done === "function" ? done : function () {};
-        var canStomp = player.classList.contains("site-player--docked")
+        // Grundo's dock is desktop-only (CSS shows it at >= 45rem); the ↑ only
+        // exists while the chrome is open, so no closed-state check is needed.
+        var canStomp = !isMobileViewport()
             && dockIdle
             && dockKick
             && !prefersReducedMotion();

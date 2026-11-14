@@ -126,7 +126,7 @@ const meta = [
 ];
 
 fs.writeFileSync(
-  "static/images/sprites/grundo.json",
+  "assets-src/sprites/meta/grundo.json",
   JSON.stringify(
     {
       note: "Orange Grundo (Pokémon G/S style). TSR #186604. Credit LonelyMarowak. Fan-use.",

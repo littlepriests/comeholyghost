@@ -98,7 +98,7 @@ for (let fi = 0; fi < frames.length; fi++) {
 const packed = await sharp(PNG.sync.write(strip)).png({ compressionLevel: 9, effort: 10 }).toBuffer();
 fs.writeFileSync("static/images/sprites/misdreavus.png", packed);
 fs.writeFileSync(
-  "static/images/sprites/misdreavus.json",
+  "assets-src/sprites/meta/misdreavus.json",
   JSON.stringify(
     {
       src: "images/sprites/misdreavus.png",

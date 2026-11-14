@@ -128,7 +128,7 @@ if (!meta.length) {
 }
 
 fs.writeFileSync(
-  "static/images/sprites/skifree.json",
+  "assets-src/sprites/meta/skifree.json",
   JSON.stringify(
     {
       note: "SkiFree characters. TSR #26926. Fan-use test. Original block only (above custom divider).",

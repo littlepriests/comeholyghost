@@ -87,5 +87,5 @@ export default async (request) => {
 
 export const config = {
     path: "/api/subscribe",
-    includedFiles: ["emails/**", "netlify/lib/**"]
+    includedFiles: ["emails/welcome.md", "emails/welcome.html", "netlify/lib/**"]
 };

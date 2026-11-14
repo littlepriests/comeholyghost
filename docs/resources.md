@@ -9,12 +9,12 @@ The dev server is `hugo server -D --disableFastRender --navigateToChanged` from 
 What we tightened (keep the GeoCities vibe; don’t gut atmosphere):
 
 - **Images:** article masters stay in the repo as WebP and are not published. `photo` / `figcaption` / `photo-grid` / writing-index serve Hugo-processed WebP only (click-to-expand is 1600px q70). Prefer masters under ~300–500 KB (see `docs/posting.md`).
-- **Fonts / icons:** self-hosted WOFF2 only — Fira Mono (`static/fonts/fira-mono-*.woff2`, `static/css/site-fonts.css`), Montserrat variable (`article-font.css`), DotMatrixNarrow (homepage title). Site vs article faces via `[params.fonts]` (see **Fonts** below). No Google Fonts / Font Awesome / Academicons CDN. Icons via `layouts/partials/icon.html`.
-- **CSS scope:** always-on chrome in `layouts/partials/head.html` (player, reading, subscribe, stars, sprites, backdrop). `retro.css` is homepage-only and scoped to `body.home`. `buttons.css` loads only with button markup. `article-reading` (blog posts), `article-media` / `blog-index` load from their layouts. Gallery / guestbook keep their own sheets. Base layout CSS lives in `assets/css/` (forked from Risotto; unused palettes dropped).
+- **Fonts / icons:** self-hosted WOFF2 only — Fira Mono, Montserrat variable (articles), DotMatrixNarrow (homepage title line 2). Every `@font-face` lives in `assets/css/fonts.css`; files under `static/fonts/`. Site vs article faces via `[params.fonts]` (see **Fonts** below). No Google Fonts / Font Awesome / Academicons CDN. Icons via `layouts/partials/icon.html`.
+- **CSS scope:** all site CSS lives in `assets/css/` except `static/css/player.css`. See **Stylesheets** below.
 - **Atmosphere JS:** bubble cursor self-hosted (`static/js/vendor/cursor-effects.esm.js` v1.0.18), homepage + desktop only. Stars: fewer on phone / `prefers-reduced-motion`; no scroll voiding on narrow viewports.
 - **npm:** project `.npmrc` → `registry.npmjs.org` only. Before any zip, confirm lockfile `resolved` URLs are all `registry.npmjs.org` (no private registry hosts).
 
-Quick check: cold Network on `/`, `/blog/`, `/blog/1126/` — no cdnjs/fonts.googleapis/unpkg `@latest`; banner/post thumbs are WebP-sized responses.
+Quick check: cold Network on `/`, `/blog/`, `/blog/crossroad-beauty/` — no cdnjs/fonts.googleapis/unpkg `@latest`; banner/post thumbs are WebP-sized responses.
 
 ## Design direction
 
@@ -32,7 +32,7 @@ Credits / provenance:
 - Clouds (`.ascii-cloud`): small version of the top cloud on [emojicombos.com/cloud-ascii-art](https://emojicombos.com/cloud-ascii-art). Placed around the ASCII angel (top over halo/wing, `# ♡` gap pair, lower flanks, smaller nest under the cat). Nest shows “sign the guestbook!” on angel hover; `home.js` voids twinkling stars behind cloud boxes.
 - Kagura / Misdreavus / Sango / SkiFree strips: fan-use test assets; publishers own the art (see Sprite animations).
 
-1. ~~**Mobile player chrome**~~ — Done. Under `44.99rem` on non-home pages, `applyPlayerChrome()` uses `site-player--simple` + `site-player--mobile` (no Winamp). Simple chrome (home + mobile) has `[x]` → ♡ without changing play/pause. Remote playlist fetch falls back to `/audio/playlist.json`; if the skin cannot boot, chrome falls back to simple instead of staying hidden.
+1. ~~**Mobile player chrome**~~ — Done. Under `44.99rem` the player is the same bar without Grundo (`applyPlayerChrome()` in `player.js`). `[x]` hides it behind a ♡ without changing play/pause. Remote playlist fetch falls back to `/audio/playlist.json`.
 1b. ~~**Mobile layout pass**~~ — Done in-tree. Narrow title scale; dock wrap + smaller pets; hide sword; overflow-x clip; larger player touch targets + safe-area; non-sticky aside; gallery/guestbook padding; under `52rem` show angel guestbook CTA (clouds hidden; `home.js` clears nest-driven CTA inline coords). Phone crawl at 390×844 passed home → blog → post → gallery → guestbook. Still spot-check on a real phone after deploy.
 2. **Desktop player + sticky header** — Same minimalist player (same close/reopen behavior as mobile) docked on `/blog`, `/gallery`, `/guestbook`, `/about` on the far side of the link dock. On article bodies that already have a third column, dock the player there. On scroll, the whole link dock (home control + player) scrolls with the article — sticky header strip, not a sticky banner.
 3. ~~**First-paint flicker (follow-up)**~~ — Done in-tree: SPA waits for new stylesheets before swapping `#page-root`; banner stays pending until the random pick loads; title face uses `font-display: swap` + Fira preload; backdrop images fade in on load; `fonts-ready` gate. Verify after deploy; reopen if anything still flashes live.
@@ -42,7 +42,7 @@ Credits / provenance:
 
 **Beginner how-to (make a strip from Spriters Resource, no prior experience):** [`docs/sprites.md`](sprites.md).
 
-Horizontal strip sheets under `static/images/sprites/`, driven by CSS `steps()` in `static/css/sprites.css`. Config is `[[params.sprites]]` in `hugo.toml` (`id`, `src`, `frameWidth`, `frameHeight`, `frames`, `fps`, `alt`, optional `scale`).
+Horizontal strip sheets under `static/images/sprites/`, driven by CSS `steps()` in `assets/css/sprites.css`. Config is `[[params.sprites]]` in `hugo.toml` (`id`, `src`, `frameWidth`, `frameHeight`, `frames`, `fps`, `alt`, optional `scale`).
 
 ### Invoke in content
 
@@ -80,7 +80,7 @@ Nav and in-site list links should stay **relative** (`relURL` / `relLangURL` / `
 
 ## Atmosphere (stars)
 
-Twinkling starfield is sitewide: `layouts/partials/stars.html` (outside `#page-root` so SPA nav keeps it), `static/css/stars.css`, `static/js/stars.js`. Linked from `head.html`. Homepage visitor ticker stays in `static/js/home.js`. On non-home pages, `stars.js` voids twinkles behind `.page__body` (title + prose + figures) and punches a CSS mask hole in `.home-stars` so glows cannot sit in letter gaps; gutters / aside keep the sky. Below 45rem the ASCII stars are not drawn, and the homepage uses that same hole over the banner, title, nav, prose, and footer. SPA nav re-runs `refreshStarReadingVoids` from `player.js`.
+Twinkling starfield is sitewide: `layouts/partials/stars.html` (outside `#page-root` so SPA nav keeps it), `assets/css/stars.css`, `static/js/stars.js`. Linked from `head.html`. Homepage visitor ticker stays in `static/js/home.js`. On non-home pages, `stars.js` voids twinkles behind `.page__body` (title + prose + figures) and punches a CSS mask hole in `.home-stars` so glows cannot sit in letter gaps; gutters / aside keep the sky. Below 45rem the ASCII stars are not drawn, and the homepage uses that same hole over the banner, title, nav, prose, and footer. SPA nav re-runs `refreshStarReadingVoids` from `player.js`.
 
 ## Read-me email CTA
 
@@ -88,7 +88,7 @@ The read-me sword figure (`sword_figure = true`) is the mailto link: clicking it
 
 ## Read-me sword figure
 
-`sword_figure = true` on read-me loads `layouts/partials/sword-figure.html` before the h1 (image from `[params.backdrop.bottom-right]`). Centered hero; ♡ fountain on hover (`static/css/sword.css`). Not shown on the homepage.
+`sword_figure = true` on read-me loads `layouts/partials/sword-figure.html` before the h1 (image from `[params.backdrop.bottom-right]`). Centered hero; ♡ fountain on hover (`assets/css/sword.css`). Not shown on the homepage.
 
 ## Aside meta (date / author / ToC)
 
@@ -101,19 +101,27 @@ Two faces, both set in `hugo.toml` — no Google Fonts / company CDNs:
 ```toml
 [params.fonts]
 site = "\"Fira Mono\", ui-monospace, monospace"
-article = "Georgia, \"Iowan Old Style\", \"Palatino Linotype\", Palatino, \"Times New Roman\", serif"
-# Optional self-hosted @font-face sheet for the article stack:
-# articleFontUrl = "css/article-font.css"
+article = "\"Montserrat\", sans-serif"
 ```
 
 | Token | Where it applies | How to change |
 | --- | --- | --- |
 | `--font-site` | Body / chrome (home, guestbook, gallery, writing index, asides) | `[params.fonts] site` |
-| `--font-article` | `/blog/<slug>/` prose (`.content__header` + `.content__body`) | `[params.fonts] article` + optional `articleFontUrl` |
+| `--font-article` | `/blog/<slug>/` prose (`.content__header` + `.content__body`) | `[params.fonts] article` |
 
-`head.html` writes the CSS variables; `static/css/reading.css` applies `--font-site` on `body`. Blog posts also load `static/css/article-reading.css` (linked from `layouts/_default/single.html` when `.Section == "blog"`). **Ad-hoc article readability fixes** (line-height, measure, heading weight, code face) go in `article-reading.css` — leave Risotto `typography.css` alone unless you intentionally want a theme-wide change. Writing-index face stays on `.blog-index` in `static/css/blog-index.css` (still site mono by default).
+`head.html` writes the CSS variables; `assets/css/typography.css` applies `--font-site` on `body`. Blog posts also load `assets/css/article-reading.css` (linked from `layouts/_default/single.html` when `.Section == "blog"`). **Ad-hoc article readability fixes** (line-height, measure, heading weight, code face) go in `article-reading.css` — keep `typography.css` for sitewide rules. Writing-index face stays on `.blog-index` in `assets/css/blog-index.css` (still site mono by default).
 
-Self-host a new article face: drop WOFF2 under `static/fonts/`, add `@font-face` in e.g. `static/css/article-font.css`, set `articleFontUrl` and put that family first in `article`.
+Self-host a new face: drop WOFF2 under `static/fonts/`, add its `@font-face` to `assets/css/fonts.css`, and put that family first in `site` or `article`.
+
+## Stylesheets
+
+One source of truth: `assets/css/`. Hugo concatenates, minifies, and fingerprints it, so there are no `?v=` bumps for CSS.
+
+- **Sitewide bundle** (`css/site.<hash>.css`, built in `layouts/partials/head.html`): fonts, tokens, typography, layout, header, logo, about, chrome, site-shell, subscribe, stars, sprites, backdrop, sword, buttons. Order matters — later files win ties.
+- **Homepage bundle** (`layouts/index.html`): `home.css` + `retro.css`.
+- **Page sheets** via `{{ partial "css.html" "name" }}` (or a slice of names): `article-media`, `article-reading` (blog posts), `blog-index`, `gallery`, `guestbook`. Put that call inside the layout's `main` block so same-site navigation picks it up.
+- **Player:** `static/css/player.css` stays separate (linked after the bundle) so the music bar keeps its own cache-busting `?v=` in `head.html`. Bump it when you edit that file.
+- Colors: `assets/css/tokens.css` holds the raw base16 hex values and the jobs (`--bg`, `--fg`, `--link`, …) — edit there.
 
 ## Hover tips (`data/tips.yaml`)
 
@@ -131,17 +139,17 @@ Script is included from `baseof.html` (and gallery/guestbook shells). Keep `aria
 Tune preview size in two places (no stretch/crop — `object-fit: contain`):
 
 1. **Hugo Fit caps** — `layouts/partials/blog-entry.html` (`$previewMaxW` / `$previewMaxH`, default 960×720). Masters larger than the box are downscaled to WebP; smaller masters keep native pixel size inside the box.
-2. **CSS display caps** — `static/css/blog-index.css`:
+2. **CSS display caps** — `assets/css/blog-index.css`:
    - `.blog-entry__figure { max-width: … }` — how wide the card image may run in the column
    - `.blog-entry__thumb > img { max-height: … }` — vertical cap (phone rules in the same file’s media query)
 
-Bump `blog-index.css?v=` in `layouts/blog/list.html` after CSS edits so SPA/cache picks them up. Lightbox still uses the larger Fit (`2400x2400`) full URL from the same partial.
+CSS is fingerprinted, so edits ship without a version bump. Lightbox still uses the larger Fit (`1600x1600`) full URL from the same partial.
 
 ## Footer SkiFree
 
-Wherever `$ echo $LANG` used to sit (`layouts/partials/footer.html`), the `skifree-yeti` strip plays instead (9 native-width frames, 3 fps, scale 2). Every layout renders its footer through `layouts/partials/site-footer.html` (shared padding and bottom line in `static/css/site-shell.css`; the page grid is `.site-shell` in `assets/css/layout.css`). Baseof pages, gallery, and guestbook use the `page` variant (yeti + copyright); the homepage uses the `home` variant (dock + `[params.home.footer]` extras, no yeti). Re-slice with `node scripts/slice-skifree.mjs` if the sheet changes.
+Wherever `$ echo $LANG` used to sit (`layouts/partials/footer.html`), the `skifree-yeti` strip plays instead (9 native-width frames, 3 fps, scale 2). Every layout renders its footer through `layouts/partials/site-footer.html` (shared padding and bottom line in `assets/css/site-shell.css`; the page grid is `.site-shell` in `assets/css/layout.css`). Baseof pages, gallery, and guestbook use the `page` variant (yeti + copyright); the homepage uses the `home` variant (dock + `[params.home.footer]` extras, no yeti). Re-slice with `node scripts/slice-skifree.mjs` if the sheet changes.
 
-Writing index (`/blog/`): one page listing all posts (not infinite scroll). `pagerSize = 3` in `hugo.toml` is unused by `layouts/blog/list.html`, which ranges `.Pages` directly — no subpage tabs unless you wire Hugo pagination later.
+Writing index (`/blog/`): one page listing all posts (not infinite scroll). `layouts/blog/list.html` ranges `.Pages` directly, so there is no pagination config in `hugo.toml` — no subpage tabs unless you wire Hugo pagination later.
 
 ## Guestbook
 
@@ -153,16 +161,7 @@ Global homepage tally uses `/api/visitors` (`netlify/functions/visitors.mjs`) an
 
 ## Color palette
 
-The active palette is `base16-dark`. Switch the whole set by changing the name in `hugo.toml`:
-
-```toml
-[params.theme]
-palette = "base16-dark"
-```
-
-The name is a file in `assets/css/palettes/`, without `.css`. The choices on disk are `apprentice`, `base16-dark`, `base16-light`, `catppuccin-frappe`, `catppuccin-latte`, `catppuccin-macchiato`, `catppuccin-mocha`, `dracula`, `gruvbox-dark`, `gruvbox-light`, `material`, `papercolor-dark`, `papercolor-light`, `solarized-dark`, `solarized-light`, `tender`, `tokyo-night-dark`, `tokyo-night-light`, `windows-95`, and `windows-95-light`. `layouts/partials/head.html` loads that file. Save `hugo.toml` and reload the site.
-
-To change one color and keep the rest, edit the hex in `assets/css/palettes/base16-dark.css`. The page does not use those hex values directly. `assets/css/colours.css` gives each one a job. Change the job there if, for example, links should use a different base color than `--base0D`.
+All colors live in `assets/css/tokens.css`: the base16-dark hex values first, then the jobs that use them. Edit a hex to change it everywhere, or point a job at a different slot if, for example, links should use something other than `--base0D`.
 
 What the current dark palette paints:
 
@@ -185,7 +184,7 @@ What the current dark palette paints:
 | `--base0E` | `#ba8baf` | Syntax highlighting |
 | `--base0F` | `#a16946` | Syntax highlighting |
 
-Every page uses a vertical linear gradient in `static/css/backdrop.css`: charcoal near-black at the top (`#121014`), easing into the palette purple (`--bg` / `#31263E`) and a touch of `--inner-bg` / `#44355B` at the bottom. Inner pages match the homepage content look — prose sits directly on the gradient (the theme body plate is gone from `assets/css/layout.css`). Corner art is homepage-only.
+Every page uses a vertical linear gradient in `assets/css/backdrop.css`: charcoal near-black at the top (`#121014`), easing into the palette purple (`--bg` / `#31263E`) and a touch of `--inner-bg` / `#44355B` at the bottom. Inner pages match the homepage content look — prose sits directly on the gradient (the theme body plate is gone from `assets/css/layout.css`). Corner art is homepage-only.
 
 ## Dimensions
 
@@ -197,8 +196,8 @@ Sizes the layout actually uses. `1rem` is 16px unless the browser's default font
 - Gallery tiles: 9.5rem square. Each thumb is cropped to 600×600 before it is shown.
 - Homepage player: the same footer stack as the other pages (Grundo over the stop button, ↑ below), on the dock baseline and at the same page edge. Sango, the ticker, and Kagura stay centered in the content column. Below 45rem the pets are hidden, and the counter, the player, and the reserved ↑ slot share one gap (`--footer-row-gap`) and that group is centered in the footer. Phone nav: Misdreavus and Pancham are bookends, with the links centered between them (two per row when they fit).
 - Atmosphere: `.home-stars` via `layouts/partials/stars.html` / `static/js/stars.js` (~153 CSS dots + ~5 sparse Joan-style `\/` ASCII stars in the side gutters, away from text). Homepage moon is Joan G. Stark’s “man in the moon” (`.ascii-moon`, `jgs` kept) in `.home-title-row` beside the centered site title. First homepage session only: when the visitor ticker scrolls into view, large Kagura attacks across the dock with feet on the ticker baseline, the count bumps mid-slash with `+1` (Sango in `.home-dock__pet--left` stays idle), then Kagura crossfades to a ~30% smaller `kagura-walk` and parks in `.home-dock__pet--right` (`static/js/home.js`). Returning visits keep Kagura idle-walking right and Sango idle left. Click Sango to play `sango-attack`; mid-swing knocks Kagura into `kagura-down`, then she gets back up to walk; Sango returns to idle when the attack strip finishes (Hiraikotsu home). If they leave without seeing the attack, the count still bumps once with no park. Counts 10 / 100 / 1000 also get a green milestone glow.
-- Media polish: `static/css/retro.css` adds twinkling corner sparkles on the **homepage banner only** — not gallery, article, or writing-index thumbs. No border, no purple wash, no scanlines.
-- Favicon slots the theme already looks for, if you add the files under `static/`: `favicon.ico`, `favicon-32x32.png` (32×32), `favicon-16x16.png` (16×16), and `apple-touch-icon.png` (180×180 is the usual size). None of those files are in the repo right now.
+- Media polish: `assets/css/retro.css` adds twinkling corner sparkles on the **homepage banner only** — not gallery, article, or writing-index thumbs. No border, no purple wash, no scanlines.
+- Favicons: `layouts/partials/head.html` links `favicon.ico`, `favicon-32x32.png`, `favicon-16x16.png`, `apple-touch-icon.png`, and `site.webmanifest` from `static/` when they exist. They are all in the repo now (cat + hearts). `site.webmanifest` still has an empty `name` / `short_name` and white theme colors.
 - Backdrop: fixed corner caps use `maxwidth` / `maxheight` in `hugo.toml`. Bottom-right image feeds read-me `.sword-figure` (`layouts/partials/sword-figure.html`) and is never emitted as `.site-backdrop`. Other corners still use `layouts/partials/backdrop.html`; SPA home adopt also strips any leftover bottom-right corner node.
 - Homepage dock: `.home-footer__dock-fit` + `fitHomeDock()` in `home.js` scale pets and ticker as one row (`--home-dock-scale`) so the footer never wraps or spills; floor 0.55. Desktop adds equal padding on the counter sides so Sango and Kagura sit halfway between the counter and the furthest spot that still stays inside the text column and halfway from Kagura to the player. Below 45rem the pets are hidden and the counter stays left, clear of the player. The first-visit slash is skipped there; the count still bumps.
 
@@ -208,12 +207,12 @@ The pointer is an image when `hugo.toml` names a file that exists under `static/
 
 ```toml
 [params.cursor]
-image = "images/cursor.png"
+image = "images/cursor.gif"
 x = 0
 y = 0
 ```
 
-- Replace `static/images/cursor.png`. Keep it 32×32 pixels. Larger images are ignored by some browsers.
+- Replace `static/images/cursor.gif`. Keep it 32×32 pixels. Larger images are ignored by some browsers.
 - `x` and `y` are the click point, in pixels from the top left of the image. The starter arrow uses `0` `0` because the tip is the top left.
 - The rule is injected in `layouts/partials/head.html`. It applies to the whole page, including links. Text fields and text areas keep the text cursor.
 - To go back to the normal pointer, delete the `image` line, or point it at a file that is not in `static/`.
@@ -224,14 +223,15 @@ Homepage only. The slot is the first thing on the page, above the header.
 
 ```toml
 [params.home]
-banner = "images/banner.svg"
+bannerDir = "images/banners"
+banner = "images/banner.webp"
 bannerAlt = "Site banner"
 ```
 
 - `bannerDir` is a folder under `static/` (starter: `static/images/banners/`). On each homepage render Hugo shuffles that folder, preloads one image (png/jpg/webp/gif), and embeds it — no JS src swap. Prefer ~1200×280 WebP. Drop more same-size banners in the folder to rotate on refresh.
 - `banner` is the fallback single file if `bannerDir` is empty or missing.
 - `bannerAlt` is the image description. `home.js` only holds `.is-pending` until decode (SPA-safe).
-- Homepage title under the banner: `displayTitle` (defaults to site title), `titleFont` (CSS `font-family` stack — change in toml to experiment), optional `titleFontUrl` (stylesheet link for that face).
+- Homepage title under the banner: `displayTitle` (defaults to site title), `displayTitleLine2`, and the look: `titleFont` / `titleColor` (line 1), `titleFontLine2` / `titleColorLine2` (line 2), `titleHighlight` (background). Those keys are the only place to set it; `home.css` only holds fallbacks. Fonts must be system fonts or declared in `assets/css/fonts.css`.
 - The markup is in `layouts/index.html`. If the file is missing, the page shows an empty frame that names the path it expected.
 
 ## Social links
@@ -294,11 +294,11 @@ icon = "fa-brands fa-github"
 
 The same footer list also takes `kind = "text"` (`text`) and `kind = "image"` (`src`, `alt`, and an optional `url`). Those are rendered in `layouts/index.html`.
 
-The look is `static/css/buttons.css`, linked from `layouts/partials/head.html`.
+The look is `assets/css/buttons.css`, part of the sitewide bundle.
 
 ## Article media shortcodes
 
-Posts and pages can embed framed pictures without raw HTML. Both shortcodes live under `layouts/shortcodes/`. Styles are `static/css/article-media.css`; the photo lightbox is `static/js/article-media.js`. The script tag sits inside `#page-root` (home, base layout, gallery) so same-site navigation, which only swaps that node, still loads it.
+Posts and pages can embed framed pictures without raw HTML. Both shortcodes live under `layouts/shortcodes/`. Styles are `assets/css/article-media.css`; the photo lightbox is `static/js/article-media.js`. The script tag sits inside `#page-root` (home, base layout, gallery) so same-site navigation, which only swaps that node, still loads it.
 
 Put the image next to the markdown as a **page resource** (same folder as `index.md`, or listed in front matter `[[resources]]`), or use a path under `static/` (for example `images/foo.png`).
 
@@ -316,7 +316,7 @@ Centered medium thumbnail with the retro frame. Click opens the full image.
 - `alt`: image alt text when you do not want it derived from the caption.
 - Self-closing `/>` is fine when there is no inner body (Hugo shortcode syntax).
 
-Example in-tree: `content/blog/1126/index.md`.
+Example in-tree: `content/blog/crossroad-beauty/index.md`.
 
 ### `figcaption` — full-width figure with caption
 
@@ -348,7 +348,7 @@ weaving-infinite-gold.png
 | 5 | 2×2 + one centered under |
 | 6+ | two columns |
 
-Example grids live on `content/blog/1126/index.md`.
+Example grids live on `content/blog/crossroad-beauty/index.md`.
 
 ### `button` and `sprite`
 
@@ -362,8 +362,8 @@ How to change what visitors read without touching layout chrome.
 
 | Change | Where |
 | --- | --- |
-| Homepage copy | `content/homepage/index.md` (and sibling homepage pages if used) |
-| New blog post | Folder under `content/blog/<slug>/` with `index.md` + images; or `content/post/` for theme samples |
+| Homepage copy | `content/_index.md` |
+| New blog post | Folder under `content/blog/<slug>/` with `index.md` + images |
 | Blog list title | `content/blog/_index.md` |
 | Photobook | `content/gallery.md` (+ images under `static/` or as page resources) |
 | Guestbook page copy | `content/guestbook.md` (signatures are Netlify Blobs / local fallback, not markdown) |
@@ -382,7 +382,7 @@ New post checklist:
 
 ### Writing index (`/blog/`)
 
-Vajra-style feed (not a bare link list). Layout: `layouts/blog/list.html` + `layouts/partials/blog-entry.html`; styles `static/css/blog-index.css` (Fira Mono, all lowercase via CSS). Each post card uses that post’s front matter:
+Vajra-style feed (not a bare link list). Layout: `layouts/blog/list.html` + `layouts/partials/blog-entry.html`; styles `assets/css/blog-index.css` (Fira Mono, all lowercase via CSS). Each post card uses that post’s front matter:
 
 | Field | Role |
 | --- | --- |
@@ -392,7 +392,7 @@ Vajra-style feed (not a bare link list). Layout: `layouts/blog/list.html` + `lay
 | `index_image` | Page-resource filename (or `static/` path); natural size up to Fit/CSS caps (see **Writing-index thumbnails**) |
 | `index_caption` | Figcaption under the thumb (fallback: resource `title`) |
 
-Thumb click opens the existing article lightbox; title links into the post. Example: `content/blog/1126/index.md`.
+Thumb click opens the existing article lightbox; title links into the post. Example: `content/blog/crossroad-beauty/index.md`.
 
 Do not put secrets, API tokens, or maintainer-only paths into `content/` or `static/` — those folders publish. Keep private notes in this file (`docs/resources.md`) only.
 
@@ -408,7 +408,7 @@ The four blocks are `[params.backdrop.bottom-right]`, `[params.backdrop.bottom-l
 
 ```toml
 [params.backdrop.bottom-right]
-image = "images/backdrop-bottom-right.svg"
+image = "images/backdrop-bottom-right.webp"
 alt = ""
 x = "1.5rem"
 y = "1.5rem"
@@ -416,11 +416,11 @@ maxwidth = "24rem"
 maxheight = "24rem"
 ```
 
-- `image` is a path under `static/`. The starters are `static/images/backdrop-bottom-right.svg`, `backdrop-bottom-left.svg`, `backdrop-top-right.svg`, and `backdrop-top-left.svg`. Each is 384×384, the same size as that corner's cap. Replacing one file changes only the corner that points at it.
+- `image` is a path under `static/`. Only `static/images/backdrop-bottom-right.webp` exists today (it feeds the read-me sword figure); add files for the other corners and point their `image` at them. Replacing one file changes only the corner that points at it.
 - `alt` is the description. Leave it empty when the picture is decoration. An empty `alt` still shows the picture.
 - `x` and `y` are the distance from that corner. Any CSS length works (`1.5rem`, `24px`). A blank `x` or `y` uses `1.5rem`.
 - `maxwidth` and `maxheight` are the largest that corner's picture is allowed to be. The layout also keeps the picture outside the middle column, so the size you see is the smaller of that cap and the free space in the corner. A file smaller than the slot stays at its own size. A larger file is shrunk to fit, keeping its proportions. The picture is never scaled up. A blank `maxwidth` or `maxheight` uses `24rem`.
-- The elements are `layouts/partials/backdrop.html`. The rules are `static/css/backdrop.css`. They sit outside `#page-root`, next to the player, so same-site navigation leaves them in place. Include that partial after `#page-root` on any new layout, the same way the player partial is included.
+- The elements are `layouts/partials/backdrop.html`. The rules are `assets/css/backdrop.css`. They sit outside `#page-root`, next to the player, so same-site navigation leaves them in place. Include that partial after `#page-root` on any new layout, the same way the player partial is included.
 
 A blank corner draws nothing. The other corners stay as they are. Leaving `image` blank means either of these:
 
@@ -511,7 +511,7 @@ npm run newsletter:send -- --slug my-post   # force one (needs Resend env)
 
 ## Player
 
-One chrome: HTML `<audio>` owns play / pause / stop / skip / auto-next and survives SPA navigations. Desktop pages, homepage included, keep that bar in the footer: Grundo (`grundo-idle`) centered above the stop button, 1rem in from the right edge of the 53rem page. The ↑ sits halfway between the skip button's right edge and the window edge. On the homepage the button row shares the dock baseline; Sango and Kagura sit out from the ticker, halfway toward the text-column limit. Inner pages (`.site-footer--page`, including gallery and guestbook) put the yeti, the player buttons, and the ↑ on one bottom line. `--footer-pad-bottom` is the space under that line on every page, homepage included. The stack parks once the footer is on screen and floats at the bottom until then. Play / pause / stop / skip briefly plays `grundo-kick`. Mobile pages use the same bar without Grundo, with the player circles the same size as the ↑ (1.65rem), and the same footer park. Every phone footer is the same row in `static/css/site-shell.css` plus `placeFooterRow()` in `player.js`: a lead slot (`--footer-lead-w`, the counter on the homepage and the yeti everywhere else), the bar, and the ↑, with one gap (`--footer-row-gap`, 1.25rem, smaller when the row is tight) and the group centered. The band is the same height on every page (`--footer-row-h`), so the player and the ↑ land in the same spot as you move between pages. On a phone the yeti drops to native size (32×43) and his "subscribe" label sits above him. They sit on the footer line and float at the screen bottom until that line is on screen. The ↑ slot stays reserved, so the bar never moves when the ↑ appears. Stop hides the bar for a green ♡ (no autoplay on reopen). A ↑ back-to-top control appears once you’ve scrolled (~160px). Long titles scroll inside a fixed slot (`is-marquee`). The player lives outside `#page-root`. Same-site link clicks swap `#page-root` and leave the player in place. A new tab, an external link, or a page with no `#page-root` loads a fresh document and the music stops.
+One chrome: HTML `<audio>` owns play / pause / stop / skip / auto-next and survives SPA navigations. Desktop pages, homepage included, keep that bar in the footer: Grundo (`grundo-idle`) centered above the stop button, 1rem in from the right edge of the 53rem page. The ↑ sits halfway between the skip button's right edge and the window edge. On the homepage the button row shares the dock baseline; Sango and Kagura sit out from the ticker, halfway toward the text-column limit. Inner pages (`.site-footer--page`, including gallery and guestbook) put the yeti, the player buttons, and the ↑ on one bottom line. `--footer-pad-bottom` is the space under that line on every page, homepage included. The stack parks once the footer is on screen and floats at the bottom until then. Play / pause / stop / skip briefly plays `grundo-kick`. Mobile pages use the same bar without Grundo, with the player circles the same size as the ↑ (1.65rem), and the same footer park. Every phone footer is the same row in `assets/css/site-shell.css` plus `placeFooterRow()` in `player.js`: a lead slot (`--footer-lead-w`, the counter on the homepage and the yeti everywhere else), the bar, and the ↑, with one gap (`--footer-row-gap`, 1.25rem, smaller when the row is tight) and the group centered. The band is the same height on every page (`--footer-row-h`), so the player and the ↑ land in the same spot as you move between pages. On a phone the yeti drops to native size (32×43) and his "subscribe" label sits above him. They sit on the footer line and float at the screen bottom until that line is on screen. The ↑ slot stays reserved, so the bar never moves when the ↑ appears. Stop hides the bar for a green ♡ (no autoplay on reopen). A ↑ back-to-top control appears once you’ve scrolled (~160px). Long titles scroll inside a fixed slot (`is-marquee`). The player lives outside `#page-root`. Same-site link clicks swap `#page-root` and leave the player in place. A new tab, an external link, or a page with no `#page-root` loads a fresh document and the music stops.
 
 Files:
 

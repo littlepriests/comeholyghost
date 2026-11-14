@@ -26,14 +26,6 @@
     line-height: 0;
 }
 
-@font-face {
-    font-family: "DotMatrixNarrow";
-    src: url("/fonts/DotMatrixNarrow.woff2") format("woff2");
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-}
-
 .page-footer__yeti-badge {
     position: absolute;
     z-index: 1;
