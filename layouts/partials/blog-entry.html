@@ -32,8 +32,10 @@
 {{- /* Preview box: Fit only when wider/taller than these; else keep native. */ -}}
 {{- $previewMaxW := 960 -}}
 {{- $previewMaxH := 720 -}}
+{{- $res := false -}}
+{{- if $imgSrc }}{{ $res = .Resources.GetMatch $imgSrc }}{{ end -}}
 {{- if $imgSrc -}}
-  {{- with .Resources.GetMatch $imgSrc -}}
+  {{- with $res -}}
     {{- if ge .Width 1 -}}
       {{- /* Fit downscales only; smaller masters keep native pixel size. */ -}}
       {{- $thumb = (.Fit (printf "%dx%d webp q80" $previewMaxW $previewMaxH)).RelPermalink -}}
@@ -47,8 +49,8 @@
     {{- $thumb = $full -}}
   {{- end -}}
 {{- end -}}
-{{- if and (not $caption) $imgSrc -}}
-  {{- with .Resources.GetMatch $imgSrc -}}
+{{- if not $caption -}}
+  {{- with $res -}}
     {{- with .Title }}{{ $caption = . }}{{ end -}}
   {{- end -}}
 {{- end -}}

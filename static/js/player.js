@@ -337,9 +337,17 @@
         });
     }
 
-    function syncBackTop() {
-        if (backTopBtn) backTopBtn.hidden = chromeClosed || window.scrollY < BACK_TOP_MIN_SCROLL;
-        placeOnFooter();
+    // Scrolling only moves the footer line vertically; the phone row is
+    // re-centered when the ↑ appears or disappears, or on resize / nav.
+    function syncBackTop(fromScroll) {
+        var hidden = chromeClosed || window.scrollY < BACK_TOP_MIN_SCROLL;
+        var toggled = !!backTopBtn && backTopBtn.hidden !== hidden;
+        if (backTopBtn) backTopBtn.hidden = hidden;
+        placeOnFooter(fromScroll !== true || toggled);
+    }
+
+    function onScroll() {
+        syncBackTop(true);
     }
 
     if (backTopBtn) {
@@ -384,8 +392,10 @@
     // Playlist must not gate the dock.
     applyPlayerChrome();
     window.addEventListener("resize", applyPlayerChrome);
-    window.addEventListener("scroll", syncBackTop, { passive: true });
-    window.addEventListener("load", syncBackTop);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("load", function () {
+        syncBackTop();
+    });
     mobileQuery.addEventListener("change", applyPlayerChrome);
 
     loadPlaylist()
@@ -420,7 +430,7 @@
 
     /* Player and ↑ sit on the footer's bottom line (homepage: the dock row).
        On a phone the counter or yeti, the player, and the ↑ share one gap, and that group is centered. */
-    function placeOnFooter() {
+    function placeOnFooter(withRow) {
         var footer = document.querySelector("[data-site-footer]");
         var fromBottom = -1;
         if (footer) {
@@ -432,7 +442,7 @@
         }
         if (fromBottom >= 0) player.style.setProperty("--player-bottom", fromBottom + "px");
         else player.style.removeProperty("--player-bottom");
-        placeFooterRow(footer);
+        if (withRow) placeFooterRow(footer);
     }
 
     function placeFooterRow(footer) {
