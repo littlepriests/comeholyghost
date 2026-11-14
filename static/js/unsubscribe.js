@@ -1,9 +1,8 @@
 (function () {
-    if (window.__siteUnsubscribe) return;
-    window.__siteUnsubscribe = true;
-
+    // Same-site nav swaps #page-root and re-runs this script, so bind per form.
     var form = document.querySelector("[data-unsubscribe-form]");
-    if (!form) return;
+    if (!form || form.dataset.bound) return;
+    form.dataset.bound = "1";
 
     var submitBtn = form.querySelector("[data-unsubscribe-submit]");
     var errEl = form.querySelector("[data-unsubscribe-error]");

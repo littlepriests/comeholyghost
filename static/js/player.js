@@ -545,6 +545,9 @@
                             nextRoot.querySelectorAll("script[src]").forEach(function (old) {
                                 var created = document.createElement("script");
                                 created.src = new URL(old.getAttribute("src"), href).href;
+                                created.onload = created.onerror = function () {
+                                    created.remove();
+                                };
                                 document.body.appendChild(created);
                             });
                         }
