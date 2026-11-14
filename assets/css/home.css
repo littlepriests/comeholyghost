@@ -1116,35 +1116,29 @@ body.home .page__logo-slot .page__logo {
         -webkit-overflow-scrolling: touch;
     }
 
+    /* Pets need the desktop gutter. The counter stays, at the left, clear of the player. */
+    .home-dock__pet {
+        display: none;
+    }
+
     .home-footer__dock-fit {
+        justify-content: flex-start;
+        height: auto;
         margin-top: 0.5rem;
-        padding: 0 0.25rem;
+        padding: 0;
     }
 
     .home-dock {
-        --home-dock-gap: 0.75rem;
-        --home-pet-scale: 1.55;
+        display: flex;
+        justify-content: flex-start;
+        width: auto;
         min-height: 0;
-    }
-
-    .dock-kagura.is-idle .sprite-anim.is-scale-3,
-    .dock-kagura.is-down .sprite-anim.is-scale-3,
-    .dock-sango .sprite-anim.is-scale-3 {
-        transform: scale(1.55);
-    }
-
-    .dock-kagura.is-traveling .sprite-anim.is-scale-3,
-    .dock-kagura.is-attacking .sprite-anim.is-scale-3 {
-        transform: scale(2.2);
+        transform: none;
     }
 
     .ticker__count {
         font-size: 1.35rem;
         letter-spacing: 0.08em;
-    }
-
-    .home-footer {
-        padding-bottom: 0.5rem;
     }
 }
 

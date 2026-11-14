@@ -150,6 +150,13 @@
     }
 }
 
+/* ASCII stars are placed for the desktop gutters. */
+@media (max-width: 44.99rem) {
+    .home-stars__ascii-star {
+        display: none;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .home-stars__star {
         animation: none;

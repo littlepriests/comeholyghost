@@ -12,7 +12,13 @@
     box-sizing: border-box;
     width: 100%;
     padding-top: var(--footer-pad-top);
+    padding-bottom: var(--footer-pad-bottom);
     color: var(--off-fg);
+}
+
+/* Yeti's own margin would stack on the shared footer padding. */
+.site-footer--page .page-footer__skifree {
+    margin: 0;
 }
 
 .site-footer p {
@@ -21,19 +27,11 @@
 
 /* Desktop: yeti, player, and ↑ (homepage: the dock row) share one bottom line. */
 @media (min-width: 45rem) {
-    .site-footer {
-        padding-bottom: var(--footer-pad-bottom);
-    }
-
     .site-footer--page {
         display: flex;
         flex-direction: column;
         justify-content: flex-end;
         min-height: calc(var(--footer-pad-top) + 100px + 0.15rem + 2rem + var(--footer-pad-bottom));
-    }
-
-    .site-footer--page .page-footer__skifree {
-        margin: 0;
     }
 }
 

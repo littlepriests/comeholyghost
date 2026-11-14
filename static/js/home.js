@@ -660,9 +660,10 @@
 
     function playAttackThenBump() {
         if (!pending || finishing) return;
-        if (reduceMotion || !kagura || !dock || !park) {
+        var narrow = window.matchMedia("(max-width: 44.99rem)").matches;
+        if (reduceMotion || narrow || !kagura || !dock || !park) {
             commitBump(true);
-            if (!reduceMotion) parkKaguraIdle();
+            if (!reduceMotion && !narrow) parkKaguraIdle();
             return;
         }
         finishing = true;

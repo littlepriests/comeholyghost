@@ -51,26 +51,10 @@
 }
 
 
-/* Phones: gutter math collapses to 0 — keep small corner art visible. */
+/* Phones have no side gutter, so the corner pictures would sit on the writing. */
 @media (max-width: 44.99rem) {
-    body.home .site-backdrop img {
-        max-width: min(7.5rem, 28vw, var(--backdrop-max-w));
-        max-height: min(7.5rem, 22vh, var(--backdrop-max-h));
-        opacity: 0.9;
-    }
-
-    body.home .site-backdrop img.is-ready {
-        opacity: 0.9;
-    }
-
-    .site-backdrop[data-anchor="bottom-left"],
-    .site-backdrop[data-anchor="bottom-right"] {
-        bottom: max(0.35rem, env(safe-area-inset-bottom));
-    }
-
-    .site-backdrop[data-anchor="top-left"],
-    .site-backdrop[data-anchor="top-right"] {
-        top: max(0.35rem, env(safe-area-inset-top));
+    .site-backdrop {
+        display: none;
     }
 }
 
