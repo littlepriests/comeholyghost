@@ -14,7 +14,7 @@
     var trackTitle = "";
     var chromeClosed = false;
     var mobileQuery = window.matchMedia("(max-width: 44.99rem)");
-    var playlistRemote = "https://administrator-corporation-syntax-page.trycloudflare.com/playlist.json";
+    var playlistRemote = player.getAttribute("data-playlist") || "";
     var playlistLocal = "/audio/playlist.json";
     var toggle = player.querySelector("[data-player-toggle]");
     var skip = player.querySelector("[data-player-skip]");
@@ -38,18 +38,21 @@
         return mobileQuery.matches;
     }
 
+    function loadLocalPlaylist() {
+        return fetch(playlistLocal).then(function (response) {
+            if (!response.ok) throw new Error("local playlist " + response.status);
+            return response.json();
+        });
+    }
+
     function loadPlaylist() {
+        if (!playlistRemote) return loadLocalPlaylist();
         return fetch(playlistRemote)
             .then(function (response) {
                 if (!response.ok) throw new Error("remote playlist " + response.status);
                 return response.json();
             })
-            .catch(function () {
-                return fetch(playlistLocal).then(function (response) {
-                    if (!response.ok) throw new Error("local playlist " + response.status);
-                    return response.json();
-                });
-            });
+            .catch(loadLocalPlaylist);
     }
 
     function currentTitle() {

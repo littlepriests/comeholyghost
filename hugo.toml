@@ -48,6 +48,10 @@ x = 0
 y = 0
 
 # Homepage banner + title. Hugo shuffles bannerDir and preloads one image per render.
+[params.player]
+# Remote playlist.json (HTTP URL with CORS). Empty or unreachable falls back to static/audio/playlist.json.
+playlist = "https://administrator-corporation-syntax-page.trycloudflare.com/playlist.json"
+
 [params.home]
 # Folder under static/ with banner-sized images (png/jpg/webp/gif). Falls back to `banner` if empty.
 bannerDir = "images/banners"
