@@ -28,7 +28,6 @@
     content: none;
 }
 
-.gallery a,
 .gallery__item {
     position: relative;
     display: block;

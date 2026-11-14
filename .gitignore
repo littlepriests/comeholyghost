@@ -6,6 +6,9 @@
 # Sprite slicer deps
 /scripts/node_modules/
 
+# Prose checker deps (corn edit installs them)
+/tools/be-density/node_modules/
+
 # Netlify function deps
 /node_modules/
 
