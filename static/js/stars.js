@@ -102,8 +102,8 @@
     }
     }
 
-    // On article / inner pages, hide twinkles behind the reading column
-    // (title + body + footer). Gradient + side gutters / aside keep stars.
+    // On inner pages, hide twinkles behind the reading column (title + body).
+    // Header, footer, side gutters, and the aside keep stars.
     function clearReadingMask() {
         starsHost.classList.remove("is-reading-masked");
         starsHost.style.removeProperty("--read-void-x");
@@ -221,37 +221,26 @@
 
             node.style.left = ((px / vw) * 100).toFixed(2) + "%";
             node.style.top = ((py / vh) * 100).toFixed(2) + "%";
-            node.classList.remove("is-reading-void");
         }
     }
 
+    // The host is fixed and the page scrolls under it, so the hole is redrawn
+    // from the reading column's current rect. The mask clips each star's glow too.
     function voidBehindArticleBodies() {
         syncSwordPocketStars();
 
-        var stars = document.querySelectorAll(".home-stars__star, .home-stars__ascii-star");
-        if (!stars.length) return;
-
-        var home = document.body.classList.contains("home");
-        var narrowNow = window.matchMedia("(max-width: 44.99rem)").matches;
-        if (home && !narrowNow) {
+        if (document.body.classList.contains("home")) {
             clearReadingMask();
-            for (var c = 0; c < stars.length; c++) {
-                stars[c].classList.remove("is-reading-void");
-            }
             return;
         }
 
+        var narrowNow = window.matchMedia("(max-width: 44.99rem)").matches;
         // Prefer the full main column so the h1 isn't left twinkling through.
         // Read-me sword figure: keep sitewide stars in the column above the h1
         // (negative space around the figure); void from the title down.
-        // A phone homepage uses the same hole over the banner, title, nav, prose, and footer.
-        var swordPage = !home && !!document.querySelector(".sword-figure");
+        var swordPage = !!document.querySelector(".sword-figure");
         var masks;
-        if (home) {
-            masks = document.querySelectorAll(
-                ".home-banner, .home-title-row, .home-header, .home-main, .home-footer"
-            );
-        } else if (swordPage) {
+        if (swordPage) {
             masks = document.querySelectorAll(
                 ".content__header, .content__body, .content__footer"
             );
@@ -263,26 +252,23 @@
                 );
             }
         }
-        // Generous pad + glow bleed so soft box-shadows don't sit in letter gaps.
+        // Pad so a star beside the hole can't sit right against the letters.
         // On sword pages, do not pad upward into the figure pocket above the h1.
-        // On a phone the pad stays small so the side margin can still twinkle.
-        var padX = narrowNow ? 16 : 64;
-        var padY = narrowNow ? 16 : 48;
+        // On a phone the pad stays small so the side gutter can still twinkle.
+        var padX = narrowNow ? 12 : 64;
+        var padY = narrowNow ? 12 : 48;
         var padYTop = swordPage ? 0 : padY;
-        var glow = 12;
-        var rects = [];
         var union = null;
         for (var i = 0; i < masks.length; i++) {
             var cr = masks[i].getBoundingClientRect();
             if (cr.width < 1 || cr.height < 1) continue;
-            if (cr.bottom < -glow || cr.top > window.innerHeight + glow) continue;
+            if (cr.bottom < -padY || cr.top > window.innerHeight + padY) continue;
             var box = {
                 left: cr.left - padX,
                 right: cr.right + padX,
                 top: cr.top - padYTop,
                 bottom: cr.bottom + padY
             };
-            rects.push(box);
             if (!union) {
                 union = {
                     left: box.left,
@@ -314,43 +300,21 @@
         } else {
             clearReadingMask();
         }
+    }
 
-        for (var s = 0; s < stars.length; s++) {
-            var star = stars[s];
-            if (!rects.length) {
-                star.classList.remove("is-reading-void");
-                continue;
-            }
-            var sr = star.getBoundingClientRect();
-            var left = sr.left - glow;
-            var right = sr.right + glow;
-            var top = sr.top - glow;
-            var bottom = sr.bottom + glow;
-            var hit = false;
-            for (var r = 0; r < rects.length; r++) {
-                var m = rects[r];
-                if (
-                    left < m.right &&
-                    right > m.left &&
-                    top < m.bottom &&
-                    bottom > m.top
-                ) {
-                    hit = true;
-                    break;
-                }
-            }
-            if (hit) star.classList.add("is-reading-void");
-            else star.classList.remove("is-reading-void");
-        }
+    var voidFrame = 0;
+    function scheduleVoids() {
+        if (voidFrame) return;
+        voidFrame = window.requestAnimationFrame(function () {
+            voidFrame = 0;
+            voidBehindArticleBodies();
+        });
     }
 
     window.refreshStarReadingVoids = voidBehindArticleBodies;
     voidBehindArticleBodies();
-    window.addEventListener("resize", voidBehindArticleBodies);
-    // Phone: fewer stars — skip scroll voiding; resize/load/SPA refresh still run.
-    if (!narrow) {
-        window.addEventListener("scroll", voidBehindArticleBodies, { passive: true });
-    }
+    window.addEventListener("resize", scheduleVoids);
+    window.addEventListener("scroll", scheduleVoids, { passive: true });
     window.addEventListener("load", voidBehindArticleBodies);
     // Images / fonts can shift the reading column after first paint (SPA + cold).
     window.setTimeout(voidBehindArticleBodies, 120);

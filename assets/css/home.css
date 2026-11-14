@@ -260,12 +260,12 @@ body.home .ascii-angel__cta-art {
     text-align: center;
     color: var(--home-title-color);
     font-family: var(--home-title-font);
-    font-size: max(0.7rem, 3.85cqi);
+    font-size: max(0.5rem, 3.85cqi);
 }
 
 .home-site-title__line--2 {
     font-family: var(--home-title-font-2);
-    font-size: max(1.2rem, 10.3cqi);
+    font-size: max(1rem, 10.3cqi);
     font-weight: 600;
     letter-spacing: 0.02rem;
     color: var(--home-title-color-2);
@@ -964,9 +964,10 @@ body.home .page__logo-slot .page__logo {
 .ticker__count {
     margin: 0;
     padding: 0.35rem 0.55rem;
-    background: #111;
-    color: var(--highlight);
-    border: 1px solid color-mix(in srgb, var(--muted) 45%, transparent);
+    background: var(--chip-bg);
+    color: var(--chip-fg);
+    border: 1px solid var(--chip-border);
+    font-family: var(--chip-font);
     letter-spacing: 0.2em;
     font-variant-numeric: tabular-nums;
     line-height: 1.2;
@@ -1080,6 +1081,7 @@ body.home .page__logo-slot .page__logo {
 
     .home-site-title {
         max-width: 100%;
+        padding-inline: 0.2rem;
     }
 
     .home-site-title__line--2 {
@@ -1097,11 +1099,11 @@ body.home .page__logo-slot .page__logo {
         max-width: 100%;
     }
 
+    /* Sized by vw so it always fits; overflow stays visible (base rule), so a
+       1px glyph overhang can't turn on a scrollbar. */
     .home-main .ascii-art {
         font-size: clamp(0.52rem, 2.7vw, 0.78rem);
         max-width: 100%;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
     }
 
     /* Pets need the desktop gutter. The counter stays; player.js centers the row. */

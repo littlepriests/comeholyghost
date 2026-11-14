@@ -1,90 +1,91 @@
 {{- $idle := partial "sprite-by-id.html" "grundo-idle" -}}
 {{- $kick := partial "sprite-by-id.html" "grundo-kick" -}}
 <div id="site-player"{{ with site.Params.player.playlist }} data-playlist="{{ . }}"{{ end }}>
-    {{- $reopenTip := partial "tip-text.html" (dict "key" "player_reopen" "fallback" "show player") -}}
-    <button type="button" class="player-reopen site-tip" data-player-reopen aria-label="{{ $reopenTip }}" data-tip="{{ $reopenTip }}" hidden>
-        <span aria-hidden="true">♡</span>
-    </button>
-    <div class="player-chrome" data-player-chrome>
-        <div class="player-chrome__dock">
-            {{- if or $idle $kick }}
-            {{- $grundoTip := partial "tip-text.html" (dict "key" "grundo" "fallback" "") -}}
-            <div class="player-dock-pet{{ with $grundoTip }} site-tip{{ end }}" data-player-dock-pet{{ with $grundoTip }} data-tip="{{ . }}"{{ end }} aria-hidden="true">
-                {{- with $idle }}
-                <span class="player-dock-pet__strip player-dock-pet__strip--idle" data-player-dock-idle>
-                    {{- partial "sprite.html" (merge . (dict "src" (printf "%s?v=5" .src) "frames" 1 "fps" 1 "alt" "" "scale" "")) -}}
-                </span>
-                {{- end }}
-                {{- with $kick }}
-                <span class="player-dock-pet__strip player-dock-pet__strip--kick" data-player-dock-kick hidden>
-                    {{- /* Hidden + static until click adds .is-kick-play for one cycle. */ -}}
-                    {{- partial "sprite.html" (merge . (dict "src" (printf "%s?v=5" .src) "fps" 8 "alt" "" "scale" "")) -}}
-                </span>
-                {{- end }}
-                {{- /* Sword ♡ look; cascading spill from feet on back-to-top stomp. */ -}}
-                <span class="player-dock-pet__hearts" data-player-dock-hearts>
-                    <span class="player-dock-pet__heart is-bright" style="--dx:0rem;--lift:-1.6rem;--dx2:0.2rem;--fall:4.8rem;--hd:0s;--hspurt:1.55s;--rot:4deg">♡</span>
-                    <span class="player-dock-pet__heart is-bright" style="--dx:-0.8rem;--lift:-1.9rem;--dx2:-1.4rem;--fall:5.2rem;--hd:0.03s;--hspurt:1.65s;--rot:-12deg">♡</span>
-                    <span class="player-dock-pet__heart is-bright" style="--dx:0.8rem;--lift:-1.9rem;--dx2:1.4rem;--fall:5.2rem;--hd:0.03s;--hspurt:1.65s;--rot:12deg">♡</span>
-                    <span class="player-dock-pet__heart" style="--dx:-1.6rem;--lift:-1.4rem;--dx2:-2.6rem;--fall:5.6rem;--hd:0.06s;--hspurt:1.7s;--rot:-22deg">♡</span>
-                    <span class="player-dock-pet__heart" style="--dx:1.6rem;--lift:-1.4rem;--dx2:2.6rem;--fall:5.6rem;--hd:0.06s;--hspurt:1.7s;--rot:22deg">♡</span>
-                    <span class="player-dock-pet__heart" style="--dx:-2.4rem;--lift:-1.1rem;--dx2:-3.6rem;--fall:6rem;--hd:0.1s;--hspurt:1.8s;--rot:-32deg">♡</span>
-                    <span class="player-dock-pet__heart" style="--dx:2.4rem;--lift:-1.1rem;--dx2:3.6rem;--fall:6rem;--hd:0.1s;--hspurt:1.8s;--rot:32deg">♡</span>
-                    <span class="player-dock-pet__heart is-bright" style="--dx:-0.3rem;--lift:-2.2rem;--dx2:-0.8rem;--fall:6.4rem;--hd:0.08s;--hspurt:1.75s;--rot:-6deg">♡</span>
-                    <span class="player-dock-pet__heart is-bright" style="--dx:0.3rem;--lift:-2.2rem;--dx2:0.8rem;--fall:6.4rem;--hd:0.08s;--hspurt:1.75s;--rot:6deg">♡</span>
-                    <span class="player-dock-pet__heart" style="--dx:-3.1rem;--lift:-0.7rem;--dx2:-4.4rem;--fall:6.8rem;--hd:0.14s;--hspurt:1.9s;--rot:-40deg">♡</span>
-                    <span class="player-dock-pet__heart" style="--dx:3.1rem;--lift:-0.7rem;--dx2:4.4rem;--fall:6.8rem;--hd:0.14s;--hspurt:1.9s;--rot:40deg">♡</span>
-                    <span class="player-dock-pet__heart" style="--dx:-1.1rem;--lift:-1.7rem;--dx2:-2.1rem;--fall:7.2rem;--hd:0.18s;--hspurt:1.85s;--rot:-16deg">♡</span>
-                    <span class="player-dock-pet__heart" style="--dx:1.1rem;--lift:-1.7rem;--dx2:2.1rem;--fall:7.2rem;--hd:0.18s;--hspurt:1.85s;--rot:16deg">♡</span>
-                    <span class="player-dock-pet__heart is-bright" style="--dx:-2rem;--lift:-1.5rem;--dx2:-3.2rem;--fall:7.6rem;--hd:0.22s;--hspurt:2s;--rot:-26deg">♡</span>
-                    <span class="player-dock-pet__heart is-bright" style="--dx:2rem;--lift:-1.5rem;--dx2:3.2rem;--fall:7.6rem;--hd:0.22s;--hspurt:2s;--rot:26deg">♡</span>
-                    <span class="player-dock-pet__heart" style="--dx:0rem;--lift:-1.2rem;--dx2:-0.4rem;--fall:8rem;--hd:0.26s;--hspurt:2.05s;--rot:-3deg">♡</span>
-                    <span class="player-dock-pet__heart" style="--dx:-3.6rem;--lift:-0.4rem;--dx2:-5rem;--fall:7.8rem;--hd:0.2s;--hspurt:2.1s;--rot:-48deg">♡</span>
-                    <span class="player-dock-pet__heart" style="--dx:3.6rem;--lift:-0.4rem;--dx2:5rem;--fall:7.8rem;--hd:0.2s;--hspurt:2.1s;--rot:48deg">♡</span>
-                    <span class="player-dock-pet__heart" style="--dx:-0.6rem;--lift:-2rem;--dx2:-1.8rem;--fall:8.4rem;--hd:0.3s;--hspurt:2.15s;--rot:-10deg">♡</span>
-                    <span class="player-dock-pet__heart" style="--dx:0.6rem;--lift:-2rem;--dx2:1.8rem;--fall:8.4rem;--hd:0.3s;--hspurt:2.15s;--rot:10deg">♡</span>
-                    <span class="player-dock-pet__heart is-bright" style="--dx:-2.7rem;--lift:-1rem;--dx2:-4.2rem;--fall:8.8rem;--hd:0.34s;--hspurt:2.2s;--rot:-36deg">♡</span>
-                    <span class="player-dock-pet__heart is-bright" style="--dx:2.7rem;--lift:-1rem;--dx2:4.2rem;--fall:8.8rem;--hd:0.34s;--hspurt:2.2s;--rot:36deg">♡</span>
-                    <span class="player-dock-pet__heart" style="--dx:-1.8rem;--lift:-0.9rem;--dx2:-3rem;--fall:9.2rem;--hd:0.38s;--hspurt:2.25s;--rot:-20deg">♡</span>
-                    <span class="player-dock-pet__heart" style="--dx:1.8rem;--lift:-0.9rem;--dx2:3rem;--fall:9.2rem;--hd:0.38s;--hspurt:2.25s;--rot:20deg">♡</span>
-                    <span class="player-dock-pet__heart" style="--dx:0.1rem;--lift:-1.8rem;--dx2:0.6rem;--fall:9.6rem;--hd:0.42s;--hspurt:2.3s;--rot:8deg">♡</span>
-                    <span class="player-dock-pet__heart is-bright" style="--dx:-4rem;--lift:-0.2rem;--dx2:-5.6rem;--fall:8.6rem;--hd:0.28s;--hspurt:2.15s;--rot:-55deg">♡</span>
-                    <span class="player-dock-pet__heart is-bright" style="--dx:4rem;--lift:-0.2rem;--dx2:5.6rem;--fall:8.6rem;--hd:0.28s;--hspurt:2.15s;--rot:55deg">♡</span>
-                </span>
-            </div>
-            {{- end }}
-            <p class="player-title" data-player-title><span data-player-title-text>Playlist</span></p>
-            {{- $playTip := partial "tip-text.html" (dict "key" "player_play" "fallback" "play") -}}
-            {{- $stopTip := partial "tip-text.html" (dict "key" "player_stop" "fallback" "hide player") -}}
-            {{- $skipTip := partial "tip-text.html" (dict "key" "player_skip" "fallback" "skip") -}}
-            <div class="player-chrome__buttons">
-                <button type="button" class="site-tip" data-player-toggle aria-label="{{ $playTip }}" data-tip="{{ $playTip }}">
-                    <span class="player-toggle-icon player-toggle-icon--play" data-player-icon-play aria-hidden="true">
-                        {{ partial "icon.html" (dict "name" "play") }}
+    <div class="player-bar" data-player-bar>
+        {{- $reopenTip := partial "tip-text.html" (dict "key" "player_reopen" "fallback" "show player") -}}
+        <button type="button" class="player-reopen site-tip" data-player-reopen aria-label="{{ $reopenTip }}" data-tip="{{ $reopenTip }}" hidden>
+            <span aria-hidden="true">♡</span>
+        </button>
+        <div class="player-chrome" data-player-chrome>
+            <div class="player-chrome__dock">
+                {{- if or $idle $kick }}
+                {{- $grundoTip := partial "tip-text.html" (dict "key" "grundo" "fallback" "") -}}
+                <div class="player-dock-pet{{ with $grundoTip }} site-tip{{ end }}" data-player-dock-pet{{ with $grundoTip }} data-tip="{{ . }}"{{ end }} aria-hidden="true">
+                    {{- with $idle }}
+                    <span class="player-dock-pet__strip player-dock-pet__strip--idle" data-player-dock-idle>
+                        {{- partial "sprite.html" (merge . (dict "src" (printf "%s?v=5" .src) "frames" 1 "fps" 1 "alt" "" "scale" "")) -}}
                     </span>
-                    <span class="player-toggle-icon player-toggle-icon--playing" data-player-icon-playing hidden aria-hidden="true">
-                        {{ partial "icon.html" (dict "name" "volume") }}
+                    {{- end }}
+                    {{- with $kick }}
+                    <span class="player-dock-pet__strip player-dock-pet__strip--kick" data-player-dock-kick hidden>
+                        {{- /* Hidden + static until click adds .is-kick-play for one cycle. */ -}}
+                        {{- partial "sprite.html" (merge . (dict "src" (printf "%s?v=5" .src) "fps" 8 "alt" "" "scale" "")) -}}
                     </span>
-                </button>
-                <button type="button" class="site-tip" data-player-stop aria-label="{{ $stopTip }}" data-tip="{{ $stopTip }}">
-                    {{ partial "icon.html" (dict "name" "stop") }}
-                </button>
-                <button type="button" class="site-tip" data-player-skip aria-label="{{ $skipTip }}" data-tip="{{ $skipTip }}">
-                    {{ partial "icon.html" (dict "name" "forward") }}
-                </button>
+                    {{- end }}
+                    {{- /* Sword ♡ look; cascading spill from feet on back-to-top stomp. */ -}}
+                    <span class="player-dock-pet__hearts" data-player-dock-hearts>
+                        <span class="player-dock-pet__heart is-bright" style="--dx:0rem;--lift:-1.6rem;--dx2:0.2rem;--fall:4.8rem;--hd:0s;--hspurt:1.55s;--rot:4deg">♡</span>
+                        <span class="player-dock-pet__heart is-bright" style="--dx:-0.8rem;--lift:-1.9rem;--dx2:-1.4rem;--fall:5.2rem;--hd:0.03s;--hspurt:1.65s;--rot:-12deg">♡</span>
+                        <span class="player-dock-pet__heart is-bright" style="--dx:0.8rem;--lift:-1.9rem;--dx2:1.4rem;--fall:5.2rem;--hd:0.03s;--hspurt:1.65s;--rot:12deg">♡</span>
+                        <span class="player-dock-pet__heart" style="--dx:-1.6rem;--lift:-1.4rem;--dx2:-2.6rem;--fall:5.6rem;--hd:0.06s;--hspurt:1.7s;--rot:-22deg">♡</span>
+                        <span class="player-dock-pet__heart" style="--dx:1.6rem;--lift:-1.4rem;--dx2:2.6rem;--fall:5.6rem;--hd:0.06s;--hspurt:1.7s;--rot:22deg">♡</span>
+                        <span class="player-dock-pet__heart" style="--dx:-2.4rem;--lift:-1.1rem;--dx2:-3.6rem;--fall:6rem;--hd:0.1s;--hspurt:1.8s;--rot:-32deg">♡</span>
+                        <span class="player-dock-pet__heart" style="--dx:2.4rem;--lift:-1.1rem;--dx2:3.6rem;--fall:6rem;--hd:0.1s;--hspurt:1.8s;--rot:32deg">♡</span>
+                        <span class="player-dock-pet__heart is-bright" style="--dx:-0.3rem;--lift:-2.2rem;--dx2:-0.8rem;--fall:6.4rem;--hd:0.08s;--hspurt:1.75s;--rot:-6deg">♡</span>
+                        <span class="player-dock-pet__heart is-bright" style="--dx:0.3rem;--lift:-2.2rem;--dx2:0.8rem;--fall:6.4rem;--hd:0.08s;--hspurt:1.75s;--rot:6deg">♡</span>
+                        <span class="player-dock-pet__heart" style="--dx:-3.1rem;--lift:-0.7rem;--dx2:-4.4rem;--fall:6.8rem;--hd:0.14s;--hspurt:1.9s;--rot:-40deg">♡</span>
+                        <span class="player-dock-pet__heart" style="--dx:3.1rem;--lift:-0.7rem;--dx2:4.4rem;--fall:6.8rem;--hd:0.14s;--hspurt:1.9s;--rot:40deg">♡</span>
+                        <span class="player-dock-pet__heart" style="--dx:-1.1rem;--lift:-1.7rem;--dx2:-2.1rem;--fall:7.2rem;--hd:0.18s;--hspurt:1.85s;--rot:-16deg">♡</span>
+                        <span class="player-dock-pet__heart" style="--dx:1.1rem;--lift:-1.7rem;--dx2:2.1rem;--fall:7.2rem;--hd:0.18s;--hspurt:1.85s;--rot:16deg">♡</span>
+                        <span class="player-dock-pet__heart is-bright" style="--dx:-2rem;--lift:-1.5rem;--dx2:-3.2rem;--fall:7.6rem;--hd:0.22s;--hspurt:2s;--rot:-26deg">♡</span>
+                        <span class="player-dock-pet__heart is-bright" style="--dx:2rem;--lift:-1.5rem;--dx2:3.2rem;--fall:7.6rem;--hd:0.22s;--hspurt:2s;--rot:26deg">♡</span>
+                        <span class="player-dock-pet__heart" style="--dx:0rem;--lift:-1.2rem;--dx2:-0.4rem;--fall:8rem;--hd:0.26s;--hspurt:2.05s;--rot:-3deg">♡</span>
+                        <span class="player-dock-pet__heart" style="--dx:-3.6rem;--lift:-0.4rem;--dx2:-5rem;--fall:7.8rem;--hd:0.2s;--hspurt:2.1s;--rot:-48deg">♡</span>
+                        <span class="player-dock-pet__heart" style="--dx:3.6rem;--lift:-0.4rem;--dx2:5rem;--fall:7.8rem;--hd:0.2s;--hspurt:2.1s;--rot:48deg">♡</span>
+                        <span class="player-dock-pet__heart" style="--dx:-0.6rem;--lift:-2rem;--dx2:-1.8rem;--fall:8.4rem;--hd:0.3s;--hspurt:2.15s;--rot:-10deg">♡</span>
+                        <span class="player-dock-pet__heart" style="--dx:0.6rem;--lift:-2rem;--dx2:1.8rem;--fall:8.4rem;--hd:0.3s;--hspurt:2.15s;--rot:10deg">♡</span>
+                        <span class="player-dock-pet__heart is-bright" style="--dx:-2.7rem;--lift:-1rem;--dx2:-4.2rem;--fall:8.8rem;--hd:0.34s;--hspurt:2.2s;--rot:-36deg">♡</span>
+                        <span class="player-dock-pet__heart is-bright" style="--dx:2.7rem;--lift:-1rem;--dx2:4.2rem;--fall:8.8rem;--hd:0.34s;--hspurt:2.2s;--rot:36deg">♡</span>
+                        <span class="player-dock-pet__heart" style="--dx:-1.8rem;--lift:-0.9rem;--dx2:-3rem;--fall:9.2rem;--hd:0.38s;--hspurt:2.25s;--rot:-20deg">♡</span>
+                        <span class="player-dock-pet__heart" style="--dx:1.8rem;--lift:-0.9rem;--dx2:3rem;--fall:9.2rem;--hd:0.38s;--hspurt:2.25s;--rot:20deg">♡</span>
+                        <span class="player-dock-pet__heart" style="--dx:0.1rem;--lift:-1.8rem;--dx2:0.6rem;--fall:9.6rem;--hd:0.42s;--hspurt:2.3s;--rot:8deg">♡</span>
+                        <span class="player-dock-pet__heart is-bright" style="--dx:-4rem;--lift:-0.2rem;--dx2:-5.6rem;--fall:8.6rem;--hd:0.28s;--hspurt:2.15s;--rot:-55deg">♡</span>
+                        <span class="player-dock-pet__heart is-bright" style="--dx:4rem;--lift:-0.2rem;--dx2:5.6rem;--fall:8.6rem;--hd:0.28s;--hspurt:2.15s;--rot:55deg">♡</span>
+                    </span>
+                </div>
+                {{- end }}
+                <p class="player-title" data-player-title><span data-player-title-text>Playlist</span></p>
+                {{- $playTip := partial "tip-text.html" (dict "key" "player_play" "fallback" "play") -}}
+                {{- $stopTip := partial "tip-text.html" (dict "key" "player_stop" "fallback" "hide player") -}}
+                {{- $skipTip := partial "tip-text.html" (dict "key" "player_skip" "fallback" "skip") -}}
+                <div class="player-chrome__buttons">
+                    <button type="button" class="site-tip" data-player-toggle aria-label="{{ $playTip }}" data-tip="{{ $playTip }}">
+                        <span class="player-toggle-icon player-toggle-icon--play" data-player-icon-play aria-hidden="true">
+                            {{ partial "icon.html" (dict "name" "play") }}
+                        </span>
+                        <span class="player-toggle-icon player-toggle-icon--playing" data-player-icon-playing hidden aria-hidden="true">
+                            {{ partial "icon.html" (dict "name" "volume") }}
+                        </span>
+                    </button>
+                    <button type="button" class="site-tip" data-player-stop aria-label="{{ $stopTip }}" data-tip="{{ $stopTip }}">
+                        {{ partial "icon.html" (dict "name" "stop") }}
+                    </button>
+                    <button type="button" class="site-tip" data-player-skip aria-label="{{ $skipTip }}" data-tip="{{ $skipTip }}">
+                        {{ partial "icon.html" (dict "name" "forward") }}
+                    </button>
+                </div>
             </div>
         </div>
-        {{- /* Outside the dock grid: hangs under the stop button, with Grundo. */ -}}
-        {{- $backTip := partial "tip-text.html" (dict "key" "player_back_top" "fallback" "back to top") -}}
-        <button
-            type="button"
-            class="player-back-top site-tip"
-            data-player-back-top
-            aria-label="{{ $backTip }}"
-            data-tip="{{ $backTip }}"
-            hidden>
-            <span aria-hidden="true">↑</span>
-        </button>
     </div>
+    {{- $backTip := partial "tip-text.html" (dict "key" "player_back_top" "fallback" "back to top") -}}
+    <button
+        type="button"
+        class="player-back-top site-tip"
+        data-player-back-top
+        aria-label="{{ $backTip }}"
+        data-tip="{{ $backTip }}"
+        hidden>
+        <span aria-hidden="true">↑</span>
+    </button>
 </div>
-<script src="{{ "js/player.js" | relURL }}?v=87"></script>
+<script src="{{ "js/player.js" | relURL }}?v=92"></script>

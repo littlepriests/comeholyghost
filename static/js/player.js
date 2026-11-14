@@ -1,6 +1,7 @@
 (function () {
     var player = document.getElementById("site-player");
-    if (!player || window.__sitePlayer) return;
+    var bar = player && player.querySelector("[data-player-bar]");
+    if (!bar || window.__sitePlayer) return;
     window.__sitePlayer = true;
 
     var audio = document.createElement("audio");
@@ -115,10 +116,6 @@
         if (!dockIdle && !dockKick) return;
         // Don't clobber an in-progress kick (pauseMedia + audio "pause" both call show).
         if (!dockPetKicking) showDockIdle();
-    }
-
-    function pulseDockKick() {
-        playDockKickThenIdle();
     }
 
     function prefersReducedMotion() {
@@ -299,8 +296,7 @@
     }
 
     function pauseMedia() {
-        // Set playing first so the audio "pause" listener does not run a second show()
-        // that would cancel the dock kick animation.
+        // Set playing first so the audio "pause" listener does not run a second show().
         playing = false;
         show();
         try {
@@ -324,13 +320,9 @@
     toggle.addEventListener("click", function () {
         if (playing) pauseMedia();
         else playMedia();
-        pulseDockKick();
     });
 
-    skip.addEventListener("click", function () {
-        skipMedia();
-        pulseDockKick();
-    });
+    skip.addEventListener("click", skipMedia);
 
     if (stop) {
         stop.addEventListener("click", function () {
@@ -341,17 +333,24 @@
         });
     }
 
-    // Scrolling only moves the footer line vertically; the phone row is
-    // re-centered when the ↑ appears or disappears, or on resize / nav.
-    function syncBackTop(fromScroll) {
-        var hidden = chromeClosed || window.scrollY < BACK_TOP_MIN_SCROLL;
-        var toggled = !!backTopBtn && backTopBtn.hidden !== hidden;
-        if (backTopBtn) backTopBtn.hidden = hidden;
-        placeOnFooter(fromScroll !== true || toggled);
+    function syncBackTop() {
+        if (backTopBtn) backTopBtn.hidden = chromeClosed || window.scrollY < BACK_TOP_MIN_SCROLL;
+    }
+
+    // Page y of the footer line and the float gap, from the last placeOnFooter().
+    var parkLineY = 0;
+    var floatGap = 0;
+
+    // Floating = the sticky track is held above the window bottom, i.e. the footer
+    // line is still below it. CSS collapses the phone bar to play/pause meanwhile.
+    function syncFloating() {
+        var floating = window.scrollY + window.innerHeight - floatGap < parkLineY - 1;
+        player.classList.toggle("site-player--floating", floating);
     }
 
     function onScroll() {
-        syncBackTop(true);
+        syncBackTop();
+        syncFloating();
     }
 
     if (backTopBtn) {
@@ -395,11 +394,18 @@
 
     // Playlist must not gate the dock.
     applyPlayerChrome();
-    window.addEventListener("resize", applyPlayerChrome);
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("load", function () {
-        syncBackTop();
-    });
+    // Phone toolbars change the window height without resizing <html>.
+    window.addEventListener("resize", syncFloating);
+    // Page height, footer size, and width changes all resize <html>.
+    if (typeof ResizeObserver === "function") {
+        new ResizeObserver(function () {
+            placeOnFooter();
+        }).observe(document.documentElement);
+    } else {
+        window.addEventListener("resize", placeOnFooter);
+        window.addEventListener("load", placeOnFooter);
+    }
     mobileQuery.addEventListener("change", applyPlayerChrome);
 
     loadPlaylist()
@@ -419,8 +425,36 @@
     function applyPlayerChrome() {
         player.classList.toggle("site-player--closed", chromeClosed);
         if (reopenBtn) reopenBtn.hidden = !chromeClosed;
-        document.documentElement.style.setProperty("--simple-player-height", Math.ceil(player.offsetHeight || 44) + "px");
         syncBackTop();
+        placeOnFooter();
+    }
+
+    /* Player and ↑ park on the footer's bottom line (homepage: the dock row).
+       The track sits right after #page-root plus the shell's bottom margin (it collapses
+       through #page-root onto the track), so the lift is that spot minus the line.
+       On a phone, once parked, the counter or yeti, the bar, and the ↑ share one
+       centered row; while floating, play sits at the top of the screen and the
+       ↑ keeps the bottom corner (CSS). */
+    function placeOnFooter() {
+        var footer = document.querySelector("[data-site-footer]");
+        var root = document.getElementById("page-root");
+        var shell = footer && footer.closest(".site-shell");
+        var lift = 0;
+        if (footer && root && shell) {
+            var dock = footer.querySelector("[data-home-dock]");
+            var line = dock
+                ? dock.getBoundingClientRect().bottom
+                : footer.getBoundingClientRect().bottom - (parseFloat(getComputedStyle(footer).paddingBottom) || 0);
+            var spot = root.getBoundingClientRect().bottom + (parseFloat(getComputedStyle(shell).marginBottom) || 0);
+            lift = spot - line;
+            parkLineY = line + window.scrollY;
+        }
+        lift = Math.max(0, Math.round(lift));
+        player.style.setProperty("--player-lift", lift + "px");
+        // Computed bottom is --player-float minus the lift.
+        floatGap = (parseFloat(getComputedStyle(player).bottom) || 0) + lift;
+        syncFloating();
+        placeFooterRow(footer);
     }
 
     function cssPx(value) {
@@ -432,23 +466,8 @@
         return parseFloat(value) || 0;
     }
 
-    /* Player and ↑ sit on the footer's bottom line (homepage: the dock row).
-       On a phone the counter or yeti, the player, and the ↑ share one gap, and that group is centered. */
-    function placeOnFooter(withRow) {
-        var footer = document.querySelector("[data-site-footer]");
-        var fromBottom = -1;
-        if (footer) {
-            var dock = footer.querySelector("[data-home-dock]");
-            var line = dock
-                ? dock.getBoundingClientRect().bottom
-                : footer.getBoundingClientRect().bottom - (parseFloat(getComputedStyle(footer).paddingBottom) || 0);
-            fromBottom = Math.round(window.innerHeight - line);
-        }
-        if (fromBottom >= 0) player.style.setProperty("--player-bottom", fromBottom + "px");
-        else player.style.removeProperty("--player-bottom");
-        if (withRow) placeFooterRow(footer);
-    }
-
+    // Bar width does not change while floating (hidden buttons keep their
+    // slots), so this row can be measured in either state.
     function placeFooterRow(footer) {
         var shifter = footer && footer.querySelector("[data-home-dock], .page-footer__skifree");
         var title = player.querySelector(".player-title");
@@ -466,7 +485,7 @@
         var vis = visual.getBoundingClientRect();
         var foot = footer.getBoundingClientRect();
         var leadW = Math.max(vis.width, cssPx(getComputedStyle(footer).getPropertyValue("--footer-lead-w")));
-        var playerW = player.getBoundingClientRect().width;
+        var playerW = bar.getBoundingClientRect().width;
         var upW = cssPx(getComputedStyle(player).getPropertyValue("--player-back-top-size")) || 26;
         var prefer = cssPx(getComputedStyle(footer).getPropertyValue("--footer-row-gap")) || 20;
         var minGap = 8;
@@ -474,7 +493,7 @@
         if (title && slack < minGap * 2) {
             var titleW = title.getBoundingClientRect().width;
             title.style.width = Math.max(24, Math.floor(titleW - (minGap * 2 - slack))) + "px";
-            playerW = player.getBoundingClientRect().width;
+            playerW = bar.getBoundingClientRect().width;
             slack = foot.width - leadW - playerW - upW;
         }
         var gap = Math.max(0, Math.min(prefer, slack / 2));

@@ -2,12 +2,18 @@
   One shell for every layout (.page, photobook, guestbook, homepage):
   the 53rem middle column, then the content column plus the aside gutter.
   Header and footer span the shell; everything else sits in the content
-  column, and .page__aside takes the gutter.
+  column, and .page__aside takes the gutter. --page-gutter is the only side
+  inset: on a phone it is wide enough to hold the stacked player and ↑.
 */
 :root {
-    --middle-column: min(53rem, calc(100vw - 2.5rem));
+    --page-gutter: 1.25rem;
+    --middle-column: min(53rem, calc(100vw - 2 * var(--page-gutter)));
     --aside-width: 275px;
     --aside-gap: 1.5rem;
+}
+
+body {
+    margin: 0;
 }
 
 .site-shell {
@@ -57,18 +63,13 @@
 }
 
 @media (max-width: 44.99rem) {
+    :root {
+        --page-gutter: 2.5rem;
+    }
+
     .site-shell {
         max-width: none;
         margin: 0.75rem auto;
-        padding: 0 0.85rem env(safe-area-inset-bottom, 0px);
-    }
-
-    /* Clearance lives on the text, so the footer itself can meet the player. */
-    .site-shell > :is(main, .page__body) {
-        padding-bottom: calc(var(--simple-player-height, 2rem) + 0.75rem);
-    }
-
-    body:has(#site-player.site-player--closed) .site-shell > :is(main, .page__body) {
-        padding-bottom: 2.5rem;
+        padding: 0 var(--page-gutter) env(safe-area-inset-bottom, 0px);
     }
 }

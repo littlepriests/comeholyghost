@@ -1,27 +1,42 @@
 /*
   One player on every page. Desktop: Grundo above the stop button, 1rem in
-  from the page's right edge; JS parks --player-bottom on the footer line.
-  Desktop ↑ sits halfway between the skip button and the window edge.
-  On a phone the counter or yeti, the player, and the ↑ share one gap and
-  the group is centered in the footer. The ↑ slot stays reserved.
+  from the page's right edge. The ↑ sits halfway between the skip button
+  and the window edge on desktop. On a phone, while floating, play/pause
+  sits in the right gutter the same distance from the top of the screen as
+  the ↑ sits from the bottom; once parked, the counter or yeti, the bar,
+  and the ↑ share the footer row. The ↑ slot stays reserved.
+
+  #site-player is a zero-height sticky track after #page-root. The browser
+  floats it --player-float above the window bottom and lets it ride the page
+  once the footer line arrives; player.js only measures --player-lift (page
+  end to footer line) when the layout changes, never on scroll.
 */
 #site-player {
-    /* 100% (not 100vw) so this matches the centered page, scrollbar included. */
-    --player-edge-right: calc((100% - min(53rem, 100% - 2.5rem)) / 2 + 1rem);
-    --player-bottom: 1rem;
+    /* 100% of the track = the window without its scrollbar. */
+    --player-edge-right: calc((100% - min(53rem, 100% - 2 * var(--page-gutter))) / 2 + 1rem);
+    --player-float: 1rem;
     --player-back-top-size: 1.65rem;
-    position: fixed;
-    right: var(--player-edge-right);
-    bottom: var(--player-bottom);
+    --player-button-gap: 0.25rem;
+    position: sticky;
+    bottom: calc(var(--player-float) - var(--player-lift, 0px));
+    translate: 0 calc(-1 * var(--player-lift, 0px));
     z-index: 30;
+    height: 0;
+    pointer-events: none;
+}
+
+#site-player .player-bar {
+    position: absolute;
+    right: var(--player-edge-right);
+    bottom: 0;
     display: flex;
     align-items: center;
     gap: 0.65rem;
-    transition: bottom 0.2s ease;
+    pointer-events: auto;
 }
 
 #site-player [hidden],
-#site-player.site-player--closed > .player-chrome {
+#site-player.site-player--closed .player-chrome {
     display: none !important;
 }
 
@@ -72,7 +87,7 @@
 #site-player .player-chrome__buttons {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: var(--player-button-gap);
 }
 
 #site-player button {
@@ -83,17 +98,19 @@
     height: 2rem;
     margin: 0;
     padding: 0;
-    font: inherit;
-    color: var(--fg);
-    background: var(--inner-bg);
-    border: 1px solid color-mix(in srgb, var(--muted) 55%, transparent);
+    font-family: var(--chip-font);
+    font-weight: 600;
+    color: var(--chip-fg);
+    background: var(--chip-bg);
+    border: 1px solid var(--chip-border);
     border-radius: 999px;
     cursor: pointer;
 }
 
 #site-player button:hover {
-    color: var(--highlight);
-    border-color: color-mix(in srgb, var(--highlight) 55%, transparent);
+    color: var(--chip-fg);
+    border-color: var(--chip-border-hot);
+    box-shadow: var(--chip-glow);
 }
 
 #site-player button i,
@@ -110,20 +127,18 @@
 }
 
 #site-player .player-back-top {
-    position: fixed;
+    position: absolute;
     right: calc(var(--player-edge-right) / 2 - var(--player-back-top-size) / 2);
-    bottom: var(--player-bottom);
-    z-index: 40;
+    bottom: 0;
+    z-index: 2;
+    pointer-events: auto;
     width: var(--player-back-top-size);
     height: var(--player-back-top-size);
     font-size: 1rem;
     font-weight: 600;
     line-height: 1;
-    color: var(--highlight);
-    background: transparent;
-    border-color: color-mix(in srgb, var(--highlight) 70%, transparent);
     border-radius: 50%;
-    opacity: 0.9;
+    opacity: 1;
     box-sizing: border-box;
 }
 
@@ -133,9 +148,12 @@
 }
 
 #site-player .player-back-top:is(:hover, :focus-visible) {
-    border-color: var(--highlight);
+    color: var(--chip-fg);
+    background: var(--chip-bg);
+    border-color: var(--chip-border-hot);
+    box-shadow: var(--chip-glow);
     opacity: 1;
-    text-shadow: 0 0 8px color-mix(in srgb, var(--highlight) 55%, transparent);
+    text-shadow: none;
 }
 
 #site-player .player-reopen {
@@ -151,6 +169,9 @@
 
 #site-player .player-reopen:hover {
     color: var(--logo, #18ff6d);
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
     opacity: 1;
     text-shadow: 0 0 8px color-mix(in srgb, var(--logo, #18ff6d) 55%, transparent);
 }
@@ -421,7 +442,9 @@ body {
     }
 }
 
-/* Phone: player circles match the ↑. JS centers the footer row (.site-player--row). */
+/* Phone: player circles match the ↑. While floating, play/pause mirrors to
+   the top of the screen and the ↑ keeps the bottom corner. Parked, JS lays
+   out the footer row (.site-player--row). */
 @media (max-width: 44.99rem) {
     html,
     body {
@@ -429,25 +452,51 @@ body {
     }
 
     #site-player {
-        --page-inset: max(calc(8px + 0.85rem), env(safe-area-inset-right));
-        --player-edge-right: calc(2 * var(--page-inset) + var(--player-back-top-size));
-        --player-bottom: max(0.75rem, env(safe-area-inset-bottom));
-        gap: 0.5rem;
+        /* Right edge of the column centered in the right page gutter. */
+        --player-column-right: calc((var(--page-gutter) - var(--player-back-top-size)) / 2);
+        --player-float: max(0.75rem, env(safe-area-inset-bottom));
         z-index: 40;
     }
 
-    #site-player.site-player--closed {
-        gap: 0;
+    #site-player .player-bar {
+        right: var(--player-column-right);
+        gap: 0.5rem;
     }
 
-    #site-player.site-player--row {
+    #site-player .player-back-top {
+        right: var(--player-column-right);
+        bottom: 0;
+    }
+
+    /* Stop and skip keep their slots while hidden (so the bar's width never
+       changes); push them past the window edge so play lands in the column.
+       The track already sits --player-float above the window bottom, so this
+       bottom offset puts play's top edge that same distance below the window
+       top. The lift translate cancels out of the visual position. The hidden
+       title must not catch taps on the text beside it. */
+    #site-player.site-player--floating:not(.site-player--closed) .player-bar {
+        bottom: calc(100dvh - 2 * var(--player-float) - var(--player-back-top-size));
+        right: calc(var(--player-column-right) - 2 * (var(--player-back-top-size) + var(--player-button-gap)));
+        pointer-events: none;
+    }
+
+    #site-player.site-player--floating:not(.site-player--closed) [data-player-toggle] {
+        pointer-events: auto;
+    }
+
+    #site-player.site-player--row:not(.site-player--floating) .player-bar {
         left: var(--player-left);
         right: auto;
     }
 
-    #site-player.site-player--row .player-back-top {
+    #site-player.site-player--row:not(.site-player--floating) .player-back-top {
         left: var(--back-top-left);
         right: auto;
+        bottom: 0;
+    }
+
+    #site-player.site-player--closed .player-bar {
+        gap: 0;
     }
 
     #site-player .player-chrome {
@@ -459,10 +508,20 @@ body {
         width: var(--player-back-top-size);
         height: var(--player-back-top-size);
     }
+
+    /* While floating only play/pause (and the ↑) show. */
+    #site-player :is(.player-title, [data-player-stop], [data-player-skip]) {
+        transition: opacity 0.2s ease, visibility 0.2s;
+    }
+
+    #site-player.site-player--floating :is(.player-title, [data-player-stop], [data-player-skip]) {
+        opacity: 0;
+        visibility: hidden;
+    }
 }
 
-@media (prefers-reduced-motion: reduce) {
-    #site-player {
+@media (max-width: 44.99rem) and (prefers-reduced-motion: reduce) {
+    #site-player :is(.player-title, [data-player-stop], [data-player-skip]) {
         transition: none;
     }
 }
