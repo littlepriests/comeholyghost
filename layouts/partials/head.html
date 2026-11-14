@@ -37,7 +37,6 @@
   (resources.Get "css/header.css")
   (resources.Get "css/logo.css")
   (resources.Get "css/about.css")
-  (resources.Get "css/footer.css")
   (resources.Get "css/risotto.css")
 | resources.Concat "css/bundle.css"
 | minify
@@ -70,12 +69,13 @@
 {{ with .Site.Language.Locale }}<meta property="og:locale" content="{{ . }}" />{{ end }}
 {{ with .Site.Params.about }}<meta property="og:image" content="{{ with .logo_image }}{{ . | absURL }}{{ end }}" />{{ end }}
 {{/* Always-on chrome. retro.css is home-only. buttons.css loads with button markup. */}}
-<link rel="stylesheet" href="{{ "css/player.css" | relURL }}?v=61">
-<link rel="stylesheet" href="{{ "css/reading.css" | relURL }}?v=21">
-<link rel="stylesheet" href="{{ "css/subscribe.css" | relURL }}?v=6">
+<link rel="stylesheet" href="{{ "css/player.css" | relURL }}?v=72">
+<link rel="stylesheet" href="{{ "css/reading.css" | relURL }}?v=23">
+<link rel="stylesheet" href="{{ "css/site-shell.css" | relURL }}?v=3">
+<link rel="stylesheet" href="{{ "css/subscribe.css" | relURL }}?v=7">
 <link rel="stylesheet" href="{{ "css/stars.css" | relURL }}?v=10">
 <link rel="stylesheet" href="{{ "css/sprites.css" | relURL }}?v=13">
-<link rel="stylesheet" href="{{ "css/backdrop.css" | relURL }}?v=20">
+<link rel="stylesheet" href="{{ "css/backdrop.css" | relURL }}?v=22">
 {{/* Custom cursor image, when static/ holds the file named in params.cursor.image. */}}
 {{ $cursor := .Site.Params.cursor.image }}
 {{ if and $cursor (os.FileExists (printf "static/%s" (strings.TrimPrefix "/" $cursor))) }}

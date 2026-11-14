@@ -2,7 +2,7 @@
 <html lang="{{- site.Language.Lang -}}">
 <head>
     {{- partial "head.html" . -}}
-    <link rel="stylesheet" href="{{ "css/gallery.css" | relURL }}?v=7">
+    <link rel="stylesheet" href="{{ "css/gallery.css" | relURL }}?v=10">
     <link rel="stylesheet" href="{{ "css/article-media.css" | relURL }}?v=6">
 </head>
 <body class="gallery-page">
@@ -58,6 +58,8 @@
             <p class="gallery-empty">No images yet. Add pictures next to a post in <code>content/blog</code>.</p>
             {{ end }}
         </main>
+
+        {{- partial "site-footer.html" (dict "page" .) }}
     </div>
     <script src="{{ "js/article-media.js" | relURL }}?v=2"></script>
     </div>

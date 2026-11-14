@@ -1,0 +1,34 @@
+{{- /*
+  One footer for every layout: same hairline, top padding, and band (static/css/site-shell.css).
+  variant "home": homepage dock + [params.home.footer] extras, no yeti row.
+  variant "page": yeti + copyright; the desktop player stack parks in this band (player.js).
+*/ -}}
+{{- $page := .page -}}
+{{- $variant := .variant | default "page" -}}
+<footer class="site-footer site-footer--{{ $variant }}{{ with .class }} {{ . }}{{ end }}" data-site-footer>
+    {{- if eq $variant "home" }}
+    {{- partial "home-dock.html" $page -}}
+    {{- with $page.Site.Params.home.footer }}
+    <div class="home-footer__extra">
+        {{- range . }}
+        {{- if eq .kind "image" }}
+        {{- if .url }}
+        <a href="{{ .url | relURL }}"><img src="{{ .src | relURL }}" alt="{{ .alt }}"></a>
+        {{- else }}
+        <img src="{{ .src | relURL }}" alt="{{ .alt }}">
+        {{- end }}
+        {{- else if eq .kind "text" }}
+        <p>{{ .text | markdownify }}</p>
+        {{- else if eq .kind "button" }}
+        <link rel="stylesheet" href="{{ "css/buttons.css" | relURL }}?v=3">
+        {{- $name := "" -}}
+        {{- with .icon }}{{ $name = partial "icon-name.html" . }}{{ end -}}
+        <a class="site-button" href="{{ .url | safeURL }}">{{- with $name }}{{ partial "icon.html" (dict "name" .) }} {{ end -}}{{ .title }}</a>
+        {{- end }}
+        {{- end }}
+    </div>
+    {{- end }}
+    {{- else }}
+    {{- partial "footer.html" $page -}}
+    {{- end }}
+</footer>

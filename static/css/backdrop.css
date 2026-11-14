@@ -5,7 +5,7 @@
     line-height: 0;
 }
 
-/* Homepage sword figure lives in home.css (.home-sword), not the fixed corner. */
+/* Stabbed-girl figure is .sword-figure on read-me (sword.css), not a fixed corner. */
 
 .site-backdrop[data-anchor="bottom-right"] {
     right: var(--backdrop-x);
@@ -141,44 +141,18 @@ body {
         box-sizing: border-box;
     }
 
-    .page__footer,
-    .home-footer {
-        width: 100%;
-        max-width: 100%;
-        box-sizing: border-box;
-        overflow-wrap: anywhere;
-    }
-
     .page__body,
     .content__body {
         overflow-wrap: anywhere;
         word-break: break-word;
     }
-
-    .page__body {
-        background: transparent !important;
-        box-shadow: none !important;
-    }
-}
-
-.page__header,
-.page__aside,
-.page__footer,
-.guestbook-header,
-.guestbook-wrap > main,
-.gallery-header,
-.gallery-wrap > main,
-.home-header,
-.home-main,
-.home-footer {
-    background-color: transparent;
 }
 
 body:not(.home) .site-backdrop {
     display: none;
 }
 
-/* Home uses .home-sword for this art; never show the fixed corner twin. */
+/* Bottom-right image is reserved for .sword-figure on read-me. */
 body.home .site-backdrop[data-anchor="bottom-right"] {
     display: none !important;
 }

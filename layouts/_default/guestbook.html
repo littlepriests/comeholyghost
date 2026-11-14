@@ -2,7 +2,7 @@
 <html lang="{{- site.Language.Lang -}}">
 <head>
     {{- partial "head.html" . -}}
-    <link rel="stylesheet" href="{{ "css/guestbook.css" | relURL }}?v=4">
+    <link rel="stylesheet" href="{{ "css/guestbook.css" | relURL }}?v=7">
 </head>
 <body class="guestbook-page">
     <div id="page-root">
@@ -36,6 +36,8 @@
                 <ol class="guestbook__entries" data-guestbook-list></ol>
             </section>
         </main>
+
+        {{- partial "site-footer.html" (dict "page" .) }}
     </div>
             <script src="{{ "js/guestbook.js" | relURL }}?v=2"></script>
     </div>
