@@ -60,10 +60,15 @@
     .site-shell {
         max-width: none;
         margin: 0.75rem auto;
-        padding: 0 0.85rem calc(var(--simple-player-height, 3rem) + 2.5rem + env(safe-area-inset-bottom, 0px));
+        padding: 0 0.85rem env(safe-area-inset-bottom, 0px);
     }
 
-    body:has(#site-player.site-player--closed) .site-shell {
-        padding-bottom: calc(3.25rem + env(safe-area-inset-bottom, 0px));
+    /* Clearance lives on the text, so the footer itself can meet the player. */
+    .site-shell > :is(main, .page__body) {
+        padding-bottom: calc(var(--simple-player-height, 2rem) + 0.75rem);
+    }
+
+    body:has(#site-player.site-player--closed) .site-shell > :is(main, .page__body) {
+        padding-bottom: 2.5rem;
     }
 }

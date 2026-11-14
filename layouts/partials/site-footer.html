@@ -1,7 +1,7 @@
 {{- /*
   One footer for every layout: same top padding and band (static/css/site-shell.css).
   variant "home": homepage dock + [params.home.footer] extras, no yeti row.
-  variant "page": yeti + copyright; the desktop player stack parks in this band (player.js).
+  variant "page": yeti + copyright; the player parks in this band on every page (player.js).
 */ -}}
 {{- $page := .page -}}
 {{- $variant := .variant | default "page" -}}
