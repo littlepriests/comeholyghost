@@ -2,13 +2,7 @@
   SkiFree yeti wherever $ echo $LANG used to sit (any page using this footer).
   Whole yeti opens subscribe; small badge position is [params.subscribe] yetiIconPos.
 */ -}}
-{{- $yeti := false -}}
-{{- range site.Params.sprites -}}
-  {{- if and (not $yeti) (eq .id "skifree-yeti") -}}
-    {{- $yeti = . -}}
-  {{- end -}}
-{{- end -}}
-{{- with $yeti }}
+{{- with partial "sprite-by-id.html" "skifree-yeti" }}
 {{- $yetiTip := partial "tip-text.html" (dict "key" "skifree" "fallback" "subscribe") -}}
 {{- $icon := site.Params.subscribe.yetiIcon | default "word" -}}
 {{- $pos := site.Params.subscribe.yetiIconPos | default "right" -}}
@@ -21,15 +15,7 @@
   data-tip="{{ $yetiTip }}"
   aria-label="{{ $yetiTip }}">
   <span class="page-footer__yeti-wrap page-footer__yeti-wrap--{{ $pos }}">
-    {{- partial "sprite.html" (dict
-      "src" .src
-      "frameWidth" .frameWidth
-      "frameHeight" .frameHeight
-      "frames" .frames
-      "fps" .fps
-      "alt" ""
-      "scale" "2"
-    ) -}}
+    {{- partial "sprite.html" (merge . (dict "alt" "" "scale" "2")) -}}
     <span class="page-footer__yeti-badge{{ if $isWord }} page-footer__yeti-badge--word{{ end }}" aria-hidden="true">
       {{- partial "subscribe-icon.html" (dict "icon" $icon) -}}
     </span>

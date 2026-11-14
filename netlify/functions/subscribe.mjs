@@ -1,38 +1,19 @@
 import {
     renderWelcomeEmail
 } from "../lib/email-templates.mjs";
+import { EMAIL_RE, cleanEmail, json, preflight, readPayload } from "../lib/http.mjs";
 import { isPreviewDeploy } from "../lib/preview-guard.mjs";
 import {
     addContact,
     errorMessage,
     resendConfig,
+    resendConfigured,
     sendWelcomeEmail
 } from "../lib/resend.mjs";
 
-const MAX_EMAIL = 200;
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function json(status, body) {
-    return Response.json(body, {
-        status,
-        headers: { "Cache-Control": "no-store" }
-    });
-}
-
-function cleanEmail(value) {
-    return String(value || "")
-        .replace(/[\u0000-\u001F]/g, "")
-        .trim()
-        .slice(0, MAX_EMAIL)
-        .toLowerCase();
-}
-
 export default async (request) => {
     if (request.method === "OPTIONS") {
-        return new Response(null, {
-            status: 204,
-            headers: { Allow: "POST, OPTIONS" }
-        });
+        return preflight("POST, OPTIONS");
     }
 
     if (request.method !== "POST") {
@@ -40,14 +21,8 @@ export default async (request) => {
     }
 
     let payload;
-    const contentType = request.headers.get("content-type") || "";
     try {
-        if (contentType.includes("application/json")) {
-            payload = await request.json();
-        } else {
-            const form = await request.formData();
-            payload = Object.fromEntries(form.entries());
-        }
+        payload = await readPayload(request);
     } catch (error) {
         return json(400, { error: "Could not read that submission." });
     }
@@ -69,7 +44,7 @@ export default async (request) => {
     }
 
     const cfg = resendConfig();
-    if (!cfg.apiKey || !cfg.from || !cfg.segmentId) {
+    if (!resendConfigured(cfg)) {
         return json(503, {
             error: "subscribe isn’t wired yet (set RESEND_API_KEY, RESEND_FROM, RESEND_SEGMENT_ID on Netlify)."
         });

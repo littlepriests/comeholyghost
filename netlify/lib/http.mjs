@@ -1,0 +1,34 @@
+export const MAX_EMAIL = 200;
+export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export function json(status, body) {
+    return Response.json(body, {
+        status,
+        headers: { "Cache-Control": "no-store" }
+    });
+}
+
+export function preflight(allow) {
+    return new Response(null, {
+        status: 204,
+        headers: { Allow: allow }
+    });
+}
+
+export function cleanEmail(value) {
+    return String(value || "")
+        .replace(/[\u0000-\u001F]/g, "")
+        .trim()
+        .slice(0, MAX_EMAIL)
+        .toLowerCase();
+}
+
+/** JSON body, else form fields. Throws when the body can't be read. */
+export async function readPayload(request) {
+    const contentType = request.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+        return request.json();
+    }
+    const form = await request.formData();
+    return Object.fromEntries(form.entries());
+}

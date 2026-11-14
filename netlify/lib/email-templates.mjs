@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import { existsSync, readdirSync, statSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import { DEFAULT_ORIGIN } from "./site.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -147,7 +148,7 @@ export function escapeHtml(text) {
  */
 export function markdownToEmailHtml(markdown, options) {
     const opts = options || {};
-    const origin = String(opts.origin || "https://cornfieldjournal.com").replace(/\/$/, "");
+    const origin = String(opts.origin || DEFAULT_ORIGIN).replace(/\/$/, "");
     const assetBase = String(opts.assetBase || origin).replace(/\/$/, "");
     let text = String(markdown || "").replace(/\r\n/g, "\n");
 
@@ -314,7 +315,7 @@ function absolutize(url, base) {
 
 export async function renderWelcomeEmail(options) {
     const opts = options || {};
-    const origin = String(opts.origin || "https://cornfieldjournal.com").replace(/\/$/, "");
+    const origin = String(opts.origin || DEFAULT_ORIGIN).replace(/\/$/, "");
     const email = String(opts.email || "").trim().toLowerCase();
     const unsubscribeUrl = email
         ? `${origin}/unsubscribe/?email=${encodeURIComponent(email)}`
@@ -339,7 +340,7 @@ export async function renderWelcomeEmail(options) {
 
 export async function renderPostEmail(post) {
     const tpl = await loadEmailTemplate("post.html");
-    const origin = post.origin || "https://cornfieldjournal.com";
+    const origin = post.origin || DEFAULT_ORIGIN;
     const heroSrc = post.heroUrl || "";
     return fillTemplate(tpl, {
         TITLE: escapeHtml(post.title || "new post"),

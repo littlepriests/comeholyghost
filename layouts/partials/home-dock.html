@@ -1,37 +1,30 @@
 <div class="home-footer__dock-fit" data-home-dock-fit>
 <div class="home-dock" data-home-dock>
-    {{- $kAttack := dict -}}
-    {{- $kWalk := dict -}}
-    {{- $kDown := dict -}}
-    {{- $sIdle := dict -}}
-    {{- $sAttack := dict -}}
-    {{- $sBoom := dict -}}
-    {{- range .Site.Params.sprites -}}
-    {{- if eq .id "kagura-attack" }}{{ $kAttack = . }}{{ end -}}
-    {{- if eq .id "kagura-walk" }}{{ $kWalk = . }}{{ end -}}
-    {{- if eq .id "kagura-down" }}{{ $kDown = . }}{{ end -}}
-    {{- if eq .id "sango-idle" }}{{ $sIdle = . }}{{ end -}}
-    {{- if eq .id "sango-attack" }}{{ $sAttack = . }}{{ end -}}
-    {{- if eq .id "sango-boomerang" }}{{ $sBoom = . }}{{ end -}}
-    {{- end -}}
+    {{- $kAttack := partial "sprite-by-id.html" "kagura-attack" -}}
+    {{- $kWalk := partial "sprite-by-id.html" "kagura-walk" -}}
+    {{- $kDown := partial "sprite-by-id.html" "kagura-down" -}}
+    {{- $sIdle := partial "sprite-by-id.html" "sango-idle" -}}
+    {{- $sAttack := partial "sprite-by-id.html" "sango-attack" -}}
+    {{- $sBoom := partial "sprite-by-id.html" "sango-boomerang" -}}
+    {{- $x3 := dict "alt" "" "scale" "3" -}}
     <div class="home-dock__pet home-dock__pet--left" data-dock-pet="left">
         {{- $sangoTip := partial "tip-text.html" (dict "key" "sango" "fallback" "sango") -}}
         <button type="button" class="dock-sango is-idle site-tip" data-dock-sango aria-label="{{ $sangoTip }}" data-tip="{{ $sangoTip }}">
             {{- with $sIdle -}}
             <span class="dock-sango__strip dock-sango__strip--idle is-active">
-                {{- partial "sprite.html" (dict "src" .src "frameWidth" .frameWidth "frameHeight" .frameHeight "frames" .frames "fps" .fps "alt" "" "scale" "3") -}}
+                {{- partial "sprite.html" (merge . $x3) -}}
             </span>
             {{- end -}}
             {{- with $sAttack -}}
             <span class="dock-sango__strip dock-sango__strip--attack">
-                {{- partial "sprite.html" (dict "src" .src "frameWidth" .frameWidth "frameHeight" .frameHeight "frames" .frames "fps" .fps "alt" "" "scale" "3") -}}
+                {{- partial "sprite.html" (merge . $x3) -}}
             </span>
             {{- end -}}
         </button>
     </div>
     {{- with $sBoom -}}
     <span class="dock-boomerang" data-dock-boomerang aria-hidden="true">
-        {{- partial "sprite.html" (dict "src" .src "frameWidth" .frameWidth "frameHeight" .frameHeight "frames" .frames "fps" .fps "alt" "" "scale" "2") -}}
+        {{- partial "sprite.html" (merge . (dict "alt" "" "scale" "2")) -}}
     </span>
     {{- end -}}
     <section class="ticker" aria-label="Visitor count" data-visitor-ticker>
@@ -44,17 +37,17 @@
         <span class="dock-kagura{{ with $kaguraTip }} site-tip{{ end }}" data-visitor-kagura{{ with $kaguraTip }} data-tip="{{ . }}"{{ end }} aria-hidden="true">
             {{- with $kAttack -}}
             <span class="dock-kagura__strip dock-kagura__strip--attack is-active">
-                {{- partial "sprite.html" (dict "src" .src "frameWidth" .frameWidth "frameHeight" .frameHeight "frames" .frames "fps" .fps "alt" "" "scale" "3") -}}
+                {{- partial "sprite.html" (merge . $x3) -}}
             </span>
             {{- end -}}
             {{- with $kWalk -}}
             <span class="dock-kagura__strip dock-kagura__strip--walk">
-                {{- partial "sprite.html" (dict "src" .src "frameWidth" .frameWidth "frameHeight" .frameHeight "frames" .frames "fps" .fps "alt" "" "scale" "3") -}}
+                {{- partial "sprite.html" (merge . $x3) -}}
             </span>
             {{- end -}}
             {{- with $kDown -}}
             <span class="dock-kagura__strip dock-kagura__strip--down">
-                {{- partial "sprite.html" (dict "src" .src "frameWidth" .frameWidth "frameHeight" .frameHeight "frames" .frames "fps" .fps "alt" "" "scale" "3") -}}
+                {{- partial "sprite.html" (merge . $x3) -}}
             </span>
             {{- end -}}
         </span>

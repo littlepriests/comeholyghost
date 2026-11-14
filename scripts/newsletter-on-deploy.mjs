@@ -24,6 +24,7 @@ import {
     resendConfigured,
     sendPostBroadcast
 } from "../netlify/lib/resend.mjs";
+import { DEFAULT_ORIGIN } from "../netlify/lib/site.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const LOCAL_LEDGER = path.join(ROOT, ".newsletter-sent.json");
@@ -80,7 +81,7 @@ async function saveLedger(store, set) {
 
 async function main() {
     const cfg = resendConfig();
-    const origin = cfg.siteOrigin || "https://cornfieldjournal.com";
+    const origin = cfg.siteOrigin || DEFAULT_ORIGIN;
     const posts = await listBlogPosts(origin);
     const store = await getBlobStore();
     const ledger = await loadLedger(store);

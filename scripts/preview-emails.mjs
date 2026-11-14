@@ -13,6 +13,7 @@ import {
     renderPostEmail,
     renderWelcomeEmail
 } from "../netlify/lib/email-templates.mjs";
+import { DEFAULT_ORIGIN } from "../netlify/lib/site.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = path.join(ROOT, "emails", "preview");
@@ -44,7 +45,7 @@ async function main() {
     // local static server for assets — production CDN may not have this build’s names yet.
     const assetOrigin =
         process.env.EMAIL_PREVIEW_ORIGIN || "http://127.0.0.1:3940";
-    const siteOrigin = "https://cornfieldjournal.com";
+    const siteOrigin = DEFAULT_ORIGIN;
 
     const welcome = await renderWelcomeEmail({
         email: "you@example.com",
