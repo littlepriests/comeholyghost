@@ -63,23 +63,18 @@
     // Sparse Joan-style star motif only (no ,O, / 000 blobs). Credit in docs/resources.md.
     var asciiStar = "  \\/\n-= * =-\n  /\\";
     minDist = 28;
+    /* ASCII stars sit in the desktop gutters. A phone has no gutter. */
+    if (!narrow) {
     var slots = reduceMotion
         ? [{ x: 6, y: 8 }, { x: 92, y: 22 }]
-        : narrow
-          ? [
-                { x: 6, y: 8 },
-                { x: 92, y: 22 },
-                { x: 10, y: 55 },
-                { x: 90, y: 62 }
-            ]
-          : [
-                { x: 6, y: 8 },
-                { x: 14, y: 26 },
-                { x: 92, y: 22 },
-                { x: 10, y: 55 },
-                { x: 90, y: 62 },
-                { x: 12, y: 88 }
-            ];
+        : [
+            { x: 6, y: 8 },
+            { x: 14, y: 26 },
+            { x: 92, y: 22 },
+            { x: 10, y: 55 },
+            { x: 90, y: 62 },
+            { x: 12, y: 88 }
+        ];
     var asciiCount = slots.length;
     for (var g = 0; g < asciiCount; g++) {
         var gx = slots[g].x + (Math.random() * 6 - 3);
@@ -104,6 +99,7 @@
         glyph.style.setProperty("--glyph-opacity", (0.22 + Math.random() * 0.28).toFixed(2));
         glyph.style.setProperty("--glyph-scale", (0.75 + Math.random() * 0.45).toFixed(2));
         starsHost.appendChild(glyph);
+    }
     }
 
     // On article / inner pages, hide twinkles behind the reading column
@@ -235,7 +231,9 @@
         var stars = document.querySelectorAll(".home-stars__star, .home-stars__ascii-star");
         if (!stars.length) return;
 
-        if (document.body.classList.contains("home")) {
+        var home = document.body.classList.contains("home");
+        var narrowNow = window.matchMedia("(max-width: 44.99rem)").matches;
+        if (home && !narrowNow) {
             clearReadingMask();
             for (var c = 0; c < stars.length; c++) {
                 stars[c].classList.remove("is-reading-void");
@@ -246,9 +244,14 @@
         // Prefer the full main column so the h1 isn't left twinkling through.
         // Read-me sword figure: keep sitewide stars in the column above the h1
         // (negative space around the figure); void from the title down.
-        var swordPage = !!document.querySelector(".sword-figure");
+        // A phone homepage uses the same hole over the banner, title, nav, prose, and footer.
+        var swordPage = !home && !!document.querySelector(".sword-figure");
         var masks;
-        if (swordPage) {
+        if (home) {
+            masks = document.querySelectorAll(
+                ".home-banner, .home-title-row, .home-header, .home-main, .home-footer"
+            );
+        } else if (swordPage) {
             masks = document.querySelectorAll(
                 ".content__header, .content__body, .content__footer"
             );
@@ -262,8 +265,9 @@
         }
         // Generous pad + glow bleed so soft box-shadows don't sit in letter gaps.
         // On sword pages, do not pad upward into the figure pocket above the h1.
-        var padX = 64;
-        var padY = 48;
+        // On a phone the pad stays small so the side margin can still twinkle.
+        var padX = narrowNow ? 16 : 64;
+        var padY = narrowNow ? 16 : 48;
         var padYTop = swordPage ? 0 : padY;
         var glow = 12;
         var rects = [];
