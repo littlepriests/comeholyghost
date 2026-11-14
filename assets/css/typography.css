@@ -1,15 +1,21 @@
-/* Fonts */
+/*
+  Base type for every page. --font-site / --font-article are set from
+  hugo.toml [params.fonts] in head.html; blog articles switch to
+  --font-article in article-reading.css.
+*/
 :root {
+    /* Legacy name still read by player.css and a few component sheets. */
     --font-monospace: "Fira Mono", monospace;
 }
 
 body {
-    font-family: var(--font-monospace);
+    font-family: var(--font-site, "Fira Mono", ui-monospace, monospace);
     font-size: 16px;
     line-height: 1.5rem;
+    color: var(--fg);
 }
 
-/* Headings — blue body color, stepped sizes so levels read apart */
+/* Headings — page title gold, h2+ link blue, stepped sizes so levels read apart */
 h1, 
 h2, 
 h3, 
@@ -22,7 +28,7 @@ h6 {
     line-height: 1.35;
 }
 
-h1 { font-size: 1.45rem; }
+h1 { font-size: 1.45rem; color: #ffd749; }
 h2 { font-size: 1.28rem; }
 h3 { font-size: 1.14rem; }
 h4 { font-size: 1.06rem; }
@@ -64,8 +70,35 @@ h6:before {
     font-weight: 500;
 }
 
+h1:before {
+    color: color-mix(in srgb, #ffd749 55%, var(--muted));
+}
+
 h1:first-child {
     margin-top: 0;
+}
+
+/* Space between headings and following prose. */
+.content__header h1,
+.content__body :is(h1, h2, h3, h4, h5, h6),
+.blog-index__heading {
+    margin-top: 1.75rem;
+    margin-bottom: 0.85rem;
+}
+
+.content__header h1:first-child,
+.content__body :is(h1, h2, h3, h4, h5, h6):first-child,
+.blog-index__heading:first-child {
+    margin-top: 0;
+}
+
+/* Sword hero sits above the h1 on read-me (figure is centered; title stays left). */
+.sword-figure + .content__header h1 {
+    margin-top: 0;
+}
+
+.content__body :is(h1, h2, h3, h4, h5, h6) + :is(h1, h2, h3, h4, h5, h6) {
+    margin-top: 0.4rem;
 }
 
 /* Paragraphs */

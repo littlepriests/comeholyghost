@@ -1,60 +1,4 @@
-/*
-  Inner pages share the homepage look: text on the open gradient, no pane.
-  Site-owned overrides live here (not Risotto core) so ad-hoc fixes stay local.
-*/
-
-/* Default site face; blog articles override via article-reading.css. */
-body {
-    font-family: var(--font-site, "Fira Mono", ui-monospace, monospace);
-}
-
-/* Page title gold; h2+ stay theme link blue. */
-h1 {
-    color: #ffd749;
-}
-
-h1:before {
-    color: color-mix(in srgb, #ffd749 55%, var(--muted, #888));
-}
-
-h2,
-h3,
-h4,
-h5,
-h6 {
-    color: var(--link);
-}
-
-h2:before,
-h3:before,
-h4:before,
-h5:before,
-h6:before {
-    color: color-mix(in srgb, var(--link) 55%, var(--muted, #888));
-}
-
-/* Space between headings and following prose (theme only had top margin). */
-.content__header h1,
-.content__body :is(h1, h2, h3, h4, h5, h6),
-.blog-index__heading {
-    margin-top: 1.75rem;
-    margin-bottom: 0.85rem;
-}
-
-.content__header h1:first-child,
-.content__body :is(h1, h2, h3, h4, h5, h6):first-child,
-.blog-index__heading:first-child {
-    margin-top: 0;
-}
-
-/* Sword hero sits above the h1 on read-me (figure is centered; title stays left). */
-.sword-figure + .content__header h1 {
-    margin-top: 0;
-}
-
-.content__body :is(h1, h2, h3, h4, h5, h6) + :is(h1, h2, h3, h4, h5, h6) {
-    margin-top: 0.4rem;
-}
+/* Sitewide chrome: SPA page fade, hover tips, back-to-top link. Type lives in typography.css. */
 
 /* SPA nav: hold the outgoing/incoming page briefly while new CSS settles. */
 #page-root.is-page-pending {
@@ -81,7 +25,7 @@ h6:before {
 /*
   Hover tip: .site-tip[data-tip] + floating layer from static/js/site-tips.js.
   Follows the pointer (ahead of the cursor). Copy lives in data/tips.yaml.
-  z-index above Winamp, sprites, images, and the back-to-top heart layer.
+  z-index above sprites, images, and the back-to-top heart layer.
 */
 .site-tip-float {
     position: fixed;

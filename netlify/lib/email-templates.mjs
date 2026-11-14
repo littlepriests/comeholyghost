@@ -341,7 +341,6 @@ export async function renderWelcomeEmail(options) {
 export async function renderPostEmail(post) {
     const tpl = await loadEmailTemplate("post.html");
     const origin = post.origin || DEFAULT_ORIGIN;
-    const heroSrc = post.heroUrl || "";
     return fillTemplate(tpl, {
         TITLE: escapeHtml(post.title || "new post"),
         DATE: escapeHtml(post.dateLabel || ""),

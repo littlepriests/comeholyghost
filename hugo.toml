@@ -10,28 +10,18 @@ enableInlineShortcodes = true
 [security.funcs]
   getenv = ['^HUGO_', '^CI$', '^CONTEXT$']
 
-[privacy.x]
-disable = true
-
 # Automatically add content sections to main menu
 sectionPagesMenu = "main"
-
-[pagination]
-pagerSize = 3
 
 [params]
 noindex = true
 
-[params.theme]
-palette = "base16-dark"
-
-# Site chrome vs blog-article faces. Self-host extra files under static/fonts/ +
-# optional articleFontUrl — do not add Google Fonts / company CDNs.
+# Site chrome vs blog-article faces. Self-host font files under static/fonts/ and
+# declare them in assets/css/fonts.css — do not add Google Fonts / company CDNs.
 # Knobs documented in docs/resources.md (Fonts).
 [params.fonts]
 site = "\"Fira Mono\", ui-monospace, monospace"
 article = "\"Montserrat\", sans-serif"
-articleFontUrl = "css/article-font.css"
 
 [params.about]
 title = ""
@@ -60,14 +50,14 @@ bannerAlt = "Site banner"
 # Text under the banner only (.home-site-title). Independent of the tab `title` above.
 displayTitle = "welcome to the "
 displayTitleLine2 = "FIELD🌽"
-# Font stack for that element only.
-titleFont = "Impact, sans-serif"
+# Title look — the only place to set it (home.css only has fallbacks for empty keys).
+# Line 1 = displayTitle, line 2 = displayTitleLine2. Fonts must be declared in
+# assets/css/fonts.css (or be system fonts). titleHighlight = background behind both.
+titleFont = "\"Segoe Script\", \"Apple Chancery\", cursive"
+titleColor = "white"
 titleFontLine2 = "\"DotMatrixNarrow\", \"Courier New\", monospace"
-# Loads @font-face from static/css/home-title-font.css (put the font in static/fonts/).
-titleFontUrl = "css/home-title-font.css"
-# Optional title colors (.home-site-title). Empty = CSS defaults in home.css.
-titleColor = "yellow"
-titleHighlight = "shadow-grey"
+titleColorLine2 = "#fdfb76"
+titleHighlight = "transparent"
 # Animated home button in the nav (sprite id from [[params.sprites]]). Empty = title chip.
 logoSprite = "misdreavus"
 

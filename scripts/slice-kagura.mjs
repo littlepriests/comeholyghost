@@ -110,5 +110,5 @@ for (let ri = 0; ri < rows.length; ri++) {
   console.log("wrote", file, cellW, "x", cellH, "*", frames.length);
 }
 
-fs.writeFileSync("static/images/sprites/kagura.json", JSON.stringify(meta, null, 2));
+fs.writeFileSync("assets-src/sprites/meta/kagura.json", JSON.stringify(meta, null, 2));
 console.log("meta", meta.length, "anims");

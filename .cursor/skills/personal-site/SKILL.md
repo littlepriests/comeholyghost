@@ -88,7 +88,7 @@ are in play.
 - If a lockfile `resolved` field is not `registry.npmjs.org`, delete the lock
   and regenerate with `npm install --package-lock-only` from this repo.
   Never import a work lockfile.
-- `package.json` currently tracks Netlify Blobs for the guestbook function;
+- `package.json` currently tracks Netlify Blobs for the guestbook and visitor-count functions;
   treat that as personal-site infra, not company tooling.
 
 ## Dev / deploy notes

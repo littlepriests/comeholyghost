@@ -1,7 +1,9 @@
 /* Main menu: Misdreavus | links (last link + Pancham glued). */
 
 .main-nav {
+    /* Home-button slot (sprites.css) and the Pancham row height share these. */
     --nav-logo-w: 52px;
+    --nav-logo-h: 108px;
     /* Native GIF size — max scale vs ./read-me.txt (do not upscale past this). */
     --nav-sub-w: 50px;
     --nav-gap-x: 0.85rem;
@@ -78,7 +80,7 @@
     align-items: center;
     justify-content: center;
     /* Match Misdreavus slot so centers line up on a shared row. */
-    height: 108px;
+    height: var(--nav-logo-h);
     line-height: 0;
     text-decoration: none !important;
 }
@@ -100,6 +102,7 @@
 @media (max-width: 44.99rem) {
     .main-nav {
         --nav-logo-w: 36px;
+        --nav-logo-h: 75px;
         /* Slightly smaller on narrow; never above the 50px max. */
         --nav-sub-w: 40px;
         position: relative;
@@ -121,7 +124,7 @@
         position: absolute;
         top: 50%;
         right: 0;
-        height: 75px;
+        height: var(--nav-logo-h);
         transform: translateY(-50%);
     }
 }

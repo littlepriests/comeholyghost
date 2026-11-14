@@ -2,8 +2,7 @@
 <html lang="{{- site.Language.Lang -}}">
 <head>
     {{- partial "head.html" . -}}
-    <link rel="stylesheet" href="{{ "css/gallery.css" | relURL }}?v=11">
-    <link rel="stylesheet" href="{{ "css/article-media.css" | relURL }}?v=6">
+    {{- partial "css.html" (slice "gallery" "article-media") }}
 </head>
 <body class="gallery-page">
     <div id="page-root">

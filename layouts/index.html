@@ -23,27 +23,21 @@
 {{- $bannerSrc := index $bannerPool 0 -}}
 <head>
     {{- partial "head.html" . -}}
-    {{ $home := resources.Get "css/home.css" | minify | fingerprint }}
+    {{ $home := slice (resources.Get "css/home.css") (resources.Get "css/retro.css") | resources.Concat "css/home.css" | minify | fingerprint }}
     <link rel="stylesheet" href="{{ $home.RelPermalink }}" integrity="{{ $home.Data.Integrity }}">
-    <link rel="stylesheet" href="{{ "css/retro.css" | relURL }}?v=15">
     <link rel="preload" as="image" href="{{ $bannerSrc }}" fetchpriority="high">
-    {{- with .Site.Params.home.titleFontUrl }}
     <link rel="preload" href="{{ "fonts/DotMatrixNarrow.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="{{ . | relURL }}">
-    {{- end }}
-    {{- $homeTitle := .Site.Params.home -}}
-    {{- if or $homeTitle.titleFont $homeTitle.titleFontLine2 $homeTitle.titleColor $homeTitle.titleHighlight }}
+    {{- /* Title look comes only from [params.home] title*; home.css holds the fallbacks. */ -}}
+    {{- $t := .Site.Params.home -}}
+    {{- if or $t.titleFont $t.titleFontLine2 $t.titleColor $t.titleColorLine2 $t.titleHighlight }}
     <style>
       body.home .home-site-title {
-        {{- with $homeTitle.titleFont }}font-family: {{ . | safeCSS }};{{ end }}
-        {{- with $homeTitle.titleColor }}--home-title-color: {{ . | safeCSS }};{{ end }}
-        {{- with $homeTitle.titleHighlight }}--home-title-highlight: {{ . | safeCSS }};{{ end }}
+        {{- with $t.titleFont }}--home-title-font: {{ . | safeCSS }};{{ end }}
+        {{- with $t.titleFontLine2 }}--home-title-font-2: {{ . | safeCSS }};{{ end }}
+        {{- with $t.titleColor }}--home-title-color: {{ . | safeCSS }};{{ end }}
+        {{- with $t.titleColorLine2 }}--home-title-color-2: {{ . | safeCSS }};{{ end }}
+        {{- with $t.titleHighlight }}--home-title-highlight: {{ . | safeCSS }};{{ end }}
       }
-      {{- with $homeTitle.titleFontLine2 }}
-      body.home .home-site-title__line--2 {
-        font-family: {{ . | safeCSS }};
-      }
-      {{- end }}
     </style>
     {{- end }}
 </head>

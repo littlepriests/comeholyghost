@@ -1,11 +1,8 @@
 {{ define "main" }}
     {{/* Page-scoped: article media + lightbox (not on home / blog index). */}}
-    <link rel="stylesheet" href="{{ "css/article-media.css" | relURL }}?v=6">
+    {{- partial "css.html" "article-media" }}
     {{- if eq .Section "blog" }}
-    <link rel="stylesheet" href="{{ "css/article-reading.css" | relURL }}?v=1">
-    {{- with site.Params.fonts.articleFontUrl }}
-    <link rel="stylesheet" href="{{ . | relURL }}">
-    {{- end }}
+    {{- partial "css.html" "article-reading" }}
     {{- end }}
     {{- if .Params.sword_figure -}}
     {{- partial "sword-figure.html" . -}}

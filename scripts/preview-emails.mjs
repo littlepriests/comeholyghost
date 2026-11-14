@@ -18,27 +18,6 @@ import { DEFAULT_ORIGIN } from "../netlify/lib/site.mjs";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = path.join(ROOT, "emails", "preview");
 
-function shell(inner, title) {
-    return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>${title} · email preview</title>
-  <style>
-    body { margin: 0; background: #0a0810; font-family: system-ui, sans-serif; }
-    .bar { padding: 12px 16px; color: #cfc8da; font-size: 13px; }
-    .bar a { color: #7ec8ff; }
-    .frame { background: #05040a; }
-  </style>
-</head>
-<body>
-  <div class="bar"><a href="./index.html">← previews</a> · ${title} · not published by Hugo</div>
-  <div class="frame">${inner}</div>
-</body>
-</html>`;
-}
-
 async function main() {
     await mkdir(OUT, { recursive: true });
     // Image URLs must match files in local public/ (Hugo Fit hashes). Point at a

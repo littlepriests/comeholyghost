@@ -203,6 +203,7 @@ They are **not** a universal “any TSR download” button. Each script is tuned
 | `scripts/slice-kagura.mjs` | `assets-src/sprites/kagura-sheet.png` | `kagura-walk`, `kagura-down`, `kagura-attack` |
 | `scripts/slice-sango.mjs` | `assets-src/sprites/sango-sheet.png` | `sango-idle`, `sango-boomerang`, `sango-attack` |
 | `scripts/slice-skifree.mjs` | `assets-src/sprites/skifree-sheet.png` | `skifree-yeti` |
+| `scripts/slice-grundo.mjs` | `assets-src/sprites/grundo-sheet.png` | `grundo-idle`, `grundo-kick` |
 
 ### B1. Install the dependency once
 
@@ -226,7 +227,7 @@ Watch the console: it prints row sizes and `wrote static/images/sprites/….png 
 
 ### B4. Copy the numbers into Hugo
 
-The script logs `frameWidth`, height, and frame count (and often writes a small `*.json` meta file). Use those values in `hugo.toml` (existing SkiFree / Sango / Kagura / Misdreavus entries are already filled in).
+The script logs `frameWidth`, height, and frame count (and writes a small `*.json` meta log to `assets-src/sprites/meta/`, which is not published; `hugo.toml` is the source of truth). Use those values in `hugo.toml` (existing SkiFree / Sango / Kagura / Misdreavus entries are already filled in).
 
 ### B5. New character / new sheet?
 
@@ -296,7 +297,7 @@ Open the page. You should see the animation loop.
 
 Unknown `id` → a visible placeholder with the id text (means Hugo config typo or server needs refresh).
 
-Live examples already on the site: `/blog/dummy/` (sprites section).
+Live examples: the site nav, footer, homepage dock, and player use these ids (see `hugo.toml`).
 
 ---
 
@@ -332,7 +333,7 @@ These are already shared for every sprite:
 
 - `layouts/shortcodes/sprite.html`
 - `layouts/partials/sprite.html`
-- `static/css/sprites.css`
+- `assets/css/sprites.css`
 
 Per new animation you only add: **strip PNG** + **`[[params.sprites]]`** + **shortcode call**.
 
@@ -344,4 +345,3 @@ Homepage dock pets (Sango / Kagura) and the Misdreavus nav button are separate w
 
 - Shortcodes + posting workflow: `docs/posting.md`
 - Existing slicers / ids / fan-use notes: `docs/resources.md` → Sprite animations
-- Example post: `content/blog/dummy/index.md` → `/blog/dummy/`

@@ -6,7 +6,7 @@ Do not put secrets, API tokens, or private paths in `content/` or `static/`. Tho
 
 ## Quick start
 
-1. Create `content/blog/<slug>/` (example: `content/blog/1126/`).
+1. Create `content/blog/<slug>/` (example: `content/blog/crossroad-beauty/`).
 2. Add `index.md` with front matter + markdown body.
 3. Drop images (and optional local video files) in that same folder.
 4. Run `hugo server -D` from the repo root and open `/blog/` then `/blog/<slug>/`.
@@ -61,7 +61,7 @@ Use `--dry-run` first. One-time alias install (PowerShell, any cwd): `powershell
 
 A commit runs that same check on staged images under `content/`. If `corn compress` would still change one, the commit stops. Corn-marked WebPs and already-small unmarked WebPs pass with nothing to do.
 
-Writing-index (`/blog/`) preview: shows near-full size with `object-fit: contain` (no crop/stretch). Oversized masters are Fit-capped in `layouts/partials/blog-entry.html`; on-page max width/height live in `static/css/blog-index.css`. Adjust those when a card looks too big or too small — details in `docs/resources.md`.
+Writing-index (`/blog/`) preview: shows near-full size with `object-fit: contain` (no crop/stretch). Oversized masters are Fit-capped in `layouts/partials/blog-entry.html`; on-page max width/height live in `assets/css/blog-index.css`. Adjust those when a card looks too big or too small — details in `docs/resources.md`.
 
 ### Local preview (`corn run`)
 
@@ -202,8 +202,7 @@ Delete every `[[buttons]]` block on the page. The inline `{{< button ... >}}` sh
 back_to_top = true
 ```
 
-Renders a quiet ⌃ under the article; click smooth-scrolls to the top of the page. Demo: `content/blog/dummy/index.md`.
-
+Renders a quiet ⌃ under the article; click smooth-scrolls to the top of the page.
 Example resource title:
 
 ```toml
@@ -226,7 +225,7 @@ Raw HTML in markdown works when you need it, but prefer shortcodes for pictures 
 
 ## Shortcodes (site-specific)
 
-All live under `layouts/shortcodes/`. Styles: `static/css/article-media.css`. Lightbox: `static/js/article-media.js`.
+All live under `layouts/shortcodes/`. Styles: `assets/css/article-media.css`. Lightbox: `static/js/article-media.js`.
 
 Self-closing form is fine when there is no inner body: `{{< photo src="x.png" />}}`.
 
@@ -274,7 +273,7 @@ weaving-infinite-gold.png
 
 Tiles use center-crop (`object-fit: cover`) so odd aspect ratios are not stretched. Click any tile → lightbox.
 
-Live walkthrough: `content/blog/dummy/index.md` → `/blog/dummy/`.
+Live example: `content/blog/crossroad-beauty/index.md`.
 
 ### `sprite` — animated pixel strips
 
@@ -291,6 +290,7 @@ Registered ids (today):
 - `kagura-walk`, `kagura-down`, `kagura-attack`
 - `sango-idle`, `sango-attack`, `sango-boomerang`
 - `skifree-yeti`
+- `grundo-idle`, `grundo-kick`
 
 `scale` is optional (`2` or `3`). Unknown ids render a visible missing marker.
 
@@ -375,10 +375,9 @@ Local:
 hugo server -D --disableFastRender --navigateToChanged
 ```
 
-Ship with `git push personal main` (see the personal-site skill). Optional zip / proj-zip is backup only.
+Ship via `corn branch` → `corn add` → `corn push` → merge into `preview` → `corn deploy` (see the personal-site skill). Optional zip / proj-zip is backup only.
 
 ## Related
 
 - Site chrome, player, sprites slicing, Netlify: `docs/resources.md`
-- Live multimedia example post: `content/blog/dummy/index.md` → `/blog/dummy/`
-- Real post using photo + photo-grid: `content/blog/1126/index.md`
+- Real post using photo + photo-grid: `content/blog/crossroad-beauty/index.md`

@@ -94,19 +94,11 @@
 .page__logo-inner--sprite {
     position: relative;
     display: block;
-    /* Native Misdreavus strip: 52×108 */
-    width: 52px;
-    height: 108px;
-    background: transparent !important;
-    opacity: 1 !important;
-    padding: 0 !important;
+    /* Slot size comes from .main-nav (header.css) so nav + sprite agree. */
+    width: var(--nav-logo-w, 52px);
+    height: var(--nav-logo-h, 108px);
     line-height: 0;
     overflow: visible;
-}
-
-.page__logo-inner--sprite::before,
-.page__logo-inner--sprite::after {
-    content: none !important;
 }
 
 .page__logo-inner--sprite .sprite-anim {
@@ -126,11 +118,6 @@
 }
 
 @media (max-width: 44.99rem) {
-    .page__logo-inner--sprite {
-        width: 36px;
-        height: 75px;
-    }
-
     .page__logo-inner--sprite .sprite-anim {
         transform: translateY(-50%) scale(0.69);
         transform-origin: center left;
