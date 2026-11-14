@@ -1,24 +1,33 @@
 /* Starfield CSS lives in static/css/stars.css (sitewide). */
 
-/* Left gutter | middle stack | right gutter. Moon sits centered in the left column. */
+/* Single middle stack. Chrome + prose share --home-content-width so banner /
+   moon / Misdreavus / nav never spill past the h1 content into gutters. */
 .home-root {
+    /* Wide enough for Misdreavus + 5 nav links on one row; still the prose column. */
+    --home-content-width: 44rem;
     position: relative;
-    display: grid;
-    /* Narrow left pocket so the moon sits beside the stack, not stranded in a wide gutter. */
-    grid-template-columns: minmax(0, 9.5rem) minmax(0, 46rem) minmax(0, 1fr);
-    justify-content: center;
-    align-items: start;
-    column-gap: 0.75rem;
+    display: block;
+    max-width: calc(var(--home-content-width) + 2.5rem);
+    width: 100%;
+    margin: 0 auto;
     padding: 1.5rem 0.75rem 3rem;
+    /* Clouds may paint into the side gutters; chrome is clipped on .home-page. */
+    overflow-x: visible;
 }
 
-/* Small clouds from emojicombos.com/cloud-ascii-art (top entry). Placed by home.js. */
+/* Small clouds from emojicombos.com/cloud-ascii-art (top entry). Placed by home.js.
+   Stay invisible until placed — otherwise the nest’s scaleX flashes stretched at 0,0. */
 .home-clouds {
     position: absolute;
     inset: 0;
     pointer-events: none;
     z-index: 2;
     overflow: visible;
+    opacity: 0;
+}
+
+.home-clouds.is-placed {
+    opacity: 1;
 }
 
 body.home pre.ascii-cloud {
@@ -172,32 +181,34 @@ body.home .ascii-angel__cta-art {
     }
 }
 
-.home-moon-col {
-    grid-column: 1;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    /* padding-top is set by home.js so the moon sits midway Misdreavus → ASCII angel */
-    padding-top: 0;
-    min-width: 0;
-}
-
 .home-page {
     position: relative;
     z-index: 1;
-    grid-column: 2;
-    max-width: 46rem;
+    max-width: 100%;
     width: 100%;
-    margin: 0 auto;
+    margin: 0;
     padding: 0 1.25rem;
-    overflow: visible;
+    box-sizing: border-box;
+    /* Banner / title / nav / prose stay in-column; clouds live outside this clip. */
+    overflow-x: clip;
+}
+
+/* Banner, title/moon, nav, prose, and footer share the prose column edges. */
+body.home .home-banner,
+body.home .home-title-row,
+body.home .home-header,
+body.home .home-main,
+body.home .home-footer {
+    width: 100%;
+    max-width: var(--home-content-width);
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
 }
 
 .home-banner {
     position: relative;
     margin-bottom: 0;
-    width: 100%;
-    max-width: 100%;
     /* Shared banner display size — reserve space before decode. */
     aspect-ratio: 1200 / 280;
     overflow: hidden;
@@ -226,27 +237,43 @@ body.home .ascii-angel__cta-art {
     }
 }
 
+/* Moon + “welcome to the FIELD” under the banner, above Misdreavus.
+   Row spans the banner: moon on the left edge, title to the right edge.
+   Moon + title sizes are cqi of this row so the pair fills the banner width. */
+.home-title-row {
+    container-type: inline-size;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: clamp(0.35rem, 1.5vw, 1rem);
+    margin: clamp(1.25rem, 3vw, 2.5rem) auto 0;
+    padding: 0;
+    overflow: visible;
+}
+
 /* Homepage-only stable title under the banner.
    Font / colors: [params.home] titleFont, titleColor, titleHighlight (or edit the vars below). */
 .home-site-title {
     --home-title-color: #black; /* text (blazing flame) */
     --home-title-highlight: #white; /* background behind the title */
 
-    /* Left-flush with the nav / page column (not centered). */
     display: block;
+    flex: 0 1 auto;
     width: fit-content;
     max-width: 100%;
-    margin: 2.5rem 0 0;
+    margin: 0;
     padding: 0.12rem 0.4rem;
     box-decoration-break: clone;
     -webkit-box-decoration-break: clone;
     color: var(--home-title-color);
     background-color: var(--home-title-highlight);
     font-size: 1rem;
-    font-weight: 600;    
+    font-weight: 600;
     letter-spacing: 0.04em;
     line-height: 1.15;
-    text-align: left;
+    text-align: center;
+    white-space: nowrap;
     text-shadow:
         0 0 18px color-mix(in srgb, #ff69b4 22%, transparent),
         0 0 28px color-mix(in srgb, #9ec9ff 16%, transparent);
@@ -257,23 +284,22 @@ body.home .ascii-angel__cta-art {
     text-align: center;
     color: white;
     font-family: "Segoe Script", "Apple Chancery", cursive;
-    font-size: 1.5rem;
+    font-size: max(0.7rem, 3.85cqi);
 }
 
 .home-site-title__line--2 {
     font-family: "DotMatrixNarrow", "Courier New", monospace;
-    font-size: 4rem;
+    font-size: max(1.2rem, 10.3cqi);
     font-weight: 600;
     letter-spacing: 0.02rem;
     color: #fdfb76;
 }
 
 /* "man in the moon" by Joan G. Stark (jgs / Spunk) — keep the signature.
-   Scrolls with the page; centered in .home-moon-col. Smaller for depth vs the ASCII angel. */
+   Sits in .home-title-row beside the site title; scales with the viewport. */
 body.home pre.ascii-moon {
     position: static;
-    left: auto;
-    top: auto;
+    flex: 0 0 auto;
     z-index: 1;
     box-sizing: border-box;
     width: auto;
@@ -287,7 +313,7 @@ body.home pre.ascii-moon {
     background: transparent !important;
     color: color-mix(in srgb, #fff1c2 82%, #ffd27a) !important;
     font-family: ui-monospace, "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, monospace;
-    font-size: 0.42rem;
+    font-size: max(0.15rem, 1.12cqi);
     line-height: 1.05 !important;
     letter-spacing: 0;
     white-space: pre;
@@ -306,26 +332,9 @@ body.home pre.ascii-moon::-webkit-scrollbar {
     height: 0 !important;
 }
 
-@media (max-width: 70rem) {
-    body.home pre.ascii-moon {
-        font-size: 0.36rem;
-        opacity: 0.88;
-    }
-}
-
 @media (max-width: 52rem) {
     .home-root {
-        display: block;
         padding: 1.5rem 0 3rem;
-    }
-
-    .home-moon-col {
-        display: none;
-    }
-
-    .home-page {
-        max-width: 46rem;
-        margin: 0 auto;
     }
 }
 
@@ -348,8 +357,30 @@ body.home pre.ascii-moon::-webkit-scrollbar {
 .home-header {
     position: relative;
     margin-top: 0.15rem;
-    margin-bottom: .5rem;
+    margin-bottom: 0.5rem;
     overflow: visible;
+    /* Keep Misdreavus + links inside the same column as the banner / h1s. */
+    min-width: 0;
+    container-type: inline-size;
+}
+
+body.home .home-header .main-nav {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* One line only: share the banner width between Misdreavus, the links, and
+   the read-me + Pancham pair. Narrow headers keep the wrapping list. */
+@container (min-width: 40rem) {
+    body.home .home-header .main-nav {
+        width: 100%;
+        max-width: 100%;
+        justify-content: space-between;
+    }
+
+    body.home .home-header .main-nav__list {
+        display: contents;
+    }
 }
 
 body.home .page__logo-slot {
@@ -364,8 +395,8 @@ body.home .page__logo-slot .page__logo {
 }
 
 .home-main {
-    max-width: 38rem;
-    margin: 0 auto 3rem;
+    margin-top: 0;
+    margin-bottom: 3rem;
 }
 
 /* Braille angel: transparent stage, pink wing/halo glow, gold halo sparkles.
@@ -731,138 +762,9 @@ body.home .page__logo-slot .page__logo {
     }
 }
 
+/* Hairline + top padding come from static/css/site-shell.css. */
 .home-footer {
-    position: relative;
-    margin: 0 auto;
-    padding-top: 1.5rem;
-    border-top: 1px solid color-mix(in srgb, var(--muted) 35%, transparent);
     text-align: center;
-    overflow: visible;
-}
-
-/*
-  Sword figure: whole image visible in the right gutter.
-  Head sits on the blue footer hairline (translateY tuned to ~head in the PNG).
-  Width tracks remaining viewport beside the ~40rem home column — shrinks to 0
-  instead of covering the article when the window is narrow.
-*/
-.home-sword {
-    /* Pin to the dock / ticker band (not the footer hairline). */
-    --home-sword-align: 48%;
-    position: absolute;
-    top: calc(1.5rem + 3.1rem);
-    right: calc(50% - 50vw + 0.5rem);
-    z-index: 5;
-    width: clamp(0px, calc((100vw - 42rem) / 2 - 0.75rem), 15rem);
-    line-height: 0;
-    /* Whole figure must receive hover — parent pointer-events:none made only a
-       ~30×25px wound target clickable, so hovering the art did nothing. */
-    pointer-events: auto;
-    cursor: crosshair;
-    overflow: visible;
-    transform: translateY(calc(var(--home-sword-align) * -1));
-    transform-origin: top center;
-}
-
-.home-sword img {
-    display: block;
-    width: 100%;
-    height: auto;
-    max-width: none;
-    max-height: none;
-    pointer-events: none;
-}
-
-/* Particle origin at blade exit through her upper back (not a hit-target). */
-.home-sword__wound {
-    position: absolute;
-    left: 38%;
-    top: 45%;
-    width: 0;
-    height: 0;
-    overflow: visible;
-    pointer-events: none;
-}
-
-.home-sword__heart {
-    position: absolute;
-    left: 0;
-    top: 0;
-    z-index: 6;
-    margin: 0;
-    pointer-events: none;
-    font-family: var(--font-monospace, ui-monospace, "Cascadia Mono", "Fira Mono", monospace);
-    font-size: 0.95rem;
-    line-height: 1;
-    color: #ff2a4a;
-    text-shadow:
-        0 0 4px #ff6b81,
-        0 0 10px #ff1744,
-        0 0 18px rgb(255 20 60 / 0.75);
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.35);
-}
-
-.home-sword__heart.is-bright {
-    color: #ff4d6d;
-    text-shadow:
-        0 0 5px #fff,
-        0 0 10px #ff2a4a,
-        0 0 18px #ff1744,
-        0 0 26px rgb(255 20 60 / 0.85);
-    font-size: 1.15rem;
-}
-
-.home-sword:hover .home-sword__heart,
-.home-sword:focus-within .home-sword__heart {
-    animation: home-sword-spurt var(--hspurt, 1s) cubic-bezier(0.12, 0.7, 0.25, 1) var(--hd, 0s) infinite;
-}
-
-@keyframes home-sword-spurt {
-    0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.25) rotate(0deg);
-        filter: brightness(1.1);
-    }
-    8% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1.2) rotate(calc(var(--rot, 0deg) * 0.25));
-        filter: brightness(1.55);
-    }
-    55% {
-        opacity: 0.85;
-        transform:
-            translate(
-                calc(-50% + var(--dx, -1rem) * 0.75),
-                calc(-50% + var(--dy, -2rem) * 0.75)
-            )
-            scale(0.95)
-            rotate(var(--rot, 0deg));
-        filter: brightness(1.25);
-    }
-    100% {
-        opacity: 0;
-        transform:
-            translate(
-                calc(-50% + var(--dx, -1rem)),
-                calc(-50% + var(--dy, -2rem))
-            )
-            scale(0.4)
-            rotate(calc(var(--rot, 0deg) * 1.35));
-        filter: brightness(0.95);
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .home-sword:hover .home-sword__heart,
-    .home-sword:focus-within .home-sword__heart {
-        animation: none;
-        opacity: 0.75;
-        transform: translate(
-            calc(-50% + var(--dx, -1rem) * 0.35),
-            calc(-50% + var(--dy, -2rem) * 0.35)
-        ) scale(1);
-    }
 }
 
 /* Scales the dock row as one unit so pets + ticker + player never spill.
@@ -881,16 +783,20 @@ body.home .page__logo-slot .page__logo {
 }
 
 .home-dock {
+    --home-dock-gap: 1.25rem;
+    --home-dock-right-pad: calc(25px * 2.1);
     position: relative;
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: flex-end;
-    justify-content: center;
-    gap: 1.25rem;
+    /* Ticker + player are the centered core; Sango and Kagura’s park mirror
+       each other in equal-width pads on either side. */
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto minmax(0, 1fr);
+    align-items: end;
+    column-gap: var(--home-dock-gap);
     margin-top: 0;
     min-height: 4.5rem;
-    width: max-content;
-    max-width: none;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
     transform: scale(var(--home-dock-scale, 1));
     transform-origin: center bottom;
 }
@@ -916,8 +822,28 @@ body.home .page__logo-slot .page__logo {
 }
 
 .home-dock__pet--left {
-    width: calc(48px * 2.1);
+    grid-column: 1;
+    justify-self: end;
     height: calc(47px * 2.1);
+}
+
+.home-dock .ticker {
+    grid-column: 2;
+    justify-self: center;
+}
+
+/* Wrapper stays in the markup for JS; its children sit on the dock grid. */
+.home-dock__after {
+    display: contents;
+}
+
+.home-dock .home-player-slot {
+    grid-column: 3;
+}
+
+.home-dock__pet--right {
+    grid-column: 4;
+    justify-self: start;
 }
 
 .home-dock__pet[hidden] {
@@ -1239,28 +1165,21 @@ body.home .page__logo-slot .page__logo {
         overflow-x: clip;
     }
 
-    .home-banner {
-        max-width: 100%;
-        /* Keep 1200/280 box; don’t fight aspect-ratio with a hard max-height. */
-    }
-
     .home-banner img {
         width: 100%;
         height: 100%;
     }
 
-    .home-site-title {
+    .home-title-row {
         margin-top: 1.25rem;
-        max-width: 100%;
-        overflow-wrap: anywhere;
+        gap: 0.4rem;
     }
 
-    .home-site-title__line {
-        font-size: 1.15rem;
+    .home-site-title {
+        max-width: 100%;
     }
 
     .home-site-title__line--2 {
-        font-size: clamp(1.65rem, 11vw, 2.35rem);
         letter-spacing: 0.01rem;
     }
 
@@ -1282,27 +1201,33 @@ body.home .page__logo-slot .page__logo {
         -webkit-overflow-scrolling: touch;
     }
 
-    .home-sword {
-        display: none;
-    }
-
     .home-footer__dock-fit {
         margin-top: 0.5rem;
         padding: 0 0.25rem;
     }
 
     .home-dock {
-        gap: 0.55rem 0.75rem;
+        --home-dock-gap: 0.75rem;
+        --home-dock-right-pad: calc(25px * 1.55);
         min-height: 0;
+        /* Player leaves this row for the fixed bar, so Sango and Kagura mirror the counter. */
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    }
+
+    .home-dock .home-player-slot {
+        display: none;
+    }
+
+    .home-dock__pet--right {
+        grid-column: 3;
     }
 
     .home-dock__pet {
-        width: calc(25px * 1.55);
+        width: var(--home-dock-right-pad);
         height: calc(42px * 1.55);
     }
 
     .home-dock__pet--left {
-        width: calc(48px * 1.55);
         height: calc(47px * 1.55);
     }
 
@@ -1322,13 +1247,12 @@ body.home .page__logo-slot .page__logo {
         letter-spacing: 0.08em;
     }
 
-    .home-player-slot {
-        width: var(--simple-player-width, 9.5rem);
-        min-height: 2.75rem;
-    }
-
     .home-footer {
         padding-bottom: 0.5rem;
+    }
+
+    .home-root {
+        padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
     }
 }
 

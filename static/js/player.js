@@ -364,6 +364,7 @@
         measureSimplePlayer();
         placeHomePlayer();
         syncBackTop();
+        placeBesideFooter();
     }
 
     function syncClosedChrome() {
@@ -448,6 +449,7 @@
         measureSimplePlayer();
         placeHomePlayer();
         syncBackTop();
+        placeBesideFooter();
     }
 
     function measureSimplePlayer() {
@@ -459,6 +461,12 @@
     function placeHomePlayer() {
         var slot = document.querySelector(".home-player-slot");
         if (!document.body.classList.contains("home") || !slot || !player.classList.contains("site-player--simple")) {
+            return;
+        }
+        // Phone homepage uses the fixed bottom bar, same as inner pages.
+        if (isMobileViewport()) {
+            clearInlinePlacement();
+            player.classList.remove("site-player--home-pending");
             return;
         }
         measureSimplePlayer();
@@ -496,12 +504,65 @@
         }
     }
 
+    function remPx(value) {
+        var rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+        var n = parseFloat(value);
+        if (!n) return 0;
+        return String(value).indexOf("rem") !== -1 ? n * rem : n;
+    }
+
+    /* Fit Grundo + buttons + ↑ inside the footer band once that band is on screen. */
+    function placeBesideFooter() {
+        if (document.body.classList.contains("home") || isMobileViewport()) {
+            player.style.removeProperty("--player-bottom");
+            return;
+        }
+        var footer = document.querySelector(".site-footer--page");
+        if (!footer) {
+            player.style.removeProperty("--player-bottom");
+            return;
+        }
+        var viewH = window.innerHeight;
+        var docH = document.documentElement.scrollHeight;
+        var fr = footer.getBoundingClientRect();
+        var pageFits = docH <= viewH + 2;
+        var atEnd = window.scrollY + viewH >= docH - 8;
+        var onScreen = fr.top >= -1 && fr.bottom <= viewH + 1;
+        if (!(pageFits || atEnd || onScreen)) {
+            player.style.removeProperty("--player-bottom");
+            return;
+        }
+        var pr = player.getBoundingClientRect();
+        if (pr.height < 2) {
+            player.style.removeProperty("--player-bottom");
+            return;
+        }
+        var styles = getComputedStyle(player);
+        var lift = 0;
+        if (backTopBtn && !backTopBtn.hasAttribute("hidden")) {
+            lift = remPx(styles.getPropertyValue("--player-back-top-size"))
+                + remPx(styles.getPropertyValue("--player-back-top-gap"));
+        }
+        var stack = pr.height + lift;
+        var bandH = fr.height - (parseFloat(getComputedStyle(footer).paddingTop) || 0);
+        var extra = Math.max(0, bandH - stack);
+        /* ↑ sits at --player-bottom; the bar is `lift` above that. Center the stack below the hairline. */
+        var clusterBottom = (viewH - fr.bottom) + extra / 2;
+        if (clusterBottom < 0) {
+            player.style.removeProperty("--player-bottom");
+            return;
+        }
+        player.style.setProperty("--player-bottom", Math.round(clusterBottom) + "px");
+    }
+
     function onViewportChange() {
         applyPlayerChrome();
         placeHomePlayer();
+        placeBesideFooter();
     }
 
     window.addEventListener("scroll", syncBackTop, { passive: true });
+    window.addEventListener("scroll", placeBesideFooter, { passive: true });
 
     if (typeof mobileQuery.addEventListener === "function") {
         mobileQuery.addEventListener("change", onViewportChange);
@@ -581,8 +642,8 @@
                                 document.body.appendChild(created);
                             });
                         }
-                        // Drop leftover fixed bottom-right corner art when home
-                        // brings its own footer-anchored .home-sword (SPA dupe).
+                        // Bottom-right art is read-me .sword-figure only — never a
+                        // fixed corner twin on home (SPA leftover cleanup).
                         if (document.body.classList.contains("home")) {
                             document.querySelectorAll(
                                 '.site-backdrop[data-anchor="bottom-right"]'
@@ -646,7 +707,10 @@
         adopt(location.href, true);
     });
 
-    window.addEventListener("load", placeHomePlayer);
+    window.addEventListener("load", function () {
+        placeHomePlayer();
+        placeBesideFooter();
+    });
 
     history.replaceState({ player: true }, "", location.href);
     applyPlayerChrome();

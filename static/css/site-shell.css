@@ -1,0 +1,57 @@
+/*
+  Shared page shell. Footer: layouts/partials/site-footer.html on every layout.
+  Photobook + guestbook use the same grid as .page (layout.css): header and
+  footer span both columns, the body sits in the content column.
+*/
+:root {
+    --footer-pad-top: 1.5rem;
+}
+
+.site-footer {
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+    padding-top: var(--footer-pad-top);
+    border-top: 1px solid color-mix(in srgb, var(--muted) 35%, transparent);
+    color: var(--off-fg);
+}
+
+.site-footer p {
+    margin: 0;
+}
+
+:is(.gallery-wrap, .guestbook-wrap) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 2rem;
+    align-items: start;
+    margin: 1.5rem auto 3rem;
+    padding: 0 0.85rem;
+}
+
+:is(.gallery-header, .guestbook-header, .gallery-wrap > main, .guestbook-wrap > main) {
+    min-width: 0;
+}
+
+:is(.gallery-header, .guestbook-header, .gallery-wrap > .site-footer, .guestbook-wrap > .site-footer) {
+    grid-column: 1 / -1;
+}
+
+@media (min-width: 45rem) {
+    :is(.gallery-wrap, .guestbook-wrap) {
+        grid-template-columns: minmax(0, 1fr) var(--aside-width);
+        column-gap: var(--aside-gap);
+        margin: 1rem auto;
+        padding: 0;
+    }
+
+    :is(.gallery-wrap, .guestbook-wrap) > main {
+        overflow-x: clip;
+    }
+}
+
+@media (max-width: 44.99rem) {
+    .site-footer {
+        overflow-wrap: anywhere;
+    }
+}

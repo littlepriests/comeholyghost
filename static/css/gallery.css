@@ -1,46 +1,9 @@
-.gallery-wrap {
-    max-width: 52rem;
-    margin: 1.5rem auto 3rem;
-    padding: 0 1.25rem;
-}
-
-/* Same content + skin column pattern as guestbook / blog aside. */
-@media (min-width: 45rem) {
-    .gallery-wrap {
-        max-width: var(--middle-column);
-        padding-right: 0;
-        padding-left: 0;
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) var(--aside-width);
-        column-gap: var(--aside-gap, 1.5rem);
-        align-items: start;
-    }
-
-    .gallery-header,
-    .gallery-wrap > main {
-        grid-column: 1;
-        min-width: 0;
-        overflow-x: clip;
-    }
-}
-
 @media (max-width: 44.99rem) {
-    .gallery-wrap {
-        padding-bottom: calc(var(--simple-player-height, 3rem) + 2.5rem + env(safe-area-inset-bottom, 0px));
-        padding-left: 0.85rem;
-        padding-right: 0.85rem;
-        max-width: 100%;
-    }
-
     .gallery {
         grid-template-columns: repeat(auto-fill, minmax(6.75rem, 1fr));
         gap: 0.55rem;
         justify-content: center;
     }
-}
-
-.gallery-header {
-    margin-bottom: 2rem;
 }
 
 .gallery-page h1::before {
