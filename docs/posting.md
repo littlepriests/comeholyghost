@@ -121,7 +121,7 @@ TOML between `+++` fences (YAML `---` also works). Fields this site cares about:
 | `index_summary` | no | Extra fallback teaser name |
 | `draft` | no | `true` — not built on Netlify / normal `hugo` (only with `hugo server -D` or `-D` builds). Soft “hide from the site.” |
 | `hide_date` | no | `true` hides the date in the article aside. Keep `date` in front matter for `/blog/` sort order and the writing-index card |
-| `email_cta` | no | Read-me only: shows the mailto envelope in the aside |
+| `sword_figure` | no | Read-me: centered stabbed-girl hero + ♡ fountain before the h1; clicking it opens the mailto from `[params.about] email` |
 | `toc` | no | **Off by default.** Set `toc = true` only if you want “On this page” in the aside. Omit it (or `false`) to hide the ToC |
 | `author` | no | Optional byline in the aside |
 | `[[buttons]]` | no | **Off by default.** Each `[[buttons]]` block adds one labeled link after the body. Delete those blocks to drop the row |

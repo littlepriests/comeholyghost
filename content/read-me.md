@@ -1,6 +1,6 @@
 +++
 title = "♡♡"
-email_cta = true
+sword_figure = true
 +++
 
 i'm an in-my-30s something-or-other with broad interests, living somewhere in rural America near many cornfields and the Embarrass River.(It's pronounced AM-braw.)

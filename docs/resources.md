@@ -84,7 +84,7 @@ Twinkling starfield is sitewide: `layouts/partials/stars.html` (outside `#page-r
 
 ## Read-me email CTA
 
-`content/read-me.md` sets `email_cta = true`. The aside (under Winamp on desktop) shows a mailto link from `[params.about] email` in `hugo.toml` — envelope + ♥ icon only. Address is public on purpose; keep secrets out of `content/` / `hugo.toml` if you ever need a private inbox. Hover label uses `.site-tip` / `data-tip` (see **Hover tips**).
+The read-me sword figure (`sword_figure = true`) is the mailto link: clicking it opens `[params.about] email` from `hugo.toml`, with the `email` tip from `data/tips.yaml`. Address is public on purpose; keep secrets out of `content/` / `hugo.toml` if you ever need a private inbox. Hover label uses `.site-tip` / `data-tip` (see **Hover tips**).
 
 ## Read-me sword figure
 
