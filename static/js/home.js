@@ -1,4 +1,9 @@
 (function () {
+    // Same-site nav re-runs this file on every return home. Window listeners
+    // bind once and call whichever run is current, so they never stack.
+    var windowBound = !!window.__homeWindowBound;
+    window.__homeWindowBound = true;
+
     // Scale the footer dock (pets + ticker) as one unit to the
     // available width so the row never wraps or spills horizontally.
     var dockFit = document.querySelector("[data-home-dock-fit]");
@@ -72,13 +77,25 @@
         window.dispatchEvent(new Event("resize"));
     }
 
+    function runFit() {
+        if (typeof window.__homeFitDock === "function") window.__homeFitDock();
+    }
+
+    if (window.__homeDockObserver) {
+        window.__homeDockObserver.disconnect();
+        window.__homeDockObserver = null;
+    }
+    window.__homeFitDock = dockFit && dock ? fitHomeDock : null;
     if (dockFit && dock) {
         fitHomeDock();
-        window.addEventListener("resize", fitHomeDock);
         if (typeof ResizeObserver === "function") {
-            new ResizeObserver(fitHomeDock).observe(dockFit);
+            window.__homeDockObserver = new ResizeObserver(fitHomeDock);
+            window.__homeDockObserver.observe(dockFit);
         }
-        window.addEventListener("load", fitHomeDock);
+    }
+    if (!windowBound) {
+        window.addEventListener("resize", runFit);
+        window.addEventListener("load", runFit);
     }
 
     // Banner URL is chosen in Hugo (shuffle + preload). Hold .is-pending until
@@ -347,10 +364,19 @@
         clearStarsBehindClouds();
     }
     window.placeHomeDecor = placeDecor;
+    window.__homeClearStars = clearStarsBehindClouds;
     placeDecor();
-    window.addEventListener("resize", placeDecor);
-    window.addEventListener("load", placeDecor);
-    window.addEventListener("scroll", clearStarsBehindClouds, { passive: true });
+    if (!windowBound) {
+        window.addEventListener("resize", function () {
+            window.placeHomeDecor();
+        });
+        window.addEventListener("load", function () {
+            window.placeHomeDecor();
+        });
+        window.addEventListener("scroll", function () {
+            window.__homeClearStars();
+        }, { passive: true });
+    }
 })();
 
 (function () {
