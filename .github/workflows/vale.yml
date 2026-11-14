@@ -19,13 +19,18 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Vale
-        uses: vale-cli/vale-action@v2.1.1
+        # v3 honors fail_on_error / sync; v2.1.1 still failed the job on
+        # Vale.Spelling (house-style lowercase) and rejected the sync input.
+        uses: vale-cli/vale-action@v3
         with:
           files: content
+          config: vale.ini
           sync: true
           # Only lines touched in the PR (full tree is noisy on existing posts).
           filter_mode: added
           reporter: github-pr-check
           fail_on_error: false
+          # Keep annotations without failing the check conclusion.
+          level: warning
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
