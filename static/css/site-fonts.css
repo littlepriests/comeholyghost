@@ -26,7 +26,7 @@
 
 /*
   Face tokens (--font-site / --font-article) are set from hugo.toml [params.fonts]
-  in themes/risotto/layouts/partials/head.html. Defaults:
+  in layouts/partials/head.html. Defaults:
     site    = Fira Mono (chrome, home, guestbook, writing index)
     article = Georgia system stack (/blog/<slug>/ via article-reading.css)
 */

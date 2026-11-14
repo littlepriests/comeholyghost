@@ -160,9 +160,9 @@ The active palette is `base16-dark`. Switch the whole set by changing the name i
 palette = "base16-dark"
 ```
 
-The name is a file in `themes/risotto/assets/css/palettes/`, without `.css`. The choices on disk are `apprentice`, `base16-dark`, `base16-light`, `catppuccin-frappe`, `catppuccin-latte`, `catppuccin-macchiato`, `catppuccin-mocha`, `dracula`, `gruvbox-dark`, `gruvbox-light`, `material`, `papercolor-dark`, `papercolor-light`, `solarized-dark`, `solarized-light`, `tender`, `tokyo-night-dark`, `tokyo-night-light`, `windows-95`, and `windows-95-light`. `themes/risotto/layouts/partials/head.html` loads that file. Save `hugo.toml` and reload the site.
+The name is a file in `assets/css/palettes/`, without `.css`. The choices on disk are `apprentice`, `base16-dark`, `base16-light`, `catppuccin-frappe`, `catppuccin-latte`, `catppuccin-macchiato`, `catppuccin-mocha`, `dracula`, `gruvbox-dark`, `gruvbox-light`, `material`, `papercolor-dark`, `papercolor-light`, `solarized-dark`, `solarized-light`, `tender`, `tokyo-night-dark`, `tokyo-night-light`, `windows-95`, and `windows-95-light`. `layouts/partials/head.html` loads that file. Save `hugo.toml` and reload the site.
 
-To change one color and keep the rest, edit the hex in `themes/risotto/assets/css/palettes/base16-dark.css`. The page does not use those hex values directly. `themes/risotto/assets/css/colours.css` gives each one a job. Change the job there if, for example, links should use a different base color than `--base0D`.
+To change one color and keep the rest, edit the hex in `assets/css/palettes/base16-dark.css`. The page does not use those hex values directly. `assets/css/colours.css` gives each one a job. Change the job there if, for example, links should use a different base color than `--base0D`.
 
 What the current dark palette paints:
 
@@ -215,7 +215,7 @@ y = 0
 
 - Replace `static/images/cursor.png`. Keep it 32×32 pixels. Larger images are ignored by some browsers.
 - `x` and `y` are the click point, in pixels from the top left of the image. The starter arrow uses `0` `0` because the tip is the top left.
-- The rule is injected in `themes/risotto/layouts/partials/head.html`. It applies to the whole page, including links. Text fields and text areas keep the text cursor.
+- The rule is injected in `layouts/partials/head.html`. It applies to the whole page, including links. Text fields and text areas keep the text cursor.
 - To go back to the normal pointer, delete the `image` line, or point it at a file that is not in `static/`.
 
 ## Banner
@@ -250,7 +250,7 @@ Add another block for another icon. The fields are `icon`, `title`, and `url`.
 - `icon` is a short name (`github`, `envelope`, `heart`, `book`, `pen`, `play`, `stop`, `forward`) or a legacy FA class (`fa-brands fa-github`) mapped in `layouts/partials/icon-name.html`. Inline SVGs — no Font Awesome / Academicons CDN.
 - `title` is the tooltip and the accessible name. The icon itself is hidden from assistive tech.
 - `url` is the destination. Use a full `https://` address, or `mailto:you@example.com`.
-- The markup is `themes/risotto/layouts/partials/about.html`. The list style is `themes/risotto/assets/css/about.css`.
+- The markup is `layouts/partials/about.html`. The list style is `assets/css/about.css`.
 
 To put a social link on one page only, including the homepage, gallery, or guestbook, use a button on that page (next section) and set `icon` to the same class.
 
@@ -294,7 +294,7 @@ icon = "fa-brands fa-github"
 
 The same footer list also takes `kind = "text"` (`text`) and `kind = "image"` (`src`, `alt`, and an optional `url`). Those are rendered in `layouts/index.html`.
 
-The look is `static/css/buttons.css`, linked from `themes/risotto/layouts/partials/head.html`.
+The look is `static/css/buttons.css`, linked from `layouts/partials/head.html`.
 
 ## Article media shortcodes
 
@@ -370,7 +370,7 @@ How to change what visitors read without touching layout chrome.
 | read-me | `content/read-me.md` |
 | Nav labels / URLs | `[[menu.main]]` in `hugo.toml` |
 | Site title, banner, sprites, socials, backdrop | `hugo.toml` `[params.*]` — see sections above |
-| Playlist (local test) | `static/audio/playlist.json` (`title`, `src`); fetch URL is in `static/js/player.js` |
+| Playlist (local test) | `static/audio/playlist.json` (`title`, `src`); remote URL is `[params.player] playlist` in `hugo.toml` |
 
 New post checklist:
 
@@ -532,13 +532,14 @@ The player loads a JSON list, then sets the audio source to each track's `src`.
 ]
 ```
 
-`title` is the label on the button row. `src` is the file the browser plays. Local fallback ships as `[]`. The fetch is hardcoded in `static/js/player.js`:
+`title` is the label on the button row. `src` is the file the browser plays. Local fallback ships as `[]`. The remote list address is set in `hugo.toml`:
 
-```js
-fetch("/audio/playlist.json")
+```toml
+[params.player]
+playlist = "http://192.168.1.20:8080/playlist.json"
 ```
 
-Change that URL when the list lives somewhere else. Track `src` values can be absolute (`https://…`) or site-relative (`/audio/…`).
+The player tries that address first and falls back to `/audio/playlist.json` when it is empty or unreachable. Track `src` values can be absolute (`https://…`) or site-relative (`/audio/…`).
 
 ### Calling a folder on another server
 
@@ -663,16 +664,11 @@ When the Hugo site later has a public address, change the Caddy header from `htt
 
 #### 6. Point the player at the playlist
 
-In `static/js/player.js`, the load line is:
+In `hugo.toml`, set the playlist URL under `[params.player]`:
 
-```js
-fetch("/audio/playlist.json")
-```
-
-Change the address inside the quotes to your playlist URL:
-
-```js
-fetch("http://192.168.1.20:8080/playlist.json")
+```toml
+[params.player]
+playlist = "http://192.168.1.20:8080/playlist.json"
 ```
 
 Save. Hugo rebuilds on save. Reload the site, press Play, and the label should be the first `title` from your file. Skip should play the second track. Moving from the homepage to Blog should keep the song going.

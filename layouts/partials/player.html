@@ -1,6 +1,6 @@
 {{- $idle := partial "sprite-by-id.html" "grundo-idle" -}}
 {{- $kick := partial "sprite-by-id.html" "grundo-kick" -}}
-<div id="site-player">
+<div id="site-player"{{ with site.Params.player.playlist }} data-playlist="{{ . }}"{{ end }}>
     {{- $reopenTip := partial "tip-text.html" (dict "key" "player_reopen" "fallback" "show player") -}}
     <button type="button" class="player-reopen site-tip" data-player-reopen aria-label="{{ $reopenTip }}" data-tip="{{ $reopenTip }}" hidden>
         <span aria-hidden="true">♡</span>
@@ -87,4 +87,4 @@
         </button>
     </div>
 </div>
-<script src="{{ "js/player.js" | relURL }}?v=85"></script>
+<script src="{{ "js/player.js" | relURL }}?v=86"></script>
