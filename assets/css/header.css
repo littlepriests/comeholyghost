@@ -1,39 +1,48 @@
-/* Main menu: Misdreavus/logo sits beside a wrapping link list.
-   Rows of links start under ./writing — not under the sprite. */
+/* Main menu: Misdreavus | links (last link + Pancham glued). */
 
 .main-nav {
+    --nav-logo-w: 52px;
+    /* Native GIF size — max scale vs ./read-me.txt (do not upscale past this). */
+    --nav-sub-w: 50px;
+    --nav-gap-x: 0.85rem;
     display: flex;
     flex-wrap: nowrap;
-    /* Center Misdreavus to the full link block (1 or 2 rows). */
     align-items: center;
-    gap: 0.75rem 1.25rem;
-    width: 100%;
+    justify-content: flex-start;
+    gap: 0.55rem var(--nav-gap-x);
+    width: fit-content;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.main-nav .page__logo-slot {
+    flex: 0 0 auto;
     min-width: 0;
 }
 
 .main-nav .page__logo {
     flex: 0 0 auto;
-    align-self: center;
     margin: 0;
 }
 
 .main-nav__list {
-    display: grid;
-    grid-template-columns: repeat(2, max-content);
-    column-gap: 2rem;
-    row-gap: 0.5rem;
-    justify-content: start;
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
+    gap: 0.45rem var(--nav-gap-x);
     margin: 0;
     padding: 0;
     list-style: none;
     min-width: 0;
-    flex: 1 1 auto;
+    flex: 0 1 auto;
+    width: max-content;
+    max-width: calc(100% - var(--nav-logo-w) - var(--nav-gap-x));
 }
 
 .main-nav__item {
+    flex: 0 0 auto;
     text-transform: lowercase;
-    min-width: 0;
     max-width: 100%;
 }
 
@@ -51,20 +60,51 @@
     content: "./";
 }
 
-@media (min-width: 36rem) {
-    .main-nav__list {
-        grid-template-columns: repeat(2, max-content);
-        column-gap: 2rem;
-    }
+/* Last link + Pancham travel as one unit (no solo wrap under writing). */
+.main-nav__item--tail {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: var(--nav-gap-x);
+}
+
+.main-nav__item--tail .nav-subscribe::before,
+.main-nav__item--tail .nav-subscribe::after {
+    content: none;
+}
+
+.main-nav__item--tail .nav-subscribe {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Match Misdreavus slot so centers line up on a shared row. */
+    height: 108px;
+    line-height: 0;
+    text-decoration: none !important;
+}
+
+.main-nav__item--tail .nav-subscribe-pet {
+    display: block;
+    width: var(--nav-sub-w);
+    height: var(--nav-sub-w);
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+.main-nav__item--tail .nav-subscribe:hover .nav-subscribe-pet,
+.main-nav__item--tail .nav-subscribe:focus-visible .nav-subscribe-pet {
+    filter: brightness(1.12);
 }
 
 @media (max-width: 44.99rem) {
     .main-nav {
-        gap: 0.55rem 0.85rem;
+        --nav-logo-w: 36px;
+        /* Slightly smaller on narrow; never above the 50px max. */
+        --nav-sub-w: 40px;
+        gap: 0.55rem var(--nav-gap-x);
     }
 
-    .main-nav__list {
-        column-gap: 1.1rem;
-        row-gap: 0.4rem;
+    .main-nav__item--tail .nav-subscribe {
+        height: 75px;
     }
 }

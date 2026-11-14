@@ -22,26 +22,30 @@
   </div>
   {{- $currentPage := . -}}
   {{- $subTip := partial "tip-text.html" (dict "key" "subscribe" "fallback" "subscribe") -}}
-  <div class="main-nav__rows">
-    <ul class="main-nav__list main-nav__list--row1">
-      {{- range .Site.Menus.main -}}
-        {{- $row := .Params.row | default 1 -}}
-        {{- if eq (int $row) 1 -}}
-      <li class="main-nav__item"><a class="nav-main-item{{ if or ($currentPage.IsMenuCurrent "main" .) ($currentPage.HasMenuCurrent "main" .) (eq ($currentPage.RelPermalink) (.URL | relLangURL)) }} active{{ end }}" href="{{ .URL | relLangURL }}" title="{{ .Title }}">{{ .Name }}</a></li>
-        {{- end -}}
+  {{- $mainMenu := .Site.Menus.main -}}
+  {{- $lastIdx := sub (len $mainMenu) 1 -}}
+  <ul class="main-nav__list">
+    {{- range $i, $item := $mainMenu -}}
+      {{- $active := or ($currentPage.IsMenuCurrent "main" $item) ($currentPage.HasMenuCurrent "main" $item) (eq ($currentPage.RelPermalink) ($item.URL | relLangURL)) -}}
+      {{- if eq $i $lastIdx -}}
+    <li class="main-nav__item main-nav__item--tail">
+      <a class="nav-main-item{{ if $active }} active{{ end }}" href="{{ $item.URL | relLangURL }}" title="{{ $item.Title }}">{{ $item.Name }}</a>
+      {{- /* Pancham glued to last link so he never wraps alone under writing. */ -}}
+      <a class="nav-subscribe site-tip" href="#subscribe" data-subscribe-open aria-label="{{ $subTip }}" data-tip="{{ $subTip }}">
+        <img
+          class="nav-subscribe-pet"
+          src="{{ "images/sprites/pancham-shiny.gif" | relURL }}"
+          width="50"
+          height="50"
+          alt=""
+          decoding="async"
+          draggable="false"
+        >
+      </a>
+    </li>
+      {{- else -}}
+    <li class="main-nav__item"><a class="nav-main-item{{ if $active }} active{{ end }}" href="{{ $item.URL | relLangURL }}" title="{{ $item.Title }}">{{ $item.Name }}</a></li>
       {{- end -}}
-    </ul>
-    <ul class="main-nav__list main-nav__list--row2">
-      {{- range .Site.Menus.main -}}
-        {{- $row := .Params.row | default 1 -}}
-        {{- if eq (int $row) 2 -}}
-      <li class="main-nav__item"><a class="nav-main-item{{ if or ($currentPage.IsMenuCurrent "main" .) ($currentPage.HasMenuCurrent "main" .) (eq ($currentPage.RelPermalink) (.URL | relLangURL)) }} active{{ end }}" href="{{ .URL | relLangURL }}" title="{{ .Title }}">{{ .Name }}</a></li>
-        {{- end -}}
-      {{- end -}}
-      <li class="main-nav__item main-nav__item--subscribe">
-        {{- /* Same <a class="nav-main-item"> as the other rows — opens the dialog via data-subscribe-open. */ -}}
-        <a class="nav-main-item site-tip" href="#subscribe" data-subscribe-open aria-label="{{ $subTip }}" data-tip="{{ $subTip }}">subscribe</a>
-      </li>
-    </ul>
-  </div>
+    {{- end -}}
+  </ul>
 </nav>

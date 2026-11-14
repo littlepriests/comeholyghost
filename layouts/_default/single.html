@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="{{ . | relURL }}">
     {{- end }}
     {{- end }}
+    {{- if .Params.sword_figure -}}
+    {{- partial "sword-figure.html" . -}}
+    {{- end -}}
     <header class="content__header">
         <h1>{{ .Title | markdownify }}</h1>
     </header>
@@ -43,20 +46,4 @@
 	    On this page:
 	    {{ .TableOfContents }}
     {{ end }}
-
-    {{- /* Read-me (and any page with email_cta): mailto under the Winamp column. */ -}}
-    {{- if and .Params.email_cta .Site.Params.about.email }}
-    <p class="aside-email">
-        <a
-            class="aside-email__link site-tip"
-            href="mailto:{{ .Site.Params.about.email }}"
-            aria-label="{{ partial "tip-text.html" (dict "key" "email" "fallback" "email me") }}"
-            data-tip="{{ partial "tip-text.html" (dict "key" "email" "fallback" "email me") }}">
-            <span class="aside-email__icon" aria-hidden="true">
-                {{ partial "icon.html" (dict "name" "envelope") }}
-                <span class="aside-email__heart">♥</span>
-            </span>
-        </a>
-    </p>
-    {{- end }}
 {{ end }}

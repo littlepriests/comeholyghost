@@ -76,6 +76,7 @@
 <link rel="stylesheet" href="{{ "css/stars.css" | relURL }}?v=10">
 <link rel="stylesheet" href="{{ "css/sprites.css" | relURL }}?v=13">
 <link rel="stylesheet" href="{{ "css/backdrop.css" | relURL }}?v=22">
+<link rel="stylesheet" href="{{ "css/sword.css" | relURL }}?v=2">
 {{/* Custom cursor image, when static/ holds the file named in params.cursor.image. */}}
 {{ $cursor := .Site.Params.cursor.image }}
 {{ if and $cursor (os.FileExists (printf "static/%s" (strings.TrimPrefix "/" $cursor))) }}

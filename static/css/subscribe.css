@@ -1,34 +1,3 @@
-/* Nav: two explicit rows (primary sections / meta + subscribe). */
-.main-nav__rows {
-    display: flex;
-    flex-direction: column;
-    gap: 0.45rem;
-    min-width: 0;
-    flex: 1 1 auto;
-}
-
-.main-nav__list {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.45rem 2rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    min-width: 0;
-}
-
-.main-nav__list--row1,
-.main-nav__list--row2 {
-    grid-template-columns: unset;
-}
-
-@media (max-width: 44.99rem) {
-    .main-nav__list {
-        gap: 0.35rem 1.1rem;
-    }
-}
-
 /* Yeti subscribe badge — move with [params.subscribe] yetiIconPos. */
 .page-footer__skifree {
     appearance: none;

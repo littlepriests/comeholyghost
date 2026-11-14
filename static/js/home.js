@@ -7,9 +7,21 @@
 
     function fitHomeDock() {
         if (!dockFit || !dock || !document.body.classList.contains("home")) return;
-        // scrollWidth ignores transform, so measure without resetting scale.
+        // Dock is width:100% grid — measure the four columns' content, not scrollWidth.
         var avail = dockFit.clientWidth;
-        var need = dock.scrollWidth;
+        var cells = [
+            dock.querySelector(".home-dock__pet--left"),
+            dock.querySelector(".ticker"),
+            dock.querySelector(".home-player-slot"),
+            dock.querySelector(".home-dock__pet--right")
+        ].filter(function (el) {
+            return el && el.offsetWidth > 0;
+        });
+        var gap = parseFloat(getComputedStyle(dock).columnGap) || 0;
+        var need = gap * Math.max(0, cells.length - 1);
+        cells.forEach(function (el) {
+            if (el) need += el.offsetWidth;
+        });
         var next = 1;
         if (avail > 0 && need > avail) {
             next = Math.max(0.55, (avail / need) * 0.98);
@@ -63,35 +75,14 @@
     revealHomeBanner();
     window.revealHomeBanner = revealHomeBanner;
 
-    // Sit the moon beside the content body, midway between Misdreavus and the ASCII angel.
-    var moonCol = document.querySelector(".home-moon-col");
-    var moon = document.querySelector(".ascii-moon");
     var page = document.querySelector(".home-page");
     var root = document.querySelector(".home-root");
-
-    function placeMoon() {
-        if (!moonCol || !moon || !page) return;
-        var misdreavus =
-            document.querySelector(".page__logo--sprite .sprite-anim") ||
-            document.querySelector(".home-header .sprite-anim") ||
-            document.querySelector(".home-header");
-        var angel = document.querySelector(".ascii-angel") || document.querySelector(".home-main");
-        if (!misdreavus || !angel) return;
-
-        var pageTop = page.getBoundingClientRect().top + window.scrollY;
-        var a = misdreavus.getBoundingClientRect();
-        var b = angel.getBoundingClientRect();
-        var midY = (a.top + a.bottom) / 2 + ((b.top + b.bottom) / 2 - (a.top + a.bottom) / 2) / 2;
-        midY += window.scrollY;
-        var moonH = moon.offsetHeight || 80;
-        var top = Math.max(0, midY - pageTop - moonH / 2);
-        moonCol.style.paddingTop = top.toFixed(1) + "px";
-    }
 
     function placeClouds() {
         if (!root || !page) return;
         var angel = document.querySelector(".ascii-angel");
         var footer = document.querySelector(".home-footer");
+        var cloudsWrap = document.querySelector(".home-clouds");
         if (!angel || !footer) return;
 
         var rootBox = root.getBoundingClientRect();
@@ -217,7 +208,6 @@
         // On narrow screens .home-clouds is display:none — clear inline coords so CSS can place it.
         var cta = angel.querySelector(".ascii-angel__cta");
         if (cta && nestEl) {
-            var cloudsWrap = document.querySelector(".home-clouds");
             var wrapCs = cloudsWrap ? window.getComputedStyle(cloudsWrap) : null;
             var nestCs = window.getComputedStyle(nestEl);
             var nr = nestEl.getBoundingClientRect();
@@ -244,6 +234,8 @@
                 cta.style.minWidth = Math.max(16, nr.width * 0.85).toFixed(1) + "px";
             }
         }
+
+        if (cloudsWrap) cloudsWrap.classList.add("is-placed");
     }
 
     // Guestbook copy falls into the nest cloud on angel hover, then fades out on leave.
@@ -318,7 +310,6 @@
     }
 
     function placeDecor() {
-        placeMoon();
         placeClouds();
         clearStarsBehindClouds();
     }
@@ -369,10 +360,15 @@
     var boomTimer = 0;
 
     function paintCount() {
-        digits.textContent = String(count || 0).padStart(6, "0");
+        // Min 2 digits (04); grow only as the real tally needs more places.
+        var n = Math.max(0, Math.floor(Number(count) || 0));
+        var raw = String(n);
+        digits.textContent = raw.padStart(Math.max(2, raw.length), "0");
         try {
-            localStorage.setItem(countKey, String(count || 0));
+            localStorage.setItem(countKey, String(n));
         } catch (error) {}
+        // Refit dock if digit width changed (fitHomeDock lives in the home IIFE).
+        window.dispatchEvent(new Event("resize"));
     }
 
     function applyCount(next, withFx) {
