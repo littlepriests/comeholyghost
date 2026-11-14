@@ -53,14 +53,14 @@
 <meta property="og:title" content="{{ with .Title }}{{ . }} &ndash; {{end}}{{ .Site.Title }}" />
 <meta property="og:url" content="{{ .Page.Permalink }}" />
 {{ if isset .Params "description" }}
-  <meta property="og:description" content="{{ with .Params.description }}{{ . }} &ndash; {{end}}"/> 
+  <meta property="og:description" content="{{ .Params.description }}"/> 
 {{ else }}
   {{ with .Site.Params.about }}
     <meta property="og:description" content="{{ .description }}"/> 
   {{ end }}
 {{ end }}
 {{ with .Site.Language.Locale }}<meta property="og:locale" content="{{ . }}" />{{ end }}
-{{ with .Site.Params.about }}<meta property="og:image" content="{{ with .logo_image }}{{ . | absURL }}{{ end }}" />{{ end }}
+{{ with .Site.Params.about.logo_image }}<meta property="og:image" content="{{ . | absURL }}" />{{ end }}
 {{/* Always-on chrome. retro.css is home-only. buttons.css loads with button markup. */}}
 <link rel="stylesheet" href="{{ "css/player.css" | relURL }}?v=83">
 <link rel="stylesheet" href="{{ "css/reading.css" | relURL }}?v=24">
