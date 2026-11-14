@@ -239,7 +239,7 @@ body.section-blog.kind-page .page-footer__yeti-badge--word {
     outline-offset: 1px;
 }
 
-.subscribe-dialog__hp {
+.site-hp {
     position: absolute;
     left: -10000px;
     width: 1px;
@@ -333,14 +333,6 @@ body.section-blog.kind-page .page-footer__yeti-badge--word {
     border: 1px solid color-mix(in srgb, var(--fg, #eee) 18%, transparent);
     border-radius: 0.15rem;
     padding: 0.45rem 0.55rem;
-}
-
-.unsubscribe-page__hp {
-    position: absolute;
-    left: -9999px;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
 }
 
 .unsubscribe-page__error,
