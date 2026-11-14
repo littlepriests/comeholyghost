@@ -19,6 +19,7 @@
 /* Yeti's own margin would stack on the shared footer padding. */
 .site-footer--page .page-footer__skifree {
     margin: 0;
+    align-self: flex-start;
 }
 
 .site-footer p {
@@ -40,9 +41,9 @@
 }
 
 /*
-  Phone, every page: one row of lead (counter or yeti), player, and ↑.
-  player.js gives the lead a --footer-lead-w slot, puts --footer-row-gap
-  between all three, and centers the group. Same band height everywhere.
+  Phone, every page: once the player parks, one row of lead (counter or yeti),
+  player, and ↑. player.js gives the lead a --footer-lead-w slot, puts
+  --footer-row-gap between all three, and centers the group. Same band height everywhere.
 */
 @media (max-width: 44.99rem) {
     .site-footer {
@@ -61,6 +62,7 @@
     /* Native size (32×43) so the yeti weighs about the same as the counter. */
     .site-footer .page-footer__skifree {
         min-height: 0;
+        align-self: flex-start;
     }
 
     .site-footer .page-footer__yeti-wrap .sprite-anim {

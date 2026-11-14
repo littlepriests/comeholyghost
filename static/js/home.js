@@ -17,7 +17,7 @@
         var sango = dock.querySelector(".home-dock__pet--left");
         var kagura = dock.querySelector(".home-dock__pet--right");
         var column = document.querySelector(".home-main");
-        var player = document.querySelector("#site-player");
+        var player = document.querySelector("[data-player-bar]");
         if (!ticker || !sango || !kagura || !column || !player) return;
         if (!window.matchMedia("(min-width: 45rem)").matches) {
             ticker.style.removeProperty("padding-left");
@@ -818,7 +818,9 @@
                 window.setTimeout(triggerOnce, 1000);
             });
         },
-        { threshold: 0.55, rootMargin: "0px 0px -8% 0px" }
+        // No bottom rootMargin: the ticker sits on the page's last line, so any
+        // inset can keep it from ever reaching the threshold at full scroll.
+        { threshold: 0.55 }
     );
     observer.observe(ticker);
 })();

@@ -35,4 +35,12 @@
 
 	/* Logo */
 	--logo: var(--base0B);
+
+	/* Homepage counter, player buttons, and back-to-top. */
+	--chip-bg: #111;
+	--chip-fg: var(--highlight);
+	--chip-border: color-mix(in srgb, var(--muted) 45%, transparent);
+	--chip-border-hot: color-mix(in srgb, var(--highlight) 55%, transparent);
+	--chip-glow: 0 0 12px color-mix(in srgb, var(--highlight) 35%, transparent);
+	--chip-font: var(--font-site, "Fira Mono", ui-monospace, monospace);
 }

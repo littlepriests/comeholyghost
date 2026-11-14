@@ -32,10 +32,7 @@
 
 /* Cleared when a cloud sits over this star (home.js). */
 .home-stars__star.is-cloud-void,
-.home-stars__ascii-star.is-cloud-void,
-/* Cleared behind article bodies on inner pages (stars.js). */
-.home-stars__star.is-reading-void,
-.home-stars__ascii-star.is-reading-void {
+.home-stars__ascii-star.is-cloud-void {
     visibility: hidden !important;
     animation: none !important;
     opacity: 0 !important;
@@ -43,7 +40,8 @@
 
 /*
   Inner pages: punch a hole in the starfield over the reading column so
-  soft glows cannot sit in letter gaps. Vars set by stars.js from .page__body.
+  soft glows cannot sit in letter gaps. Vars set by stars.js from .page__body
+  on scroll and resize. The homepage has no hole.
 */
 .home-stars.is-reading-masked {
     -webkit-mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
