@@ -25,7 +25,7 @@
     {{- partial "head.html" . -}}
     {{ $home := resources.Get "css/home.css" | minify | fingerprint }}
     <link rel="stylesheet" href="{{ $home.RelPermalink }}" integrity="{{ $home.Data.Integrity }}">
-    <link rel="stylesheet" href="{{ "css/retro.css" | relURL }}?v=14">
+    <link rel="stylesheet" href="{{ "css/retro.css" | relURL }}?v=15">
     <link rel="preload" as="image" href="{{ $bannerSrc }}" fetchpriority="high">
     {{- with .Site.Params.home.titleFontUrl }}
     <link rel="preload" href="{{ "fonts/DotMatrixNarrow.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>

@@ -305,22 +305,6 @@ body.home pre.ascii-moon::-webkit-scrollbar {
 }
 
 
-.home-banner__empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.25rem;
-    min-height: 8rem;
-    padding: 1.5rem;
-    text-align: center;
-    color: var(--muted);
-}
-
-.home-banner__empty p {
-    margin: 0;
-}
-
 .home-header {
     position: relative;
     margin-top: 0.15rem;

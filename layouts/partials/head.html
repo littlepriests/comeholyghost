@@ -19,13 +19,6 @@
 <script>
   window.__SITE_CONTEXT__ = {{ $ctx | jsonify }};
   window.__SITE_SKIP_METERED_API__ = {{ if or (eq $ctx "deploy-preview") (eq $ctx "branch-deploy") }}true{{ else }}false{{ end }};
-  (function () {
-    function ready() { document.documentElement.classList.add("fonts-ready"); }
-    ready();
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.catch(function () {});
-    }
-  })();
 </script>
 <script src="{{ "js/site-context.js" | relURL }}?v=1"></script>
 <!-- site base css (forked from risotto) -->
