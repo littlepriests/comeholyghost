@@ -1,27 +1,11 @@
+import { EMAIL_RE, cleanEmail, json, preflight } from "../lib/http.mjs";
 import { isPreviewDeploy } from "../lib/preview-guard.mjs";
 import {
     errorMessage,
     resendConfig,
     unsubscribeContact
 } from "../lib/resend.mjs";
-
-const MAX_EMAIL = 200;
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function json(status, body) {
-    return Response.json(body, {
-        status,
-        headers: { "Cache-Control": "no-store" }
-    });
-}
-
-function cleanEmail(value) {
-    return String(value || "")
-        .replace(/[\u0000-\u001F]/g, "")
-        .trim()
-        .slice(0, MAX_EMAIL)
-        .toLowerCase();
-}
+import { DEFAULT_ORIGIN } from "../lib/site.mjs";
 
 function emailFromRequest(request, payload) {
     const url = new URL(request.url);
@@ -32,17 +16,14 @@ function emailFromRequest(request, payload) {
 
 export default async (request) => {
     if (request.method === "OPTIONS") {
-        return new Response(null, {
-            status: 204,
-            headers: { Allow: "GET, POST, OPTIONS" }
-        });
+        return preflight("GET, POST, OPTIONS");
     }
 
     if (request.method === "GET") {
         // Human clicks should land on the Hugo page; API GET is for probes.
         const url = new URL(request.url);
         const email = cleanEmail(url.searchParams.get("email") || "");
-        const origin = (process.env.URL || "https://cornfieldjournal.com").replace(/\/$/, "");
+        const origin = (process.env.URL || DEFAULT_ORIGIN).replace(/\/$/, "");
         const dest = email
             ? `${origin}/unsubscribe/?email=${encodeURIComponent(email)}`
             : `${origin}/unsubscribe/`;

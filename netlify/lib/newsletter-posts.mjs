@@ -2,6 +2,7 @@ import { readdir, readFile, access } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { publishedImageUrl } from "./email-templates.mjs";
+import { DEFAULT_ORIGIN } from "./site.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const BLOG_DIR = path.join(ROOT, "content", "blog");
@@ -54,7 +55,7 @@ async function fileExists(file) {
 }
 
 export async function listBlogPosts(origin) {
-    const site = String(origin || "https://cornfieldjournal.com").replace(/\/$/, "");
+    const site = String(origin || DEFAULT_ORIGIN).replace(/\/$/, "");
     let dirs = [];
     try {
         dirs = await readdir(BLOG_DIR, { withFileTypes: true });

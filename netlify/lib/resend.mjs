@@ -1,3 +1,5 @@
+import { DEFAULT_ORIGIN, siteOrigin } from "./site.mjs";
+
 export async function resendRequest(apiKey, route, payload, method) {
     const response = await fetch(`https://api.resend.com${route}`, {
         method: method || "POST",
@@ -21,10 +23,7 @@ export function resendConfig() {
         apiKey: process.env.RESEND_API_KEY || "",
         from: process.env.RESEND_FROM || "",
         segmentId: process.env.RESEND_SEGMENT_ID || "",
-        siteOrigin: (process.env.URL || process.env.DEPLOY_PRIME_URL || "https://cornfieldjournal.com").replace(
-            /\/$/,
-            ""
-        )
+        siteOrigin: siteOrigin()
     };
 }
 
@@ -56,7 +55,7 @@ export async function unsubscribeContact(cfg, email) {
 }
 
 export async function sendWelcomeEmail(cfg, email, html) {
-    const origin = (cfg.siteOrigin || "https://cornfieldjournal.com").replace(/\/$/, "");
+    const origin = (cfg.siteOrigin || DEFAULT_ORIGIN).replace(/\/$/, "");
     const unsubApi = `${origin}/api/unsubscribe?email=${encodeURIComponent(email)}`;
     return resendRequest(cfg.apiKey, "/emails", {
         from: cfg.from,

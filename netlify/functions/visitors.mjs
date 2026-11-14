@@ -1,17 +1,9 @@
 import { getStore } from "@netlify/blobs";
+import { json, preflight } from "../lib/http.mjs";
 import { isPreviewDeploy } from "../lib/preview-guard.mjs";
 
 const STORE_NAME = "visitors";
 const COUNT_KEY = "count";
-
-function json(status, body) {
-    return Response.json(body, {
-        status,
-        headers: {
-            "Cache-Control": "no-store"
-        }
-    });
-}
 
 async function readCount(store) {
     const value = await store.get(COUNT_KEY, { type: "json" });
@@ -26,12 +18,7 @@ async function readCount(store) {
 
 export default async (request) => {
     if (request.method === "OPTIONS") {
-        return new Response(null, {
-            status: 204,
-            headers: {
-                Allow: "GET, POST, OPTIONS"
-            }
-        });
+        return preflight("GET, POST, OPTIONS");
     }
 
     // Deploy preview / branch: no Blobs reads/writes (production counter stays clean).

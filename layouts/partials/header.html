@@ -1,12 +1,7 @@
 <nav class="page__nav main-nav">
   {{ $logoSprite := false }}
   {{ with .Site.Params.home.logoSprite }}
-    {{ $want := . }}
-    {{ range $.Site.Params.sprites }}
-      {{ if and (not $logoSprite) (eq .id $want) }}
-        {{ $logoSprite = . }}
-      {{ end }}
-    {{ end }}
+    {{ $logoSprite = partial "sprite-by-id.html" . }}
   {{ end }}
   <div class="page__logo-slot{{ with $logoSprite }} page__logo-slot--sprite{{ end }}">
     <h1 class="page__logo{{ with $logoSprite }} page__logo--sprite{{ end }}">

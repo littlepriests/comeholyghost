@@ -105,12 +105,6 @@ jgs   `'-..._____.-`</pre>
     <script src="{{ "js/home.js" | relURL }}?v=61"></script>
     <script src="{{ "js/article-media.js" | relURL }}?v=2"></script>
     </div>
-    {{ partial "stars.html" . }}
-    {{ partial "backdrop.html" . }}
-    {{ partial "player.html" . }}
-    {{ partial "subscribe-dialog.html" . }}
-    {{ partial "cursor-effects.html" . }}
-    <script src="{{ "js/site-tips.js" | relURL }}?v=2"></script>
-    <script src="{{ "js/subscribe.js" | relURL }}?v=4"></script>
+    {{- partial "site-chrome.html" . }}
 </body>
 </html>
