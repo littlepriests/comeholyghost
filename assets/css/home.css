@@ -1,18 +1,10 @@
 /* Starfield CSS lives in static/css/stars.css (sitewide). */
 
-/* Single middle stack. Chrome + prose share --home-content-width so banner /
-   moon / Misdreavus / nav never spill past the h1 content into gutters. */
+/* Shell is .site-shell (assets/css/layout.css). Clouds live outside it in
+   .home-root and may paint into the side gutters. */
 .home-root {
-    /* Wide enough for Misdreavus + 5 nav links on one row; still the prose column. */
-    --home-content-width: 44rem;
-    position: relative;
-    display: block;
-    max-width: calc(var(--home-content-width) + 2.5rem);
-    width: 100%;
-    margin: 0 auto;
-    padding: 1.5rem 0.75rem 3rem;
-    /* Clouds may paint into the side gutters; chrome is clipped on .home-page. */
-    overflow-x: visible;
+    /* Trial: cat + clouds share one scale so the cluster stays in the content column. */
+    --ascii-fit: 0.86;
 }
 
 /* Small clouds from emojicombos.com/cloud-ascii-art (top entry). Placed by home.js.
@@ -40,7 +32,7 @@ body.home pre.ascii-cloud {
     background: transparent !important;
     color: color-mix(in srgb, #e8f4ff 70%, var(--muted)) !important;
     font-family: ui-monospace, "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, monospace;
-    font-size: 0.48rem;
+    font-size: calc(0.48rem * var(--ascii-fit, 1));
     line-height: 1.05 !important;
     letter-spacing: 0;
     white-space: pre;
@@ -57,7 +49,7 @@ body.home pre.ascii-cloud[data-cloud="heart"] {
     z-index: 5;
     opacity: 0.9;
     /* Compact so it fits the strip between # ♡ and the cat halo. */
-    font-size: 0.28rem;
+    font-size: calc(0.28rem * var(--ascii-fit, 1));
     line-height: 1.02 !important;
     background: transparent !important;
 }
@@ -65,26 +57,26 @@ body.home pre.ascii-cloud[data-cloud="heart"] {
 body.home pre.ascii-cloud[data-cloud="gap-a"] {
     z-index: 3;
     opacity: 0.72;
-    font-size: 0.2rem;
+    font-size: calc(0.2rem * var(--ascii-fit, 1));
 }
 
 body.home pre.ascii-cloud[data-cloud="gap-b"] {
     z-index: 2;
     opacity: 0.55;
-    font-size: 0.17rem;
+    font-size: calc(0.17rem * var(--ascii-fit, 1));
 }
 
 /* Right flank stays behind the nest cloud. */
 body.home pre.ascii-cloud[data-cloud="mid"] {
     z-index: 1;
-    font-size: 0.34rem;
+    font-size: calc(0.34rem * var(--ascii-fit, 1));
     opacity: 0.62;
 }
 
 body.home pre.ascii-cloud[data-cloud="below"] {
     z-index: 2;
     opacity: 0.7;
-    font-size: 0.34rem;
+    font-size: calc(0.34rem * var(--ascii-fit, 1));
 }
 
 /* Nest = foreground guestbook cloud; interior stays open to the page background. */
@@ -106,7 +98,7 @@ body.home .ascii-cloud-nest .ascii-cloud[data-cloud="nest"] {
     top: auto !important;
     z-index: 1;
     opacity: 0.92;
-    font-size: 0.42rem;
+    font-size: calc(0.42rem * var(--ascii-fit, 1));
     transform: none;
     background: transparent !important;
 }
@@ -181,34 +173,16 @@ body.home .ascii-angel__cta-art {
     }
 }
 
+/* Homepage pieces carry their own vertical spacing. */
 .home-page {
     position: relative;
     z-index: 1;
-    max-width: 100%;
-    width: 100%;
-    margin: 0;
-    padding: 0 1.25rem;
-    box-sizing: border-box;
-    /* Banner / title / nav / prose stay in-column; clouds live outside this clip. */
+    row-gap: 0;
     overflow-x: clip;
-}
-
-/* Banner, title/moon, nav, prose, and footer share the prose column edges. */
-body.home .home-banner,
-body.home .home-title-row,
-body.home .home-header,
-body.home .home-main,
-body.home .home-footer {
-    width: 100%;
-    max-width: var(--home-content-width);
-    margin-left: auto;
-    margin-right: auto;
-    box-sizing: border-box;
 }
 
 .home-banner {
     position: relative;
-    margin-bottom: 0;
     /* Shared banner display size — reserve space before decode. */
     aspect-ratio: 1200 / 280;
     overflow: hidden;
@@ -247,9 +221,7 @@ body.home .home-footer {
     align-items: center;
     justify-content: space-between;
     gap: clamp(0.35rem, 1.5vw, 1rem);
-    margin: clamp(1.25rem, 3vw, 2.5rem) auto 0;
-    padding: 0;
-    overflow: visible;
+    margin-top: clamp(1.25rem, 3vw, 2.5rem);
 }
 
 /* Homepage-only stable title under the banner.
@@ -332,11 +304,6 @@ body.home pre.ascii-moon::-webkit-scrollbar {
     height: 0 !important;
 }
 
-@media (max-width: 52rem) {
-    .home-root {
-        padding: 1.5rem 0 3rem;
-    }
-}
 
 .home-banner__empty {
     display: flex;
@@ -358,29 +325,6 @@ body.home pre.ascii-moon::-webkit-scrollbar {
     position: relative;
     margin-top: 0.15rem;
     margin-bottom: 0.5rem;
-    overflow: visible;
-    /* Keep Misdreavus + links inside the same column as the banner / h1s. */
-    min-width: 0;
-    container-type: inline-size;
-}
-
-body.home .home-header .main-nav {
-    margin-left: auto;
-    margin-right: auto;
-}
-
-/* One line only: share the banner width between Misdreavus, the links, and
-   the read-me + Pancham pair. Narrow headers keep the wrapping list. */
-@container (min-width: 40rem) {
-    body.home .home-header .main-nav {
-        width: 100%;
-        max-width: 100%;
-        justify-content: space-between;
-    }
-
-    body.home .home-header .main-nav__list {
-        display: contents;
-    }
 }
 
 body.home .page__logo-slot {
@@ -427,7 +371,7 @@ body.home .page__logo-slot .page__logo {
     background: transparent !important;
     color: color-mix(in srgb, #ffe6f2 40%, var(--fg, #d8d8d8)) !important;
     font-family: var(--font-monospace, ui-monospace, "Cascadia Mono", "Fira Mono", monospace);
-    font-size: 0.85rem;
+    font-size: calc(0.85rem * var(--ascii-fit, 1));
     line-height: 1.15;
     white-space: pre;
     text-shadow:
@@ -762,69 +706,59 @@ body.home .page__logo-slot .page__logo {
     }
 }
 
-/* Hairline + top padding come from static/css/site-shell.css. */
+/* Top padding and the bottom line come from static/css/site-shell.css. */
 .home-footer {
     text-align: center;
 }
 
-/* Scales the dock row as one unit so pets + ticker + player never spill.
-   Clip X only — Y stays visible so Kagura’s attack frames aren’t cut at the hairline. */
+/* Scales the dock row as one unit so pets + ticker never spill.
+   Clip X only — Y stays visible so Kagura’s attack frames aren’t cut. */
 .home-footer__dock-fit {
     display: flex;
     justify-content: center;
     align-items: flex-end;
-    width: 100%;
-    max-width: 100%;
     margin-top: 0.75rem;
-    box-sizing: border-box;
     overflow-x: clip;
-    overflow-y: visible;
     height: calc(var(--home-dock-h, 4.5rem) * var(--home-dock-scale, 1));
 }
 
+/* Ticker is the centered core; Sango and Kagura mirror it. */
 .home-dock {
     --home-dock-gap: 1.25rem;
-    --home-dock-right-pad: calc(25px * 2.1);
+    --home-pet-scale: 2.1;
     position: relative;
-    /* Ticker + player are the centered core; Sango and Kagura’s park mirror
-       each other in equal-width pads on either side. */
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: end;
     column-gap: var(--home-dock-gap);
-    margin-top: 0;
     min-height: 4.5rem;
     width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
     transform: scale(var(--home-dock-scale, 1));
     transform-origin: center bottom;
 }
 
-.home-player-slot {
-    width: var(--simple-player-width);
-    height: var(--simple-player-height, 1.75rem);
-    flex: none;
-    display: flex;
-    align-items: flex-end;
+/* Desktop: the dock stays in the content column, beside the player. */
+@media (min-width: 45rem) {
+    .home-footer__dock-fit {
+        width: calc(100% - var(--aside-width) - var(--aside-gap));
+    }
 }
 
 /* Park pads: left = Sango, right = Kagura after the slash. */
 .home-dock__pet {
     position: relative;
     flex: none;
-    width: calc(25px * 2.1);
-    height: calc(42px * 2.1);
+    width: calc(25px * var(--home-pet-scale));
+    height: calc(42px * var(--home-pet-scale));
     display: flex;
     align-items: flex-end;
     justify-content: center;
-    overflow: visible;
 }
 
 .home-dock__pet--left {
     grid-column: 1;
     justify-self: end;
-    height: calc(47px * 2.1);
+    height: calc(47px * var(--home-pet-scale));
 }
 
 .home-dock .ticker {
@@ -837,12 +771,8 @@ body.home .page__logo-slot .page__logo {
     display: contents;
 }
 
-.home-dock .home-player-slot {
-    grid-column: 3;
-}
-
 .home-dock__pet--right {
-    grid-column: 4;
+    grid-column: 3;
     justify-self: start;
 }
 
@@ -1150,21 +1080,6 @@ body.home .page__logo-slot .page__logo {
 
 /* —— Mobile homepage (aligns with player simple chrome @ 44.99rem) —— */
 @media (max-width: 44.99rem) {
-    html,
-    body.home {
-        overflow-x: clip;
-    }
-
-    .home-root {
-        padding: 1rem 0 4.5rem;
-    }
-
-    .home-page {
-        padding: 0 0.85rem;
-        max-width: 100%;
-        overflow-x: clip;
-    }
-
     .home-banner img {
         width: 100%;
         height: 100%;
@@ -1208,27 +1123,8 @@ body.home .page__logo-slot .page__logo {
 
     .home-dock {
         --home-dock-gap: 0.75rem;
-        --home-dock-right-pad: calc(25px * 1.55);
+        --home-pet-scale: 1.55;
         min-height: 0;
-        /* Player leaves this row for the fixed bar, so Sango and Kagura mirror the counter. */
-        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    }
-
-    .home-dock .home-player-slot {
-        display: none;
-    }
-
-    .home-dock__pet--right {
-        grid-column: 3;
-    }
-
-    .home-dock__pet {
-        width: var(--home-dock-right-pad);
-        height: calc(42px * 1.55);
-    }
-
-    .home-dock__pet--left {
-        height: calc(47px * 1.55);
     }
 
     .dock-kagura.is-idle .sprite-anim.is-scale-3,
@@ -1249,10 +1145,6 @@ body.home .page__logo-slot .page__logo {
 
     .home-footer {
         padding-bottom: 0.5rem;
-    }
-
-    .home-root {
-        padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
     }
 }
 

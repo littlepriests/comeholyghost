@@ -1,62 +1,69 @@
-/* 1rem = 16px by default */
+/*
+  One shell for every layout (.page, photobook, guestbook, homepage):
+  the 53rem middle column, then the content column plus the aside gutter.
+  Header and footer span the shell; everything else sits in the content
+  column, and .page__aside takes the gutter.
+*/
+:root {
+    --middle-column: min(53rem, calc(100vw - 2.5rem));
+    --aside-width: 275px;
+    --aside-gap: 1.5rem;
+}
 
-.page {
-    max-width: 64rem;
-    margin: 1rem auto;
+.site-shell {
     display: grid;
-    grid-template-areas:
-      "header"
-      "body"
-      "aside"
-      "footer";
-    grid-template-columns: minmax(0, 1fr); /* https://css-tricks.com/preventing-a-grid-blowout/ */
-    grid-row-gap: 2rem;
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 2rem;
+    align-items: start;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: var(--middle-column);
+    margin: 1rem auto;
 }
 
-@media (min-width: 45rem) {
-    .page {
-        grid-template-areas:
-          "header  header"
-          "body    aside"
-          "footer  footer";
-        grid-template-columns: minmax(0, 1fr) 15rem;
-        grid-column-gap: 2rem;
-    }
+.site-shell > * {
+    min-width: 0;
 }
 
-/* Header */
-.page__header {
-    grid-area: header;
-    display: flex;
+.site-shell > :is(header, footer) {
+    grid-column: 1 / -1;
 }
 
-.page__logo {
-    flex-shrink: 0;
-}
-
-.page__nav {
-    flex-grow: 1;
-}
-
-/* Body + aside */
 .page__body {
-    grid-area: body;
-    background-color: var(--off-bg);
-    box-shadow: 0 0 0 1rem var(--off-bg);
     overflow-wrap: break-word;
 }
 
 .page__aside {
-    grid-area: aside;
     color: var(--off-fg);
-    position: sticky;
-    top: 1rem;
-    right: 1rem;
-    overflow-y: auto;
-    max-height: 95vh;
 }
 
-/* Footer */
-.page__footer {
-    grid-area: footer;
+@media (min-width: 45rem) {
+    .site-shell {
+        grid-template-columns: minmax(0, 1fr) var(--aside-width);
+        column-gap: var(--aside-gap);
+    }
+
+    .site-shell > :not(header, footer, .page__aside) {
+        grid-column: 1;
+    }
+
+    .site-shell > :is(.page__body, main) {
+        overflow-x: clip;
+    }
+
+    .page__aside {
+        text-align: center;
+    }
+}
+
+@media (max-width: 44.99rem) {
+    .site-shell {
+        max-width: none;
+        margin: 0.75rem auto;
+        padding: 0 0.85rem calc(var(--simple-player-height, 3rem) + 2.5rem + env(safe-area-inset-bottom, 0px));
+    }
+
+    body:has(#site-player.site-player--closed) .site-shell {
+        padding-bottom: calc(3.25rem + env(safe-area-inset-bottom, 0px));
+    }
 }

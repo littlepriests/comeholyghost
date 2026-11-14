@@ -39,7 +39,6 @@
         <span class="ticker__pop" data-visitor-pop hidden aria-hidden="true">+1</span>
     </section>
     <div class="home-dock__after">
-        <div class="home-player-slot"></div>
         <div class="home-dock__pet home-dock__pet--right" data-dock-pet="right" aria-hidden="true"></div>
         {{- $kaguraTip := partial "tip-text.html" (dict "key" "kagura" "fallback" "") -}}
         <span class="dock-kagura{{ with $kaguraTip }} site-tip{{ end }}" data-visitor-kagura{{ with $kaguraTip }} data-tip="{{ . }}"{{ end }} aria-hidden="true">

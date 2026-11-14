@@ -1,6 +1,5 @@
 /*
   Inner pages share the homepage look: text on the open gradient, no pane.
-  Kill the theme's solid body plate / halo so nothing boxes the prose.
   Site-owned overrides live here (not Risotto core) so ad-hoc fixes stay local.
 */
 
@@ -71,32 +70,6 @@ h6:before {
     #page-root {
         transition: none;
     }
-}
-
-/* fonts-ready is set immediately in head.html (preload FA solid). */
-body:not(.home) .page__body,
-body:not(.home) .guestbook-wrap > main,
-body:not(.home) .gallery-wrap > main {
-    background: transparent !important;
-    background-image: none !important;
-    border: 0 !important;
-    box-shadow: none !important;
-    max-width: none;
-    width: auto;
-    margin: 0;
-    padding: 0;
-}
-
-/*
-  Article date / author / ToC / email CTA sit in .page__aside.
-  Scroll with the page (not sticky) so meta does not chase the viewport.
-*/
-body:not(.home) .page__aside {
-    position: static;
-    top: auto;
-    right: auto;
-    max-height: none;
-    overflow: visible;
 }
 
 /* SkiFree yeti chrome lives in subscribe.css (clickable subscribe + badge). */

@@ -4,7 +4,7 @@
   {{- if and (not $idle) (eq .id "grundo-idle") -}}{{- $idle = . -}}{{- end -}}
   {{- if and (not $kick) (eq .id "grundo-kick") -}}{{- $kick = . -}}{{- end -}}
 {{- end -}}
-<div id="site-player" class="site-player--simple">
+<div id="site-player">
     {{- $reopenTip := partial "tip-text.html" (dict "key" "player_reopen" "fallback" "show player") -}}
     <button type="button" class="player-reopen site-tip" data-player-reopen aria-label="{{ $reopenTip }}" data-tip="{{ $reopenTip }}" hidden>
         <span aria-hidden="true">♡</span>
@@ -107,4 +107,4 @@
         </button>
     </div>
 </div>
-<script src="{{ "js/player.js" | relURL }}?v=67"></script>
+<script src="{{ "js/player.js" | relURL }}?v=76"></script>

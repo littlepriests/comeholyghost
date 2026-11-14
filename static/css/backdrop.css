@@ -50,12 +50,6 @@
     }
 }
 
-/* Homepage: corner art stays fully visible; size against the ~40rem stack
-   so the pictures still show when the 53rem gutter math would collapse them. */
-body.home .site-backdrop img {
-    max-width: min(var(--backdrop-max-w), max(0px, calc((100vw - min(40rem, 100%) - 3rem) / 2)));
-    max-height: min(var(--backdrop-max-h), max(0px, calc((100vh - 16rem) / 2)));
-}
 
 /* Phones: gutter math collapses to 0 — keep small corner art visible. */
 @media (max-width: 44.99rem) {
@@ -78,16 +72,6 @@ body.home .site-backdrop img {
     .site-backdrop[data-anchor="top-right"] {
         top: max(0.35rem, env(safe-area-inset-top));
     }
-}
-
-.page,
-.gallery-wrap,
-.guestbook-wrap {
-    max-width: var(--middle-column);
-}
-
-.home-page {
-    max-width: min(40rem, 100%);
 }
 
 #page-root {
@@ -129,16 +113,6 @@ body {
     html {
         min-height: 100%;
         background-color: var(--grad-charcoal, #121014);
-    }
-
-    .page,
-    .gallery-wrap,
-    .guestbook-wrap,
-    .home-page,
-    .home-root {
-        width: 100%;
-        max-width: 100%;
-        box-sizing: border-box;
     }
 
     .page__body,

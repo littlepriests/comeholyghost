@@ -1,18 +1,52 @@
 (function () {
-    // Scale the footer dock (pets + ticker + player) as one unit to the
+    // Scale the footer dock (pets + ticker) as one unit to the
     // available width so the row never wraps or spills horizontally.
     var dockFit = document.querySelector("[data-home-dock-fit]");
     var dock = document.querySelector("[data-home-dock]");
     var dockScale = 1;
 
+    /* Equal padding on the counter pushes Sango and Kagura apart.
+       Stop at the text column, or halfway from Kagura to the player. */
+    function spaceDockPets() {
+        var ticker = dock.querySelector(".ticker");
+        var sango = dock.querySelector(".home-dock__pet--left");
+        var kagura = dock.querySelector(".home-dock__pet--right");
+        var column = document.querySelector(".home-main");
+        var player = document.querySelector("#site-player");
+        if (!ticker || !sango || !kagura || !column || !player) return;
+        if (!window.matchMedia("(min-width: 45rem)").matches) {
+            ticker.style.removeProperty("padding-left");
+            ticker.style.removeProperty("padding-right");
+            return;
+        }
+        var applied = dock.style.getPropertyValue("--home-dock-scale");
+        dock.style.setProperty("--home-dock-scale", "1");
+        ticker.style.paddingLeft = "0px";
+        ticker.style.paddingRight = "0px";
+        var sr = sango.getBoundingClientRect();
+        var kr = kagura.getBoundingClientRect();
+        var cr = column.getBoundingClientRect();
+        var pr = player.getBoundingClientRect();
+        var sangoRoom = sr.left - cr.left;
+        var kaguraColumn = cr.right - kr.right;
+        var kaguraHalf = (pr.left - kr.right) / 2;
+        var room = Math.min(sangoRoom, kaguraColumn, kaguraHalf);
+        /* Halfway back from the full spread toward the counter. */
+        var pad = Math.max(0, Math.round(room / 2));
+        ticker.style.paddingLeft = pad + "px";
+        ticker.style.paddingRight = pad + "px";
+        if (applied) dock.style.setProperty("--home-dock-scale", applied);
+        else dock.style.removeProperty("--home-dock-scale");
+    }
+
     function fitHomeDock() {
         if (!dockFit || !dock || !document.body.classList.contains("home")) return;
-        // Dock is width:100% grid — measure the four columns' content, not scrollWidth.
+        spaceDockPets();
+        // Dock is width:100% grid — measure the columns' content, not scrollWidth.
         var avail = dockFit.clientWidth;
         var cells = [
             dock.querySelector(".home-dock__pet--left"),
             dock.querySelector(".ticker"),
-            dock.querySelector(".home-player-slot"),
             dock.querySelector(".home-dock__pet--right")
         ].filter(function (el) {
             return el && el.offsetWidth > 0;
@@ -35,7 +69,6 @@
         dock.style.setProperty("--home-dock-scale", token);
         dockFit.style.setProperty("--home-dock-scale", token);
         dockFit.style.setProperty("--home-dock-h", dock.offsetHeight + "px");
-        document.body.classList.toggle("is-home-dock-scaled", next < 0.998);
         window.dispatchEvent(new Event("resize"));
     }
 
