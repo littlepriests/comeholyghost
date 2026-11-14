@@ -18,9 +18,7 @@
             </section>
 
             <section class="page__aside">
-                <div class="aside__about">
-                    {{- partial "about.html" . -}}
-                </div>
+                {{- partial "about.html" . -}}
                 {{- /* No hairline when the about block is empty chrome. */ -}}
                 {{- $about := .Site.Params.about -}}
                 {{- $hasAbout := or $about.title $about.description $about.logo $about.logo_image -}}

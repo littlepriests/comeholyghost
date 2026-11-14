@@ -63,15 +63,6 @@
     font-size: 0.9rem;
 }
 
-.guestbook__hp {
-    position: absolute;
-    left: -10000px;
-    top: auto;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-}
-
 .guestbook__entries {
     list-style: none;
     margin: 0;
