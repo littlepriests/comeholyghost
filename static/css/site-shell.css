@@ -25,6 +25,10 @@
     margin: 0;
 }
 
+.site-footer .copyright:empty {
+    display: none;
+}
+
 /* Desktop: yeti, player, and ↑ (homepage: the dock row) share one bottom line. */
 @media (min-width: 45rem) {
     .site-footer--page {
@@ -35,8 +39,40 @@
     }
 }
 
+/*
+  Phone, every page: one row of lead (counter or yeti), player, and ↑.
+  player.js gives the lead a --footer-lead-w slot, puts --footer-row-gap
+  between all three, and centers the group. Same band height everywhere.
+*/
 @media (max-width: 44.99rem) {
     .site-footer {
+        --footer-row-gap: 1.25rem;
+        --footer-lead-w: 2.25rem;
+        --footer-row-h: 43px;
+        /* Empty pixels in the 32px frame, plus the slack in the lead slot. */
+        --footer-yeti-nudge: 4px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        min-height: calc(var(--footer-pad-top) + var(--footer-row-h) + var(--footer-pad-bottom));
         overflow-wrap: anywhere;
+    }
+
+    /* Native size (32×43) so the yeti weighs about the same as the counter. */
+    .site-footer .page-footer__skifree {
+        min-height: 0;
+    }
+
+    .site-footer .page-footer__yeti-wrap .sprite-anim {
+        transform: none;
+    }
+
+    /* The label goes above him, so it stays out of the gap before the player. */
+    .site-footer .page-footer__yeti-wrap .page-footer__yeti-badge {
+        top: auto;
+        right: auto;
+        bottom: calc(100% + 0.25rem);
+        left: 50%;
+        transform: translateX(-50%);
     }
 }

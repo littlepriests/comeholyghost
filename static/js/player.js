@@ -409,9 +409,19 @@
         syncBackTop();
     }
 
-    /* Desktop: player and ↑ sit on the footer's bottom line (homepage: the dock row). */
+    function cssPx(value) {
+        if (!value) return 0;
+        value = String(value).trim();
+        if (value.slice(-3) === "rem") {
+            return parseFloat(value) * parseFloat(getComputedStyle(document.documentElement).fontSize);
+        }
+        return parseFloat(value) || 0;
+    }
+
+    /* Player and ↑ sit on the footer's bottom line (homepage: the dock row).
+       On a phone the counter or yeti, the player, and the ↑ share one gap, and that group is centered. */
     function placeOnFooter() {
-        var footer = !isMobileViewport() && document.querySelector("[data-site-footer]");
+        var footer = document.querySelector("[data-site-footer]");
         var fromBottom = -1;
         if (footer) {
             var dock = footer.querySelector("[data-home-dock]");
@@ -422,6 +432,48 @@
         }
         if (fromBottom >= 0) player.style.setProperty("--player-bottom", fromBottom + "px");
         else player.style.removeProperty("--player-bottom");
+        placeFooterRow(footer);
+    }
+
+    function placeFooterRow(footer) {
+        var shifter = footer && footer.querySelector("[data-home-dock], .page-footer__skifree");
+        var title = player.querySelector(".player-title");
+        if (!isMobileViewport() || !footer || !shifter) {
+            player.classList.remove("site-player--row");
+            player.style.removeProperty("--player-left");
+            player.style.removeProperty("--back-top-left");
+            if (shifter) shifter.style.marginLeft = "";
+            if (title) title.style.width = "";
+            return;
+        }
+        if (title) title.style.width = "";
+        shifter.style.marginLeft = "0px";
+        var visual = shifter.querySelector("[data-visitor-count]") || shifter.querySelector(".sprite-anim") || shifter;
+        var vis = visual.getBoundingClientRect();
+        var foot = footer.getBoundingClientRect();
+        var leadW = Math.max(vis.width, cssPx(getComputedStyle(footer).getPropertyValue("--footer-lead-w")));
+        var playerW = player.getBoundingClientRect().width;
+        var upW = cssPx(getComputedStyle(player).getPropertyValue("--player-back-top-size")) || 26;
+        var prefer = cssPx(getComputedStyle(footer).getPropertyValue("--footer-row-gap")) || 20;
+        var minGap = 8;
+        var slack = foot.width - leadW - playerW - upW;
+        if (title && slack < minGap * 2) {
+            var titleW = title.getBoundingClientRect().width;
+            title.style.width = Math.max(24, Math.floor(titleW - (minGap * 2 - slack))) + "px";
+            playerW = player.getBoundingClientRect().width;
+            slack = foot.width - leadW - playerW - upW;
+        }
+        var gap = Math.max(0, Math.min(prefer, slack / 2));
+        var group = leadW + playerW + upW + gap * 2;
+        var start = foot.left + (foot.width - group) / 2;
+        var nudge = visual.closest(".page-footer__skifree")
+            ? cssPx(getComputedStyle(footer).getPropertyValue("--footer-yeti-nudge"))
+            : 0;
+        shifter.style.marginLeft = Math.round(start + (leadW - vis.width) / 2 - nudge - vis.left) + "px";
+        var playerLeft = Math.round(start + leadW + gap);
+        player.style.setProperty("--player-left", playerLeft + "px");
+        player.style.setProperty("--back-top-left", Math.round(playerLeft + playerW + gap) + "px");
+        player.classList.add("site-player--row");
     }
 
     function stylesheetPresent(absolute) {

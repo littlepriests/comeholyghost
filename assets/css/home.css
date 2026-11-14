@@ -1116,7 +1116,7 @@ body.home .page__logo-slot .page__logo {
         -webkit-overflow-scrolling: touch;
     }
 
-    /* Pets need the desktop gutter. The counter stays, at the left, clear of the player. */
+    /* Pets need the desktop gutter. The counter stays; player.js centers the row. */
     .home-dock__pet {
         display: none;
     }
@@ -1124,7 +1124,7 @@ body.home .page__logo-slot .page__logo {
     .home-footer__dock-fit {
         justify-content: flex-start;
         height: auto;
-        margin-top: 0.5rem;
+        margin-top: 0;
         padding: 0;
     }
 
@@ -1137,8 +1137,14 @@ body.home .page__logo-slot .page__logo {
     }
 
     .ticker__count {
-        font-size: 1.35rem;
-        letter-spacing: 0.08em;
+        box-sizing: border-box;
+        display: inline-flex;
+        align-items: center;
+        height: 1.65rem;
+        padding: 0 0.45rem;
+        font-size: 0.85rem;
+        line-height: 1;
+        letter-spacing: 0.06em;
     }
 }
 

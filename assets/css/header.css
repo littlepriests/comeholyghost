@@ -96,15 +96,32 @@
     filter: brightness(1.12);
 }
 
+/* Phone: Misdreavus | links | Pancham as bookends; links go 2-up when they fit. */
 @media (max-width: 44.99rem) {
     .main-nav {
         --nav-logo-w: 36px;
         /* Slightly smaller on narrow; never above the 50px max. */
         --nav-sub-w: 40px;
-        gap: 0.55rem var(--nav-gap-x);
+        position: relative;
+        display: grid;
+        grid-template-columns: var(--nav-logo-w) minmax(0, 1fr) var(--nav-sub-w);
+        width: 100%;
+    }
+
+    .main-nav__list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+        justify-items: center;
+        gap: 0.35rem var(--nav-gap-x);
+        width: auto;
+        max-width: none;
     }
 
     .main-nav__item--tail .nav-subscribe {
+        position: absolute;
+        top: 50%;
+        right: 0;
         height: 75px;
+        transform: translateY(-50%);
     }
 }
