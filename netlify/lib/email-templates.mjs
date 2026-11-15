@@ -325,13 +325,13 @@ export async function renderWelcomeEmail(options) {
     const { meta, body } = parseFrontMatter(raw);
     const tpl = await loadEmailTemplate("welcome.html");
     return fillTemplate(tpl, {
-        TITLE: escapeHtml(meta.title || "welcome to the FIELD"),
+        TITLE: escapeHtml(meta.title || "hi there"),
         PREHEADER: escapeHtml(
-            meta.preheader || "you’re on the list — new writing only, leave whenever."
+            meta.preheader || "read what i write."
         ),
-        HEADLINE: escapeHtml(meta.headline || "you made it onto the list"),
+        HEADLINE: escapeHtml(meta.headline || "thanks for joining"),
         FOOTER: escapeHtml(
-            meta.footer || "cornfieldjournal.com · leave whenever you want"
+            meta.footer || "cornfieldjournal.com"
         ),
         UNSUBSCRIBE_URL: unsubscribeUrl,
         BODY: markdownToEmailHtml(body, { origin })
