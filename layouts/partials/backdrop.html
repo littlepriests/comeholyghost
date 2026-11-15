@@ -1,12 +1,9 @@
 {{ $backdrop := .Site.Params.backdrop }}
 {{ if $backdrop }}
-<link rel="stylesheet" href="{{ "css/backdrop.css" | relURL }}?v=19">
 {{ range $name := slice "bottom-right" "bottom-left" "top-right" "top-left" }}
     {{/*
-      Bottom-right is always the footer-anchored .home-sword on the homepage —
-      never a fixed .site-backdrop. Skipping it here also prevents SPA dupes:
-      a non-home full load used to inject the corner art, then navigating home
-      added .home-sword on top until refresh.
+      Bottom-right art is the read-me .sword-figure (not a fixed corner).
+      Skip it here so it never doubles as .site-backdrop on home or SPA nav.
     */}}
     {{ if eq $name "bottom-right" }}
     {{ else }}

@@ -1,6 +1,5 @@
 {{ define "main" }}
-    <link rel="stylesheet" href="{{ "css/blog-index.css" | relURL }}?v=9">
-    <link rel="stylesheet" href="{{ "css/article-media.css" | relURL }}?v=6">
+    {{- partial "css.html" (slice "blog-index" "article-media") }}
     <div class="blog-index">
         <h1 class="blog-index__heading" id="{{ .Title | urlize }}">{{ .Title | markdownify }}</h1>
 

@@ -1,0 +1,36 @@
+# Prose lint for content/ (same folder as `corn edit`). House-style lowercase
+# still trips Vale.Spelling, so this check annotates but does not fail the job.
+name: Vale
+
+on:
+  pull_request:
+  push:
+    branches: [preview, main]
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  vale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Vale
+        # v3 honors fail_on_error / sync; v2.1.1 still failed the job on
+        # Vale.Spelling (house-style lowercase) and rejected the sync input.
+        uses: vale-cli/vale-action@v3
+        with:
+          files: content
+          config: vale.ini
+          sync: true
+          # Only lines touched in the PR (full tree is noisy on existing posts).
+          filter_mode: added
+          reporter: github-pr-check
+          fail_on_error: false
+          # Keep annotations without failing the check conclusion.
+          level: warning
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

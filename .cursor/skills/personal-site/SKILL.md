@@ -48,7 +48,11 @@ those over inventing new patterns.
 ## Working model
 
 1. Edit **only** under this clone (`comeholyghost`).
-2. Day-to-day sync: `git pull personal main` / commit / `git push personal main`.
+2. Ship via **`preview`** (integration) → **`main`** (production). Prefer:
+   `corn branch` → edit → `corn add` → `corn push` → merge the PR into
+   `preview` on GitHub → when ready, `corn deploy` (promotes `preview` →
+   `main` only if checks are green). Do not push straight to `main` for
+   day-to-day work.
 3. Keep work GitHub (`gh`, default `github.com` SSH) as the machine default.
    Pushes here must use `git@github.com-personal:littlepriests/comeholyghost.git`
    (deploy key). Do not force-push `main` unless the user explicitly asks.
@@ -84,7 +88,7 @@ are in play.
 - If a lockfile `resolved` field is not `registry.npmjs.org`, delete the lock
   and regenerate with `npm install --package-lock-only` from this repo.
   Never import a work lockfile.
-- `package.json` currently tracks Netlify Blobs for the guestbook function;
+- `package.json` currently tracks Netlify Blobs for the guestbook and visitor-count functions;
   treat that as personal-site infra, not company tooling.
 
 ## Dev / deploy notes

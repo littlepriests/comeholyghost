@@ -1,7 +1,8 @@
 import fs from "fs";
+import sharp from "sharp";
 import { PNG } from "./node_modules/pngjs/lib/png.js";
 
-const sheet = PNG.sync.read(fs.readFileSync("static/images/sprites/skifree-sheet.png"));
+const sheet = PNG.sync.read(fs.readFileSync("assets-src/sprites/skifree-sheet.png"));
 const { width, height, data } = sheet;
 
 const px = (x, y) => {
@@ -70,7 +71,7 @@ console.log(
   }))
 );
 
-function writeStrip(id, frames, fps, alt) {
+async function writeStrip(id, frames, fps, alt) {
   if (!frames.length) throw new Error("no frames for " + id);
   const cellW = Math.max(...frames.map((f) => f.w));
   const cellH = Math.max(...frames.map((f) => f.h));
@@ -93,7 +94,8 @@ function writeStrip(id, frames, fps, alt) {
     }
   }
   const file = `static/images/sprites/${id}.png`;
-  fs.writeFileSync(file, PNG.sync.write(strip));
+  const packed = await sharp(PNG.sync.write(strip)).png({ compressionLevel: 9, effort: 10 }).toBuffer();
+  fs.writeFileSync(file, packed);
   console.log("wrote", file, cellW, "x", cellH, "*", frames.length);
   return {
     id,
@@ -111,37 +113,13 @@ const original = candidates.filter((r) => r.y1 < 400 && r.h >= 16);
 
 const meta = [];
 
-// Row 0: skier facing / turn poses (narrower cells) then jumps (wider).
-const skiRow = original.find((r) => r.h >= 28 && r.h <= 36 && r.frames.length >= 8);
-if (skiRow) {
-  meta.push(writeStrip("skifree-ski", skiRow.frames.slice(0, 4), 6, "SkiFree skier"));
-}
-
 // Tall yeti row only (stand / walk / grab / eat+blood). Keep native ~32px
 // cells — appending the wider climax row stretched the strip weirdly.
 const yetiRow = original
   .filter((r) => r.h >= 40 && r.frames.length >= 3)
   .sort((a, b) => b.frames.length - a.frames.length)[0];
 if (yetiRow) {
-  meta.push(writeStrip("skifree-yeti", yetiRow.frames, 3, "SkiFree yeti"));
-}
-
-// Wipeout: tumble + star poses from the end of the skier row, else a short mid row.
-if (skiRow && skiRow.frames.length >= 8) {
-  meta.push(writeStrip("skifree-crash", skiRow.frames.slice(5, 8), 4, "SkiFree wipeout"));
-} else {
-  const crashRow = original.find(
-    (r) =>
-      r !== skiRow &&
-      r !== yetiRow &&
-      r.h >= 18 &&
-      r.h <= 36 &&
-      r.frames.length >= 2 &&
-      r.frames.length <= 6
-  );
-  if (crashRow) {
-    meta.push(writeStrip("skifree-crash", crashRow.frames.slice(0, 4), 4, "SkiFree wipeout"));
-  }
+  meta.push(await writeStrip("skifree-yeti", yetiRow.frames, 3, "SkiFree yeti"));
 }
 
 if (!meta.length) {
@@ -150,7 +128,7 @@ if (!meta.length) {
 }
 
 fs.writeFileSync(
-  "static/images/sprites/skifree.json",
+  "assets-src/sprites/meta/skifree.json",
   JSON.stringify(
     {
       note: "SkiFree characters. TSR #26926. Fan-use test. Original block only (above custom divider).",

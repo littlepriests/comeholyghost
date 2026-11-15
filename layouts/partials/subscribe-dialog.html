@@ -1,0 +1,25 @@
+{{- /*
+  Sitewide subscribe dialog (outside #page-root so SPA nav keeps it).
+  Opened by [data-subscribe-open] — nav + SkiFree yeti.
+*/ -}}
+<dialog class="subscribe-dialog" id="subscribe-dialog" data-subscribe-dialog aria-labelledby="subscribe-dialog-title">
+  <form class="subscribe-dialog__form" data-subscribe-form method="dialog">
+    <div class="subscribe-dialog__head">
+      <h2 id="subscribe-dialog-title" class="subscribe-dialog__title">subscribe</h2>
+      <button type="submit" class="subscribe-dialog__close" value="cancel" formnovalidate aria-label="close">×</button>
+    </div>
+    <p class="subscribe-dialog__lede">new writing lands in your inbox. leave whenever — unsub is always easy.</p>
+    <label class="subscribe-dialog__label">email
+      <input type="email" name="email" required autocomplete="email" maxlength="200" placeholder="you@example.com">
+    </label>
+    <label class="site-hp" aria-hidden="true">Leave blank
+      <input type="text" name="website" tabindex="-1" autocomplete="off">
+    </label>
+    <p class="subscribe-dialog__error" data-subscribe-error hidden></p>
+    <p class="subscribe-dialog__ok" data-subscribe-ok hidden></p>
+    <div class="subscribe-dialog__actions">
+      <button type="button" class="subscribe-dialog__submit" data-subscribe-submit>join the list</button>
+      <button type="submit" class="subscribe-dialog__cancel" value="cancel" formnovalidate>not now</button>
+    </div>
+  </form>
+</dialog>

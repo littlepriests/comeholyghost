@@ -1,33 +1,27 @@
 baseURL = "http://localhost:1313/"
-theme = "risotto"
 # Browser tab (+ default <title> elsewhere). Not the homepage banner header.
 title = "꒰ঌᐢ.ˬ.ᐢ໒꒱"
 locale = "en-us"
 DefaultContentLanguage = "en"
 enableInlineShortcodes = true
 
-[privacy.x]
-disable = true
+# Netlify sets CONTEXT (production | deploy-preview | branch-deploy). head.html
+# reads it so preview skips metered APIs. Hugo only allows getenv for listed names.
+[security.funcs]
+  getenv = ['^HUGO_', '^CI$', '^CONTEXT$']
 
 # Automatically add content sections to main menu
 sectionPagesMenu = "main"
 
-[pagination]
-pagerSize = 3
-
 [params]
 noindex = true
 
-[params.theme]
-palette = "base16-dark"
-
-# Site chrome vs blog-article faces. Self-host extra files under static/fonts/ +
-# optional articleFontUrl — do not add Google Fonts / company CDNs.
+# Site chrome vs blog-article faces. Self-host font files under static/fonts/ and
+# declare them in assets/css/fonts.css — do not add Google Fonts / company CDNs.
 # Knobs documented in docs/resources.md (Fonts).
 [params.fonts]
 site = "\"Fira Mono\", ui-monospace, monospace"
 article = "\"Montserrat\", sans-serif"
-articleFontUrl = "css/article-font.css"
 
 [params.about]
 title = ""
@@ -44,6 +38,10 @@ x = 0
 y = 0
 
 # Homepage banner + title. Hugo shuffles bannerDir and preloads one image per render.
+[params.player]
+# Remote playlist.json (HTTP URL with CORS). Empty or unreachable falls back to static/audio/playlist.json.
+playlist = "https://administrator-corporation-syntax-page.trycloudflare.com/playlist.json"
+
 [params.home]
 # Folder under static/ with banner-sized images (png/jpg/webp/gif). Falls back to `banner` if empty.
 bannerDir = "images/banners"
@@ -52,14 +50,14 @@ bannerAlt = "Site banner"
 # Text under the banner only (.home-site-title). Independent of the tab `title` above.
 displayTitle = "welcome to the "
 displayTitleLine2 = "FIELD🌽"
-# Font stack for that element only.
-titleFont = "Impact, sans-serif"
+# Title look — the only place to set it (home.css only has fallbacks for empty keys).
+# Line 1 = displayTitle, line 2 = displayTitleLine2. Fonts must be declared in
+# assets/css/fonts.css (or be system fonts). titleHighlight = background behind both.
+titleFont = "\"Segoe Script\", \"Apple Chancery\", cursive"
+titleColor = "white"
 titleFontLine2 = "\"DotMatrixNarrow\", \"Courier New\", monospace"
-# Loads @font-face from static/css/home-title-font.css (put the font in static/fonts/).
-titleFontUrl = "css/home-title-font.css"
-# Optional title colors (.home-site-title). Empty = CSS defaults in home.css.
-titleColor = "yellow"
-titleHighlight = "shadow-grey"
+titleColorLine2 = "#fdfb76"
+titleHighlight = "transparent"
 # Animated home button in the nav (sprite id from [[params.sprites]]). Empty = title chip.
 logoSprite = "misdreavus"
 
@@ -111,24 +109,6 @@ fps = 4
 alt = "Sango idle"
 
 [[params.sprites]]
-id = "sango-walk"
-src = "images/sprites/sango-walk.png"
-frameWidth = 27
-frameHeight = 42
-frames = 4
-fps = 6
-alt = "Sango walk"
-
-[[params.sprites]]
-id = "sango-hurt"
-src = "images/sprites/sango-hurt.png"
-frameWidth = 30
-frameHeight = 41
-frames = 1
-fps = 1
-alt = "Sango hurt"
-
-[[params.sprites]]
 id = "sango-boomerang"
 src = "images/sprites/sango-boomerang.png"
 frameWidth = 45
@@ -147,15 +127,6 @@ fps = 8
 alt = "Sango attack"
 
 [[params.sprites]]
-id = "skifree-ski"
-src = "images/sprites/skifree-ski.png"
-frameWidth = 23
-frameHeight = 34
-frames = 4
-fps = 6
-alt = "SkiFree skier"
-
-[[params.sprites]]
 id = "skifree-yeti"
 src = "images/sprites/skifree-yeti.png"
 frameWidth = 32
@@ -163,15 +134,6 @@ frameHeight = 43
 frames = 9
 fps = 3
 alt = "SkiFree yeti"
-
-[[params.sprites]]
-id = "skifree-crash"
-src = "images/sprites/skifree-crash.png"
-frameWidth = 31
-frameHeight = 34
-frames = 3
-fps = 4
-alt = "SkiFree wipeout"
 
 [[params.sprites]]
 id = "grundo-idle"
@@ -198,8 +160,8 @@ alt = "Orange Grundo kick"
 [params.backdrop.bottom-right]
 image = "images/backdrop-bottom-right.webp"
 alt = ""
-# Homepage uses layouts/partials/home-sword.html (footer hairline + gutter scale).
-# These offsets only apply if the fixed corner backdrop is shown elsewhere.
+# Used by layouts/partials/sword-figure.html on read-me (not a fixed home corner).
+# x/y/max* only matter if this corner is ever emitted as .site-backdrop.
 x = "0.75rem"
 y = "0rem"
 maxwidth = "16rem"
@@ -246,8 +208,16 @@ maxheight = "24rem"
 # url = "https://github.com/"
 # icon = "fa-brands fa-github"
 
+# Newsletter (Resend). Form opens from nav + SkiFree yeti; API key stays in Netlify env.
+# yetiIcon: word (DotMatrix “subscribe”, scroll-reveal) | plane | bell | rss | at
+# yetiIconPos: bottom | top | left | right
+[params.subscribe]
+yetiIcon = "word"
+yetiIconPos = "right"
+
 [menu]
 
+  # Single wrapping row (Misdreavus + links). Order = weight.
   [[menu.main]]
     identifier = "blog"
     name = "writing"
@@ -262,7 +232,7 @@ maxheight = "24rem"
 
   [[menu.main]]
     identifier = "guestbook"
-    name = "Guestbook"
+    name = "guestbook"
     url = "/guestbook/"
     weight = 10
 
@@ -271,6 +241,14 @@ maxheight = "24rem"
     name = "read-me.txt"
     url = "/read-me/"
     weight = 11
+
+# Article photos live in the post folder. Publish only the resized files
+# templates ask for, not the master next to index.md.
+[[cascade]]
+  [cascade.build]
+    publishResources = false
+  [cascade.target]
+    path = "/blog/**"
 
 [taxonomies]
 category = "categories"

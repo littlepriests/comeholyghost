@@ -104,7 +104,7 @@ Use this when you’re new, or the sheet doesn’t match an existing slicer.
 1. Open [The Spriters Resource](https://www.spriters-resource.com/).
 2. Find the game → character → sheet you want.
 3. Download the PNG. Keep a note of the sheet ID / game name for your own credits.
-4. Optional: copy it into `static/images/sprites/` as e.g. `my-character-sheet.png` so it lives with the project (the raw sheet is **not** required at runtime — only the finished strip is).
+4. Optional: copy it into `assets-src/sprites/` as e.g. `my-character-sheet.png` so it lives with the project (raw sheets are not published — only the finished strip under `static/images/sprites/` is).
 
 ### A2. Open it and zoom in
 
@@ -199,10 +199,11 @@ They are **not** a universal “any TSR download” button. Each script is tuned
 
 | Script | Expects this file | Writes |
 | --- | --- | --- |
-| `scripts/slice-misdreavus.mjs` | `static/images/sprites/misdreavus-sheet.png` | `misdreavus.png` |
-| `scripts/slice-kagura.mjs` | `…/kagura-sheet.png` | `kagura-walk`, `kagura-down`, `kagura-attack` |
-| `scripts/slice-sango.mjs` | Sango sheet (see script) | `sango-*` strips |
-| `scripts/slice-skifree.mjs` | `…/skifree-sheet.png` | `skifree-ski`, `skifree-yeti`, `skifree-crash` |
+| `scripts/slice-misdreavus.mjs` | `assets-src/sprites/misdreavus-sheet.png` | `misdreavus.png` |
+| `scripts/slice-kagura.mjs` | `assets-src/sprites/kagura-sheet.png` | `kagura-walk`, `kagura-down`, `kagura-attack` |
+| `scripts/slice-sango.mjs` | `assets-src/sprites/sango-sheet.png` | `sango-idle`, `sango-boomerang`, `sango-attack` |
+| `scripts/slice-skifree.mjs` | `assets-src/sprites/skifree-sheet.png` | `skifree-yeti` |
+| `scripts/slice-grundo.mjs` | `assets-src/sprites/grundo-sheet.png` | `grundo-idle`, `grundo-kick` |
 
 ### B1. Install the dependency once
 
@@ -226,7 +227,7 @@ Watch the console: it prints row sizes and `wrote static/images/sprites/….png 
 
 ### B4. Copy the numbers into Hugo
 
-The script logs `frameWidth`, height, and frame count (and often writes a small `*.json` meta file). Use those values in `hugo.toml` (existing SkiFree / Sango / Kagura / Misdreavus entries are already filled in).
+The script logs `frameWidth`, height, and frame count (and writes a small `*.json` meta log to `assets-src/sprites/meta/`, which is not published; `hugo.toml` is the source of truth). Use those values in `hugo.toml` (existing SkiFree / Sango / Kagura / Misdreavus entries are already filled in).
 
 ### B5. New character / new sheet?
 
@@ -296,7 +297,7 @@ Open the page. You should see the animation loop.
 
 Unknown `id` → a visible placeholder with the id text (means Hugo config typo or server needs refresh).
 
-Live examples already on the site: `/blog/dummy/` (sprites section).
+Live examples: the site nav, footer, homepage dock, and player use these ids (see `hugo.toml`).
 
 ---
 
@@ -332,7 +333,7 @@ These are already shared for every sprite:
 
 - `layouts/shortcodes/sprite.html`
 - `layouts/partials/sprite.html`
-- `static/css/sprites.css`
+- `assets/css/sprites.css`
 
 Per new animation you only add: **strip PNG** + **`[[params.sprites]]`** + **shortcode call**.
 
@@ -344,4 +345,3 @@ Homepage dock pets (Sango / Kagura) and the Misdreavus nav button are separate w
 
 - Shortcodes + posting workflow: `docs/posting.md`
 - Existing slicers / ids / fan-use notes: `docs/resources.md` → Sprite animations
-- Example post: `content/blog/dummy/index.md` → `/blog/dummy/`

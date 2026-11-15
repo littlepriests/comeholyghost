@@ -10,7 +10,7 @@
   Thumb at top, centered in the column; title / date / summary stay left.
   Index image shows at natural size up to the CSS max box; oversized masters are
   Fit-shrunk in Hugo (no stretch). Click expands via article-media lightbox.
-  Tune caps in this partial + static/css/blog-index.css (see docs/resources.md).
+  Tune caps in this partial + assets/css/blog-index.css (see docs/resources.md).
 */ -}}
 {{- /*
   Index teaser is front matter only — never Hugo's auto .Summary, which
@@ -32,23 +32,25 @@
 {{- /* Preview box: Fit only when wider/taller than these; else keep native. */ -}}
 {{- $previewMaxW := 960 -}}
 {{- $previewMaxH := 720 -}}
+{{- $res := false -}}
+{{- if $imgSrc }}{{ $res = .Resources.GetMatch $imgSrc }}{{ end -}}
 {{- if $imgSrc -}}
-  {{- with .Resources.GetMatch $imgSrc -}}
-    {{- $full = .RelPermalink -}}
+  {{- with $res -}}
     {{- if ge .Width 1 -}}
       {{- /* Fit downscales only; smaller masters keep native pixel size. */ -}}
       {{- $thumb = (.Fit (printf "%dx%d webp q80" $previewMaxW $previewMaxH)).RelPermalink -}}
-      {{- $full = (.Fit "2400x2400 webp q80").RelPermalink -}}
+      {{- $full = (.Fit "1600x1600 webp q70").RelPermalink -}}
     {{- else -}}
       {{- $thumb = .RelPermalink -}}
+      {{- $full = $thumb -}}
     {{- end -}}
   {{- else -}}
     {{- $full = $imgSrc | relURL -}}
     {{- $thumb = $full -}}
   {{- end -}}
 {{- end -}}
-{{- if and (not $caption) $imgSrc -}}
-  {{- with .Resources.GetMatch $imgSrc -}}
+{{- if not $caption -}}
+  {{- with $res -}}
     {{- with .Title }}{{ $caption = . }}{{ end -}}
   {{- end -}}
 {{- end -}}

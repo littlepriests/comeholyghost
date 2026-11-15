@@ -23,52 +23,27 @@
 {{- $bannerSrc := index $bannerPool 0 -}}
 <head>
     {{- partial "head.html" . -}}
-    {{ $home := resources.Get "css/home.css" | minify | fingerprint }}
+    {{ $home := slice (resources.Get "css/home.css") (resources.Get "css/retro.css") | resources.Concat "css/home.css" | minify | fingerprint }}
     <link rel="stylesheet" href="{{ $home.RelPermalink }}" integrity="{{ $home.Data.Integrity }}">
-    <link rel="stylesheet" href="{{ "css/retro.css" | relURL }}?v=13">
     <link rel="preload" as="image" href="{{ $bannerSrc }}" fetchpriority="high">
-    {{- with .Site.Params.home.titleFontUrl }}
     <link rel="preload" href="{{ "fonts/DotMatrixNarrow.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="{{ . | relURL }}">
-    {{- end }}
-    {{- $homeTitle := .Site.Params.home -}}
-    {{- if or $homeTitle.titleFont $homeTitle.titleFontLine2 $homeTitle.titleColor $homeTitle.titleHighlight }}
+    {{- /* Title look comes only from [params.home] title*; home.css holds the fallbacks. */ -}}
+    {{- $t := .Site.Params.home -}}
+    {{- if or $t.titleFont $t.titleFontLine2 $t.titleColor $t.titleColorLine2 $t.titleHighlight }}
     <style>
       body.home .home-site-title {
-        {{- with $homeTitle.titleFont }}font-family: {{ . | safeCSS }};{{ end }}
-        {{- with $homeTitle.titleColor }}--home-title-color: {{ . | safeCSS }};{{ end }}
-        {{- with $homeTitle.titleHighlight }}--home-title-highlight: {{ . | safeCSS }};{{ end }}
+        {{- with $t.titleFont }}--home-title-font: {{ . | safeCSS }};{{ end }}
+        {{- with $t.titleFontLine2 }}--home-title-font-2: {{ . | safeCSS }};{{ end }}
+        {{- with $t.titleColor }}--home-title-color: {{ . | safeCSS }};{{ end }}
+        {{- with $t.titleColorLine2 }}--home-title-color-2: {{ . | safeCSS }};{{ end }}
+        {{- with $t.titleHighlight }}--home-title-highlight: {{ . | safeCSS }};{{ end }}
       }
-      {{- with $homeTitle.titleFontLine2 }}
-      body.home .home-site-title__line--2 {
-        font-family: {{ . | safeCSS }};
-      }
-      {{- end }}
     </style>
     {{- end }}
 </head>
 <body class="home">
     <div id="page-root" class="home-root">
-        <aside class="home-moon-col" aria-hidden="true">
-            {{- /* "man in the moon" by Joan G. Stark (jgs / Spunk). Keep the signature. */ -}}
-            <pre class="ascii-moon">          ______          \'/
-      .-'` .    `'-.    -= * =-
-    .'  '    .---.  '.    /.\
-   /  '    .'     `'. \
-  ;  '    /          \|
- :  '  _ ;            `
-;  :  /(\ \
-|  .       '.
-|  ' /     --'
-|  .   '.__\
-;  :       /
- ;  .     |            ,
-  ;  .    \           /|
-   \  .    '.       .'/
-    '.  '  . `'---'`.'
-jgs   `'-..._____.-`</pre>
-        </aside>
-    <div class="home-page">
+    <div class="home-page site-shell">
         {{- /* Chosen above in <head> (shuffle + preload). Decode-gated reveal is home.js. */ -}}
         <div class="home-banner is-pending">
             <img
@@ -84,12 +59,31 @@ jgs   `'-..._____.-`</pre>
         {{- $line1 := .Site.Params.home.displayTitle | default .Site.Title -}}
         {{- $line2 := .Site.Params.home.displayTitleLine2 | default "" -}}
         {{- if or $line1 $line2 }}
-        <p class="home-site-title">
-            {{- with $line1 }}<span class="home-site-title__line">{{ . }}</span>{{ end -}}
-            {{- with $line2 }}<span class="home-site-title__line home-site-title__line--2">{{ . }}</span>{{ end -}}
-        </p>
+        <div class="home-title-row">
+            {{- /* "man in the moon" by Joan G. Stark (jgs / Spunk). Keep the signature. */ -}}
+            <pre class="ascii-moon" aria-hidden="true">          ______          \'/
+      .-'` .    `'-.    -= * =-
+    .'  '    .---.  '.    /.\
+   /  '    .'     `'. \
+  ;  '    /          \|
+ :  '  _ ;            `
+;  :  /(\ \
+|  .       '.
+|  ' /     --'
+|  .   '.__\
+;  :       /
+ ;  .     |            ,
+  ;  .    \           /|
+   \  .    '.       .'/
+    '.  '  . `'---'`.'
+jgs   `'-..._____.-`</pre>
+            <p class="home-site-title">
+                {{- with $line1 }}<span class="home-site-title__line">{{ . }}</span>{{ end -}}
+                {{- with $line2 }}<span class="home-site-title__line home-site-title__line--2">{{ . }}</span>{{ end -}}
+            </p>
+        </div>
         {{- end }}
-        
+
         <header class="home-header">
             {{- partial "header.html" . -}}
         </header>
@@ -99,105 +93,12 @@ jgs   `'-..._____.-`</pre>
             {{- partial "page-buttons.html" . -}}
         </main>
 
-        <footer class="home-footer">
-            {{- partial "home-sword.html" . -}}
-            <div class="home-footer__dock-fit" data-home-dock-fit>
-            <div class="home-dock" data-home-dock>
-                {{- $kAttack := dict -}}
-                {{- $kWalk := dict -}}
-                {{- $kDown := dict -}}
-                {{- $sIdle := dict -}}
-                {{- $sHurt := dict -}}
-                {{- $sAttack := dict -}}
-                {{- $sBoom := dict -}}
-                {{- range .Site.Params.sprites -}}
-                {{- if eq .id "kagura-attack" }}{{ $kAttack = . }}{{ end -}}
-                {{- if eq .id "kagura-walk" }}{{ $kWalk = . }}{{ end -}}
-                {{- if eq .id "kagura-down" }}{{ $kDown = . }}{{ end -}}
-                {{- if eq .id "sango-idle" }}{{ $sIdle = . }}{{ end -}}
-                {{- if eq .id "sango-hurt" }}{{ $sHurt = . }}{{ end -}}
-                {{- if eq .id "sango-attack" }}{{ $sAttack = . }}{{ end -}}
-                {{- if eq .id "sango-boomerang" }}{{ $sBoom = . }}{{ end -}}
-                {{- end -}}
-                <div class="home-dock__pet home-dock__pet--left" data-dock-pet="left">
-                    {{- $sangoTip := partial "tip-text.html" (dict "key" "sango" "fallback" "sango") -}}
-                    <button type="button" class="dock-sango is-idle site-tip" data-dock-sango aria-label="{{ $sangoTip }}" data-tip="{{ $sangoTip }}">
-                        {{- with $sIdle -}}
-                        <span class="dock-sango__strip dock-sango__strip--idle is-active">
-                            {{- partial "sprite.html" (dict "src" .src "frameWidth" .frameWidth "frameHeight" .frameHeight "frames" .frames "fps" .fps "alt" "" "scale" "3") -}}
-                        </span>
-                        {{- end -}}
-                        {{- with $sHurt -}}
-                        <span class="dock-sango__strip dock-sango__strip--hurt">
-                            {{- partial "sprite.html" (dict "src" .src "frameWidth" .frameWidth "frameHeight" .frameHeight "frames" .frames "fps" .fps "alt" "" "scale" "3") -}}
-                        </span>
-                        {{- end -}}
-                        {{- with $sAttack -}}
-                        <span class="dock-sango__strip dock-sango__strip--attack">
-                            {{- partial "sprite.html" (dict "src" .src "frameWidth" .frameWidth "frameHeight" .frameHeight "frames" .frames "fps" .fps "alt" "" "scale" "3") -}}
-                        </span>
-                        {{- end -}}
-                    </button>
-                </div>
-                {{- with $sBoom -}}
-                <span class="dock-boomerang" data-dock-boomerang aria-hidden="true">
-                    {{- partial "sprite.html" (dict "src" .src "frameWidth" .frameWidth "frameHeight" .frameHeight "frames" .frames "fps" .fps "alt" "" "scale" "2") -}}
-                </span>
-                {{- end -}}
-                <section class="ticker" aria-label="Visitor count" data-visitor-ticker>
-                    <p class="ticker__count" data-visitor-count>000000</p>
-                    <span class="ticker__pop" data-visitor-pop hidden aria-hidden="true">+1</span>
-                </section>
-                <div class="home-player-slot"></div>
-                <div class="home-dock__pet home-dock__pet--right" data-dock-pet="right" aria-hidden="true"></div>
-                {{- $kaguraTip := partial "tip-text.html" (dict "key" "kagura" "fallback" "") -}}
-                <span class="dock-kagura{{ with $kaguraTip }} site-tip{{ end }}" data-visitor-kagura{{ with $kaguraTip }} data-tip="{{ . }}"{{ end }} aria-hidden="true">
-                    {{- with $kAttack -}}
-                    <span class="dock-kagura__strip dock-kagura__strip--attack is-active">
-                        {{- partial "sprite.html" (dict "src" .src "frameWidth" .frameWidth "frameHeight" .frameHeight "frames" .frames "fps" .fps "alt" "" "scale" "3") -}}
-                    </span>
-                    {{- end -}}
-                    {{- with $kWalk -}}
-                    <span class="dock-kagura__strip dock-kagura__strip--walk">
-                        {{- partial "sprite.html" (dict "src" .src "frameWidth" .frameWidth "frameHeight" .frameHeight "frames" .frames "fps" .fps "alt" "" "scale" "3") -}}
-                    </span>
-                    {{- end -}}
-                    {{- with $kDown -}}
-                    <span class="dock-kagura__strip dock-kagura__strip--down">
-                        {{- partial "sprite.html" (dict "src" .src "frameWidth" .frameWidth "frameHeight" .frameHeight "frames" .frames "fps" .fps "alt" "" "scale" "3") -}}
-                    </span>
-                    {{- end -}}
-                </span>
-            </div>
-            </div>
-
-            {{ with .Site.Params.home.footer }}
-            <div class="home-footer__extra">
-                {{ range . }}
-                {{ if eq .kind "image" }}
-                {{ if .url }}
-                <a href="{{ .url | relURL }}"><img src="{{ .src | relURL }}" alt="{{ .alt }}"></a>
-                {{ else }}
-                <img src="{{ .src | relURL }}" alt="{{ .alt }}">
-                {{ end }}
-                {{ else if eq .kind "text" }}
-                <p>{{ .text | markdownify }}</p>
-                {{ else if eq .kind "button" }}
-                {{- $name := "" -}}
-                {{- with .icon }}{{ $name = partial "icon-name.html" . }}{{ end -}}
-                <a class="site-button" href="{{ .url | safeURL }}">{{- with $name }}{{ partial "icon.html" (dict "name" .) }} {{ end -}}{{ .title }}</a>
-                {{ end }}
-                {{ end }}
-            </div>
-            {{ end }}
-        </footer>
+        {{- partial "site-footer.html" (dict "page" . "variant" "home" "class" "home-footer") }}
     </div>
     {{- partial "home-clouds.html" . -}}
-    <script src="{{ "js/home.js" | relURL }}?v=48"></script>
+    <script src="{{ "js/home.js" | relURL }}?v=62"></script>
+    <script src="{{ "js/article-media.js" | relURL }}?v=2"></script>
     </div>
-    {{ partial "stars.html" . }}
-    {{ partial "backdrop.html" . }}
-    {{ partial "player.html" . }}
-    {{ partial "cursor-effects.html" . }}
+    {{- partial "site-chrome.html" . }}
 </body>
 </html>

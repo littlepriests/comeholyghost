@@ -1,10 +1,11 @@
-# Hover flavor for decorative site chrome (sprites, pets, player, skin, UI chips).
+# Hover flavor for decorative site chrome (sprites, pets, player, UI chips).
 # Edit here → corn run / Hugo rebuild. Tips follow the cursor (site-tips.js).
 #
 # Photos/posts: use shortcode params instead, e.g.
 #   {{</* photo src="x.webp" caption="…" tip="fun hover" */>}}
 
-email: email me
+email: ♡ email me ♡
+subscribe: subscribe
 back_to_top: back to top
 logo: home
 
@@ -13,12 +14,11 @@ player_reopen: show player
 player_play: play
 player_stop: hide player
 player_skip: next track
-winamp: little winamp
 
 grundo: orange menace
 sango: throw it
 kagura: wind witch
-skifree: yeti!
+skifree: subscribe (yeti mail)
 
 # Optional: override a social link by its hugo.toml `title` string.
 # social:
