@@ -1,0 +1,32 @@
+{
+  "note": "Sango from InuYasha: Fūun Emaki (WonderSwan). TSR #13363. Fan-use test.",
+  "anims": [
+    {
+      "id": "sango-idle",
+      "src": "images/sprites/sango-idle.png",
+      "frameWidth": 27,
+      "frameHeight": 40,
+      "frames": 3,
+      "fps": 4,
+      "alt": "Sango idle"
+    },
+    {
+      "id": "sango-boomerang",
+      "src": "images/sprites/sango-boomerang.png",
+      "frameWidth": 45,
+      "frameHeight": 40,
+      "frames": 4,
+      "fps": 10,
+      "alt": "Hiraikotsu"
+    },
+    {
+      "id": "sango-attack",
+      "src": "images/sprites/sango-attack.png",
+      "frameWidth": 48,
+      "frameHeight": 47,
+      "frames": 8,
+      "fps": 8,
+      "alt": "Sango attack"
+    }
+  ]
+}

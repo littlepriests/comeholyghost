@@ -1,0 +1,10 @@
+{{- /* Sitewide chrome after #page-root, so same-site nav keeps it. */ -}}
+{{ partial "stars.html" . }}
+{{ partial "backdrop.html" . }}
+{{ partial "player.html" . }}
+{{ partial "subscribe-dialog.html" . }}
+{{- if .IsHome }}
+{{ partial "cursor-effects.html" . }}
+{{- end }}
+<script src="{{ "js/site-tips.js" | relURL }}?v=2"></script>
+<script src="{{ "js/subscribe.js" | relURL }}?v=4"></script>

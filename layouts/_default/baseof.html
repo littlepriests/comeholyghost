@@ -7,7 +7,7 @@
 
     <body class="{{ with .Section }}section-{{ . }} {{ end }}kind-{{ .Kind }}">
         <div id="page-root">
-        <div class="page">
+        <div class="page site-shell">
 
             <header class="page__header">
                 {{- partial "header.html" . -}}
@@ -18,9 +18,7 @@
             </section>
 
             <section class="page__aside">
-                <div class="aside__about">
-                    {{- partial "about.html" . -}}
-                </div>
+                {{- partial "about.html" . -}}
                 {{- /* No hairline when the about block is empty chrome. */ -}}
                 {{- $about := .Site.Params.about -}}
                 {{- $hasAbout := or $about.title $about.description $about.logo $about.logo_image -}}
@@ -34,17 +32,13 @@
                 </div>
             </section>
 
-            <footer class="page__footer">
-                {{- partial "footer.html" . -}}
-            </footer>
+            {{- partial "site-footer.html" (dict "page" . "class" "page__footer") }}
 
         </div>
-        </div>
-        {{ partial "stars.html" . }}
-        {{ partial "backdrop.html" . }}
-        {{ partial "player.html" . }}
-        <script src="{{ "js/site-tips.js" | relURL }}?v=2"></script>
+        {{- /* Inside #page-root so same-site nav (which only swaps that node) loads the lightbox. */ -}}
         <script src="{{ "js/article-media.js" | relURL }}?v=2"></script>
+        </div>
+        {{- partial "site-chrome.html" . }}
     </body>
 
 </html>

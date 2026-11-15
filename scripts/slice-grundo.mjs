@@ -1,8 +1,9 @@
 import fs from "fs";
+import sharp from "sharp";
 import { PNG } from "./node_modules/pngjs/lib/png.js";
 import { fillGaps } from "./fill-grundo-gaps.mjs";
 
-const sheet = PNG.sync.read(fs.readFileSync("static/images/sprites/grundo-sheet.png"));
+const sheet = PNG.sync.read(fs.readFileSync("assets-src/sprites/grundo-sheet.png"));
 const { width, height, data } = sheet;
 
 const px = (x, y) => {
@@ -77,7 +78,7 @@ if (!orange || orangeCount(orange) < 100) {
   process.exit(1);
 }
 
-function writeStrip(id, frames, fps, alt) {
+async function writeStrip(id, frames, fps, alt) {
   if (!frames.length) throw new Error("no frames for " + id);
   const cellW = Math.max(...frames.map((f) => f.w));
   const cellH = Math.max(...frames.map((f) => f.h));
@@ -101,7 +102,8 @@ function writeStrip(id, frames, fps, alt) {
   }
   fillGaps(strip);
   const file = `static/images/sprites/${id}.png`;
-  fs.writeFileSync(file, PNG.sync.write(strip));
+  const packed = await sharp(PNG.sync.write(strip)).png({ compressionLevel: 9, effort: 10 }).toBuffer();
+  fs.writeFileSync(file, packed);
   console.log("wrote", file, cellW, "x", cellH, "*", frames.length);
   return {
     id,
@@ -119,12 +121,12 @@ function writeStrip(id, frames, fps, alt) {
 const idle = orange.frames[0];
 const legUp = orange.frames[1];
 const meta = [
-  writeStrip("grundo-idle", [idle], 1, "Orange Grundo idle"),
-  writeStrip("grundo-kick", [idle, legUp, idle], 8, "Orange Grundo kick"),
+  await writeStrip("grundo-idle", [idle], 1, "Orange Grundo idle"),
+  await writeStrip("grundo-kick", [idle, legUp, idle], 8, "Orange Grundo kick"),
 ];
 
 fs.writeFileSync(
-  "static/images/sprites/grundo.json",
+  "assets-src/sprites/meta/grundo.json",
   JSON.stringify(
     {
       note: "Orange Grundo (Pokémon G/S style). TSR #186604. Credit LonelyMarowak. Fan-use.",

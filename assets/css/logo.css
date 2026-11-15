@@ -1,0 +1,41 @@
+/*
+  Home button in the nav. With [params.home] logoSprite set it is the sprite
+  (styled in sprites.css); without it, the "[site title] $" text chip below.
+*/
+.page__logo {
+    padding: 0;
+    margin: 0;
+    font-weight: inherit;
+    color: var(--bg);
+}
+
+.page__logo:before {
+    content: none;
+}
+
+a.page__logo-inner:link, a.page__logo-inner:visited {
+    color: inherit;
+    text-decoration: inherit;
+}
+
+.page__logo-inner:not(.page__logo-inner--sprite) {
+    display: block;
+    background: var(--logo);
+    opacity: 0.90;
+    padding: 0.25rem;
+}
+
+a.page__logo-inner:not(.page__logo-inner--sprite):hover,
+a.page__logo-inner:not(.page__logo-inner--sprite):active {
+    opacity: 1;
+}
+
+.page__logo-inner:not(.page__logo-inner--sprite):before {
+    content: "[";
+    color: var(--bg);
+}
+
+.page__logo-inner:not(.page__logo-inner--sprite):after {
+    content: "] $";
+    color: var(--bg);
+}

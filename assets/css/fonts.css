@@ -1,0 +1,50 @@
+/*
+  Every self-hosted @font-face lives here (no Google Fonts / company CDNs).
+  Browsers only download a face when an element actually uses it, so declaring
+  them sitewide costs nothing on pages that never render that family.
+
+  Face tokens (--font-site / --font-article) come from hugo.toml [params.fonts]
+  via layouts/partials/head.html.
+*/
+@font-face {
+    font-family: "Fira Mono";
+    src: url("/fonts/fira-mono-400.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Fira Mono";
+    src: url("/fonts/fira-mono-700.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Map heading 500–600 to the bold face without an extra file. */
+@font-face {
+    font-family: "Fira Mono";
+    src: url("/fonts/fira-mono-700.woff2") format("woff2");
+    font-weight: 500 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Homepage title line 2 + subscribe dialog. */
+@font-face {
+    font-family: "DotMatrixNarrow";
+    src: url("/fonts/DotMatrixNarrow.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Blog article body (--font-article). */
+@font-face {
+    font-family: "Montserrat";
+    src: url("/fonts/Montserrat-VariableFont_wght.woff2") format("woff2");
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}

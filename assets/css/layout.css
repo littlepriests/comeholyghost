@@ -1,0 +1,75 @@
+/*
+  One shell for every layout (.page, photobook, guestbook, homepage):
+  the 53rem middle column, then the content column plus the aside gutter.
+  Header and footer span the shell; everything else sits in the content
+  column, and .page__aside takes the gutter. --page-gutter is the only side
+  inset: on a phone it is wide enough to hold the stacked player and ↑.
+*/
+:root {
+    --page-gutter: 1.25rem;
+    --middle-column: min(53rem, calc(100vw - 2 * var(--page-gutter)));
+    --aside-width: 275px;
+    --aside-gap: 1.5rem;
+}
+
+body {
+    margin: 0;
+}
+
+.site-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 2rem;
+    align-items: start;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: var(--middle-column);
+    margin: 1rem auto;
+}
+
+.site-shell > * {
+    min-width: 0;
+}
+
+.site-shell > :is(header, footer) {
+    grid-column: 1 / -1;
+}
+
+.page__body {
+    overflow-wrap: break-word;
+}
+
+.page__aside {
+    color: var(--off-fg);
+}
+
+@media (min-width: 45rem) {
+    .site-shell {
+        grid-template-columns: minmax(0, 1fr) var(--aside-width);
+        column-gap: var(--aside-gap);
+    }
+
+    .site-shell > :not(header, footer, .page__aside) {
+        grid-column: 1;
+    }
+
+    .site-shell > :is(.page__body, main) {
+        overflow-x: clip;
+    }
+
+    .page__aside {
+        text-align: center;
+    }
+}
+
+@media (max-width: 44.99rem) {
+    :root {
+        --page-gutter: 2.5rem;
+    }
+
+    .site-shell {
+        max-width: none;
+        margin: 0.75rem auto;
+        padding: 0 var(--page-gutter) env(safe-area-inset-bottom, 0px);
+    }
+}

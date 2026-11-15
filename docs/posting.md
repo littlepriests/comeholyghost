@@ -6,7 +6,7 @@ Do not put secrets, API tokens, or private paths in `content/` or `static/`. Tho
 
 ## Quick start
 
-1. Create `content/blog/<slug>/` (example: `content/blog/1126/`).
+1. Create `content/blog/<slug>/` (example: `content/blog/crossroad-beauty/`).
 2. Add `index.md` with front matter + markdown body.
 3. Drop images (and optional local video files) in that same folder.
 4. Run `hugo server -D` from the repo root and open `/blog/` then `/blog/<slug>/`.
@@ -43,7 +43,7 @@ content/blog/<slug>/
 
 ### Image size (masters)
 
-Prefer **WebP** (or compressed JPEG) under ~300–500 KB for article masters. Multi‑MB PNGs hurt first paint even when shortcodes serve Hugo-resized WebP thumbs — the original still ships in the repo/deploy. `photo` / `photo-grid` / `figcaption` / writing-index previews already emit processed WebP display sizes from page resources; keep the source file reasonable too.
+Prefer **WebP** (or compressed JPEG) under ~300–500 KB for article masters so the repo stays small. Blog bundles set `publishResources = false`, so the build does not publish that master. `photo` serves a 1400px WebP and a 1600px click-to-expand WebP; `photo-grid` uses an 800px tile and the same 1600px expand; `figcaption` and the writing-index preview use their own resized WebP. Keep the source file reasonable so Hugo has less to resize.
 
 **In-place recompress (keep the repo lean):** drop camera files into the post folder, then:
 
@@ -59,7 +59,9 @@ Default path is `content/blog`. Converts `.jpg`/`.png` → lossy WebP (long edge
 
 Use `--dry-run` first. One-time alias install (PowerShell, any cwd): `powershell -ExecutionPolicy Bypass -File scripts/install-corn.ps1` — or from the repo root run `.\corn compress …`.
 
-Writing-index (`/blog/`) preview: shows near-full size with `object-fit: contain` (no crop/stretch). Oversized masters are Fit-capped in `layouts/partials/blog-entry.html`; on-page max width/height live in `static/css/blog-index.css`. Adjust those when a card looks too big or too small — details in `docs/resources.md`.
+A commit runs that same check on staged images under `content/`. If `corn compress` would still change one, the commit stops. Corn-marked WebPs and already-small unmarked WebPs pass with nothing to do.
+
+Writing-index (`/blog/`) preview: shows near-full size with `object-fit: contain` (no crop/stretch). Oversized masters are Fit-capped in `layouts/partials/blog-entry.html`; on-page max width/height live in `assets/css/blog-index.css`. Adjust those when a card looks too big or too small — details in `docs/resources.md`.
 
 ### Local preview (`corn run`)
 
@@ -119,7 +121,7 @@ TOML between `+++` fences (YAML `---` also works). Fields this site cares about:
 | `index_summary` | no | Extra fallback teaser name |
 | `draft` | no | `true` — not built on Netlify / normal `hugo` (only with `hugo server -D` or `-D` builds). Soft “hide from the site.” |
 | `hide_date` | no | `true` hides the date in the article aside. Keep `date` in front matter for `/blog/` sort order and the writing-index card |
-| `email_cta` | no | Read-me only: shows the mailto envelope in the aside |
+| `sword_figure` | no | Read-me: centered stabbed-girl hero + ♡ fountain before the h1; clicking it opens the mailto from `[params.about] email` |
 | `toc` | no | **Off by default.** Set `toc = true` only if you want “On this page” in the aside. Omit it (or `false`) to hide the ToC |
 | `author` | no | Optional byline in the aside |
 | `[[buttons]]` | no | **Off by default.** Each `[[buttons]]` block adds one labeled link after the body. Delete those blocks to drop the row |
@@ -200,8 +202,7 @@ Delete every `[[buttons]]` block on the page. The inline `{{< button ... >}}` sh
 back_to_top = true
 ```
 
-Renders a quiet ⌃ under the article; click smooth-scrolls to the top of the page. Demo: `content/blog/dummy/index.md`.
-
+Renders a quiet ⌃ under the article; click smooth-scrolls to the top of the page.
 Example resource title:
 
 ```toml
@@ -224,7 +225,7 @@ Raw HTML in markdown works when you need it, but prefer shortcodes for pictures 
 
 ## Shortcodes (site-specific)
 
-All live under `layouts/shortcodes/`. Styles: `static/css/article-media.css`. Lightbox: `static/js/article-media.js`.
+All live under `layouts/shortcodes/`. Styles: `assets/css/article-media.css`. Lightbox: `static/js/article-media.js`.
 
 Self-closing form is fine when there is no inner body: `{{< photo src="x.png" />}}`.
 
@@ -272,7 +273,7 @@ weaving-infinite-gold.png
 
 Tiles use center-crop (`object-fit: cover`) so odd aspect ratios are not stretched. Click any tile → lightbox.
 
-Live walkthrough: `content/blog/dummy/index.md` → `/blog/dummy/`.
+Live example: `content/blog/crossroad-beauty/index.md`.
 
 ### `sprite` — animated pixel strips
 
@@ -287,8 +288,9 @@ Registered ids (today):
 
 - `misdreavus`
 - `kagura-walk`, `kagura-down`, `kagura-attack`
-- `sango-idle`, `sango-walk`, `sango-hurt`, `sango-attack`, `sango-boomerang`
-- `skifree-ski`, `skifree-yeti`, `skifree-crash`
+- `sango-idle`, `sango-attack`, `sango-boomerang`
+- `skifree-yeti`
+- `grundo-idle`, `grundo-kick`
 
 `scale` is optional (`2` or `3`). Unknown ids render a visible missing marker.
 
@@ -373,10 +375,9 @@ Local:
 hugo server -D --disableFastRender --navigateToChanged
 ```
 
-Ship with `git push personal main` (see the personal-site skill). Optional zip / proj-zip is backup only.
+Ship via `corn branch` → `corn add` → `corn push` → merge into `preview` → `corn deploy` (see the personal-site skill). Optional zip / proj-zip is backup only.
 
 ## Related
 
 - Site chrome, player, sprites slicing, Netlify: `docs/resources.md`
-- Live multimedia example post: `content/blog/dummy/index.md` → `/blog/dummy/`
-- Real post using photo + photo-grid: `content/blog/1126/index.md`
+- Real post using photo + photo-grid: `content/blog/crossroad-beauty/index.md`

@@ -1,19 +1,12 @@
 import { getStore } from "@netlify/blobs";
+import { json, preflight, readPayload } from "../lib/http.mjs";
+import { isPreviewDeploy } from "../lib/preview-guard.mjs";
 
 const STORE_NAME = "guestbook";
 const ENTRIES_KEY = "entries";
 const MAX_ENTRIES = 100;
 const MAX_NAME = 80;
 const MAX_MESSAGE = 500;
-
-function json(status, body) {
-    return Response.json(body, {
-        status,
-        headers: {
-            "Cache-Control": "no-store"
-        }
-    });
-}
 
 function cleanText(value, max) {
     return String(value || "")
@@ -30,11 +23,21 @@ async function loadEntries(store) {
 
 export default async (request) => {
     if (request.method === "OPTIONS") {
-        return new Response(null, {
-            status: 204,
-            headers: {
-                Allow: "GET, POST, OPTIONS"
-            }
+        return preflight("GET, POST, OPTIONS");
+    }
+
+    // Deploy preview / branch: no shared Blobs — keep production signatures clean.
+    if (isPreviewDeploy()) {
+        if (request.method === "GET") {
+            return json(200, { entries: [], preview: true });
+        }
+        if (request.method !== "POST") {
+            return json(405, { error: "Method not allowed." });
+        }
+        return json(200, {
+            entries: [],
+            preview: true,
+            error: "Preview deploy — signatures aren’t saved. Try production or local storage."
         });
     }
 
@@ -50,14 +53,8 @@ export default async (request) => {
     }
 
     let payload;
-    const contentType = request.headers.get("content-type") || "";
     try {
-        if (contentType.includes("application/json")) {
-            payload = await request.json();
-        } else {
-            const form = await request.formData();
-            payload = Object.fromEntries(form.entries());
-        }
+        payload = await readPayload(request);
     } catch (err) {
         return json(400, { error: "Could not read that submission." });
     }
