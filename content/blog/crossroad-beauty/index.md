@@ -9,7 +9,7 @@ index_caption = "red for vitality"
 where is the beauty! apparently it's somewhere near
 [the cross at the crossroads](https://crossusa.org/) in illinois.
 
-{{< photo src="text.webp" caption="♡thank you kyle♡"/>}}
+{{< photo src="images/nongrid/text.webp" caption="♡thank you kyle♡"/>}}
 
 tl;dr i saw cool art and listened to cool music.
 
@@ -61,7 +61,7 @@ effortless study; the breadth of detail feels endless.
 
 {{< photo-grid caption="sheesh next to el gran muro for scale (+i'm bummed i didn't get a better picture!) + photo of el gran muro @ peachtree, courtesy of smarthistory" >}}
 amaral-el-gran-muro-sheesh.webp
-peachtree-gran-amaral.webp
+/images/nongrid/peachtree-gran-amaral.webp
 {{< /photo-grid >}}
 
 [_el gran muro_ (1976)](https://smarthistory.org/olga-de-amaral-el-gran-muro/)

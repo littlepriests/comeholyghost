@@ -1,7 +1,8 @@
 import fs from "fs";
+import sharp from "sharp";
 import { PNG } from "./node_modules/pngjs/lib/png.js";
 
-const sheet = PNG.sync.read(fs.readFileSync("static/images/sprites/kagura-sheet.png"));
+const sheet = PNG.sync.read(fs.readFileSync("assets-src/sprites/kagura-sheet.png"));
 const { width, height, data } = sheet;
 
 const px = (x, y) => {
@@ -65,7 +66,8 @@ const rows = candidates.slice(-3);
 const names = ["kagura-walk", "kagura-down", "kagura-attack"];
 const meta = [];
 
-rows.forEach((row, ri) => {
+for (let ri = 0; ri < rows.length; ri++) {
+  const row = rows[ri];
   // Walk row ends with a front idle pose — keep the 6-frame loop only.
   const frames = ri === 0 ? row.frames.slice(0, 6) : row.frames;
   const cellW = Math.max(...frames.map((f) => f.w));
@@ -93,7 +95,8 @@ rows.forEach((row, ri) => {
 
   const name = names[ri] || `kagura-row-${ri + 1}`;
   const file = `static/images/sprites/${name}.png`;
-  fs.writeFileSync(file, PNG.sync.write(strip));
+  const packed = await sharp(PNG.sync.write(strip)).png({ compressionLevel: 9, effort: 10 }).toBuffer();
+  fs.writeFileSync(file, packed);
   const entry = {
     id: name,
     src: `images/sprites/${name}.png`,
@@ -105,7 +108,7 @@ rows.forEach((row, ri) => {
   };
   meta.push(entry);
   console.log("wrote", file, cellW, "x", cellH, "*", frames.length);
-});
+}
 
-fs.writeFileSync("static/images/sprites/kagura.json", JSON.stringify(meta, null, 2));
+fs.writeFileSync("assets-src/sprites/meta/kagura.json", JSON.stringify(meta, null, 2));
 console.log("meta", meta.length, "anims");

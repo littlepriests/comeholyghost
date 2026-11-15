@@ -1,0 +1,11 @@
+{{- /*
+  First [[params.sprites]] entry whose id matches, or false.
+  {{ $s := partial "sprite-by-id.html" "kagura-walk" }}
+*/ -}}
+{{- $match := false -}}
+{{- range site.Params.sprites -}}
+  {{- if and (not $match) (eq .id $) -}}
+    {{- $match = . -}}
+  {{- end -}}
+{{- end -}}
+{{- return $match -}}

@@ -2,5 +2,10 @@
   "private": true,
   "dependencies": {
     "@netlify/blobs": "^9.1.1"
+  },
+  "scripts": {
+    "emails:preview": "node scripts/preview-emails.mjs",
+    "newsletter:dry": "node scripts/newsletter-on-deploy.mjs",
+    "newsletter:send": "node scripts/newsletter-on-deploy.mjs --send"
   }
 }

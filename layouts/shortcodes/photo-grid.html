@@ -9,7 +9,8 @@
   {{< /photo-grid >}}
 
   One image path per line (page resource or static/ path). Optional caption=.
-  Page-resource tiles: Fit 800x webp thumb; lightbox Fit 2400x webp.
+  Page-resource tiles: Fit 800x webp q75 thumb; lightbox Fit 1600x webp q70.
+  The master stays in the repo and is not published.
 */ -}}
 {{- $caption := .Get "caption" | default "" -}}
 {{- $raw := split .Inner "\n" -}}
@@ -31,14 +32,18 @@
       {{- with $.Page.Resources.GetMatch $src -}}
         {{- $img = . -}}
       {{- end -}}
-      {{- $href := cond $img $img.RelPermalink ($src | relURL) -}}
-      {{- $thumb := $href -}}
-      {{- $full := $href -}}
-      {{- if and $img (ge $img.Width 1) -}}
-        {{- $disp := $img.Fit "800x800 webp q75" -}}
-        {{- $large := $img.Fit "2400x2400 webp q80" -}}
-        {{- $thumb = $disp.RelPermalink -}}
-        {{- $full = $large.RelPermalink -}}
+      {{- $thumb := $src | relURL -}}
+      {{- $full := $thumb -}}
+      {{- if $img -}}
+        {{- if ge $img.Width 1 -}}
+          {{- $disp := $img.Fit "800x800 webp q75" -}}
+          {{- $large := $img.Fit "1600x1600 webp q70" -}}
+          {{- $thumb = $disp.RelPermalink -}}
+          {{- $full = $large.RelPermalink -}}
+        {{- else -}}
+          {{- $thumb = $img.RelPermalink -}}
+          {{- $full = $thumb -}}
+        {{- end -}}
       {{- end -}}
       {{- $alt := printf "%s (%d)" ($caption | default "photo" | plainify) (add $i 1) -}}
       <button

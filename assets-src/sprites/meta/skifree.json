@@ -1,0 +1,14 @@
+{
+  "note": "SkiFree characters. TSR #26926. Fan-use test. Original block only (above custom divider).",
+  "anims": [
+    {
+      "id": "skifree-yeti",
+      "src": "images/sprites/skifree-yeti.png",
+      "frameWidth": 32,
+      "frameHeight": 43,
+      "frames": 9,
+      "fps": 3,
+      "alt": "SkiFree yeti"
+    }
+  ]
+}

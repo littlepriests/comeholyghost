@@ -29,7 +29,7 @@ import sharp from "sharp";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const CORN_MARK = "comeholyghost-corn";
 
-const IMAGE_EXT = new Set([
+export const IMAGE_EXT = new Set([
   ".jpg",
   ".jpeg",
   ".png",
@@ -39,11 +39,17 @@ const IMAGE_EXT = new Set([
   ".avif",
 ]);
 
+export const COMPRESS_DEFAULTS = {
+  maxEdge: 2000,
+  maxBytes: 512000,
+  quality: 82,
+};
+
 function parseArgs(argv) {
   const opts = {
-    maxEdge: 2000,
-    quality: 82,
-    maxBytes: 512000,
+    maxEdge: COMPRESS_DEFAULTS.maxEdge,
+    quality: COMPRESS_DEFAULTS.quality,
+    maxBytes: COMPRESS_DEFAULTS.maxBytes,
     force: false,
     onlyNew: false,
     dryRun: false,
@@ -142,27 +148,19 @@ function isRecentlyAdded(file) {
   }
 }
 
-async function compressOne(file, opts) {
+/**
+ * Same decision corn compress uses, without writing.
+ * status "ready" means a run would replace the file; "skip" means leave it.
+ * `output` is set only when status is "ready".
+ */
+export async function planImage(input, file, opts) {
   const ext = path.extname(file).toLowerCase();
-  const dir = path.dirname(file);
-  const stem = path.basename(file, ext);
-  const outPath = path.join(dir, `${stem}.webp`);
-  const before = fs.statSync(file).size;
-
-  // Read into memory first so Windows can overwrite the same path; sharp keeps
-  // a lock on file-path inputs until GC, which makes writeFileSync fail (EBUSY/UNKNOWN).
-  let input;
-  try {
-    input = fs.readFileSync(file);
-  } catch (err) {
-    return { file, status: "error", detail: err.message };
-  }
-
+  const before = input.length;
   let meta;
   try {
     meta = await sharp(input, { failOn: "none" }).metadata();
   } catch (err) {
-    return { file, status: "error", detail: err.message };
+    return { status: "error", detail: err.message };
   }
 
   const w = meta.width || 0;
@@ -175,7 +173,6 @@ async function compressOne(file, opts) {
   // Corn-marked = already through this tool. Skip unless --force (avoids generational loss).
   if (marked && !opts.force) {
     return {
-      file,
       status: "skip",
       detail: `corn-marked (${fmtBytes(before)}, ${w}×${h})`,
     };
@@ -183,7 +180,6 @@ async function compressOne(file, opts) {
 
   if (opts.onlyNew && !isRecentlyAdded(file)) {
     return {
-      file,
       status: "skip",
       detail: `not new to git (${fmtBytes(before)}, ${w}×${h})`,
     };
@@ -193,17 +189,8 @@ async function compressOne(file, opts) {
   // Oversized / over-edge unmarked WebP still get a first compress pass (then marked).
   if (alreadyWebp && !opts.force && before <= opts.maxBytes && withinEdge) {
     return {
-      file,
       status: "skip",
       detail: `already lean (${fmtBytes(before)}, ${w}×${h})`,
-    };
-  }
-
-  if (opts.dryRun) {
-    return {
-      file,
-      status: "dry-run",
-      detail: `would write ${path.basename(outPath)} from ${w}×${h} ${fmtBytes(before)}`,
     };
   }
 
@@ -217,7 +204,7 @@ async function compressOne(file, opts) {
     });
   }
 
-  const buf = await pipeline
+  const output = await pipeline
     .webp({ quality: opts.quality, effort: 4 })
     .withMetadata({
       exif: {
@@ -229,16 +216,59 @@ async function compressOne(file, opts) {
     })
     .toBuffer();
 
-  if (alreadyWebp && buf.length >= before && withinEdge) {
+  if (alreadyWebp && output.length >= before && withinEdge) {
+    return {
+      status: "skip",
+      detail: `output not smaller (${fmtBytes(before)} → ${fmtBytes(output.length)})`,
+    };
+  }
+
+  return {
+    status: "ready",
+    detail: `${w}×${h} ${fmtBytes(before)} → ${fmtBytes(output.length)}`,
+    output,
+    width: w,
+    height: h,
+    before,
+  };
+}
+
+async function compressOne(file, opts) {
+  const ext = path.extname(file).toLowerCase();
+  const dir = path.dirname(file);
+  const stem = path.basename(file, ext);
+  const outPath = path.join(dir, `${stem}.webp`);
+
+  // Read into memory first so Windows can overwrite the same path; sharp keeps
+  // a lock on file-path inputs until GC, which makes writeFileSync fail (EBUSY/UNKNOWN).
+  let input;
+  try {
+    input = fs.readFileSync(file);
+  } catch (err) {
+    return { file, status: "error", detail: err.message };
+  }
+
+  let plan;
+  try {
+    plan = await planImage(input, file, opts);
+  } catch (err) {
+    return { file, status: "error", detail: err.message };
+  }
+
+  if (plan.status === "skip" || plan.status === "error") {
+    return { file, status: plan.status, detail: plan.detail };
+  }
+
+  if (opts.dryRun) {
     return {
       file,
-      status: "skip",
-      detail: `output not smaller (${fmtBytes(before)} → ${fmtBytes(buf.length)})`,
+      status: "dry-run",
+      detail: `would write ${path.basename(outPath)} from ${plan.detail}`,
     };
   }
 
   const tmpPath = `${outPath}.tmp-${process.pid}`;
-  fs.writeFileSync(tmpPath, buf);
+  fs.writeFileSync(tmpPath, plan.output);
   fs.renameSync(tmpPath, outPath);
 
   let md = 0;
@@ -250,7 +280,7 @@ async function compressOne(file, opts) {
   return {
     file,
     status: "ok",
-    detail: `${w}×${h} ${fmtBytes(before)} → ${fmtBytes(buf.length)} · marked${md ? ` · updated ${md} md` : ""}`,
+    detail: `${plan.detail} · marked${md ? ` · updated ${md} md` : ""}`,
     outPath,
   };
 }
@@ -325,4 +355,7 @@ Lean unmarked WebP and corn-marked files are skipped.
   process.exit(fail ? 1 : 0);
 }
 
-main();
+const invokedDirectly =
+  process.argv[1] &&
+  process.argv[1].replace(/\\/g, "/").endsWith("/compress-post-images.mjs");
+if (invokedDirectly) main();

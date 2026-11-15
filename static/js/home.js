@@ -1,15 +1,66 @@
 (function () {
-    // Scale the footer dock (pets + ticker + player) as one unit to the
+    // Same-site nav re-runs this file on every return home. Window listeners
+    // bind once and call whichever run is current, so they never stack.
+    var windowBound = !!window.__homeWindowBound;
+    window.__homeWindowBound = true;
+
+    // Scale the footer dock (pets + ticker) as one unit to the
     // available width so the row never wraps or spills horizontally.
     var dockFit = document.querySelector("[data-home-dock-fit]");
     var dock = document.querySelector("[data-home-dock]");
     var dockScale = 1;
 
+    /* Equal padding on the counter pushes Sango and Kagura apart.
+       Stop at the text column, or halfway from Kagura to the player. */
+    function spaceDockPets() {
+        var ticker = dock.querySelector(".ticker");
+        var sango = dock.querySelector(".home-dock__pet--left");
+        var kagura = dock.querySelector(".home-dock__pet--right");
+        var column = document.querySelector(".home-main");
+        var player = document.querySelector("[data-player-bar]");
+        if (!ticker || !sango || !kagura || !column || !player) return;
+        if (!window.matchMedia("(min-width: 45rem)").matches) {
+            ticker.style.removeProperty("padding-left");
+            ticker.style.removeProperty("padding-right");
+            return;
+        }
+        var applied = dock.style.getPropertyValue("--home-dock-scale");
+        dock.style.setProperty("--home-dock-scale", "1");
+        ticker.style.paddingLeft = "0px";
+        ticker.style.paddingRight = "0px";
+        var sr = sango.getBoundingClientRect();
+        var kr = kagura.getBoundingClientRect();
+        var cr = column.getBoundingClientRect();
+        var pr = player.getBoundingClientRect();
+        var sangoRoom = sr.left - cr.left;
+        var kaguraColumn = cr.right - kr.right;
+        var kaguraHalf = (pr.left - kr.right) / 2;
+        var room = Math.min(sangoRoom, kaguraColumn, kaguraHalf);
+        /* Halfway back from the full spread toward the counter. */
+        var pad = Math.max(0, Math.round(room / 2));
+        ticker.style.paddingLeft = pad + "px";
+        ticker.style.paddingRight = pad + "px";
+        if (applied) dock.style.setProperty("--home-dock-scale", applied);
+        else dock.style.removeProperty("--home-dock-scale");
+    }
+
     function fitHomeDock() {
         if (!dockFit || !dock || !document.body.classList.contains("home")) return;
-        // scrollWidth ignores transform, so measure without resetting scale.
+        spaceDockPets();
+        // Dock is width:100% grid — measure the columns' content, not scrollWidth.
         var avail = dockFit.clientWidth;
-        var need = dock.scrollWidth;
+        var cells = [
+            dock.querySelector(".home-dock__pet--left"),
+            dock.querySelector(".ticker"),
+            dock.querySelector(".home-dock__pet--right")
+        ].filter(function (el) {
+            return el && el.offsetWidth > 0;
+        });
+        var gap = parseFloat(getComputedStyle(dock).columnGap) || 0;
+        var need = gap * Math.max(0, cells.length - 1);
+        cells.forEach(function (el) {
+            if (el) need += el.offsetWidth;
+        });
         var next = 1;
         if (avail > 0 && need > avail) {
             next = Math.max(0.55, (avail / need) * 0.98);
@@ -23,17 +74,28 @@
         dock.style.setProperty("--home-dock-scale", token);
         dockFit.style.setProperty("--home-dock-scale", token);
         dockFit.style.setProperty("--home-dock-h", dock.offsetHeight + "px");
-        document.body.classList.toggle("is-home-dock-scaled", next < 0.998);
         window.dispatchEvent(new Event("resize"));
     }
 
+    function runFit() {
+        if (typeof window.__homeFitDock === "function") window.__homeFitDock();
+    }
+
+    if (window.__homeDockObserver) {
+        window.__homeDockObserver.disconnect();
+        window.__homeDockObserver = null;
+    }
+    window.__homeFitDock = dockFit && dock ? fitHomeDock : null;
     if (dockFit && dock) {
         fitHomeDock();
-        window.addEventListener("resize", fitHomeDock);
         if (typeof ResizeObserver === "function") {
-            new ResizeObserver(fitHomeDock).observe(dockFit);
+            window.__homeDockObserver = new ResizeObserver(fitHomeDock);
+            window.__homeDockObserver.observe(dockFit);
         }
-        window.addEventListener("load", fitHomeDock);
+    }
+    if (!windowBound) {
+        window.addEventListener("resize", runFit);
+        window.addEventListener("load", runFit);
     }
 
     // Banner URL is chosen in Hugo (shuffle + preload). Hold .is-pending until
@@ -63,35 +125,14 @@
     revealHomeBanner();
     window.revealHomeBanner = revealHomeBanner;
 
-    // Sit the moon beside the content body, midway between Misdreavus and the ASCII angel.
-    var moonCol = document.querySelector(".home-moon-col");
-    var moon = document.querySelector(".ascii-moon");
     var page = document.querySelector(".home-page");
     var root = document.querySelector(".home-root");
-
-    function placeMoon() {
-        if (!moonCol || !moon || !page) return;
-        var misdreavus =
-            document.querySelector(".page__logo--sprite .sprite-anim") ||
-            document.querySelector(".home-header .sprite-anim") ||
-            document.querySelector(".home-header");
-        var angel = document.querySelector(".ascii-angel") || document.querySelector(".home-main");
-        if (!misdreavus || !angel) return;
-
-        var pageTop = page.getBoundingClientRect().top + window.scrollY;
-        var a = misdreavus.getBoundingClientRect();
-        var b = angel.getBoundingClientRect();
-        var midY = (a.top + a.bottom) / 2 + ((b.top + b.bottom) / 2 - (a.top + a.bottom) / 2) / 2;
-        midY += window.scrollY;
-        var moonH = moon.offsetHeight || 80;
-        var top = Math.max(0, midY - pageTop - moonH / 2);
-        moonCol.style.paddingTop = top.toFixed(1) + "px";
-    }
 
     function placeClouds() {
         if (!root || !page) return;
         var angel = document.querySelector(".ascii-angel");
         var footer = document.querySelector(".home-footer");
+        var cloudsWrap = document.querySelector(".home-clouds");
         if (!angel || !footer) return;
 
         var rootBox = root.getBoundingClientRect();
@@ -217,7 +258,6 @@
         // On narrow screens .home-clouds is display:none — clear inline coords so CSS can place it.
         var cta = angel.querySelector(".ascii-angel__cta");
         if (cta && nestEl) {
-            var cloudsWrap = document.querySelector(".home-clouds");
             var wrapCs = cloudsWrap ? window.getComputedStyle(cloudsWrap) : null;
             var nestCs = window.getComputedStyle(nestEl);
             var nr = nestEl.getBoundingClientRect();
@@ -244,6 +284,8 @@
                 cta.style.minWidth = Math.max(16, nr.width * 0.85).toFixed(1) + "px";
             }
         }
+
+        if (cloudsWrap) cloudsWrap.classList.add("is-placed");
     }
 
     // Guestbook copy falls into the nest cloud on angel hover, then fades out on leave.
@@ -318,15 +360,23 @@
     }
 
     function placeDecor() {
-        placeMoon();
         placeClouds();
         clearStarsBehindClouds();
     }
     window.placeHomeDecor = placeDecor;
+    window.__homeClearStars = clearStarsBehindClouds;
     placeDecor();
-    window.addEventListener("resize", placeDecor);
-    window.addEventListener("load", placeDecor);
-    window.addEventListener("scroll", clearStarsBehindClouds, { passive: true });
+    if (!windowBound) {
+        window.addEventListener("resize", function () {
+            window.placeHomeDecor();
+        });
+        window.addEventListener("load", function () {
+            window.placeHomeDecor();
+        });
+        window.addEventListener("scroll", function () {
+            window.__homeClearStars();
+        }, { passive: true });
+    }
 })();
 
 (function () {
@@ -346,7 +396,6 @@
     var kWalkStrip = kagura && kagura.querySelector(".dock-kagura__strip--walk");
     var kDownStrip = kagura && kagura.querySelector(".dock-kagura__strip--down");
     var sIdleStrip = sango && sango.querySelector(".dock-sango__strip--idle");
-    var sHurtStrip = sango && sango.querySelector(".dock-sango__strip--hurt");
     var sAttackStrip = sango && sango.querySelector(".dock-sango__strip--attack");
 
     if (!digits) return;
@@ -365,16 +414,20 @@
     var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     var slashMs = 2600;
     var bumpAt = 0.38;
-    var hurtAt = 0.28;
     var sangoBusy = false;
     var kaguraRecoverTimer = 0;
     var boomTimer = 0;
 
     function paintCount() {
-        digits.textContent = String(count || 0).padStart(6, "0");
+        // Min 2 digits (04); grow only as the real tally needs more places.
+        var n = Math.max(0, Math.floor(Number(count) || 0));
+        var raw = String(n);
+        digits.textContent = raw.padStart(Math.max(2, raw.length), "0");
         try {
-            localStorage.setItem(countKey, String(count || 0));
+            localStorage.setItem(countKey, String(n));
         } catch (error) {}
+        // Refit dock if digit width changed (fitHomeDock lives in the home IIFE).
+        window.dispatchEvent(new Event("resize"));
     }
 
     function applyCount(next, withFx) {
@@ -385,7 +438,13 @@
 
     // Global tally via Netlify Blobs (/api/visitors). Plain hugo server has no
     // functions, so GET/POST fall back to the cached localStorage number.
+    // Deploy preview / branch: skip the function entirely (local tally only).
+    function skipMetered() {
+        return typeof window.siteSkipMeteredApi === "function" && window.siteSkipMeteredApi();
+    }
+
     function loadRemoteCount() {
+        if (skipMetered()) return;
         fetch(apiUrl, { headers: { Accept: "application/json" } })
             .then(function (response) {
                 if (!response.ok) throw new Error("visitor GET failed");
@@ -402,6 +461,11 @@
     }
 
     function bumpRemote(withFx, done) {
+        if (skipMetered()) {
+            applyCount(count + 1, withFx);
+            if (done) done();
+            return;
+        }
         fetch(apiUrl, {
             method: "POST",
             headers: { Accept: "application/json" }
@@ -455,7 +519,6 @@
 
     function setSangoStrip(mode) {
         if (sIdleStrip) sIdleStrip.classList.toggle("is-active", mode === "idle");
-        if (sHurtStrip) sHurtStrip.classList.toggle("is-active", mode === "hurt");
         if (sAttackStrip) sAttackStrip.classList.toggle("is-active", mode === "attack");
     }
 
@@ -526,21 +589,10 @@
 
     function setSangoIdle() {
         if (!sango) return;
-        sango.classList.remove("is-hurt", "is-attacking", "is-busy");
+        sango.classList.remove("is-attacking", "is-busy");
         sango.classList.add("is-idle");
         setSangoStrip("idle");
         sangoBusy = false;
-    }
-
-    function playSangoHurt() {
-        if (!sango || reduceMotion) return;
-        sangoBusy = true;
-        sango.classList.add("is-busy");
-        sango.classList.remove("is-idle", "is-attacking");
-        sango.classList.add("is-hurt");
-        setSangoStrip("hurt");
-        // Hold the impact pose — the sheet's "hurt row" is mostly idle cells.
-        window.setTimeout(setSangoIdle, 900);
     }
 
     function knockKaguraDown() {
@@ -565,7 +617,7 @@
 
         sangoBusy = true;
         sango.classList.add("is-busy");
-        sango.classList.remove("is-idle", "is-hurt");
+        sango.classList.remove("is-idle");
         sango.classList.add("is-attacking");
         setSangoStrip("attack");
         restartStripAnim(sAttackStrip);
@@ -634,9 +686,10 @@
 
     function playAttackThenBump() {
         if (!pending || finishing) return;
-        if (reduceMotion || !kagura || !dock || !park) {
+        var narrow = window.matchMedia("(max-width: 44.99rem)").matches;
+        if (reduceMotion || narrow || !kagura || !dock || !park) {
             commitBump(true);
-            if (!reduceMotion) parkKaguraIdle();
+            if (!reduceMotion && !narrow) parkKaguraIdle();
             return;
         }
         finishing = true;
@@ -666,11 +719,6 @@
                     "transform " + slashMs / 1000 + "s cubic-bezier(0.33, 0.12, 0.2, 1)";
                 kagura.style.transform = "translateX(" + travel.endX + "px)";
                 ticker && ticker.classList.add("is-attacking");
-
-                // Wind reaches Sango first (baked into kagura-attack frames), then the ticker.
-                window.setTimeout(function () {
-                    playSangoHurt();
-                }, slashMs * hurtAt);
 
                 window.setTimeout(function () {
                     if (bumped) return;
@@ -770,115 +818,9 @@
                 window.setTimeout(triggerOnce, 1000);
             });
         },
-        { threshold: 0.55, rootMargin: "0px 0px -8% 0px" }
+        // No bottom rootMargin: the ticker sits on the page's last line, so any
+        // inset can keep it from ever reaching the threshold at full scroll.
+        { threshold: 0.55 }
     );
     observer.observe(ticker);
-})();
-
-// First homepage landing: thought bubble left of Misdreavus asks to play music.
-// Phone (≤44.99rem): skip entirely — bottom player is enough; don't mark seen.
-(function () {
-    var prompt = document.querySelector("[data-music-prompt]");
-    if (!prompt) return;
-    if (window.matchMedia("(max-width: 44.99rem)").matches) return;
-
-    var key = "home-music-prompt-seen";
-    try {
-        if (new URLSearchParams(location.search).has("replay-music")) {
-            sessionStorage.removeItem(key);
-        }
-    } catch (error) {}
-
-    var seen = false;
-    try {
-        seen = !!sessionStorage.getItem(key);
-    } catch (error) {}
-    if (seen) return;
-
-    var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    var syncRaf = 0;
-    // Opaque-pixel centroids per Misdreavus frame (52×108 strip). Positive = lower.
-    var centroids = [45.2, 49.6, 49.5, 52.7, 52.7, 56.2, 60.0, 61.5, 61.4, 62.4];
-    var centroidMean =
-        centroids.reduce(function (sum, value) {
-            return sum + value;
-        }, 0) / centroids.length;
-
-    function dismiss() {
-        prompt.hidden = true;
-        prompt.classList.remove("is-open");
-        if (syncRaf) {
-            cancelAnimationFrame(syncRaf);
-            syncRaf = 0;
-        }
-        try {
-            sessionStorage.setItem(key, "1");
-        } catch (error) {}
-    }
-
-    function playMusic() {
-        if (typeof window.sitePlayerPlay === "function") {
-            window.sitePlayerPlay();
-            return;
-        }
-        var toggle = document.querySelector("[data-player-toggle]");
-        if (toggle) toggle.click();
-    }
-
-    function spriteFrameIndex(sprite) {
-        var frames = Math.max(1, parseFloat(getComputedStyle(sprite).getPropertyValue("--sprite-frames")) || 10);
-        var fps = Math.max(0.1, parseFloat(getComputedStyle(sprite).getPropertyValue("--sprite-fps")) || 8);
-        var period = (frames / fps) * 1000;
-        var anims = typeof sprite.getAnimations === "function" ? sprite.getAnimations() : [];
-        var t = 0;
-        if (anims.length && typeof anims[0].currentTime === "number") {
-            t = anims[0].currentTime;
-        } else {
-            // Fallback when WAAPI isn't available: wall-clock from first paint.
-            if (!spriteFrameIndex._t0) spriteFrameIndex._t0 = performance.now();
-            t = performance.now() - spriteFrameIndex._t0;
-        }
-        var cycle = ((t % (period * 2)) + period * 2) % (period * 2);
-        var forward = cycle < period;
-        var local = forward ? cycle : period * 2 - cycle;
-        var steps = Math.max(1, frames - 1);
-        var frame = Math.min(frames - 1, Math.floor((local / period) * steps + 1e-6));
-        return frame;
-    }
-
-    function syncThoughtBob() {
-        syncRaf = 0;
-        if (prompt.hidden || !prompt.classList.contains("is-open")) return;
-        var sprite = document.querySelector(".page__logo-inner--sprite .sprite-anim");
-        if (sprite && !reduceMotion) {
-            var frame = spriteFrameIndex(sprite);
-            var bob = (centroids[frame] || centroidMean) - centroidMean;
-            // Scale with the logo sprite box (mobile shrinks the strip).
-            var box = sprite.parentElement;
-            var scale = box ? box.getBoundingClientRect().height / 108 : 1;
-            prompt.style.setProperty("--thought-bob", (bob * scale).toFixed(2) + "px");
-        } else {
-            prompt.style.setProperty("--thought-bob", "0px");
-        }
-        syncRaf = requestAnimationFrame(syncThoughtBob);
-    }
-
-    // Cloud left/right hit zones + visible y/n share the same data attrs.
-    prompt.querySelectorAll("[data-music-yes]").forEach(function (btn) {
-        btn.addEventListener("click", function () {
-            playMusic();
-            dismiss();
-        });
-    });
-    prompt.querySelectorAll("[data-music-no]").forEach(function (btn) {
-        btn.addEventListener("click", function () {
-            dismiss();
-        });
-    });
-
-    prompt.hidden = false;
-    requestAnimationFrame(function () {
-        prompt.classList.add("is-open");
-        syncThoughtBob();
-    });
 })();

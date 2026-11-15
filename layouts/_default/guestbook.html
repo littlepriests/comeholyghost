@@ -2,11 +2,11 @@
 <html lang="{{- site.Language.Lang -}}">
 <head>
     {{- partial "head.html" . -}}
-    <link rel="stylesheet" href="{{ "css/guestbook.css" | relURL }}?v=4">
+    {{- partial "css.html" "guestbook" }}
 </head>
 <body class="guestbook-page">
     <div id="page-root">
-    <div class="guestbook-wrap">
+    <div class="guestbook-wrap site-shell">
         <header class="guestbook-header">
             {{- partial "header.html" . -}}
         </header>
@@ -23,7 +23,7 @@
                 <label>say anything...
                     <textarea name="message" maxlength="500" rows="4"></textarea>
                 </label>
-                <label class="guestbook__hp" aria-hidden="true">Leave blank
+                <label class="site-hp" aria-hidden="true">Leave blank
                     <input type="text" name="website" tabindex="-1" autocomplete="off">
                 </label>
                 <p class="guestbook__error" data-guestbook-error hidden></p>
@@ -36,12 +36,11 @@
                 <ol class="guestbook__entries" data-guestbook-list></ol>
             </section>
         </main>
+
+        {{- partial "site-footer.html" (dict "page" .) }}
     </div>
-    <script src="{{ "js/guestbook.js" | relURL }}"></script>
+            <script src="{{ "js/guestbook.js" | relURL }}?v=2"></script>
     </div>
-    {{ partial "stars.html" . }}
-    {{ partial "backdrop.html" . }}
-    {{ partial "player.html" . }}
-    <script src="{{ "js/site-tips.js" | relURL }}?v=2"></script>
+    {{- partial "site-chrome.html" . }}
 </body>
 </html>

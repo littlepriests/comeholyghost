@@ -1,0 +1,116 @@
+.site-backdrop {
+    position: fixed;
+    z-index: 0;
+    pointer-events: none;
+    line-height: 0;
+}
+
+/* Stabbed-girl figure is .sword-figure on read-me (sword.css), not a fixed corner. */
+
+.site-backdrop[data-anchor="bottom-right"] {
+    right: var(--backdrop-x);
+    bottom: var(--backdrop-y);
+}
+
+.site-backdrop[data-anchor="bottom-left"] {
+    left: var(--backdrop-x);
+    bottom: var(--backdrop-y);
+}
+
+.site-backdrop[data-anchor="top-right"] {
+    right: var(--backdrop-x);
+    top: var(--backdrop-y);
+}
+
+.site-backdrop[data-anchor="top-left"] {
+    left: var(--backdrop-x);
+    top: var(--backdrop-y);
+}
+
+.site-backdrop img {
+    display: block;
+    width: auto;
+    height: auto;
+    opacity: 0;
+    transition: opacity 0.28s ease;
+    /* Stay outside the middle column, and inside this corner's own cap.
+       A smaller file is not scaled up. A short window shrinks the picture
+       so a band of the page remains between the top and bottom corners. */
+    max-width: min(var(--backdrop-max-w), max(0px, calc((100vw - var(--middle-column) - 5rem) / 2 - var(--backdrop-x, 1.5rem))));
+    max-height: min(var(--backdrop-max-h), max(0px, calc((100vh - 20rem) / 2 - var(--backdrop-y, 1.5rem))));
+}
+
+.site-backdrop img.is-ready {
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .site-backdrop img {
+        transition: none;
+    }
+}
+
+
+/* Phones have no side gutter, so the corner pictures would sit on the writing. */
+@media (max-width: 44.99rem) {
+    .site-backdrop {
+        display: none;
+    }
+}
+
+#page-root {
+    position: relative;
+    z-index: 1;
+}
+
+/*
+  Sitewide vertical gradient:
+  top = charcoal near-black, easing into the palette purple (--bg / #31263E)
+  and a touch of --inner-bg / #44355B at the bottom.
+*/
+body {
+    --grad-charcoal: #121014;
+    --grad-purple: var(--bg);
+    --grad-purple-lit: var(--inner-bg);
+    background-color: var(--grad-charcoal);
+    background-image: linear-gradient(
+        to bottom,
+        var(--grad-charcoal) 0%,
+        color-mix(in srgb, var(--grad-charcoal) 70%, var(--grad-purple)) 28%,
+        color-mix(in srgb, var(--grad-charcoal) 35%, var(--grad-purple)) 55%,
+        var(--grad-purple) 78%,
+        color-mix(in srgb, var(--grad-purple) 55%, var(--grad-purple-lit)) 100%
+    );
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+/* Fixed backgrounds leave light “body” bands on mobile Safari / Chrome. */
+@media (max-width: 44.99rem) {
+    body {
+        background-attachment: scroll;
+        background-size: 100% auto;
+        min-height: 100%;
+    }
+
+    html {
+        min-height: 100%;
+        background-color: var(--grad-charcoal, #121014);
+    }
+
+    .page__body,
+    .content__body {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+}
+
+body:not(.home) .site-backdrop {
+    display: none;
+}
+
+/* Bottom-right image is reserved for .sword-figure on read-me. */
+body.home .site-backdrop[data-anchor="bottom-right"] {
+    display: none !important;
+}
