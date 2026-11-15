@@ -1,7 +1,7 @@
 +++
 title = "beauty @ the crossroads"
 date = 2026-11-11
-summary = "everything's experimental, i learn about textile art, i meet conrete i didn't like."
+summary = "everything's experimental, i learn about textile art, i meet concrete i didn't like."
 index_image = "amaral-red-qi.webp"
 index_caption = "red for vitality"
 +++
@@ -33,7 +33,7 @@ amaral-me-3d.webp
 amaral-gold-room.webp
 {{< /photo-grid >}}
 
-i didn't expect amaral's work to share more with structure, sculpture, and built environments than it does with, say, renaissance tapestries. to accomodate how amaral's objects occupy space, pulitzer curated most galleries (maybe all?) with at least one structure, often several, suspended away from the walls. that let me + other museum-goers do a little dance with amaral's work. 
+i didn't expect amaral's work to share more with structure, sculpture, and built environments than it does with, say, renaissance tapestries. to accommodate how amaral's objects occupy space, pulitzer curated most galleries (maybe all?) with at least one structure, often several, suspended away from the walls. that let me + other museum-goers do a little dance with amaral's work. 
 
 we can't touch, but we can move through space as we look, perceive changes in light + shadow, experience how repetition affects depth + space, and watch how each installation changes in relation to our point-of-view. looking is an effortless study; the breadth of detail feels endless.
 
@@ -44,7 +44,7 @@ amaral-el-gran-muro-sheesh.webp
 
 [_el gran muro_ (1976)](https://smarthistory.org/olga-de-amaral-el-gran-muro/) was a commission for the peachtree hotel in atlanta, and spans about six stories. the gallery attendant told us each section weighed several hundred pounds and was the most difficult install for the exhibition. my sister grilled the attendant about insurance policies (they're expensive), whether it was shipped in a freight (yes), and the process the museum used to handle the install (don't remember the answer to this).
 
- anyway, i'm getting a D- in museum-goer because i forgot to note the name/material for the photos. the pulitzer [wrote a guide](https://issuu.com/pulitzerarts/docs/fall_2026_exhibition_guide_olga_de_b6974811d4b584?fr=sNGI0NjkyODE2OTQ) to accompany their exhibition, overviewing amaral's background as an architect and her different eras working with experimental form + material. the guide doesn't pair pictures with their write-up, so scroll through their [(limited) digital gallery](https://pulitzerarts.org/art/olga-de-amaral-weaving-the-infinite/), too.
+ anyway, i'm getting a d- in museum-goer because i forgot to note the name/material for the photos. the pulitzer [wrote a guide](https://issuu.com/pulitzerarts/docs/fall_2026_exhibition_guide_olga_de_b6974811d4b584?fr=sNGI0NjkyODE2OTQ) to accompany their exhibition, overviewing amaral's background as an architect and her different eras working with experimental form + material. the guide doesn't pair pictures with their write-up, so scroll through their [(limited) digital gallery](https://pulitzerarts.org/art/olga-de-amaral-weaving-the-infinite/), too.
 
 {{< photo src="pulitzer-tadao-ando.webp" caption="water court @ pulitzer arts foundation, st louis, MO, designed by tadao ando" />}}
 
