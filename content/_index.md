@@ -2,13 +2,13 @@
 title = "₊˚⊹♡"
 +++
 
-# ⋆｡°✩
+# ⋆✩⋆
 
 </br>
 
 this is a digital commonplace notebook.
 
-# ˙⋆✮⋆˚࿔
+# ♡
 
 <figure class="ascii-angel">
 <span class="ascii-angel__fx" aria-hidden="true">
