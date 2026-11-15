@@ -4,13 +4,12 @@ sword_figure = true
 +++
 
 i'm an in-my-30s something-or-other with broad interests, living somewhere in
-rural america near many cornfields and the embarrass river.(it's rural america
-near many cornfields and the embarrass river.(it's pronounced AM-braw.)
+rural america near many cornfields and the embarrass river. (it's pronounced
+AM-braw.)
 
 this site is inspired by commonplace journals, tumblr + livejournal, jenny
 nicholson's unyielding authenticity, my beautiful + courageous friends, and the
-me who's still nine and wishing she could make an angelfire shrine. pictures,
-photo edits, any and all writing, and anything worthwhile are done by me.
+me who's still nine and wishing she could make an angelfire shrine.
 
 ## footnotes
 
