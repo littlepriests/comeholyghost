@@ -14,7 +14,7 @@ photo edits, any and all writing, and anything worthwhile are done by me.
 
 ## footnotes
 
-- hugo (layout started from the [risotto theme](https://themes.gohugo.io/themes/risotto/), now site-owned)
+- hugo with [risotto theme](https://themes.gohugo.io/themes/risotto/), modified
 - music: _symphonic suite akira_ (1988) by geinoh yamashirogumi
 - kagura banner from inuyasha ep67, "the howling wind of betrayal"
 - ascii art roundup
@@ -26,3 +26,4 @@ photo edits, any and all writing, and anything worthwhile are done by me.
   - [misdreavus](https://www.spriters-resource.com/ds_dsi/pokemonblackwhite/asset/35479/) by ploaj
   - [kagura](https://www.spriters-resource.com/wonderswan_wsc/inuyashafuuunemaki/asset/13358/) by unknown
   - [sango](https://www.spriters-resource.com/wonderswan_wsc/inuyashafuuunemaki/asset/13363/) by dee
+  - [grundo](https://www.spriters-resource.com/custom_edited/neopetscustoms/asset/186604/?source=genre) by lonelymarowak
