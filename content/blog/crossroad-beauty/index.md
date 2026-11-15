@@ -6,8 +6,7 @@ index_image = "amaral-red-qi.webp"
 index_caption = "red for vitality"
 +++
 
-where is the beauty! apparently it's somewhere near
-[the cross at the crossroads](https://crossusa.org/) in illinois.
+where is the beauty! apparently it's somewhere near [the cross at the crossroads](https://crossusa.org/) in illinois.
 
 {{< photo src="images/nongrid/text.webp" caption="♡thank you kyle♡"/>}}
 
@@ -15,10 +14,7 @@ tl;dr i saw cool art and listened to cool music.
 
 ## weird objects
 
-my sister picked up some artwork in st l for an upcoming show at her museum, so
-i tagged along as entertainment for the two hour drive. we checked out the
-pulitzer arts foundation since they're hosting a collection by
-[olga de amaral](https://olgadeamaral.art/) , a colombian fiber artist.
+my sister picked up some artwork in stl for an upcoming show at her museum, so i tagged along as entertainment for the two hour drive. we checked out the pulitzer arts foundation since they're hosting a collection by [olga de amaral](https://olgadeamaral.art/), a colombian fiber artist.
 
 what i realized belatedly while editing my photos + reading up on amaral +
 writing this post is that my initial response was maybe, probably, reactionary.
@@ -33,7 +29,7 @@ amaral-red-net.webp
 amaral-pulitzer-texture.webp
 {{< /photo-grid >}}
 
-the scale of her textiles surprised me, both in size and how they contorted in
+the scale of her textiles surprised me, both in size and how they contort in
 space. amaral uses repeated, smaller forms that unify into a much larger
 product. but the actual material she weaves offsets that unity, gives certain
 textiles a wildness that holds your eye. i think, too, the density of a messy
@@ -49,10 +45,10 @@ amaral-gold-room.webp
 {{< /photo-grid >}}
 
 i didn't expect amaral's work to share more with structure, sculpture, and built
-environments than, say, renaissance tapestries. to accommodate how amaral's
-objects occupy space, pulitzer curated most galleries (maybe all?) with at least
-one structure, often several, suspended away from the walls. that let me + other
-museum-goers do a little dance with amaral's work.
+environments than it does with, say, renaissance tapestries. to accommodate how
+amaral's objects occupy space, pulitzer curated most galleries (maybe all?) with
+at least one structure, often several, suspended away from the walls. that let
+me + other museum-goers do a little dance with amaral's work.
 
 we can't touch, but we can move through space as we look, perceive changes in
 light + shadow, experience how repetition affects depth + space, and watch how
@@ -64,35 +60,13 @@ amaral-el-gran-muro-sheesh.webp
 /images/nongrid/peachtree-gran-amaral.webp
 {{< /photo-grid >}}
 
-[_el gran muro_ (1976)](https://smarthistory.org/olga-de-amaral-el-gran-muro/)
-was a commission for the peachtree hotel in atlanta, and spans about six
-stories. the gallery attendant told us each section weighed several hundred
-pounds and was the most difficult install for the exhibition. my sister grilled
-the attendant about insurance policies (they're expensive), whether it was
-shipped in a freight (yes), and the process the museum used to handle the
-install (don't remember the answer to this).
+[_el gran muro_ (1976)](https://smarthistory.org/olga-de-amaral-el-gran-muro/) was a commission for the peachtree hotel in atlanta, and spans about six stories. the gallery attendant told us each section weighed several hundred pounds and was the most difficult install for the exhibition. my sister grilled the attendant about insurance policies (they're expensive), whether it was shipped in a freight (yes), and the process the museum used to handle the install (i walked away).
 
-anyway, i'm getting a D- in museum-goer because i forgot to note the
-name/material of each work. the pulitzer
-[wrote a guide](https://issuu.com/pulitzerarts/docs/fall_2026_exhibition_guide_olga_de_b6974811d4b584?fr=sNGI0NjkyODE2OTQ)
-to accompany their exhibition, overviewing amaral's background as an architect
-and her different eras working with experimental form + material. the guide
-doesn't pair pictures with their write-up, so scroll through their
-[(limited) digital gallery](https://pulitzerarts.org/art/olga-de-amaral-weaving-the-infinite/)
-, too.
+ anyway, i'm getting a d- in museum-goer because i forgot to note the name/material for the photos. the pulitzer [wrote a guide](https://issuu.com/pulitzerarts/docs/fall_2026_exhibition_guide_olga_de_b6974811d4b584?fr=sNGI0NjkyODE2OTQ) to accompany their exhibition, overviewing amaral's background as an architect and her different eras working with experimental form + material. the guide doesn't pair pictures with their write-up, so scroll through their [(limited) digital gallery](https://pulitzerarts.org/art/olga-de-amaral-weaving-the-infinite/), too.
 
 {{< photo src="pulitzer-tadao-ando.webp" caption="water court @ pulitzer arts foundation, st louis, MO, designed by tadao ando" />}}
 
-another neat thing. japanese architect
-[tadao ando](https://www.instagram.com/tadao_ando_ando/?hl=en) designed the
-pulitzer building. i usually love concrete, but i'm not sure my immediate
-reaction was "love" while i walked from room to room. the concrete appeared
-soft, supple, but i still managed to feel cold and sterile inside it. not a
-place i'd want to hang out at all day. next time we go in i'll have to pay more
-attention and read up on
-[ando's approach to design](https://artic.contentdm.oclc.org/digital/collection/caohp/id/40)
-. would i feel differently on a sunnier day? i wonder how amaral felt about
-concrete...
+another neat thing: japanese architect  [tadao ando](https://www.instagram.com/tadao_ando_ando/?hl=en) designed the pulitzer building. i usually love concrete, but i'm not sure my immediate reaction was "love" while i walked from room to room. the concrete appeared soft, supple, but i still managed to feel cold and sterile inside it. not a place i'd want to hang out at all day. next time we go in i'll have to pay more attention and read up on [ando's approach to design](https://artic.contentdm.oclc.org/digital/collection/caohp/id/40). would i feel differently on a sunnier day? i wonder how amaral felt about concrete...
 
 ## 33.9 single (f) seeking hammered dulcimer
 
@@ -101,19 +75,9 @@ concrete...
 i plan on doing a longer post about me + drumming + losing interest in the kit
 in lieu of percussion + karen carpenter. for the sake of today, i'll summarize.
 
-i made it out to the student percussion ensemble and i hope to make it a habit.
-the music department introduced me to
-[experimental percussion](https://www.thetonearm.com/the-solitary-ensemble-of-erik-hall-minimalist-trilogy-solo-three/)
-, i heard
-[batá performed live](https://folklife.si.edu/magazine/gender-taboos-cuban-bata-drumming)
-(my drum instructor performed ♡♡♡), and i reaffirmed my love for all these odd
-instruments.
+i made it out to the student percussion ensemble and i hope to make it a habit. the music department introduced me to [experimental percussion](https://www.thetonearm.com/the-solitary-ensemble-of-erik-hall-minimalist-trilogy-solo-three/), i heard [batá performed live](https://folklife.si.edu/magazine/gender-taboos-cuban-bata-drumming) (my drum instructor performed ♡♡♡), and i reaffirmed my love for all these odd instruments.
 
-one of my 2027 resolutions is to learn orchestral grip since i've been
-prioritizing snare and trad grip. i want to play timpani and glockenspiel, and
-steal someone's
-[hammered dulcimer](https://youtu.be/QN3KWbpBsvg?si=RyaTU0v77ZGm7vr_) .
-ultimately, really, i need to develop strong opinions about mallets.
+one of my 2027 resolutions is to learn orchestral grip since i've been prioritizing snare and trad grip. i want to play timpani and glockenspiel, and steal someone's [hammered dulcimer](https://youtu.be/QN3KWbpBsvg?si=RyaTU0v77ZGm7vr_). ultimately, really, i need to develop strong opinions about mallets.
 
 ## reading + journal
 

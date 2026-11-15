@@ -5,20 +5,20 @@
 #   {{</* photo src="x.webp" caption="…" tip="fun hover" */>}}
 
 email: ♡ email me ♡
-subscribe: subscribe
-back_to_top: back to top
-logo: home
+subscribe: subscribe pancham :) 
+back_to_top: up, up
+logo: i wanna go home
 
-player_back_top: back to top
+player_back_top: up, up
 player_reopen: show player
-player_play: play
-player_stop: hide player
-player_skip: next track
+player_play: play akira
+player_stop: remove this
+player_skip: not this one
 
-grundo: orange menace
-sango: throw it
-kagura: wind witch
-skifree: subscribe (yeti mail)
+grundo: stomp
+sango: 飛来骨
+kagura: 神楽のファン
+skifree: skifree 1991
 
 # Optional: override a social link by its hugo.toml `title` string.
 # social:
