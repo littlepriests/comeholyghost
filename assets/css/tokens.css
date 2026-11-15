@@ -1,0 +1,46 @@
+/*
+  Color tokens. Raw palette (base16 slots) first, then the jobs the rest of the
+  CSS uses. Change a hex here to recolor; change a job to re-point it.
+*/
+:root {
+	--base00: #31263E;
+	--base01: #31263E;
+	--base02: #44355B;
+	--base03: #7cafc2;
+	--base04: #b8b8b8;
+	--base05: #d8d8d8;
+	--base06: #e8e8e8;
+	--base07: #f8f8f8;
+	--base08: #ab4642;
+	--base09: #dc9656;
+	--base0A: #18FF6D;
+	--base0B: #18FF6D;
+	--base0C: #f27e57;
+	--base0D: #7cafc2;
+	--base0E: #ba8baf;
+	--base0F: #a16946;
+
+	/* Background */
+	--bg: var(--base00);
+	--off-bg: var(--base01);
+	--inner-bg: var(--base02);
+
+	/* Text */
+	--fg: var(--base05);
+	--off-fg: var(--base04);
+	--muted: var(--base03);
+	--link: var(--base0D);
+	--hover: var(--base0C);
+	--highlight: var(--base0A);
+
+	/* Logo */
+	--logo: var(--base0B);
+
+	/* Homepage counter, player buttons, and back-to-top. */
+	--chip-bg: #111;
+	--chip-fg: var(--highlight);
+	--chip-border: color-mix(in srgb, var(--muted) 45%, transparent);
+	--chip-border-hot: color-mix(in srgb, var(--highlight) 55%, transparent);
+	--chip-glow: 0 0 12px color-mix(in srgb, var(--highlight) 35%, transparent);
+	--chip-font: var(--font-site, "Fira Mono", ui-monospace, monospace);
+}

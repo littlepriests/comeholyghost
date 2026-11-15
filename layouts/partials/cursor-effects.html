@@ -1,6 +1,7 @@
 {{/*
   Bubble cursor — homepage only (see layouts/index.html).
-  Self-hosted pin: static/js/vendor/cursor-effects.esm.js (v1.0.18).
+  Self-hosted pin: static/js/vendor/cursor-effects.esm.js (v1.0.18, trimmed to
+  bubbleCursor). Need another effect? Re-vendor it from the upstream release.
   Skip on coarse pointers / narrow viewports / reduced motion.
 */}}
 <script type="module">
@@ -35,7 +36,7 @@
     }
 
     function isSword(node) {
-        return !!(node && node.closest && node.closest(".home-sword"));
+        return !!(node && node.closest && node.closest(".sword-figure"));
     }
 
     document.addEventListener("pointerover", function (event) {

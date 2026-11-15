@@ -8,7 +8,7 @@ index_caption = "red for vitality"
 
 where is the beauty! apparently it's somewhere near [the cross at the crossroads](https://crossusa.org/) in illinois.
 
-{{< photo src="text.webp" caption="♡thank you kyle♡"/>}}
+{{< photo src="images/nongrid/text.webp" caption="♡thank you kyle♡"/>}}
 
 tl;dr i saw cool art and listened to cool music.
 
@@ -39,7 +39,7 @@ we can't touch, but we can move through space as we look, perceive changes in li
 
 {{< photo-grid caption="sheesh next to el gran muro for scale (+i'm bummed i didn't get a better picture!) + photo of el gran muro @ peachtree, courtesy of smarthistory" >}}
 amaral-el-gran-muro-sheesh.webp
-peachtree-gran-amaral.webp
+/images/nongrid/peachtree-gran-amaral.webp
 {{< /photo-grid >}}
 
 [_el gran muro_ (1976)](https://smarthistory.org/olga-de-amaral-el-gran-muro/) was a commission for the peachtree hotel in atlanta, and spans about six stories. the gallery attendant told us each section weighed several hundred pounds and was the most difficult install for the exhibition. my sister grilled the attendant about insurance policies (they're expensive), whether it was shipped in a freight (yes), and the process the museum used to handle the install (don't remember the answer to this).

@@ -1,0 +1,131 @@
+/*
+  Horizontal strip sprite animations (pixel-art sheets).
+  Set --sprite-fw, --sprite-fh, --sprite-frames, --sprite-fps, and background-image.
+
+  Infinite loops: steps(frames) to -frames*fw (one cell past the strip) so every
+  frame including the last get equal time. One-shots that must freeze on the
+  last real frame use sprite-anim-play-hold + steps(frames-1) instead.
+*/
+
+.sprite-anim {
+    display: inline-block;
+    width: calc(var(--sprite-fw, 32) * 1px);
+    height: calc(var(--sprite-fh, 32) * 1px);
+    flex-shrink: 0;
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    background-size: calc(var(--sprite-fw, 32) * var(--sprite-frames, 1) * 1px) calc(var(--sprite-fh, 32) * 1px);
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    animation-name: sprite-anim-play;
+    animation-duration: calc(var(--sprite-frames, 1) / var(--sprite-fps, 8) * 1s);
+    animation-timing-function: steps(var(--sprite-frames, 1), end);
+    animation-iteration-count: infinite;
+    vertical-align: bottom;
+}
+
+/* One-frame strips must not animate — steps(0) is invalid and a 1-wide sheet
+   would land on an empty cell past the only frame. */
+.sprite-anim.is-static {
+    animation: none !important;
+    background-position: 0 0 !important;
+}
+
+.sprite-anim.is-scale-2 {
+    transform: scale(2);
+    transform-origin: bottom center;
+}
+
+.sprite-anim.is-scale-3 {
+    transform: scale(3);
+    transform-origin: bottom center;
+}
+
+/*
+  Article bodies: transform:scale() paints larger but keeps the pre-scale box,
+  so several scaled strips in one paragraph stack on each other. Grow the
+  layout footprint to match the visual (dock pets keep their own origins).
+*/
+.content__body .sprite-anim.is-scale-2,
+.content__body .sprite-anim.is-scale-3 {
+    transform-origin: bottom left;
+}
+
+.content__body .sprite-anim.is-scale-2 {
+    margin-right: calc(var(--sprite-fw, 32) * 1px);
+    margin-top: calc(var(--sprite-fh, 32) * 1px);
+}
+
+.content__body .sprite-anim.is-scale-3 {
+    margin-right: calc(var(--sprite-fw, 32) * 2px);
+    margin-top: calc(var(--sprite-fh, 32) * 2px);
+}
+
+@keyframes sprite-anim-play {
+    from {
+        background-position: 0 0;
+    }
+    to {
+        /* One cell past the last frame — steps(frames) never paints this blank. */
+        background-position: calc(var(--sprite-fw, 32) * var(--sprite-frames, 1) * -1px) 0;
+    }
+}
+
+/* One-shot / fill-mode:forwards — land on the last real frame. */
+@keyframes sprite-anim-play-hold {
+    from {
+        background-position: 0 0;
+    }
+    to {
+        background-position: calc(var(--sprite-fw, 32) * (var(--sprite-frames, 1) - 1) * -1px) 0;
+    }
+}
+
+/* Home nav button: floating Misdreavus (or any logoSprite) */
+.page__logo.page__logo--sprite,
+.page__logo--sprite {
+    line-height: 0;
+    list-style: none;
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.page__logo-inner--sprite {
+    position: relative;
+    display: block;
+    /* Slot size comes from .main-nav (header.css) so nav + sprite agree. */
+    width: var(--nav-logo-w, 52px);
+    height: var(--nav-logo-h, 108px);
+    line-height: 0;
+    overflow: visible;
+}
+
+.page__logo-inner--sprite .sprite-anim {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    bottom: auto;
+    /* Center in the logo box so nav align-items:center matches the visible pet */
+    transform: translateY(-50%);
+    transform-origin: center left;
+    /* Play forward then reverse so the bob eases up/down with no snap */
+    animation-direction: alternate;
+}
+
+.page__logo-inner--sprite:hover .sprite-anim {
+    filter: brightness(1.12);
+}
+
+@media (max-width: 44.99rem) {
+    .page__logo-inner--sprite .sprite-anim {
+        transform: translateY(-50%) scale(0.69);
+        transform-origin: center left;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sprite-anim {
+        animation: none;
+    }
+}

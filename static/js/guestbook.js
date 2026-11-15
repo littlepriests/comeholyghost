@@ -174,7 +174,11 @@
         });
     });
 
-    fetchEntries().catch(function () {
-        useLocal();
-    });
+    if (typeof window.siteSkipMeteredApi === "function" && window.siteSkipMeteredApi()) {
+        useLocal("Deploy preview — signatures stay in this browser (not the live guestbook).");
+    } else {
+        fetchEntries().catch(function () {
+            useLocal();
+        });
+    }
 })();

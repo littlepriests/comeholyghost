@@ -1,0 +1,133 @@
+/* Stabbed-girl figure + ♡ fountain (read-me hero). Image from backdrop.bottom-right.
+   Sitewide .home-stars fill the column above the h1 around this figure. */
+.sword-figure {
+    position: relative;
+    display: block;
+    width: min(100%, 16rem);
+    margin: 0 auto 1.75rem;
+    line-height: 0;
+    pointer-events: auto;
+    cursor: crosshair;
+    overflow: visible;
+    color: inherit;
+    text-decoration: none;
+}
+
+.sword-figure:focus-visible {
+    outline: 2px solid var(--highlight, #18FF6D);
+    outline-offset: 4px;
+}
+
+.sword-figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: none;
+    max-height: min(70vh, 28rem);
+    margin: 0 auto;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+/* Particle origin centered on the figure (tune left/top if the blade exit moves). */
+.sword-figure__wound {
+    position: absolute;
+    left: 50%;
+    top: 42%;
+    width: 0;
+    height: 0;
+    overflow: visible;
+    pointer-events: none;
+}
+
+.sword-figure__heart {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 6;
+    margin: 0;
+    pointer-events: none;
+    font-family: var(--font-monospace, ui-monospace, "Cascadia Mono", "Fira Mono", monospace);
+    font-size: 0.95rem;
+    line-height: 1;
+    color: #ff2a4a;
+    text-shadow:
+        0 0 4px #ff6b81,
+        0 0 10px #ff1744,
+        0 0 18px rgb(255 20 60 / 0.75);
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.35);
+}
+
+.sword-figure__heart.is-bright {
+    color: #ff4d6d;
+    text-shadow:
+        0 0 5px #fff,
+        0 0 10px #ff2a4a,
+        0 0 18px #ff1744,
+        0 0 26px rgb(255 20 60 / 0.85);
+    font-size: 1.15rem;
+}
+
+.sword-figure:hover .sword-figure__heart,
+.sword-figure:focus-within .sword-figure__heart {
+    animation: sword-figure-spurt var(--hspurt, 1s) cubic-bezier(0.12, 0.7, 0.25, 1) var(--hd, 0s) infinite;
+}
+
+@keyframes sword-figure-spurt {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.25) rotate(0deg);
+        filter: brightness(1.1);
+    }
+    8% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2) rotate(calc(var(--rot, 0deg) * 0.25));
+        filter: brightness(1.55);
+    }
+    55% {
+        opacity: 0.85;
+        transform:
+            translate(
+                calc(-50% + var(--dx, -1rem) * 0.75),
+                calc(-50% + var(--dy, -2rem) * 0.75)
+            )
+            scale(0.95)
+            rotate(var(--rot, 0deg));
+        filter: brightness(1.25);
+    }
+    100% {
+        opacity: 0;
+        transform:
+            translate(
+                calc(-50% + var(--dx, -1rem)),
+                calc(-50% + var(--dy, -2rem))
+            )
+            scale(0.4)
+            rotate(calc(var(--rot, 0deg) * 1.35));
+        filter: brightness(0.95);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sword-figure:hover .sword-figure__heart,
+    .sword-figure:focus-within .sword-figure__heart {
+        animation: none;
+        opacity: 0.75;
+        transform: translate(
+            calc(-50% + var(--dx, -1rem) * 0.35),
+            calc(-50% + var(--dy, -2rem) * 0.35)
+        ) scale(1);
+    }
+}
+
+@media (max-width: 44.99rem) {
+    .sword-figure {
+        width: min(100%, 11rem);
+        margin-bottom: 1.25rem;
+    }
+
+    .sword-figure img {
+        max-height: min(50vh, 20rem);
+    }
+}
