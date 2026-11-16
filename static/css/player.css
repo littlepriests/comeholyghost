@@ -237,6 +237,8 @@ body {
     z-index: 6;
 }
 
+/* Same hues as the sword (#ff2a4a / #ff4d6d). Glyphs 0.95rem, bright 1.2rem.
+   Spill distance is --lift / --fall on each heart in player.html. */
 #site-player .player-dock-pet__heart {
     position: absolute;
     left: 0;

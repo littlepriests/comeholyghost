@@ -100,6 +100,8 @@
     overflow: visible;
 }
 
+/* Click ♡. Same hues as the sword (255 42 74 / 255 77 109), drawn softer.
+   Glyph 0.75rem, bright 0.85rem, times --scale. Burst distance is set in site-cursor-fx.js. */
 .site-cursor-hearts__heart {
     position: absolute;
     left: 0;

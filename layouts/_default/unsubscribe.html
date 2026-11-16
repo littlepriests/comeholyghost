@@ -3,10 +3,10 @@
   <h1>{{ .Title }}</h1>
 </header>
 <div class="content__body unsubscribe-page" data-unsubscribe-page>
-  <p class="unsubscribe-page__lede">ya, i hate emails too lol.</p>
+  <p class="unsubscribe-page__lede">{{ site.Data.chrome.unsubscribe.lede }}</p>
   <form class="unsubscribe-page__form" data-unsubscribe-form>
-    <label class="unsubscribe-page__label">♡
-      <input type="email" name="email" required autocomplete="email" maxlength="200" placeholder="you@example.com ♡" data-unsubscribe-email>
+    <label class="unsubscribe-page__label">{{ site.Data.chrome.unsubscribe.email_label }}
+      <input type="email" name="email" required autocomplete="email" maxlength="200" placeholder="{{ site.Data.chrome.unsubscribe.email_placeholder }}" data-unsubscribe-email>
     </label>
     <label class="site-hp" aria-hidden="true">Leave blank
       <input type="text" name="website" tabindex="-1" autocomplete="off">
@@ -14,7 +14,7 @@
     <p class="unsubscribe-page__error" data-unsubscribe-error hidden></p>
     <p class="unsubscribe-page__ok" data-unsubscribe-ok hidden></p>
     <div class="unsubscribe-page__actions">
-      <button type="submit" class="unsubscribe-page__submit" data-unsubscribe-submit>adios</button>
+      <button type="submit" class="unsubscribe-page__submit" data-unsubscribe-submit>{{ site.Data.chrome.unsubscribe.submit }}</button>
     </div>
   </form>
   <script src="{{ "js/unsubscribe.js" | relURL }}?v=2"></script>

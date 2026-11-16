@@ -1,11 +1,12 @@
 /* Writing index (/blog/): vajra-style feed — title, date, thumb + caption, summary. */
 
 .blog-index {
-    font-family: "Fira Mono", var(--font-monospace, ui-monospace, monospace);
+    font-family: var(--font-site, "Fira Mono", ui-monospace, monospace);
     text-transform: lowercase;
     max-width: 36rem;
 }
 
+/* Same gold as site h1 (#ffd749). This one is 1.2rem. */
 .blog-index__heading {
     margin: 0 0 1.25rem;
     font-family: inherit;
