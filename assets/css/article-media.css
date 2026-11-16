@@ -52,7 +52,7 @@
     margin: 0.55rem 0 0;
     padding: 0 0.35rem;
     color: color-mix(in srgb, var(--off-fg, #d8d8d8) 72%, var(--muted, #9a93a8));
-    font-family: "Fira Mono", var(--font-monospace, ui-monospace, monospace);
+    font-family: var(--font-site, "Fira Mono", ui-monospace, monospace);
     font-size: 0.78rem;
     font-weight: 400;
     font-style: italic;

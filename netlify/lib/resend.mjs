@@ -129,18 +129,18 @@ export async function unsubscribeContact(cfg, email) {
     return resendRequest(cfg.apiKey, `/contacts/${encoded}`, null, "DELETE");
 }
 
-/** htmlOrOpts: HTML string, or { html, subject } from renderWelcomeEmail. */
+/** htmlOrOpts: HTML string, or { html, subject } from renderWelcomeEmail (emails/welcome.md). */
 export async function sendWelcomeEmail(cfg, email, htmlOrOpts) {
     const origin = (cfg.siteOrigin || DEFAULT_ORIGIN).replace(/\/$/, "");
     const unsubApi = `${origin}/api/unsubscribe?email=${encodeURIComponent(email)}`;
     const opts =
         htmlOrOpts && typeof htmlOrOpts === "object"
             ? htmlOrOpts
-            : { html: htmlOrOpts, subject: "welcome to the FIELD" };
+            : { html: htmlOrOpts, subject: "" };
     return resendRequest(cfg.apiKey, "/emails", {
         from: cfg.from,
         to: [email],
-        subject: String(opts.subject || "welcome to the FIELD").trim(),
+        subject: String(opts.subject || "welcome").trim(),
         html: opts.html,
         headers: {
             "List-Unsubscribe": `<${unsubApi}>`,

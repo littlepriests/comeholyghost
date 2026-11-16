@@ -10,6 +10,7 @@ function h(t) {
     c = window.innerHeight,
     l = { x: h / 2, y: h / 2 },
     a = [],
+    /* Used only when the caller omits colors. Homepage passes the same four. */
     r = (t && t.colors) || ["#d4b85c", "#e6d48a", "#c9a84a", "#f0e6b8"],
     skip = 0;
   const d = window.matchMedia("(prefers-reduced-motion: reduce)");

@@ -1,3 +1,6 @@
+{{- /*
+  Grundo beside the player. Idle 42×56, kick 46×56, no scale (native pixels). Desktop only, from 45rem.
+*/ -}}
 {{- $idle := partial "sprite-by-id.html" "grundo-idle" -}}
 {{- $kick := partial "sprite-by-id.html" "grundo-kick" -}}
 <div id="site-player"{{ with site.Params.player.playlist }} data-playlist="{{ . }}"{{ end }}>

@@ -17,10 +17,10 @@
             {{- partial "page-buttons.html" . -}}
 
             <form class="guestbook__form" data-guestbook-form>
-                <label>name
+                <label>{{ site.Data.chrome.guestbook.name_label }}
                     <input type="text" name="name" maxlength="80" autocomplete="nickname">
                 </label>
-                <label>say anything...
+                <label>{{ site.Data.chrome.guestbook.message_label }}
                     <textarea name="message" maxlength="500" rows="4"></textarea>
                 </label>
                 <label class="site-hp" aria-hidden="true">Leave blank
@@ -28,11 +28,11 @@
                 </label>
                 <p class="guestbook__error" data-guestbook-error hidden></p>
                 <p class="guestbook__status" data-guestbook-status hidden></p>
-                <button type="submit">≽(◉˕ ◉ ≼マ</button>
+                <button type="submit">{{ site.Data.chrome.guestbook.submit }}</button>
             </form>
 
-            <section aria-label="Guestbook entries">
-                <h2>beautiful angels ˚₊‧꒰ა ♡ ໒꒱ ‧₊˚</h2>
+            <section aria-label="{{ site.Data.chrome.guestbook.entries_label }}">
+                <h2>{{ site.Data.chrome.guestbook.entries_heading }}</h2>
                 <ol class="guestbook__entries" data-guestbook-list></ol>
             </section>
         </main>

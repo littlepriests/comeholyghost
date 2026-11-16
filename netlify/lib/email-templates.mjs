@@ -54,6 +54,7 @@ export function fillTemplate(html, vars) {
 }
 
 const EMAIL_IMG_ALT = "go to site for full image";
+/* Photo well. Same hex as --inner-bg (#44355B). Hero is 520px wide; a single photo is 360px. */
 const EMAIL_INNER_BG = "#44355B";
 
 export function heroBlock(src, alt) {

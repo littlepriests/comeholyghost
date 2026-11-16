@@ -3,9 +3,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta charset="UTF-8"/>
 {{ if .Site.Params.noindex }}<meta name="robots" content="noindex" /> {{ end }}
-<link rel="preload" href="{{ "fonts/fira-mono-400.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
+{{- $fontPreload := .Site.Params.fonts.preload | default (slice "fonts/fira-mono-400.woff2" "fonts/DotMatrixNarrow.woff2") -}}
+{{- range $fontPreload }}
+<link rel="preload" href="{{ . | relURL }}" as="font" type="font/woff2" crossorigin>
+{{- end }}
 {{- $fontSite := .Site.Params.fonts.site | default `"Fira Mono", ui-monospace, monospace` -}}
-{{- $fontArticle := .Site.Params.fonts.article | default `Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, "Times New Roman", serif` -}}
+{{- $fontArticle := .Site.Params.fonts.article | default `"Montserrat", sans-serif` -}}
 <style>
   :root {
     --font-site: {{ $fontSite | safeCSS }};
@@ -44,7 +47,7 @@
 | minify
 | fingerprint }}
 <link rel="stylesheet" href="{{ $site.RelPermalink }}" integrity="{{ $site.Data.Integrity }}">
-<link rel="stylesheet" href="{{ "css/player.css" | relURL }}?v=91">
+<link rel="stylesheet" href="{{ "css/player.css" | relURL }}?v=92">
 <!-- favicon -->
 {{ if os.FileExists "static/favicon.ico" }}<link rel="icon" href="{{ "favicon.ico" | absURL }}">{{ end }}
 {{ if os.FileExists "static/favicon-32x32.png" }}<link rel="icon" type="image/png" sizes="32x32" href="{{ "favicon-32x32.png" | absURL }}">{{ end }}

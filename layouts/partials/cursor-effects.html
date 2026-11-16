@@ -19,6 +19,7 @@
     function startTrail() {
         if (trail || overSword || !allowed()) return;
         trail = starCursor({
+            /* Golds. Sparkle draws about 4.5–7.7px before it grows (vendor baseDimension). */
             colors: ["#d4b85c", "#e6d48a", "#c9a84a", "#f0e6b8"]
         });
     }

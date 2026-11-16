@@ -104,14 +104,13 @@
     imgEl.src = item.full;
     imgEl.alt = item.alt || "";
     imgEl.classList.toggle("is-carousel", items.length > 1);
+    imgEl.removeAttribute("title");
     if (items.length > 1) {
-      imgEl.title = "Click for next photo";
       dialog.setAttribute(
         "aria-label",
         "Expanded image " + (index + 1) + " of " + items.length
       );
     } else {
-      imgEl.removeAttribute("title");
       dialog.setAttribute("aria-label", "Expanded image");
     }
   }
