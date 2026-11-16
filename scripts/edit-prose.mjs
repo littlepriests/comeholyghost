@@ -10,12 +10,14 @@
  *   corn edit --blog/crossroad-beauty content/blog/crossroad-beauty/
  *   corn edit content/blog/foo        same, positional under content/
  *   corn edit --review …              walk fixable Vale alerts, y/n each
+ *   corn edit --fix …                 alias of --review (Vale picker, not md wrap)
  *
  * Options:
  *   --skip-sync     Do not run vale sync
  *   --vale-only     Skip be-density
  *   --density-only  Skip Vale
  *   --review        Interactive y/n (and numbered picks) for fixable alerts
+ *   --fix           Alias of --review (Vale Action walk — not corn md --fix)
  *   --help
  */
 import { spawn, spawnSync } from "node:child_process";
@@ -37,6 +39,7 @@ const FIXED_FLAGS = new Set([
   "--vale-only",
   "--density-only",
   "--review",
+  "--fix",
   "--help",
   "-h",
 ]);
@@ -56,7 +59,7 @@ function parseArgs(argv) {
     if (a === "--skip-sync") opts.skipSync = true;
     else if (a === "--vale-only") opts.valeOnly = true;
     else if (a === "--density-only") opts.densityOnly = true;
-    else if (a === "--review") opts.review = true;
+    else if (a === "--review" || a === "--fix") opts.review = true;
     else if (a === "--help" || a === "-h") opts.help = true;
     else if (a.startsWith("--") && !FIXED_FLAGS.has(a)) {
       // corn edit --read-me.md  →  content/read-me.md
@@ -221,6 +224,46 @@ function ignoreLogLabel(alert) {
     return `${JSON.stringify(stem)} (spelling + possessives)`;
   }
   return JSON.stringify(match);
+}
+
+/** Site Vocab accept list (vale.ini Vocab = Site). Survives vale sync. */
+const SITE_ACCEPT_PATH = path.join(
+  root,
+  "styles",
+  "config",
+  "vocabularies",
+  "Site",
+  "accept.txt",
+);
+
+/**
+ * Persist a Match into the Site vocabulary (sorted, de-duped, lowercase stem
+ * for spelling; exact match otherwise). Returns the word written.
+ */
+function acceptToSiteVocab(alert) {
+  const match = String(alert?.Match ?? "").trim();
+  if (!match) throw new Error("empty Match; nothing to accept");
+  const word = isSpellingCheck(alert)
+    ? possessiveStem(match).toLowerCase()
+    : match.toLowerCase();
+  if (!word) throw new Error("empty stem; nothing to accept");
+
+  fs.mkdirSync(path.dirname(SITE_ACCEPT_PATH), { recursive: true });
+  let lines = [];
+  if (fs.existsSync(SITE_ACCEPT_PATH)) {
+    lines = fs
+      .readFileSync(SITE_ACCEPT_PATH, "utf8")
+      .split(/\r?\n/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+  const set = new Set(lines.map((s) => s.toLowerCase()));
+  if (!set.has(word.toLowerCase())) {
+    lines.push(word);
+    lines.sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }));
+    fs.writeFileSync(SITE_ACCEPT_PATH, lines.join("\n") + "\n", "utf8");
+  }
+  return word;
 }
 
 function isSpellingCheck(alert) {
@@ -475,7 +518,7 @@ function filterReviewQueue(queue, skipped, ignoredItems) {
 async function reviewFixable(relFiles) {
   if (!process.stdin.isTTY || !process.stdout.isTTY) {
     console.error(
-      "corn edit --review needs an interactive terminal (TTY). Use plain corn edit instead.",
+      "corn edit --fix / --review needs an interactive terminal (TTY). Use plain corn edit instead.",
     );
     return 2;
   }
@@ -486,6 +529,7 @@ async function reviewFixable(relFiles) {
   let applied = 0;
   let skippedN = 0;
   let ignoredN = 0;
+  let acceptedN = 0;
   let quit = false;
 
   const rl = readline.createInterface({
@@ -500,6 +544,8 @@ Review fixable Vale alerts (Action set; case-only spelling already filtered).
   n / s       skip this one only
   i           ignore this match for the rest of this run (all repeats;
               spelling also covers possessives: amaral → amaral's)
+  a           accept into Site vocab (styles/config/vocabularies/Site/accept.txt)
+              and ignore for the rest of this run
   q           quit review
 `);
 
@@ -537,7 +583,7 @@ Review fixable Vale alerts (Action set; case-only spelling already filtered).
       if (suggestions.length === 0) {
         console.log("  (no auto-fix suggestion from vale fix)");
         const ans = (
-          await ask(rl, "  [Enter=skip, i=ignore match, q=quit] ")
+          await ask(rl, "  [Enter=skip, i=ignore, a=accept vocab, q=quit] ")
         ).toLowerCase();
         if (ans === "q") {
           quit = true;
@@ -547,6 +593,21 @@ Review fixable Vale alerts (Action set; case-only spelling already filtered).
           ignoredItems.add(ignoreItemKey(alert));
           ignoredN++;
           console.log(`  ignoring ${ignoreLogLabel(alert)} for this run`);
+          continue;
+        }
+        if (ans === "a") {
+          try {
+            const word = acceptToSiteVocab(alert);
+            ignoredItems.add(ignoreItemKey(alert));
+            acceptedN++;
+            console.log(
+              `  accepted ${JSON.stringify(word)} → styles/config/vocabularies/Site/accept.txt`,
+            );
+          } catch (err) {
+            console.error(`  accept failed: ${err.message}`);
+            skipped.add(key);
+            skippedN++;
+          }
           continue;
         }
         skipped.add(key);
@@ -564,8 +625,8 @@ Review fixable Vale alerts (Action set; case-only spelling already filtered).
 
       const hint =
         suggestions.length === 1
-          ? "y/Enter=apply, n=skip, i=ignore, q=quit"
-          : `1-${suggestions.length}=pick, n=skip, i=ignore, q=quit`;
+          ? "y/Enter=apply, n=skip, i=ignore, a=accept, q=quit"
+          : `1-${suggestions.length}=pick, n=skip, i=ignore, a=accept, q=quit`;
       const ans = (await ask(rl, `  [${hint}] `)).toLowerCase();
 
       if (ans === "q") {
@@ -576,6 +637,21 @@ Review fixable Vale alerts (Action set; case-only spelling already filtered).
         ignoredItems.add(ignoreItemKey(alert));
         ignoredN++;
         console.log(`  ignoring ${ignoreLogLabel(alert)} for this run`);
+        continue;
+      }
+      if (ans === "a") {
+        try {
+          const word = acceptToSiteVocab(alert);
+          ignoredItems.add(ignoreItemKey(alert));
+          acceptedN++;
+          console.log(
+            `  accepted ${JSON.stringify(word)} → styles/config/vocabularies/Site/accept.txt`,
+          );
+        } catch (err) {
+          console.error(`  accept failed: ${err.message}`);
+          skipped.add(key);
+          skippedN++;
+        }
         continue;
       }
       if (ans === "n" || ans === "s") {
@@ -626,7 +702,7 @@ Review fixable Vale alerts (Action set; case-only spelling already filtered).
   }
 
   console.log(
-    `\nReview done: ${applied} applied, ${skippedN} skipped, ${ignoredN} ignore-item(s).`,
+    `\nReview done: ${applied} applied, ${skippedN} skipped, ${ignoredN} ignore-item(s), ${acceptedN} accepted to vocab.`,
   );
   return 0;
 }
@@ -650,11 +726,13 @@ Lint markdown under content/ only (Vale + be-density).
   corn edit --blog/your-post        content/blog/your-post/
   corn edit content/blog/your-post  same (positional must stay under content/)
   corn edit --review --blog/post    y/n each fixable Vale alert
+  corn edit --fix --blog/post       same as --review (Vale picker)
 
   --skip-sync      skip vale sync
   --vale-only      Vale only
   --density-only   be-density only
-  --review         interactive yes/no (or 1–N); i ignores a match for the run
+  --review         interactive yes/no (or 1–N); i ignores; a accepts to vocab
+  --fix            alias of --review (not corn md --fix)
 
 Spelling alerts that only differ by case (illinois vs Illinois) are dropped;
 real typos stay.`);
