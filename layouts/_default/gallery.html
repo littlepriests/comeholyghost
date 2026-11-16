@@ -60,7 +60,7 @@
 
         {{- partial "site-footer.html" (dict "page" .) }}
     </div>
-    <script src="{{ "js/article-media.js" | relURL }}?v=3"></script>
+    {{ partial "js.html" "article-media" }}
     </div>
     {{- partial "site-chrome.html" . }}
 </body>

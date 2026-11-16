@@ -18,9 +18,10 @@
   {{- $img = . -}}
 {{- end -}}
 {{- $href := $src | relURL -}}
+{{- $disp := false -}}
 {{- if $img -}}
   {{- if ge $img.Width 1 -}}
-    {{- $disp := $img.Fit "1600x1600 webp q75" -}}
+    {{- $disp = $img.Fit "1600x1600 webp q75" -}}
     {{- $href = $disp.RelPermalink -}}
   {{- else -}}
     {{- $href = $img.RelPermalink -}}
@@ -31,7 +32,10 @@
 {{- end -}}
 <figure class="article-figure">
   <div class="article-figure__frame">
-    <img src="{{ $href }}" alt="{{ $alt }}" loading="lazy" decoding="async">
+    {{- $w := 0 -}}
+    {{- $h := 0 -}}
+    {{- with $disp }}{{ $w = .Width }}{{ $h = .Height }}{{ end -}}
+    {{ partial "responsive-img.html" (dict "src" $href "alt" $alt "res" $img "width" $w "height" $h "sizes" "(min-width: 40rem) 40rem, 100vw") }}
   </div>
   {{- with $caption }}
   <figcaption class="article-figure__caption">{{ . | $.Page.RenderString }}</figcaption>

@@ -34,9 +34,10 @@
       {{- end -}}
       {{- $thumb := $src | relURL -}}
       {{- $full := $thumb -}}
+      {{- $disp := false -}}
       {{- if $img -}}
         {{- if ge $img.Width 1 -}}
-          {{- $disp := $img.Fit "800x800 webp q75" -}}
+          {{- $disp = $img.Fit "800x800 webp q75" -}}
           {{- $large := $img.Fit "1600x1600 webp q70" -}}
           {{- $thumb = $disp.RelPermalink -}}
           {{- $full = $large.RelPermalink -}}
@@ -52,7 +53,10 @@
         data-article-photo
         data-full="{{ $full }}"
         aria-label="View larger: {{ $alt }}">
-        <img src="{{ $thumb }}" alt="{{ $alt }}" loading="lazy" decoding="async">
+        {{- $w := 0 -}}
+        {{- $h := 0 -}}
+        {{- with $disp }}{{ $w = .Width }}{{ $h = .Height }}{{ end -}}
+        {{ partial "responsive-img.html" (dict "src" $thumb "alt" $alt "res" $img "width" $w "height" $h "sizes" "(min-width: 36rem) 17rem, 46vw") }}
       </button>
     {{- end -}}
   </div>

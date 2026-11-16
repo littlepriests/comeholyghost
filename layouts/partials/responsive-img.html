@@ -1,0 +1,27 @@
+{{- /*
+  <img> with the processed size reserved (so the page doesn't jump) and a srcset
+  of smaller WebP copies. dict: src, alt, res (page resource), width, height, sizes.
+*/ -}}
+{{- $srcset := slice -}}
+{{- with .res -}}
+  {{- if ge .Width 1 -}}
+    {{- $original := . -}}
+    {{- range slice 480 800 1200 1600 -}}
+      {{- if le . $original.Width -}}
+        {{- $scaled := $original.Resize (printf "%dx webp q75" .) -}}
+        {{- $srcset = $srcset | append (printf "%s %dw" $scaled.RelPermalink $scaled.Width) -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+<img
+  {{- with .id }} id="{{ . }}"{{ end }}
+  src="{{ .src }}"
+  alt="{{ .alt }}"
+  {{- with .title }} title="{{ . }}"{{ end -}}
+  {{- with .width }} width="{{ . }}"{{ end -}}
+  {{- with .height }} height="{{ . }}"{{ end -}}
+  {{- with $srcset }} srcset="{{ delimit . ", " }}"{{ end -}}
+  {{- with .sizes }} sizes="{{ . }}"{{ end }}
+  loading="lazy"
+  decoding="async">

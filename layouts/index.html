@@ -97,8 +97,8 @@ jgs   `'-..._____.-`</pre>
         {{- partial "site-footer.html" (dict "page" . "variant" "home" "class" "home-footer") }}
     </div>
     {{- partial "home-clouds.html" . -}}
-    <script src="{{ "js/home.js" | relURL }}?v=62"></script>
-    <script src="{{ "js/article-media.js" | relURL }}?v=3"></script>
+    {{ partial "js.html" "home" }}
+    {{ partial "js.html" "article-media" }}
     </div>
     {{- partial "site-chrome.html" . }}
 </body>

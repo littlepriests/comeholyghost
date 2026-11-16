@@ -7,7 +7,7 @@
   Photos: pass tip= on the shortcode — not this file.
 */ -}}
 {{- $text := .fallback | default "" -}}
-{{- with site.Data.tips -}}
+{{- with hugo.Data.tips -}}
   {{- if $.social -}}
     {{- with .social -}}
       {{- with index . $.social -}}{{- $text = . -}}{{- end -}}

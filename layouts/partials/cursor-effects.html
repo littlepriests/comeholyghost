@@ -1,10 +1,11 @@
 {{/*
   Star trail (homepage only — see layouts/index.html).
-  Self-hosted pin: static/js/vendor/cursor-effects.esm.js (v1.0.18 motion,
+  Self-hosted pin: assets/js/vendor/cursor-effects.esm.js (v1.0.18 motion,
   star particles instead of bubbles). Skip on coarse / narrow / reduced motion.
 */}}
+{{- $vendor := resources.Get "js/vendor/cursor-effects.esm.js" | fingerprint }}
 <script type="module">
-    import { starCursor } from "{{ "js/vendor/cursor-effects.esm.js" | relURL }}";
+    import { starCursor } from "{{ $vendor.RelPermalink }}";
 
     var trail = null;
     var overSword = false;

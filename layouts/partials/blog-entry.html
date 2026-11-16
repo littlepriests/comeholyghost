@@ -29,6 +29,7 @@
 {{- $caption := .Params.index_caption | default "" -}}
 {{- $thumb := false -}}
 {{- $full := "" -}}
+{{- $disp := false -}}
 {{- /* Preview box: Fit only when wider/taller than these; else keep native. */ -}}
 {{- $previewMaxW := 960 -}}
 {{- $previewMaxH := 720 -}}
@@ -38,7 +39,8 @@
   {{- with $res -}}
     {{- if ge .Width 1 -}}
       {{- /* Fit downscales only; smaller masters keep native pixel size. */ -}}
-      {{- $thumb = (.Fit (printf "%dx%d webp q80" $previewMaxW $previewMaxH)).RelPermalink -}}
+      {{- $disp = .Fit (printf "%dx%d webp q80" $previewMaxW $previewMaxH) -}}
+      {{- $thumb = $disp.RelPermalink -}}
       {{- $full = (.Fit "1600x1600 webp q70").RelPermalink -}}
     {{- else -}}
       {{- $thumb = .RelPermalink -}}
@@ -63,7 +65,10 @@
             data-article-photo
             data-full="{{ $full }}"
             aria-label="{{ if $caption }}view larger: {{ $caption | plainify }}{{ else }}view larger image{{ end }}">
-            <img src="{{ $thumb }}" alt="{{ $caption | default .Title | plainify }}" loading="lazy" decoding="async">
+            {{- $w := 0 -}}
+            {{- $h := 0 -}}
+            {{- with $disp }}{{ $w = .Width }}{{ $h = .Height }}{{ end -}}
+            {{ partial "responsive-img.html" (dict "src" $thumb "alt" ($caption | default .Title | plainify) "res" $res "width" $w "height" $h "sizes" "(min-width: 53rem) 40rem, 100vw") }}
         </button>
         {{- with $caption }}
         <figcaption class="blog-entry__caption">{{ . | $.RenderString }}</figcaption>

@@ -10,8 +10,8 @@
 {{- with .Site.Params.cursor.image }}
 {{- $cursorFile := printf "static/%s" (strings.TrimPrefix "/" .) -}}
 {{- if os.FileExists $cursorFile }}
-<script src="{{ "js/site-cursor-fx.js" | relURL }}?v=6"></script>
+{{ partial "js.html" "site-cursor-fx" }}
 {{- end }}
 {{- end }}
-<script src="{{ "js/site-tips.js" | relURL }}?v=2"></script>
-<script src="{{ "js/subscribe.js" | relURL }}?v=4"></script>
+{{ partial "js.html" "site-tips" }}
+{{ partial "js.html" "subscribe" }}

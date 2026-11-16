@@ -18,6 +18,7 @@ profiles: |
     `md` is your md linter
     `compress` manages images
     `email` is resend preview.
+    `test` checks nothing broke (and that nothing moved, with --visual).
 
   Ship are your git/GitHub/Netlify commands you never remember. You need the `--thinkpad` or `aura` args for these.
     `update` updates your packages
@@ -142,6 +143,21 @@ sections:
           - flag: EMAIL_PREVIEW_NO_OPEN=1
             help: Do not open the browser (env)
 
+      - invoke: corn test
+        about: |
+          Unit tests (functions, email, corn) + browser behavior tests
+          (page swap keeps music, pets, player parking, subscribe). Same as CI.
+          First run installs tests/node_modules + Playwright Chromium.
+        flags:
+          - flag: --unit
+            help: Unit tests only (fast; no browser or Hugo)
+          - flag: --visual
+            help: Screenshot check of every page, desktop + phone. Fails if anything moved.
+          - flag: --update
+            help: Re-record screenshots after a change you meant. Commit the new PNGs.
+          - flag: --all
+            help: Unit + behavior + screenshots
+
   - name: Ship
     blurb: |
       Git remotes differ by machine. Pass a machine flag on branch / add /
@@ -208,6 +224,8 @@ examples:
   - corn compress --dry-run --new content/blog/crossroad-beauty
   - corn email
   - corn email --watch
+  - corn test
+  - corn test --visual
   - corn update --dry-run
   - corn branch --thinkpad && corn add --thinkpad && corn push --thinkpad
   - corn deploy --aura --pr-only

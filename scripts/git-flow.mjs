@@ -22,6 +22,16 @@ import os from "node:os";
 import path from "node:path";
 import readline from "node:readline";
 import { fileURLToPath } from "node:url";
+import {
+  MACHINES,
+  batchAcceptHasWords,
+  findSecretPaths,
+  judgeCheckRuns,
+  judgePrChecks,
+  mmddyy,
+  parseMachineFlags,
+  pickUpdateBranchName,
+} from "./lib/git-flow-rules.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const INTEGRATION = "preview";
@@ -31,25 +41,8 @@ const BATCH_ACCEPT = "styles/config/vocabularies/Batch/accept.txt";
 const BATCH_ACCEPT_NOTE =
   "# Words for the current preview batch. corn deploy clears this after preview is on main.\n";
 
-/** @type {Record<string, { id: string, label: string, remote: string }>} */
-const MACHINES = {
-  thinkpad: {
-    id: "thinkpad",
-    label: "thinkpad (work)",
-    remote: "personal",
-  },
-  aura: {
-    id: "aura",
-    label: "aura (personal)",
-    remote: "origin",
-  },
-};
-
 /** Set once per run by resolveRemote(). */
 let REMOTE = "";
-
-const SECRET_HINT =
-  /(^|\/)(\.env|\.env\.|.*credentials.*|.*secret.*|.*\.pem$|.*id_rsa|.*kubeconfig)/i;
 
 function run(cmd, args, opts = {}) {
   const r = spawnSync(cmd, args, {
@@ -86,27 +79,6 @@ function ghOut(...args) {
 function die(msg, code = 1) {
   console.error(msg);
   process.exit(code);
-}
-
-function parseMachineFlags(args) {
-  const rest = [];
-  let machine = null;
-  for (const a of args) {
-    if (a === "--thinkpad") {
-      if (machine && machine !== "thinkpad") {
-        die("Use only one of --aura / --thinkpad.");
-      }
-      machine = "thinkpad";
-    } else if (a === "--aura") {
-      if (machine && machine !== "aura") {
-        die("Use only one of --aura / --thinkpad.");
-      }
-      machine = "aura";
-    } else {
-      rest.push(a);
-    }
-  }
-  return { machine, rest };
 }
 
 function promptMachine() {
@@ -164,13 +136,6 @@ function currentBranch() {
   return gitOut("branch", "--show-current");
 }
 
-function mmddyy(d = new Date()) {
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  const yy = String(d.getFullYear()).slice(-2);
-  return `${mm}${dd}${yy}`;
-}
-
 function nextUpdateBranch() {
   const base = `update-${mmddyy()}`;
   const local = gitOut("branch", "--list", `${base}*`)
@@ -181,13 +146,9 @@ function nextUpdateBranch() {
     .split("\n")
     .map((s) => s.trim().replace(new RegExp(`^${REMOTE}/`), ""))
     .filter(Boolean);
-  const taken = new Set([...local, ...remote]);
-  if (!taken.has(base)) return base;
-  for (let i = 2; i < 50; i++) {
-    const name = `${base}-${i}`;
-    if (!taken.has(name)) return name;
-  }
-  die("Too many update-* branches for today.");
+  const name = pickUpdateBranchName(base, new Set([...local, ...remote]));
+  if (!name) die("Too many update-* branches for today.");
+  return name;
 }
 
 function fetchAll() {
@@ -257,7 +218,7 @@ function listChanges() {
 }
 
 function assertNoSecrets(paths) {
-  const bad = paths.filter((p) => SECRET_HINT.test(p));
+  const bad = findSecretPaths(paths);
   if (bad.length) {
     die(
       `Refusing to stage likely secrets:\n  ${bad.join("\n  ")}\nMove them out of the tree or rename before corn add.`
@@ -508,14 +469,7 @@ function previewChecksGreen() {
       { allowFail: true }
     );
     const out = `${checks.stdout || ""}\n${checks.stderr || ""}`;
-    if (/fail|pending|error/i.test(out) && !/pass/i.test(out)) {
-      return { ok: false, detail: out.trim() || "checks not green", prNum };
-    }
-    // gh pr checks exits 0 when all pass, 1 when pending/fail
-    if (checks.status !== 0) {
-      return { ok: false, detail: out.trim() || "checks not green", prNum };
-    }
-    return { ok: true, detail: out.trim() || "all checks passed", prNum };
+    return { ...judgePrChecks(checks.status, out), prNum };
   }
 
   // No PR yet — inspect latest commit status on preview via API.
@@ -549,28 +503,7 @@ function previewChecksGreen() {
     } catch {
       list = [];
     }
-    if (!list.length) {
-      return {
-        ok: true,
-        detail: "No check runs reported on preview (treating as clear).",
-        prNum: null
-      };
-    }
-    const bad = list.filter(
-      (c) =>
-        c.status !== "completed" ||
-        (c.conclusion && !["success", "neutral", "skipped"].includes(c.conclusion))
-    );
-    if (bad.length) {
-      return {
-        ok: false,
-        detail: bad
-          .map((c) => `${c.name}: ${c.status}/${c.conclusion || "?"}`)
-          .join("\n"),
-        prNum: null
-      };
-    }
-    return { ok: true, detail: "All check runs completed successfully.", prNum: null };
+    return { ...judgeCheckRuns(list), prNum: null };
   }
   return { ok: false, detail: `preview commit status: ${state}`, prNum: null };
 }
@@ -579,13 +512,6 @@ function batchAcceptText(rev) {
   const shown = run("git", ["show", `${rev}:${BATCH_ACCEPT}`], { allowFail: true });
   if (shown.status !== 0) return "";
   return shown.stdout || "";
-}
-
-function batchAcceptHasWords(text) {
-  return text.split(/\r?\n/).some((line) => {
-    const trimmed = line.trim();
-    return trimmed && !trimmed.startsWith("#");
-  });
 }
 
 /**

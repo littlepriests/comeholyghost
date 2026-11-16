@@ -23,7 +23,7 @@
 }
 
 /*
-  Hover tip: .site-tip[data-tip] + floating layer from static/js/site-tips.js.
+  Hover tip: .site-tip[data-tip] + floating layer from assets/js/site-tips.js.
   Follows the pointer (ahead of the cursor). Copy lives in data/tips.yaml.
   z-index above sprites, images, and the back-to-top heart layer.
 */

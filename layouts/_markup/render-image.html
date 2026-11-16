@@ -1,3 +1,13 @@
+{{- $res := false -}}
+{{- with .Page.Resources.GetMatch .Destination }}{{ $res = . }}{{ end -}}
+{{- if not $res }}{{ with .Page.Resources.GetMatch (.Destination | path.Base) }}{{ $res = . }}{{ end }}{{ end -}}
+{{- $w := 0 -}}
+{{- $h := 0 -}}
+{{- with $res }}{{ if ge .Width 1 }}{{ $w = .Width }}{{ $h = .Height }}{{ end }}{{ end -}}
 <span class="retro-media">
-<img id="{{ .Destination | path.Base | anchorize }}" src="{{ .Destination | safeURL }}" alt="{{ .PlainText }}"{{ with .Title }} title="{{ . }}"{{ end }} loading="lazy">
+{{- if $res -}}
+  {{ partial "responsive-img.html" (dict "src" (.Destination | safeURL) "alt" .PlainText "title" .Title "id" (.Destination | path.Base | anchorize) "res" $res "width" $w "height" $h "sizes" "(min-width: 40rem) 40rem, 100vw") }}
+{{- else -}}
+<img id="{{ .Destination | path.Base | anchorize }}" src="{{ .Destination | safeURL }}" alt="{{ .PlainText }}"{{ with .Title }} title="{{ . }}"{{ end }} loading="lazy" decoding="async">
+{{- end -}}
 </span>

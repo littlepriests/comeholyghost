@@ -12,6 +12,11 @@
 # Netlify function deps
 /node_modules/
 
+# Test deps + run output (screenshot baselines in tests/e2e/__screenshots__/ DO ship)
+/tests/node_modules/
+/tests/test-results/
+/tests/playwright-report/
+
 # Vale binary + sync cache (reinstall Vale, then `vale sync` / `corn edit`).
 # House rules live in styles/wraith/ and DO ship. Do not ignore that folder.
 # (Old `Styles/` entry matched styles/ on Windows and hid wraith.)

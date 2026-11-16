@@ -24,6 +24,7 @@ const COMMANDS = {
   edit: "edit-prose.mjs",
   md: "lint-markdown.mjs",
   email: "preview-emails.mjs",
+  test: "run-tests.mjs",
   update: "update-deps.mjs",
 };
 
@@ -130,7 +131,7 @@ function flagRows(flags, flagWidth = 24) {
   return rows;
 }
 
-const WRITER_CMDS = new Set(["run", "compress", "edit", "md", "email"]);
+const WRITER_CMDS = new Set(["run", "compress", "edit", "md", "email", "test"]);
 const SHIP_CMDS = new Set(["update", "branch", "add", "push", "deploy"]);
 
 function exampleBucket(ex) {

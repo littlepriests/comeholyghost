@@ -17,16 +17,17 @@
 [context.branch-deploy]
   command = "hugo --minify --baseURL $DEPLOY_PRIME_URL"
 
-# Long-cache versioned/static assets; HTML revalidates so deploys show up.
+# /js/ and /css/ hold only fingerprinted files (assets/ via css.html / js.html),
+# so a changed file is a new URL. Images keep a shorter cache; HTML revalidates.
 [[headers]]
   for = "/js/*"
   [headers.values]
-    Cache-Control = "public, max-age=604800"
+    Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
   for = "/css/*"
   [headers.values]
-    Cache-Control = "public, max-age=604800"
+    Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
   for = "/fonts/*"

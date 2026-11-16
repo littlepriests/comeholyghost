@@ -153,6 +153,20 @@ export function markdownToEmailHtml(markdown, options) {
     const assetBase = String(opts.assetBase || origin).replace(/\/$/, "");
     let text = String(markdown || "").replace(/\r\n/g, "\n");
 
+    // Escape the prose first, with shortcodes masked so their `<` survives for the
+    // replacements below. Tags inserted after this (`<a>`, `<strong>`, photos) stay real
+    // HTML, and a `<b>` written in a paragraph is text.
+    const shortcodes = [];
+    text = text.replace(/\{\{<[\s\S]*?>\}\}/g, function (match) {
+        const token = `%%SC${shortcodes.length}%%`;
+        shortcodes.push(match);
+        return token;
+    });
+    text = escapeHtml(text);
+    text = text.replace(/%%SC(\d+)%%/g, function (_, n) {
+        return shortcodes[Number(n)];
+    });
+
     // {{< photo src="x" caption="y" >}} / photo-grid blocks
     text = text.replace(/\{\{<\s*photo\s+([^>]*?)\s*\/?>\}\}/g, function (_, attrs) {
         const src = /src\s*=\s*"([^"]+)"/.exec(attrs);
@@ -196,24 +210,24 @@ export function markdownToEmailHtml(markdown, options) {
     });
     text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function (_, label, href) {
         const url = absolutize(href, origin);
-        return `<a href="${url}" style="color:#18ff6d;text-decoration:underline;">${escapeHtml(label)}</a>`;
+        return `<a href="${url}" style="color:#18ff6d;text-decoration:underline;">${label}</a>`;
     });
 
     // Headings / emphasis (after links so we don't nest badly on raw md)
     text = text.replace(/^### (.+)$/gm, function (_, t) {
-        return `<p style="margin:18px 0 8px;font-size:15px;color:#f2efe8;">${escapeHtml(t)}</p>`;
+        return `<p style="margin:18px 0 8px;font-size:15px;color:#f2efe8;">${t}</p>`;
     });
     text = text.replace(/^## (.+)$/gm, function (_, t) {
-        return `<p style="margin:20px 0 8px;font-size:16px;color:#f2efe8;">${escapeHtml(t)}</p>`;
+        return `<p style="margin:20px 0 8px;font-size:16px;color:#f2efe8;">${t}</p>`;
     });
     text = text.replace(/^# (.+)$/gm, function (_, t) {
-        return `<p style="margin:20px 0 8px;font-size:18px;color:#f2efe8;">${escapeHtml(t)}</p>`;
+        return `<p style="margin:20px 0 8px;font-size:18px;color:#f2efe8;">${t}</p>`;
     });
     text = text.replace(/\*\*([^*]+)\*\*/g, function (_, t) {
-        return `<strong>${escapeHtml(t)}</strong>`;
+        return `<strong>${t}</strong>`;
     });
     text = text.replace(/\*([^*]+)\*/g, function (_, t) {
-        return `<em>${escapeHtml(t)}</em>`;
+        return `<em>${t}</em>`;
     });
 
     const blocks = text.split(/\n{2,}/);
@@ -249,14 +263,12 @@ function collapseSoftWrapsHtml(text) {
         .trim();
 }
 
-/** Plain prose: escape, then soft-wrap → space; hard break → <br>. */
+/** Plain prose is already escaped. Soft-wrap → space; hard break → <br>. */
 function collapseSoftWrapsPlain(text) {
     return String(text || "")
         .split(/  \n/)
         .map(function (part) {
-            return escapeHtml(
-                part.replace(/\n+/g, " ").replace(/[ \t]{2,}/g, " ").trim()
-            );
+            return part.replace(/\n+/g, " ").replace(/[ \t]{2,}/g, " ").trim();
         })
         .filter(Boolean)
         .join("<br>\n");

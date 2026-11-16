@@ -247,7 +247,7 @@ Raw HTML in markdown works when you need it, but prefer shortcodes for pictures 
 
 ## Shortcodes (site-specific)
 
-All live under `layouts/shortcodes/`. Styles: `assets/css/article-media.css`. Lightbox: `static/js/article-media.js`.
+All live under `layouts/shortcodes/`. Styles: `assets/css/article-media.css`. Lightbox: `assets/js/article-media.js`.
 
 Self-closing form is fine when there is no inner body: `{{< photo src="x.png" />}}`.
 

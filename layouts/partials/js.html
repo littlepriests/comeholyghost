@@ -1,0 +1,12 @@
+{{- /*
+  Script from assets/js/, minified + fingerprinted (no ?v= bumps).
+    {{ partial "js.html" "home" }}
+  SPA nav (player.js) re-runs scripts inside #page-root by src, so each stays its own URL.
+*/ -}}
+{{- with resources.Get (printf "js/%s.js" .) }}
+{{- /* js.Build bundles any imports (home.js) and emits a classic script, so the SPA re-run by src still works. */ -}}
+{{- $js := . | js.Build (dict "format" "iife" "target" "es2020") | minify | fingerprint }}
+<script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}"></script>
+{{- else }}
+{{- errorf "js.html: assets/js/%s.js not found" . }}
+{{- end }}
