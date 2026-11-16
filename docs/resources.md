@@ -109,7 +109,7 @@ article = "\"Montserrat\", sans-serif"
 | `--font-site` | Body / chrome (home, guestbook, gallery, writing index, asides) | `[params.fonts] site` |
 | `--font-article` | `/blog/<slug>/` prose (`.content__header` + `.content__body`) | `[params.fonts] article` |
 
-`head.html` writes the CSS variables; `assets/css/typography.css` applies `--font-site` on `body`. Blog posts also load `assets/css/article-reading.css` (linked from `layouts/_default/single.html` when `.Section == "blog"`). **Ad-hoc article readability fixes** (line-height, measure, heading weight, code face) go in `article-reading.css` — keep `typography.css` for sitewide rules. Articles change the face only, never the font size, so body text and headings match the homepage and read-me. `typography.css` sets `text-wrap: balance` on headings and `text-wrap: pretty` on paragraphs, list items, captions, and quotes, so a title or short line doesn't end on one lone word. Writing-index face stays on `.blog-index` in `assets/css/blog-index.css` (still site mono by default).
+`head.html` writes the CSS variables; `assets/css/typography.css` applies `--font-site` on `body`. Blog posts also load `assets/css/article-reading.css` (linked from `layouts/_default/single.html` when `.Section == "blog"`). **Ad-hoc article readability fixes** (line-height, measure, heading weight, code face) go in `article-reading.css` — keep `typography.css` for sitewide rules. Articles change the face only, never the font size, so body text and headings match the homepage and read-me. `typography.css` sets `text-wrap: balance` on headings plus homepage title lines and writing-index titles, and `text-wrap: pretty` on paragraphs, lists, captions, quotes, index summaries, and the article aside — so a title or short line is less likely to end on one lone word (orphan/widow). Chromium supports this best; Safari/Firefox may still orphan. No `&nbsp;` rewrites in `content/`. Writing-index face stays on `.blog-index` in `assets/css/blog-index.css` (still site mono by default).
 
 Self-host a new face: drop WOFF2 under `static/fonts/`, add its `@font-face` to `assets/css/fonts.css`, and put that family first in `site` or `article`.
 
@@ -455,7 +455,7 @@ You still **merge feature PRs into `preview` in GitHub** yourself. `corn deploy`
 
 **PR base must be `preview`.** GitHub’s default compare URL targets `main` (the default branch). Prefer `corn push`, or open `compare/preview...<branch>?expand=1`. Cadence: land many feature PRs on `preview` through the month; one `corn deploy` (`preview` → `main`) when you want production.
 
-**Vale CI:** `.github/workflows/vale.yml` runs Vale on `content/` for PRs/pushes (added lines only). It posts a check with annotations; it does **not** fail the job yet (house-style lowercase still looks like spelling errors). Local: `corn edit`.
+**Vale CI:** `.github/workflows/vale.yml` runs Vale on `content/` for PRs/pushes (added lines only). It posts a check with annotations; it does **not** fail the job yet (house-style lowercase still looks like spelling errors). Local: `corn edit` / `corn edit --fix`. Accepted house words live in `styles/config/vocabularies/Site/accept.txt` (`Vocab = Site` in `vale.ini`; key `a` in the review picker).
 
 ### Do Deploy Previews burn credits?
 
@@ -486,13 +486,17 @@ Templates live in git under `emails/` (not published by Hugo). Site subscribe UI
 | `RESEND_API_KEY` | `re_…` |
 | `RESEND_FROM` | `FIELD <news@cornfieldjournal.com>` (must be on the verified domain) |
 | `RESEND_SEGMENT_ID` | segment id from step 3 |
+| `RESEND_NOTIFY_TO` | `fellbeasts@proton.me` (owner ping on new subscribe; optional, this is the default) |
+| `RESEND_WEBHOOK_SECRET` | `whsec_…` from the Resend webhook details page |
 | `NEWSLETTER_AUTO_SEND` | `1` when you want deploys to broadcast **net-new** posts |
 
 Optional local: same vars in a gitignored `.env` for `netlify dev` / `--send`.
 
+**Owner notify (webhook):** In Resend → Webhooks, add `https://cornfieldjournal.com/api/resend-webhook` for event `contact.created`. Paste the signing secret into `RESEND_WEBHOOK_SECRET`. The handler emails `RESEND_NOTIFY_TO` (or the default above). `/api/subscribe` also sends the same ping when it creates a contact, so you still get a notice if the webhook is late or unset.
+
 ### Behavior
 
-- **Subscribe:** adds the contact to the segment; sends the welcome letter once (skipped if they were already on the list). Edit copy in `emails/welcome.md`; chrome is `emails/welcome.html`. Welcome is transactional (not a Broadcast), so unsub is a site link to `/unsubscribe/` + `POST /api/unsubscribe` (marks the Resend contact `unsubscribed`). Post letters still use `{{{RESEND_UNSUBSCRIBE_URL}}}`.
+- **Subscribe:** adds the contact to the segment; sends the welcome letter once (skipped if they were already on the list); pings the owner. Edit copy in `emails/welcome.md`; chrome is `emails/welcome.html`. Welcome is transactional (not a Broadcast), so unsub is a site link to `/unsubscribe/` + `POST /api/unsubscribe` (marks the Resend contact `unsubscribed`). Post letters still use `{{{RESEND_UNSUBSCRIBE_URL}}}`.
 - **New posts:** `scripts/newsletter-on-deploy.mjs` runs after Hugo. First run **seeds** a ledger with every existing post (nothing historical is emailed). Later deploys broadcast only slugs not yet in the ledger via Resend **Broadcasts** (not transactional `/emails`). Skip a post with front matter `newsletter = false`.
 - **Ledger:** Netlify Blobs store `newsletter` / key `sent` on deploy; locally `.newsletter-sent.json` (gitignored).
 
@@ -500,9 +504,10 @@ Optional local: same vars in a gitignored `.env` for `netlify dev` / `--send`.
 
 ```bash
 corn email
+corn email --watch
 ```
 
-(or `npm run emails:preview`) Rebuilds `emails/preview/`. Serve HTML with `npx serve emails/preview -p 3939` and local Hugo assets with `npx serve public -p 3940` (preview image URLs point at `:3940` so Fit hashes match this build). Welcome copy: `emails/welcome.md`. Post chrome: `emails/post.html` (body comes from the Hugo post). Placeholders: `{{TITLE}}` `{{DATE}}` `{{SUMMARY}}` `{{PERMALINK}}` `{{HERO_BLOCK}}` `{{BODY}}`; leave `{{{RESEND_UNSUBSCRIBE_URL}}}` for Broadcasts. Photo-grids render as 2-up tables (no lightbox); img `alt` is “go to site for full image”.
+(or `npm run emails:preview`) Rebuilds `emails/preview/`. `--watch` rebuilds when `emails/`, email libs, or `content/blog/` change; the preview index auto-refreshes. Serve HTML with `npx serve emails/preview -p 3939` and local Hugo assets with `npx serve public -p 3940` (preview image URLs point at `:3940` so Fit hashes match this build). Welcome copy: `emails/welcome.md`. Post chrome: `emails/post.html` (body comes from the Hugo post). Placeholders: `{{TITLE}}` `{{DATE}}` `{{SUMMARY}}` `{{PERMALINK}}` `{{HERO_BLOCK}}` `{{BODY}}`; leave `{{{RESEND_UNSUBSCRIBE_URL}}}` for Broadcasts. Photo-grids render as 2-up tables (no lightbox); img `alt` is “go to site for full image”.
 
 ```bash
 npm run newsletter:dry    # list what would send
