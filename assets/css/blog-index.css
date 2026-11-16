@@ -1,11 +1,12 @@
 /* Writing index (/blog/): vajra-style feed — title, date, thumb + caption, summary. */
 
 .blog-index {
-    font-family: "Fira Mono", var(--font-monospace, ui-monospace, monospace);
+    font-family: var(--font-site, "Fira Mono", ui-monospace, monospace);
     text-transform: lowercase;
     max-width: 36rem;
 }
 
+/* Same gold as site h1 (#ffd749). This one is 1.2rem. */
 .blog-index__heading {
     margin: 0 0 1.25rem;
     font-family: inherit;
@@ -101,14 +102,17 @@
 }
 
 .blog-entry__caption {
-    margin: 0.4rem 0 0;
-    padding: 0;
+    margin: 0.45rem 0 0;
+    padding: 0 0.15rem;
     font-family: inherit;
-    font-size: 0.8rem;
+    font-size: 0.72rem;
+    font-weight: 400;
     font-style: italic;
-    line-height: 1.35;
-    color: var(--off-fg, #d8d8d8);
+    letter-spacing: 0.02em;
+    line-height: 1.4;
+    color: color-mix(in srgb, var(--off-fg, #d8d8d8) 72%, var(--muted, #9a93a8));
     text-transform: lowercase;
+    opacity: 0.92;
 }
 
 .blog-entry__summary {

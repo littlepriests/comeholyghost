@@ -2,7 +2,8 @@
 /**
  * Markdown structure + 80-col wrap for content/ only.
  *
- *   corn md                         lint all markdown under content/
+ *   corn md                         prompt for content/blog/<name>
+ *   corn md --all                   lint all markdown under content/
  *   corn md --blog/crossroad-beauty
  *   corn md --fix …                 wrap prose to 80 + markdownlint --fix
  *   corn md --wrap-only …           wrap only (no markdownlint)
@@ -13,6 +14,7 @@
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
+import readline from "node:readline";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 
@@ -23,6 +25,7 @@ const WRAP_WIDTH = 80;
 const require = createRequire(import.meta.url);
 
 const FIXED_FLAGS = new Set([
+  "--all",
   "--fix",
   "--wrap-only",
   "--lint-only",
@@ -33,6 +36,7 @@ const FIXED_FLAGS = new Set([
 
 function parseArgs(argv) {
   const opts = {
+    all: false,
     fix: false,
     wrapOnly: false,
     lintOnly: false,
@@ -41,7 +45,8 @@ function parseArgs(argv) {
     targets: [],
   };
   for (const a of argv) {
-    if (a === "--fix") opts.fix = true;
+    if (a === "--all") opts.all = true;
+    else if (a === "--fix") opts.fix = true;
     else if (a === "--wrap-only") opts.wrapOnly = true;
     else if (a === "--lint-only") opts.lintOnly = true;
     else if (a === "--dry-run") opts.dryRun = true;
@@ -57,6 +62,49 @@ function parseArgs(argv) {
     }
   }
   return opts;
+}
+
+function normalizeBlogName(raw) {
+  let name = String(raw || "")
+    .trim()
+    .replace(/\\/g, "/")
+    .replace(/^\/+/, "");
+  if (!name) return "";
+  name = name.replace(/^(content\/)?blog\//, "");
+  name = name.replace(/\/+$/, "");
+  if (/\.mdx?$/i.test(name) && !name.includes("/")) {
+    name = name.replace(/\.mdx?$/i, "");
+  }
+  if (!name || name.includes("..")) {
+    throw new Error("Need a blog slug under content/blog/ (no ..).");
+  }
+  return `blog/${name}`;
+}
+
+function promptBlogTarget() {
+  return new Promise((resolve, reject) => {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+    rl.question("content/blog/<name>: ", (answer) => {
+      rl.close();
+      try {
+        const target = normalizeBlogName(answer);
+        if (!target) {
+          reject(
+            new Error(
+              "Empty name — type a post slug (e.g. crossroad-beauty) or pass --all.",
+            ),
+          );
+          return;
+        }
+        resolve(target);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  });
 }
 
 function walkMarkdown(dir, out = []) {
@@ -92,11 +140,19 @@ function resolveUnderContent(raw) {
   return abs;
 }
 
-function collectMarkdown(targets) {
+function collectMarkdown(targets, { all = false } = {}) {
   if (!fs.existsSync(contentRoot)) {
     throw new Error(`Missing content/ at ${contentRoot}`);
   }
-  if (targets.length === 0) return walkMarkdown(contentRoot).sort();
+  if (all) {
+    if (targets.length) {
+      throw new Error("Pass --all alone, or pass a path — not both.");
+    }
+    return walkMarkdown(contentRoot).sort();
+  }
+  if (targets.length === 0) {
+    throw new Error("No target — pass a path, --all, or answer the blog prompt.");
+  }
   const files = [];
   for (const t of targets) {
     const p = resolveUnderContent(t);
@@ -366,7 +422,7 @@ function reportLongLines(files) {
   return n;
 }
 
-function main() {
+async function main() {
   let opts;
   try {
     opts = parseArgs(process.argv.slice(2));
@@ -381,13 +437,15 @@ function main() {
 Markdown structure lint + ${WRAP_WIDTH}-col prose wrap under content/ only.
 (Prose/style stays with corn edit / Vale.)
 
-  corn md                         lint all content/**/*.md
+  corn md                         prompt for content/blog/<name>
+  corn md --all                   lint all content/**/*.md
   corn md --blog/your-post
   corn md --fix --blog/your-post  wrap to ${WRAP_WIDTH} + markdownlint --fix
   corn md --wrap-only …
   corn md --lint-only …
   corn md --dry-run --fix …      show wrap changes without writing
 
+  --all          sweep all content/**/*.md
   --fix         wrap prose + apply markdownlint fixes
   --wrap-only    wrap only
   --lint-only    markdownlint only
@@ -400,9 +458,23 @@ Markdown structure lint + ${WRAP_WIDTH}-col prose wrap under content/ only.
     process.exit(2);
   }
 
+  if (opts.all && opts.targets.length) {
+    console.error("Pass --all alone, or pass a path — not both.");
+    process.exit(2);
+  }
+
+  if (!opts.all && opts.targets.length === 0) {
+    try {
+      opts.targets.push(await promptBlogTarget());
+    } catch (err) {
+      console.error(err.message);
+      process.exit(2);
+    }
+  }
+
   let files;
   try {
-    files = collectMarkdown(opts.targets);
+    files = collectMarkdown(opts.targets, { all: opts.all });
   } catch (err) {
     console.error(err.message);
     process.exit(2);
@@ -456,4 +528,7 @@ Markdown structure lint + ${WRAP_WIDTH}-col prose wrap under content/ only.
   process.exit(code);
 }
 
-main();
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

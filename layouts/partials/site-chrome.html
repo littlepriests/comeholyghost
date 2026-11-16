@@ -6,5 +6,12 @@
 {{- if .IsHome }}
 {{ partial "cursor-effects.html" . }}
 {{- end }}
+{{- /* Ghost click hearts + idle bubbles — desktop fine pointer only (script self-gates). */ -}}
+{{- with .Site.Params.cursor.image }}
+{{- $cursorFile := printf "static/%s" (strings.TrimPrefix "/" .) -}}
+{{- if os.FileExists $cursorFile }}
+<script src="{{ "js/site-cursor-fx.js" | relURL }}?v=6"></script>
+{{- end }}
+{{- end }}
 <script src="{{ "js/site-tips.js" | relURL }}?v=2"></script>
 <script src="{{ "js/subscribe.js" | relURL }}?v=4"></script>

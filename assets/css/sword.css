@@ -40,6 +40,8 @@
     pointer-events: none;
 }
 
+/* ♡ fountain. Hue #ff2a4a, bright #ff4d6d. Glyphs 0.95rem, bright 1.15rem.
+   The spread is the --dx/--dy on each heart in sword-figure.html. A theme key can replace the hues. */
 .sword-figure__heart {
     position: absolute;
     left: 0;

@@ -183,8 +183,8 @@ body.home .ascii-angel__cta-art {
 
 .home-banner {
     position: relative;
-    /* Shared banner display size — reserve space before decode. */
-    aspect-ratio: 1200 / 280;
+    /* Box comes from [params.home] bannerWidth / bannerHeight. */
+    aspect-ratio: var(--home-banner-ratio, 1200 / 280);
     overflow: hidden;
     /* Frame / sparkle come from assets/css/retro.css */
 }
@@ -332,7 +332,10 @@ body.home .page__logo-slot .page__logo {
 }
 
 /* Braille angel: transparent stage, pink wing/halo glow, gold halo sparkles.
-   Theme `pre` paints a solid --inner-bg !important — kill that on .ascii-art. */
+   Theme `pre` paints a solid --inner-bg !important — kill that on .ascii-art.
+   These four hues are local to the angel (mauve matches --base0E).
+   pink #ff69b4, mauve #ba8baf, gold #ffd27a, hot #fff1c2.
+   The 2.1rem top margin and 1.75rem / 3.25rem padding are the cloud pocket, not colors. */
 .home-main .ascii-angel {
     --ascii-pink: #ff69b4;
     --ascii-mauve: #ba8baf;

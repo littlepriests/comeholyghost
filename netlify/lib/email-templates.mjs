@@ -54,6 +54,7 @@ export function fillTemplate(html, vars) {
 }
 
 const EMAIL_IMG_ALT = "go to site for full image";
+/* Photo well. Same hex as --inner-bg (#44355B). Hero is 520px wide; a single photo is 360px. */
 const EMAIL_INNER_BG = "#44355B";
 
 export function heroBlock(src, alt) {
@@ -313,6 +314,11 @@ function absolutize(url, base) {
     return `${base}/${raw.replace(/^\.\//, "")}`;
 }
 
+/**
+ * Welcome letter from emails/welcome.md (all copy) + welcome.html (chrome only).
+ * Returns { html, subject }. Blank / commented-out fields omit their blocks
+ * (no empty shells). Unsubscribe link always remains in the footer block.
+ */
 export async function renderWelcomeEmail(options) {
     const opts = options || {};
     const origin = String(opts.origin || DEFAULT_ORIGIN).replace(/\/$/, "");
@@ -324,18 +330,62 @@ export async function renderWelcomeEmail(options) {
     const raw = await readFile(mdPath, "utf8");
     const { meta, body } = parseFrontMatter(raw);
     const tpl = await loadEmailTemplate("welcome.html");
-    return fillTemplate(tpl, {
-        TITLE: escapeHtml(meta.title || "hi there"),
-        PREHEADER: escapeHtml(
-            meta.preheader || "read what i write."
-        ),
-        HEADLINE: escapeHtml(meta.headline || "thanks for joining"),
-        FOOTER: escapeHtml(
-            meta.footer || "cornfieldjournal.com"
-        ),
-        UNSUBSCRIBE_URL: unsubscribeUrl,
-        BODY: markdownToEmailHtml(body, { origin })
+    const subject = String(meta.subject || meta.title || "welcome").trim();
+    const preheader = String(meta.preheader || "").trim();
+    const greeting = String(meta.greeting || "").trim();
+    const headline = String(meta.headline || "").trim();
+    const footer = String(meta.footer || "").trim();
+    const unsubLabel = String(meta.unsubscribe || "unsubscribe").trim() || "unsubscribe";
+    const bodyHtml = markdownToEmailHtml(body, { origin });
+    const imageBlock = welcomeImageBlock(meta.image, meta.image_alt, origin);
+
+    const html = fillTemplate(tpl, {
+        TITLE: escapeHtml(meta.title || subject),
+        PREHEADER_BLOCK: preheader
+            ? `<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">${escapeHtml(preheader)}</div>\n`
+            : "",
+        GREETING_BLOCK: greeting
+            ? `<p style="margin:0;font-size:13px;line-height:1.4;color:#9a93a8;"><span style="color:#ffe566;font-family:Impact,Haettenschweiler,'Arial Black',sans-serif;font-size:24px;letter-spacing:0.05em;">${escapeHtml(greeting)}</span></p>` +
+              `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:14px 0 18px;"><tr><td style="height:2px;line-height:2px;font-size:0;background:#18ff6d;">&nbsp;</td></tr></table>\n`
+            : "",
+        IMAGE_BLOCK: imageBlock,
+        HEADLINE_BLOCK: headline
+            ? `<h1 style="margin:0 0 14px;font-size:20px;line-height:1.3;font-weight:normal;color:#f2efe8;">${escapeHtml(headline)}</h1>\n`
+            : "",
+        BODY_BLOCK: bodyHtml
+            ? `<div style="font-size:14px;line-height:1.6;color:#d8d2e0;">${bodyHtml}</div>\n`
+            : "",
+        FOOTER_BLOCK: welcomeFooterBlock(footer, unsubLabel, unsubscribeUrl)
     });
+    return { html, subject };
+}
+
+function welcomeFooterBlock(footer, unsubLabel, unsubscribeUrl) {
+    const line = footer
+        ? `${escapeHtml(footer)}<br>\n                `
+        : "";
+    return (
+        `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">` +
+        `<tr><td style="height:1px;line-height:1px;font-size:0;background:#3a3348;">&nbsp;</td></tr>` +
+        `</table>` +
+        `<p style="margin:14px 0 0;font-size:12px;line-height:1.55;color:#9a93a8;">` +
+        `${line}<a href="${unsubscribeUrl}" style="color:#f2efe8;text-decoration:underline;">${escapeHtml(unsubLabel)}</a>` +
+        `</p>`
+    );
+}
+
+/** Optional welcome image from front matter (`image:` under static/ or absolute URL). */
+function welcomeImageBlock(image, alt, origin) {
+    const raw = String(image || "").trim();
+    if (!raw) return "";
+    let src = raw;
+    if (!/^https?:\/\//i.test(raw) && !raw.startsWith("//")) {
+        const rel = raw.replace(/^\/+/, "").replace(/^static\//, "");
+        src = `${origin}/${rel}`;
+    } else if (raw.startsWith("//")) {
+        src = `https:${raw}`;
+    }
+    return heroBlock(src, alt || EMAIL_IMG_ALT);
 }
 
 export async function renderPostEmail(post) {

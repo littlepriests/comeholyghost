@@ -1,4 +1,4 @@
-# Posting blog posts (multimedia)
+﻿# Posting blog posts (multimedia)
 
 How to write and ship a post on this site: folder layout, front matter, shortcodes, sprites, and video. Maintainer chrome (player, stars, Netlify) lives in `docs/resources.md` — this file is for **content**.
 
@@ -57,9 +57,29 @@ Default path is `content/blog`. Converts `.jpg`/`.png` → lossy WebP (long edge
 - **`corn compress --new`:** same rules, but only files **new to git** (not on `HEAD`).
 - **`--force`:** recompress even corn-marked WebP (opt-in; can soften).
 
-Use `--dry-run` first. One-time alias install (PowerShell, any cwd): `powershell -ExecutionPolicy Bypass -File scripts/install-corn.ps1` — or from the repo root run `.\corn compress …`.
+Use `--dry-run` first.
 
-A commit runs that same check on staged images under `content/`. If `corn compress` would still change one, the commit stops. Corn-marked WebPs and already-small unmarked WebPs pass with nothing to do.
+### Corn CLI (Writer vs Ship)
+
+Same `corn` binary; two machine profiles:
+
+| Profile | Machine | Commands |
+| --- | --- | --- |
+| **Writer** | personal / writing | `run`, `edit`, `md`, `compress`, `email` |
+| **Ship** | deploy / git+Netlify box | Writer cmds + `update`, `branch`, `add`, `push`, `deploy` |
+
+One-time install (PowerShell, any cwd):
+
+```text
+powershell -File scripts/install-corn.ps1
+. $PROFILE
+npm install --prefix scripts
+corn help
+```
+
+Without install: from the repo root `.\corn help` or `node scripts\corn.mjs help`.
+
+A commit runs the compress check on staged images under `content/`. If `corn compress` would still change one, the commit stops. Corn-marked WebPs and already-small unmarked WebPs pass with nothing to do.
 
 Writing-index (`/blog/`) preview: shows near-full size with `object-fit: contain` (no crop/stretch). Oversized masters are Fit-capped in `layouts/partials/blog-entry.html`; on-page max width/height live in `assets/css/blog-index.css`. Adjust those when a card looks too big or too small — details in `docs/resources.md`.
 
@@ -78,29 +98,31 @@ Runs `hugo server -D --disableFastRender --navigateToChanged` from the repo root
 Vale (`vale.ini` + `styles/wraith`) plus `tools/be-density` (be-verb share). Requires `vale` on PATH. **Only markdown under `content/`** — never `docs/` or the rest of the repo.
 
 ```text
-corn edit                         # all content/**/*.md
+corn edit                         # prompt: content/blog/<name> + Vale picker
+corn edit --all                   # all content/**/*.md + picker
+corn edit --report --blog/post    # report-only Vale (no picker)
 corn edit --read-me.md            # content/read-me.md
 corn edit --blog/your-post        # that post folder
 corn edit content/blog/your-post  # same (must stay under content/)
-corn edit --review --blog/post    # y/n (or 1–N) each fixable Vale alert
 ```
 
-First run may `vale sync` package styles. Flags: `--vale-only`, `--density-only`, `--skip-sync`, `--review`.
+First run may `vale sync` package styles. Flags: `--all`, `--vale-only`, `--density-only`, `--skip-sync`, `--report` (report-only). `--fix` / `--review` still work but are the default.
 
-`--review` walks alerts that have a Vale `Action` (replace / edit / suggest / …), prompts per alert, and writes chosen fixes into the markdown. Keys: `y`/`Enter` apply, `1–N` pick, `n` skip once, `i` ignore that match for the rest of the run (all repeats; for spelling, possessives share the stem — `amaral` also ignores `amaral's`, but not bare plural `amarals`, and not non-spelling/grammar alerts), `q` quit. Needs a real terminal (TTY).
+Default `corn edit` walks alerts that have a Vale `Action` (replace / edit / suggest / …), prompts per alert, and writes chosen fixes into the markdown. Keys: `y`/`Enter` apply, `1–N` pick, `n` skip once, `i` ignore that match for the rest of the run (all repeats; for spelling, possessives share the stem — `amaral` also ignores `amaral's`, but not bare plural `amarals`, and not non-spelling/grammar alerts), `a` accept into the batch Vale list (`styles/config/vocabularies/Batch/accept.txt`, committed with the PR, cleared on `preview` by `corn deploy` after that batch is on `main`), `p` accept into the permanent Site list (`styles/config/vocabularies/Site/accept.txt`), `q` quit. Needs a real terminal (TTY); use `--report` otherwise.
 
-`corn edit` (and `--review`) drop spelling alerts that only differ by case (`illinois` vs `Illinois`) so house-style lowercase isn’t treated as a typo. Real misspellings still flag.
+`corn edit` drops spelling alerts that only differ by case (`illinois` vs `Illinois`) so house-style lowercase isn’t treated as a typo. Real misspellings still flag.
 
 ### Markdown structure (`corn md`)
 
-`markdownlint-cli2` (config: `.markdownlint-cli2.yaml`) plus an 80-column prose wrap that leaves Hugo shortcodes, front matter, fences, tables, lists, headings, HTML/`<pre>`/braille ASCII, and markdown links/URLs alone. **Only `content/`.** Style/spelling stay with `corn edit`. Prefer `--wrap-only` or a dry-run before `--fix` on link-heavy pages (footnotes).
+`markdownlint-cli2` (config: `.markdownlint-cli2.yaml`) plus an 80-column prose wrap that leaves Hugo shortcodes, front matter, fences, tables, lists, headings, HTML/`<pre>`/braille ASCII, and markdown links/URLs alone. **Only `content/`.** Style/spelling stay with `corn edit` — `corn md --fix` does **not** open the Vale picker.
 
 Whitespace / lists (fixable with `--fix`): unordered markers are `-`, nested lists indent with 2 spaces (no tabs), strip stray trailing spaces (exactly two spaces still OK for a hard break), collapse extra blank lines, one space after list markers.
 
 ```text
-corn md                         # lint + report lines over 80
+corn md                         # prompt: content/blog/<name>
+corn md --all                   # lint all content/**/*.md
 corn md --blog/your-post
-corn md --fix --blog/your-post  # wrap to 80 + markdownlint --fix
+corn md --fix --blog/your-post  # wrap to 80 + markdownlint --fix (not Vale)
 corn md --wrap-only …
 corn md --lint-only …
 corn md --dry-run --fix …

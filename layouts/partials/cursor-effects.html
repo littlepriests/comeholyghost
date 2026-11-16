@@ -1,13 +1,12 @@
 {{/*
-  Bubble cursor — homepage only (see layouts/index.html).
-  Self-hosted pin: static/js/vendor/cursor-effects.esm.js (v1.0.18, trimmed to
-  bubbleCursor). Need another effect? Re-vendor it from the upstream release.
-  Skip on coarse pointers / narrow viewports / reduced motion.
+  Star trail (homepage only — see layouts/index.html).
+  Self-hosted pin: static/js/vendor/cursor-effects.esm.js (v1.0.18 motion,
+  star particles instead of bubbles). Skip on coarse / narrow / reduced motion.
 */}}
 <script type="module">
-    import { bubbleCursor } from "{{ "js/vendor/cursor-effects.esm.js" | relURL }}";
+    import { starCursor } from "{{ "js/vendor/cursor-effects.esm.js" | relURL }}";
 
-    var bubbles = null;
+    var trail = null;
     var overSword = false;
     var mqReduce = window.matchMedia("(prefers-reduced-motion: reduce)");
     var mqNarrow = window.matchMedia("(max-width: 44.99rem)");
@@ -17,22 +16,23 @@
         return !mqReduce.matches && !mqNarrow.matches && !mqCoarse.matches;
     }
 
-    function startBubbles() {
-        if (bubbles || overSword || !allowed()) return;
-        bubbles = bubbleCursor({
-            colors: ["#ff69b4", "#ffffff", "#b388ff"]
+    function startTrail() {
+        if (trail || overSword || !allowed()) return;
+        trail = starCursor({
+            /* Golds. Sparkle draws about 4.5–7.7px before it grows (vendor baseDimension). */
+            colors: ["#d4b85c", "#e6d48a", "#c9a84a", "#f0e6b8"]
         });
     }
 
-    function stopBubbles() {
-        if (!bubbles) return;
-        if (typeof bubbles.destroy === "function") bubbles.destroy();
-        bubbles = null;
+    function stopTrail() {
+        if (!trail) return;
+        if (typeof trail.destroy === "function") trail.destroy();
+        trail = null;
     }
 
     function sync() {
-        if (allowed()) startBubbles();
-        else stopBubbles();
+        if (allowed()) startTrail();
+        else stopTrail();
     }
 
     function isSword(node) {
@@ -42,7 +42,7 @@
     document.addEventListener("pointerover", function (event) {
         if (!isSword(event.target)) return;
         overSword = true;
-        stopBubbles();
+        stopTrail();
     }, true);
 
     document.addEventListener("pointerout", function (event) {

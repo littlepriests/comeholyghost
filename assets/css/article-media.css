@@ -49,13 +49,17 @@
 }
 
 .article-figure__caption {
-    margin: 0.45rem 0 0;
-    padding: 0 0.25rem;
-    color: var(--off-fg, #d8d8d8);
-    font-family: "Fira Mono", var(--font-monospace, ui-monospace, monospace);
-    font-size: 0.9rem;
-    line-height: 1.35;
+    margin: 0.55rem 0 0;
+    padding: 0 0.35rem;
+    color: color-mix(in srgb, var(--off-fg, #d8d8d8) 72%, var(--muted, #9a93a8));
+    font-family: var(--font-site, "Fira Mono", ui-monospace, monospace);
+    font-size: 0.78rem;
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: 0.02em;
+    line-height: 1.4;
     text-align: center;
+    opacity: 0.92;
 }
 
 /* Grouped photos: 2-up rows; odd leftover tile centered under. */
