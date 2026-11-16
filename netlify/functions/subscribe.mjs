@@ -6,6 +6,7 @@ import { isPreviewDeploy } from "../lib/preview-guard.mjs";
 import {
     addContact,
     errorMessage,
+    notifyOwnerSubscribe,
     resendConfig,
     resendConfigured,
     sendWelcomeEmail
@@ -59,6 +60,12 @@ export default async (request) => {
 
     // Welcome only for brand-new contacts (409 = already on the list).
     if (contact.created) {
+        // Owner ping (webhook is the other path; this covers when webhooks lag).
+        try {
+            await notifyOwnerSubscribe(cfg, email);
+        } catch (error) {
+            // Don't fail the subscriber on a notify blip.
+        }
         try {
             const welcomeHtml = await renderWelcomeEmail({
                 email,
