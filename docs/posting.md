@@ -1,4 +1,4 @@
-# Posting blog posts (multimedia)
+﻿# Posting blog posts (multimedia)
 
 How to write and ship a post on this site: folder layout, front matter, shortcodes, sprites, and video. Maintainer chrome (player, stars, Netlify) lives in `docs/resources.md` — this file is for **content**.
 
@@ -98,19 +98,19 @@ Runs `hugo server -D --disableFastRender --navigateToChanged` from the repo root
 Vale (`vale.ini` + `styles/wraith`) plus `tools/be-density` (be-verb share). Requires `vale` on PATH. **Only markdown under `content/`** — never `docs/` or the rest of the repo.
 
 ```text
-corn edit                         # all content/**/*.md
+corn edit                         # prompt: content/blog/<name> + Vale picker
+corn edit --all                   # all content/**/*.md + picker
+corn edit --report --blog/post    # report-only Vale (no picker)
 corn edit --read-me.md            # content/read-me.md
 corn edit --blog/your-post        # that post folder
 corn edit content/blog/your-post  # same (must stay under content/)
-corn edit --fix --blog/post       # y/n Vale picker (alias of --review)
-corn edit --review --blog/post    # same as --fix
 ```
 
-First run may `vale sync` package styles. Flags: `--vale-only`, `--density-only`, `--skip-sync`, `--review` / `--fix`.
+First run may `vale sync` package styles. Flags: `--all`, `--vale-only`, `--density-only`, `--skip-sync`, `--report` (report-only). `--fix` / `--review` still work but are the default.
 
-`--fix` / `--review` walk alerts that have a Vale `Action` (replace / edit / suggest / …), prompts per alert, and writes chosen fixes into the markdown. Keys: `y`/`Enter` apply, `1–N` pick, `n` skip once, `i` ignore that match for the rest of the run (all repeats; for spelling, possessives share the stem — `amaral` also ignores `amaral's`, but not bare plural `amarals`, and not non-spelling/grammar alerts), `a` accept into the site Vale vocabulary (persist), `q` quit. Needs a real terminal (TTY).
+Default `corn edit` walks alerts that have a Vale `Action` (replace / edit / suggest / …), prompts per alert, and writes chosen fixes into the markdown. Keys: `y`/`Enter` apply, `1–N` pick, `n` skip once, `i` ignore that match for the rest of the run (all repeats; for spelling, possessives share the stem — `amaral` also ignores `amaral's`, but not bare plural `amarals`, and not non-spelling/grammar alerts), `a` accept into the site Vale vocabulary (persist), `q` quit. Needs a real terminal (TTY); use `--report` otherwise.
 
-`corn edit` (and `--fix` / `--review`) drop spelling alerts that only differ by case (`illinois` vs `Illinois`) so house-style lowercase isn’t treated as a typo. Real misspellings still flag.
+`corn edit` drops spelling alerts that only differ by case (`illinois` vs `Illinois`) so house-style lowercase isn’t treated as a typo. Real misspellings still flag.
 
 ### Markdown structure (`corn md`)
 
@@ -119,7 +119,8 @@ First run may `vale sync` package styles. Flags: `--vale-only`, `--density-only`
 Whitespace / lists (fixable with `--fix`): unordered markers are `-`, nested lists indent with 2 spaces (no tabs), strip stray trailing spaces (exactly two spaces still OK for a hard break), collapse extra blank lines, one space after list markers.
 
 ```text
-corn md                         # lint + report lines over 80
+corn md                         # prompt: content/blog/<name>
+corn md --all                   # lint all content/**/*.md
 corn md --blog/your-post
 corn md --fix --blog/your-post  # wrap to 80 + markdownlint --fix (not Vale)
 corn md --wrap-only …

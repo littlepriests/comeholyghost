@@ -67,11 +67,11 @@ export default async (request) => {
             // Don't fail the subscriber on a notify blip.
         }
         try {
-            const welcomeHtml = await renderWelcomeEmail({
+            const welcome = await renderWelcomeEmail({
                 email,
                 origin: cfg.siteOrigin
             });
-            const sent = await sendWelcomeEmail(cfg, email, welcomeHtml);
+            const sent = await sendWelcomeEmail(cfg, email, welcome);
             if (!sent.ok) {
                 return json(502, {
                     error: errorMessage(sent, "you’re listed, but the welcome note didn’t send.")

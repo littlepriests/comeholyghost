@@ -39,9 +39,11 @@ those over inventing new patterns.
 - **Do not** leave Cursor `Co-authored-by` / `Made-with: Cursor` trailers on
   commits. Repo `.githooks/commit-msg` strips them; also keep Cursor Settings →
   Git & PRs → Attribution (commit + PR) off for this machine if possible.
-- Site source of truth is the private GitHub repo
+-   Site source of truth is the private GitHub repo
   [`littlepriests/comeholyghost`](https://github.com/littlepriests/comeholyghost)
-  on branch `main`, remote name **`personal`**. Optional backup only:
+  on branch `main`. Git remote name is machine-specific: **`personal`** on
+  thinkpad (`corn … --thinkpad`), **`origin`** on aura (`corn … --aura`);
+  bare ship commands prompt. Optional backup only:
   [`akristen/proj-zip`](https://github.com/akristen/proj-zip). Never add an
   employer remote.
 
@@ -51,11 +53,14 @@ those over inventing new patterns.
 2. Ship via **`preview`** (integration) → **`main`** (production). Prefer:
    `corn branch` → edit → `corn add` → `corn push` → merge the PR into
    `preview` on GitHub → when ready, `corn deploy` (promotes `preview` →
-   `main` only if checks are green). Do not push straight to `main` for
+   `main` only if checks are green). Pass `--thinkpad` or `--aura` on those
+   git commands (or answer the prompt). Do not push straight to `main` for
    day-to-day work.
-3. Keep work GitHub (`gh`, default `github.com` SSH) as the machine default.
-   Pushes here must use `git@github.com-personal:littlepriests/comeholyghost.git`
-   (deploy key). Do not force-push `main` unless the user explicitly asks.
+3. On thinkpad, keep work GitHub (`gh`, default `github.com` SSH) as the
+   machine default; site pushes use
+   `git@github.com-personal:littlepriests/comeholyghost.git` (deploy key,
+   remote name `personal`). On aura, standard `origin` → github.com is fine.
+   Do not force-push `main` unless the user explicitly asks.
 4. Optional backup: when asked to zip / update proj-zip, build a zip and upload
    via `gh api` — that path is backup, not the primary ship loop.
 
@@ -63,7 +68,8 @@ those over inventing new patterns.
 
 - Lockfile `resolved` URLs are all `registry.npmjs.org` (no private registry).
 - No `.env`, tokens, `*.pem`, docker/kube configs, or work credentials staged.
-- Remotes: only `personal` → littlepriests/comeholyghost (plus none from work).
+- Remotes: thinkpad `personal` or aura `origin` → littlepriests/comeholyghost
+  (plus none from work).
 
 ### Zip contents (optional backup)
 

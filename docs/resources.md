@@ -1,4 +1,4 @@
-# Site resources
+﻿# Site resources
 
 Private notes for the site owner and agents. This file is not a Hugo page. Do not move it into `content/` or `static/`. Hugo publishes those folders. Visitors should not see this.
 
@@ -33,10 +33,12 @@ Credits / provenance:
 - Kagura / Misdreavus / Sango / SkiFree strips: fan-use test assets; publishers own the art (see Sprite animations).
 
 1. ~~**Mobile player chrome**~~ — Done. Under `44.99rem` the player is the same bar without Grundo (`applyPlayerChrome()` in `player.js`). `[x]` hides it behind a ♡ without changing play/pause. Remote playlist fetch falls back to `/audio/playlist.json`.
-1b. ~~**Mobile layout pass**~~ — Done in-tree. Narrow title scale; dock wrap + smaller pets; hide sword; overflow-x clip; larger player touch targets + safe-area; non-sticky aside; gallery/guestbook padding; under `52rem` show angel guestbook CTA (clouds hidden; `home.js` clears nest-driven CTA inline coords). Phone crawl at 390×844 passed home → blog → post → gallery → guestbook. Still spot-check on a real phone after deploy.
-2. **Desktop player + sticky header** — Same minimalist player (same close/reopen behavior as mobile) docked on `/blog`, `/gallery`, `/guestbook`, `/about` on the far side of the link dock. On article bodies that already have a third column, dock the player there. On scroll, the whole link dock (home control + player) scrolls with the article — sticky header strip, not a sticky banner.
-3. ~~**First-paint flicker (follow-up)**~~ — Done in-tree: SPA waits for new stylesheets before swapping `#page-root`; banner stays pending until the random pick loads; title face uses `font-display: swap` + Fira preload; backdrop images fade in on load; `fonts-ready` gate. Verify after deploy; reopen if anything still flashes live.
+1b. ~~**Mobile layout pass**~~ — Done. Owner OK on phone layout; remaining polish is orphan/widow avoidance (CSS `text-wrap` — see Typography).
+2. ~~**Desktop player + sticky header**~~ — Dropped. Current footer player behavior is what the owner wants; do not reopen.
+3. ~~**First-paint flicker (follow-up)**~~ — Done / no longer reproducing. SPA stylesheet wait, banner pending-until-decode, font preload, backdrop fade, `fonts-ready` gate. Banner still picks one image per homepage **render** from `bannerDir` (shuffle in Hugo — refresh or SPA re-enter home to see another); it is not a timed slideshow.
 4. **Domain primary in Netlify** — Code already uses relative nav/`RelPermalink` and pins production `--baseURL https://cornfieldjournal.com/` in `netlify.toml`. Remaining work is Netlify UI: set `cornfieldjournal.com` as the site primary domain (not only an alias) after deploy.
+5. **Fun custom cursor (owner later)** — See **Cursor** below. Do not change `[params.cursor]` unless asked.
+6. **`site.webmanifest` polish (optional)** — Icons exist; `name` / `short_name` are empty and theme colors are white. Only matters if someone “Add to Home Screen” / installs as a PWA — then the shortcut label and splash use those fields. Fine to ignore until you care about that.
 
 ## Sprite animations (test)
 
@@ -203,7 +205,11 @@ Sizes the layout actually uses. `1rem` is 16px unless the browser's default font
 
 ## Cursor
 
-The pointer is an image when `hugo.toml` names a file that exists under `static/`.
+Two different “cursor” ideas on this site — don’t confuse them:
+
+1. **Pointer image (shipped)** — CSS `cursor: url(…)` from `[params.cursor]` in `hugo.toml`. Replaces the system arrow with a 32×32 GIF (or PNG). Hotspot `x` / `y` is where clicks register. Text fields keep the I-beam. Agents must not change this unless asked.
+2. **Bubble trail (shipped, homepage desktop)** — `static/js/vendor/cursor-effects.esm.js` draws floating bubbles that follow the pointer. Separate from the pointer image; not the “fun custom cursor” backlog item.
+3. **Fun custom cursor (owner later, not started)** — A more personal / animated pointer idea beyond the starter GIF (e.g. a hand-drawn hotspot, frame animation, or character that reacts). Still means editing `[params.cursor]` + `static/images/cursor.gif` (and maybe a tiny CSS/JS assist). Leave alone until you decide the art and behavior.
 
 ```toml
 [params.cursor]
@@ -442,12 +448,20 @@ Stopgap flow before a heavier release process:
 
 ### corn git commands
 
-Remote is **`personal`** → `littlepriests/comeholyghost`. There is no separate `develop` branch — **`preview` is develop**.
+Repo is always `littlepriests/comeholyghost`. Remote **name** depends on machine:
+
+| Flag | Machine | Git remote name |
+| --- | --- | --- |
+| `--thinkpad` | work | `personal` (SSH host `github.com-personal`) |
+| `--aura` | home | `origin` (standard `github.com`) |
+| (neither) | — | interactive prompt |
+
+Pass the flag on `branch` / `add` / `push` / `deploy` (or answer the prompt). There is no separate `develop` branch — **`preview` is develop**.
 
 | Command | What it does |
 | --- | --- |
 | `corn branch` | Fetch; merge `main` into local `preview`; create `update-MMDDYY` (or `-2`, …) from `preview`. |
-| `corn add` | Same preview←main sync; stay on / create an `update-*` branch; stage; **prompt for commit message**; `git push -u` so the remote feature branch exists (PR base = `preview`). |
+| `corn add` | On a feature branch: stage → **prompt for commit message** → `git push -u` (no preview checkout). On `main`/`preview`: create `update-*` first (stashes if dirty). `--sync` stashes if dirty, syncs `preview`←`main`, merges into the branch, pops, then commits. |
 | `corn push` | Push current branch; open or reuse a PR **into `preview`**. |
 | `corn deploy` | If `preview` is ahead of `main` **and checks are green**, open/merge the release PR `preview` → `main`. `--pr-only` stops before merge; `--dry-run` prints intent. |
 
@@ -455,7 +469,7 @@ You still **merge feature PRs into `preview` in GitHub** yourself. `corn deploy`
 
 **PR base must be `preview`.** GitHub’s default compare URL targets `main` (the default branch). Prefer `corn push`, or open `compare/preview...<branch>?expand=1`. Cadence: land many feature PRs on `preview` through the month; one `corn deploy` (`preview` → `main`) when you want production.
 
-**Vale CI:** `.github/workflows/vale.yml` runs Vale on `content/` for PRs/pushes (added lines only). It posts a check with annotations; it does **not** fail the job yet (house-style lowercase still looks like spelling errors). Local: `corn edit` / `corn edit --fix`. Accepted house words live in `styles/config/vocabularies/Site/accept.txt` (`Vocab = Site` in `vale.ini`; key `a` in the review picker).
+**Vale CI:** `.github/workflows/vale.yml` runs Vale on `content/` for PRs/pushes (added lines only). It posts a check with annotations; it does **not** fail the job yet (house-style lowercase still looks like spelling errors). Local: `corn edit` (picker by default; `--report` for report-only). Accepted house words live in `styles/config/vocabularies/Site/accept.txt` (`Vocab = Site` in `vale.ini`; key `a` in the review picker).
 
 ### Do Deploy Previews burn credits?
 
@@ -496,7 +510,7 @@ Optional local: same vars in a gitignored `.env` for `netlify dev` / `--send`.
 
 ### Behavior
 
-- **Subscribe:** adds the contact to the segment; sends the welcome letter once (skipped if they were already on the list); pings the owner. Edit copy in `emails/welcome.md`; chrome is `emails/welcome.html`. Welcome is transactional (not a Broadcast), so unsub is a site link to `/unsubscribe/` + `POST /api/unsubscribe` (marks the Resend contact `unsubscribed`). Post letters still use `{{{RESEND_UNSUBSCRIBE_URL}}}`.
+- **Subscribe:** adds the contact to the segment; sends the welcome letter once (skipped if they were already on the list); pings the owner. **All welcome copy** (subject, greeting, headline, preheader, footer, body, optional `image`) lives in `emails/welcome.md` only; `emails/welcome.html` is chrome/tokens. Welcome is transactional (not a Broadcast), so unsub is a site link to `/unsubscribe/` + `POST /api/unsubscribe` (**deletes** the Resend contact). Post letters still use `{{{RESEND_UNSUBSCRIBE_URL}}}`.
 - **New posts:** `scripts/newsletter-on-deploy.mjs` runs after Hugo. First run **seeds** a ledger with every existing post (nothing historical is emailed). Later deploys broadcast only slugs not yet in the ledger via Resend **Broadcasts** (not transactional `/emails`). Skip a post with front matter `newsletter = false`.
 - **Ledger:** Netlify Blobs store `newsletter` / key `sent` on deploy; locally `.newsletter-sent.json` (gitignored).
 
@@ -507,7 +521,7 @@ corn email
 corn email --watch
 ```
 
-(or `npm run emails:preview`) Rebuilds `emails/preview/`. `--watch` rebuilds when `emails/`, email libs, or `content/blog/` change; the preview index auto-refreshes. Serve HTML with `npx serve emails/preview -p 3939` and local Hugo assets with `npx serve public -p 3940` (preview image URLs point at `:3940` so Fit hashes match this build). Welcome copy: `emails/welcome.md`. Post chrome: `emails/post.html` (body comes from the Hugo post). Placeholders: `{{TITLE}}` `{{DATE}}` `{{SUMMARY}}` `{{PERMALINK}}` `{{HERO_BLOCK}}` `{{BODY}}`; leave `{{{RESEND_UNSUBSCRIBE_URL}}}` for Broadcasts. Photo-grids render as 2-up tables (no lightbox); img `alt` is “go to site for full image”.
+(or `npm run emails:preview`) Rebuilds `emails/preview/` and serves **both** letters at **http://127.0.0.1:3939/** (welcome + post; opens the browser). Also serves Hugo `public/` on **:3940** for post Fit images when that folder exists. `--watch` keeps serving and rebuilds when `emails/`, email libs, or `content/blog/` change. Env: `EMAIL_PREVIEW_NO_OPEN=1`, `EMAIL_PREVIEW_PORT`, `EMAIL_ASSET_PORT`. Welcome copy: `emails/welcome.md`. Post chrome: `emails/post.html` (body comes from the Hugo post). Placeholders: `{{TITLE}}` `{{DATE}}` `{{SUMMARY}}` `{{PERMALINK}}` `{{HERO_BLOCK}}` `{{BODY}}`; leave `{{{RESEND_UNSUBSCRIBE_URL}}}` for Broadcasts. Photo-grids render as 2-up tables (no lightbox); img `alt` is “go to site for full image”.
 
 ```bash
 npm run newsletter:dry    # list what would send

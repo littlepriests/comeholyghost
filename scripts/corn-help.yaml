@@ -1,0 +1,210 @@
+# =============================================================================
+# corn help — edit THIS file to change what `corn help` prints.
+# Colors / layout are applied by scripts/corn.mjs (TTY only; NO_COLOR disables).
+# =============================================================================
+
+usage: |
+  corn <command> [args]
+  corn help                 → press 1–6 (no Enter)
+  corn help writer commands
+  corn help ship full
+  corn help all | install
+  corn help | --help | -h
+
+profiles: |
+  Writer commands help you edit, get site ready for publication
+    `run` shows you the site
+    `edit` is your vale stuff
+    `md` is your md linter
+    `compress` manages images
+    `email` is resend preview.
+
+  Ship are your git/GitHub/Netlify commands you never remember. You need the `--thinkpad` or `aura` args for these.
+    `update` updates your packages
+    `branch` starts a new branch
+    `add` add+commit plus branch sync and an early push. syncs local preview from main, creates branch if you aren't on one, merges latest preview into your branch, stage + commits
+    `push` pushes your changes to the branch + creates a PR if one already exists
+    `deploy` deploys your changes to the live site.
+
+install: |
+  One-time setup so `corn` works on new machines:
+
+  `powershell -File scripts/install-corn.ps1`
+    Writes a `corn` PowerShell function into your profile so you can
+    run `corn …` from any folder.
+
+  ` . $PROFILE`
+    Reloads the profile in this terminal so `corn` is available now.
+
+  npm install --prefix scripts
+    Installs script deps (yaml, sharp, markdownlint, …) under
+    scripts/node_modules.
+
+  Without install (from the repo root):
+    .\corn help
+    node scripts\corn.mjs help
+paths: |
+  `edit` and `md` only look under content/
+  Bare corn edit / corn md prompt for content/blog/<name>
+  Pass --all to sweep all of content/
+  Explicit paths / --blog/slug / --read-me.md still work
+  `compress` defaults to content/blog
+
+sections:
+  - name: Writer
+    commands:
+      - invoke: corn run [hugo args…]
+        about: |
+          Runs site locally @ http://localhost:1313/
+          Default Hugo flags: server -D --disableFastRender --navigateToChanged (disable drafts, fast render, navigate to changed)
+          Extra args pass through (e.g. --bind 0.0.0.0 to make it public).
+        flags:
+          - flag: --cache
+            help:  forces a clean Hugo rebuild of processed assets. Adds Hugo’s   --ignoreCache so this server run doesn’t reuse stale cache.
+              Use it when the site looks "stuck" on old images/CSS after you changed assets. Normal corn run is usually enough; --cache is the "start fresh" option.
+          - flag: --help, -h
+            help: Command help
+
+      - invoke: corn compress [path…]
+        about: |
+          In-place WebP recompress (lean repo masters). Default path: content/blog.
+          Path = where to look; already corn-stamped .webp are skipped unless --force.
+          Examples:
+            corn compress content/blog/crossroad-beauty
+            corn compress --new content/blog/crossroad-beauty
+            corn compress --dry-run --max-edge 1600 --quality 75
+        flags:
+          - flag: --new
+            help: Only files not on git HEAD (new/untracked). Path alone still rescans that folder for any unmarked masters.
+          - flag: --force
+            help: Re-encode even corn-marked .webp (otherwise those are left alone)
+          - flag: --max-edge N
+            help: Cap the longest side (width or height) in px; smaller images are not upscaled (default 2000). e.g. --max-edge 1600
+          - flag: --quality N
+            help: Lossy WebP quality 1–100 — higher looks better / bigger file (default 82). e.g. --quality 75
+          - flag: --max-bytes N
+            help: Skip unmarked .webp already ≤ N bytes and within max-edge (default 512000 ≈ 500KB). e.g. --max-bytes 300000
+          - flag: --dry-run
+            help: Report what would change; do not write
+          - flag: --help, -h
+            help: Command help
+
+      - invoke: corn edit [path…]
+        about: |
+          Vale + be-density prose check. Default opens the interactive Vale
+          picker (former --fix). No path → prompt content/blog/<name>.
+        flags:
+          - flag: --all
+            help: Sweep all content/**/*.md (skip blog prompt)
+          - flag: --fix, --review
+            help: Explicit picker (default on) — y/Enter apply, 1–N pick, n skip, i ignore, a accept to Site vocab, q quit
+          - flag: --report
+            help: Report-only Vale (no interactive picker)
+          - flag: --vale-only
+            help: Skip be-density
+          - flag: --density-only
+            help: Skip Vale (no picker; be-density only)
+          - flag: --skip-sync
+            help: Do not run vale sync when packs are missing
+          - flag: --help, -h
+            help: Command help
+
+      - invoke: corn md [path…]
+        about: |
+          markdownlint + report lines over 80 cols (content/ only).
+          No path → prompt content/blog/<name>. Does NOT run Vale —
+          use corn edit for the Vale picker.
+        flags:
+          - flag: --all
+            help: Sweep all content/**/*.md (skip blog prompt)
+          - flag: --fix
+            help: Wrap prose to 80 + markdownlint --fix
+          - flag: --wrap-only
+            help: Wrap only (no markdownlint)
+          - flag: --lint-only
+            help: markdownlint only (no wrap)
+          - flag: --dry-run
+            help: With --fix / --wrap-only — show wrap changes, don't write
+          - flag: --help, -h
+            help: Command help
+
+      - invoke: corn email
+        about: |
+          Rebuild + serve welcome & post at http://127.0.0.1:3939/ (opens browser);
+          also serves public/ on :3940 for post Fit images when present
+        flags:
+          - flag: --watch
+            help: Rebuild when emails/, libs, or content/blog/ change
+          - flag: EMAIL_PREVIEW_PORT
+            help: Override HTML preview port (env)
+          - flag: EMAIL_ASSET_PORT
+            help: Override public/ asset port (env)
+          - flag: EMAIL_PREVIEW_NO_OPEN=1
+            help: Do not open the browser (env)
+
+  - name: Ship
+    blurb: |
+      Git remotes differ by machine. Pass a machine flag on branch / add /
+      push / deploy, or omit it and answer the prompt.
+    shared_flags:
+      - flag: --thinkpad
+        help: Work machine → git remote "personal"
+      - flag: --aura
+        help: Home machine → git remote "origin"
+      - flag: (neither)
+        help: Prompt thinkpad vs aura
+    commands:
+      - invoke: corn update
+        about: |
+          npm update in ./, scripts/, tools/be-density/
+        flags:
+          - flag: --latest
+            help: Bump package.json ranges to newest (majors ok) + reinstall
+          - flag: --dry-run, -n
+            help: List outdated packages only
+
+      - invoke: corn branch
+        about: |
+          Start update-MMDDYY from preview (after folding main into preview)
+        flags: []
+
+      - invoke: corn add
+        about: |
+          Default: stay on current feature branch → stage → commit message → push -u.
+          On main/preview: create update-* first (stashes if dirty).
+        flags:
+          - flag: --sync
+            help: Stash if dirty, sync preview←main, merge into branch, pop stash, then commit
+
+      - invoke: corn push
+        about: |
+          Push branch + open/reuse PR into preview (Deploy Preview)
+        flags: []
+
+      - invoke: corn deploy
+        about: |
+          If preview checks are green, merge preview → main (live)
+        flags:
+          - flag: --pr-only
+            help: Open/update release PR only; you merge in GitHub
+          - flag: --dry-run
+            help: Print what deploy would do (no merge)
+
+ship: |
+  Typical ship: corn branch → edit → corn add → corn push → merge PR on
+  GitHub into preview → poke the Deploy Preview → corn deploy when ready.
+  On thinkpad use --thinkpad; on aura use --aura (or omit and answer the prompt).
+
+examples:
+  - corn run
+  - corn run --cache --bind 0.0.0.0
+  - corn edit --blog/crossroad-beauty
+  - corn edit --report --all
+  - corn md --fix --blog/crossroad-beauty
+  - corn compress --dry-run --new content/blog/crossroad-beauty
+  - corn email
+  - corn email --watch
+  - corn update --dry-run
+  - corn branch --thinkpad && corn add --thinkpad && corn push --thinkpad
+  - corn deploy --aura --pr-only
+  - corn deploy --thinkpad
