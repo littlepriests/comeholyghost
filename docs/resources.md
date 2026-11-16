@@ -11,7 +11,7 @@ What we tightened (keep the GeoCities vibe; don’t gut atmosphere):
 - **Images:** article masters stay in the repo as WebP and are not published. `photo` / `figcaption` / `photo-grid` / writing-index serve Hugo-processed WebP only (click-to-expand is 1600px q70). Prefer masters under ~300–500 KB (see `docs/posting.md`).
 - **Fonts / icons:** self-hosted WOFF2 only — Fira Mono, Montserrat variable (articles), DotMatrixNarrow (homepage title line 2). Every `@font-face` lives in `assets/css/fonts.css`; files under `static/fonts/`. Site vs article faces via `[params.fonts]` (see **Fonts** below). No Google Fonts / Font Awesome / Academicons CDN. Icons via `layouts/partials/icon.html`.
 - **CSS scope:** all site CSS lives in `assets/css/` except `static/css/player.css`. See **Stylesheets** below.
-- **Atmosphere JS:** bubble cursor self-hosted (`static/js/vendor/cursor-effects.esm.js` v1.0.18), homepage + desktop only. Stars: fewer on phone / `prefers-reduced-motion`; no scroll voiding on narrow viewports.
+- **Atmosphere JS:** gold star cursor trail self-hosted (`static/js/vendor/cursor-effects.esm.js` v1.0.18 motion), homepage + desktop only. Background stars: fewer on phone / `prefers-reduced-motion`; no scroll voiding on narrow viewports.
 - **npm:** project `.npmrc` → `registry.npmjs.org` only. Before any zip, confirm lockfile `resolved` URLs are all `registry.npmjs.org` (no private registry hosts).
 
 Quick check: cold Network on `/`, `/blog/`, `/blog/crossroad-beauty/` — no cdnjs/fonts.googleapis/unpkg `@latest`; banner/post thumbs are WebP-sized responses.
@@ -36,9 +36,9 @@ Credits / provenance:
 1b. ~~**Mobile layout pass**~~ — Done. Owner OK on phone layout; remaining polish is orphan/widow avoidance (CSS `text-wrap` — see Typography).
 2. ~~**Desktop player + sticky header**~~ — Dropped. Current footer player behavior is what the owner wants; do not reopen.
 3. ~~**First-paint flicker (follow-up)**~~ — Done / no longer reproducing. SPA stylesheet wait, banner pending-until-decode, font preload, backdrop fade, `fonts-ready` gate. Banner still picks one image per homepage **render** from `bannerDir` (shuffle in Hugo — refresh or SPA re-enter home to see another); it is not a timed slideshow.
-4. **Domain primary in Netlify** — Code already uses relative nav/`RelPermalink` and pins production `--baseURL https://cornfieldjournal.com/` in `netlify.toml`. Remaining work is Netlify UI: set `cornfieldjournal.com` as the site primary domain (not only an alias) after deploy.
-5. **Fun custom cursor (owner later)** — See **Cursor** below. Do not change `[params.cursor]` unless asked.
-6. **`site.webmanifest` polish (optional)** — Icons exist; `name` / `short_name` are empty and theme colors are white. Only matters if someone “Add to Home Screen” / installs as a PWA — then the shortcut label and splash use those fields. Fine to ignore until you care about that.
+4. ~~**Domain primary in Netlify**~~ — Done (`cornfieldjournal.com` is primary).
+5. ~~**Fun custom cursor (owner later)**~~ — Ghost kept; homepage star trail + click hearts + idle bubbles (`cursor-effects` / `site-cursor-fx.js`). Tweak/revert after you try it.
+6. ~~**`site.webmanifest` polish (optional)**~~ — Skipping for now (unlikely anyone installs as an app).
 
 ## Sprite animations (test)
 
@@ -127,7 +127,7 @@ One source of truth: `assets/css/`. Hugo concatenates, minifies, and fingerprint
 
 ## Hover tips (`data/tips.yaml`)
 
-Native `title=` tooltips sit under the cursor and fight the bubble cursor. Use instead:
+Native `title=` tooltips sit under the cursor and fight the star trail. Use instead:
 
 - **Decorative chrome** (sprites, pets, player, logo, email chip): edit **`data/tips.yaml`** keys (`grundo`, `sango`, `kagura`, `player_play`, …). Optional `social:` overrides by hugo.toml link title.
 - **Article photos**: case-by-case on the shortcode — `tip="…"` (and `alt=` / `caption=` as usual), not the YAML map.
@@ -208,8 +208,8 @@ Sizes the layout actually uses. `1rem` is 16px unless the browser's default font
 Two different “cursor” ideas on this site — don’t confuse them:
 
 1. **Pointer image (shipped)** — CSS `cursor: url(…)` from `[params.cursor]` in `hugo.toml`. Replaces the system arrow with a 32×32 GIF (or PNG). Hotspot `x` / `y` is where clicks register. Text fields keep the I-beam. Agents must not change this unless asked.
-2. **Bubble trail (shipped, homepage desktop)** — `static/js/vendor/cursor-effects.esm.js` draws floating bubbles that follow the pointer. Separate from the pointer image; not the “fun custom cursor” backlog item.
-3. **Fun custom cursor (owner later, not started)** — A more personal / animated pointer idea beyond the starter GIF (e.g. a hand-drawn hotspot, frame animation, or character that reacts). Still means editing `[params.cursor]` + `static/images/cursor.gif` (and maybe a tiny CSS/JS assist). Leave alone until you decide the art and behavior.
+2. **Star trail (shipped, homepage desktop)** — `static/js/vendor/cursor-effects.esm.js` (`starCursor`) draws gold sparkles that follow the pointer (same motion as the old bubble trail). Separate from the pointer image.
+3. **Fun custom cursor (experimenting)** — Keep the ghost GIF as the pointer. Extras in `static/js/site-cursor-fx.js` + `chrome.css`: click → soft ♡ burst; idle soft bubbles near the hotspot. Same desktop / fine-pointer / motion gates as the trail.
 
 ```toml
 [params.cursor]
