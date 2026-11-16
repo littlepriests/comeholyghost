@@ -6,7 +6,8 @@
  *   corn add      Stage + commit (prompt) + push -u on current feature branch
  *   corn add --sync  Stash if dirty, preview←main, merge into branch, pop, then commit
  *   corn push     Push branch + open/update PR into preview
- *   corn deploy   Promote preview → main when checks are green
+ *   corn deploy   Promote preview → main when checks are green,
+ *                 then clear the batch Vale accept list on preview
  *
  * Machine remote wiring (all ship commands):
  *   --thinkpad  work box → git remote "personal" (github.com-personal)
@@ -16,6 +17,8 @@
  * Feature merges into preview stay manual on GitHub. Production is main only.
  */
 import { spawnSync } from "node:child_process";
+import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import readline from "node:readline";
 import { fileURLToPath } from "node:url";
@@ -23,6 +26,10 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const INTEGRATION = "preview";
 const PRODUCTION = "main";
+/** Current preview batch. Same note as scripts/edit-prose.mjs. */
+const BATCH_ACCEPT = "styles/config/vocabularies/Batch/accept.txt";
+const BATCH_ACCEPT_NOTE =
+  "# Words for the current preview batch. corn deploy clears this after preview is on main.\n";
 
 /** @type {Record<string, { id: string, label: string, remote: string }>} */
 const MACHINES = {
@@ -568,6 +575,71 @@ function previewChecksGreen() {
   return { ok: false, detail: `preview commit status: ${state}`, prNum: null };
 }
 
+function batchAcceptText(rev) {
+  const shown = run("git", ["show", `${rev}:${BATCH_ACCEPT}`], { allowFail: true });
+  if (shown.status !== 0) return "";
+  return shown.stdout || "";
+}
+
+function batchAcceptHasWords(text) {
+  return text.split(/\r?\n/).some((line) => {
+    const trimmed = line.trim();
+    return trimmed && !trimmed.startsWith("#");
+  });
+}
+
+/**
+ * After preview's commits are on main, drop batch accept words on preview.
+ * The clear commit only touches the accept file, so Vale does not re-read posts.
+ * Skips when the list is already empty. Refuses while preview still has commits
+ * main does not, so a not-yet-promoted batch stays intact.
+ */
+function clearBatchAcceptOnPreview() {
+  fetchAll();
+  const previewRev = `${REMOTE}/${INTEGRATION}`;
+  const mainRev = `${REMOTE}/${PRODUCTION}`;
+  if (!batchAcceptHasWords(batchAcceptText(previewRev))) return;
+
+  const ahead = gitOut(
+    "rev-list",
+    "--count",
+    `${mainRev}..${previewRev}`
+  );
+  if (Number(ahead) > 0) {
+    console.log(
+      `${INTEGRATION} is still ahead of ${PRODUCTION}; left the batch accept list in place.`
+    );
+    return;
+  }
+
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "corn-batch-accept-"));
+  let added = false;
+  try {
+    const rev = gitOut("rev-parse", previewRev);
+    run("git", ["worktree", "add", "--detach", tmp, rev]);
+    added = true;
+    fs.mkdirSync(path.dirname(path.join(tmp, BATCH_ACCEPT)), { recursive: true });
+    fs.writeFileSync(path.join(tmp, BATCH_ACCEPT), BATCH_ACCEPT_NOTE, "utf8");
+    run("git", ["-C", tmp, "add", "--", BATCH_ACCEPT]);
+    run("git", [
+      "-C",
+      tmp,
+      "commit",
+      "-m",
+      "Clear the batch Vale accept list after it reached main.",
+    ]);
+    run("git", ["-C", tmp, "push", REMOTE, `HEAD:refs/heads/${INTEGRATION}`]);
+    console.log(
+      `Cleared ${BATCH_ACCEPT} on ${INTEGRATION}. The next batch starts empty.`
+    );
+  } finally {
+    if (added) {
+      run("git", ["worktree", "remove", "--force", tmp], { allowFail: true });
+    }
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+}
+
 async function cmdDeploy(args) {
   assertRemote();
   const dry = args.includes("--dry-run");
@@ -589,8 +661,18 @@ async function cmdDeploy(args) {
   // ahead of main = second number
   const parts = behind.split(/\s+/).map(Number);
   const previewAhead = parts[1] || 0;
+  const batchPending = batchAcceptHasWords(
+    batchAcceptText(`${REMOTE}/${INTEGRATION}`)
+  );
   if (!previewAhead) {
     console.log(`${INTEGRATION} has nothing new for ${PRODUCTION}.`);
+    if (batchPending && dry) {
+      console.log(
+        `[dry-run] Would clear ${BATCH_ACCEPT} on ${INTEGRATION}.`
+      );
+    } else if (batchPending) {
+      clearBatchAcceptOnPreview();
+    }
     return;
   }
   console.log(`${INTEGRATION} is ${previewAhead} commit(s) ahead of ${PRODUCTION}.`);
@@ -608,6 +690,11 @@ async function cmdDeploy(args) {
   if (!prNum) {
     if (dry) {
       console.log(`[dry-run] Would open PR ${INTEGRATION} → ${PRODUCTION}.`);
+      if (batchPending) {
+        console.log(
+          `[dry-run] After that merge, would clear ${BATCH_ACCEPT} on ${INTEGRATION}.`
+        );
+      }
       return;
     }
     const created = ghOut(
@@ -666,6 +753,15 @@ async function cmdDeploy(args) {
   if (prOnly || dry) {
     if (dry) console.log("[dry-run] Skipping merge.");
     else console.log("Stopped at PR (--pr-only). Merge in GitHub when ready.");
+    if (batchPending && dry) {
+      console.log(
+        `[dry-run] After that merge, would clear ${BATCH_ACCEPT} on ${INTEGRATION}.`
+      );
+    } else if (batchPending) {
+      console.log(
+        `Batch accept list stays until this release is on ${PRODUCTION}. Run corn deploy again after the merge to clear it.`
+      );
+    }
     return;
   }
 
@@ -689,6 +785,7 @@ async function cmdDeploy(args) {
     { stdio: "inherit" }
   );
   console.log(`Merged ${INTEGRATION} → ${PRODUCTION}. Netlify will production-deploy main.`);
+  clearBatchAcceptOnPreview();
 }
 
 function usage() {
@@ -703,7 +800,8 @@ function usage() {
   corn add        Stage + commit (prompt) + push -u on current feature branch
   corn add --sync Stash if dirty, preview←main, merge into branch, pop, commit
   corn push       Push branch + open/update PR into preview
-  corn deploy     If preview checks are green, PR + merge preview → main
+  corn deploy     If preview checks are green, PR + merge preview → main,
+                  then clear the batch Vale accept list on preview
   corn deploy --pr-only   Open/update release PR only (no merge)
   corn deploy --dry-run   Show what would happen
 

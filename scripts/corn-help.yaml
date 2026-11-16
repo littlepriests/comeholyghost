@@ -97,7 +97,7 @@ sections:
           - flag: --all
             help: Sweep all content/**/*.md (skip blog prompt)
           - flag: --fix, --review
-            help: Explicit picker (default on) — y/Enter apply, 1–N pick, n skip, i ignore, a accept to Site vocab, q quit
+            help: Explicit picker (default on) — y/Enter apply, 1–N pick, n skip, i ignore, a accept to the batch list, p accept to the permanent Site list, q quit
           - flag: --report
             help: Report-only Vale (no interactive picker)
           - flag: --vale-only
@@ -183,7 +183,8 @@ sections:
 
       - invoke: corn deploy
         about: |
-          If preview checks are green, merge preview → main (live)
+          If preview checks are green, merge preview → main (live), then
+          clear styles/config/vocabularies/Batch/accept.txt on preview.
         flags:
           - flag: --pr-only
             help: Open/update release PR only; you merge in GitHub
@@ -193,6 +194,9 @@ sections:
 ship: |
   Typical ship: corn branch → edit → corn add → corn push → merge PR on
   GitHub into preview → poke the Deploy Preview → corn deploy when ready.
+  Key `a` in corn edit writes the batch Vale list. That file ships with the
+  PR and stays through the production merge. corn deploy then clears it on
+  preview so the next batch starts empty. Key `p` writes the permanent Site list.
   On thinkpad use --thinkpad; on aura use --aura (or omit and answer the prompt).
 
 examples:

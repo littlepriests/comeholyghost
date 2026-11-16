@@ -1,0 +1,13 @@
+# Words for the current preview batch. corn deploy clears this after preview is on main.
+amaral
+ando
+joie
+leftbank
+muro
+oankali
+overviewing
+peachtree
+sry
+stl
+tadao
+vivre

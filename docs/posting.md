@@ -108,7 +108,7 @@ corn edit content/blog/your-post  # same (must stay under content/)
 
 First run may `vale sync` package styles. Flags: `--all`, `--vale-only`, `--density-only`, `--skip-sync`, `--report` (report-only). `--fix` / `--review` still work but are the default.
 
-Default `corn edit` walks alerts that have a Vale `Action` (replace / edit / suggest / …), prompts per alert, and writes chosen fixes into the markdown. Keys: `y`/`Enter` apply, `1–N` pick, `n` skip once, `i` ignore that match for the rest of the run (all repeats; for spelling, possessives share the stem — `amaral` also ignores `amaral's`, but not bare plural `amarals`, and not non-spelling/grammar alerts), `a` accept into the site Vale vocabulary (persist), `q` quit. Needs a real terminal (TTY); use `--report` otherwise.
+Default `corn edit` walks alerts that have a Vale `Action` (replace / edit / suggest / …), prompts per alert, and writes chosen fixes into the markdown. Keys: `y`/`Enter` apply, `1–N` pick, `n` skip once, `i` ignore that match for the rest of the run (all repeats; for spelling, possessives share the stem — `amaral` also ignores `amaral's`, but not bare plural `amarals`, and not non-spelling/grammar alerts), `a` accept into the batch Vale list (`styles/config/vocabularies/Batch/accept.txt`, committed with the PR, cleared on `preview` by `corn deploy` after that batch is on `main`), `p` accept into the permanent Site list (`styles/config/vocabularies/Site/accept.txt`), `q` quit. Needs a real terminal (TTY); use `--report` otherwise.
 
 `corn edit` drops spelling alerts that only differ by case (`illinois` vs `Illinois`) so house-style lowercase isn’t treated as a typo. Real misspellings still flag.
 
