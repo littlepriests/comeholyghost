@@ -1,11 +1,17 @@
 #!/usr/bin/env node
 /**
- * Git ship helpers for littlepriests/comeholyghost (remote: personal).
+ * Git ship helpers for littlepriests/comeholyghost.
  *
  *   corn branch   Create update-MMDDYY from latest preview
- *   corn add      Sync preview ← main, stage, commit (prompt), push -u
+ *   corn add      Stage + commit (prompt) + push -u on current feature branch
+ *   corn add --sync  Stash if dirty, preview←main, merge into branch, pop, then commit
  *   corn push     Push branch + open/update PR into preview
  *   corn deploy   Promote preview → main when checks are green
+ *
+ * Machine remote wiring (all ship commands):
+ *   --thinkpad  work box → git remote "personal" (github.com-personal)
+ *   --aura      home box → git remote "origin" (standard github.com)
+ *   (neither)   interactive prompt
  *
  * Feature merges into preview stay manual on GitHub. Production is main only.
  */
@@ -15,9 +21,25 @@ import readline from "node:readline";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const REMOTE = "personal";
 const INTEGRATION = "preview";
 const PRODUCTION = "main";
+
+/** @type {Record<string, { id: string, label: string, remote: string }>} */
+const MACHINES = {
+  thinkpad: {
+    id: "thinkpad",
+    label: "thinkpad (work)",
+    remote: "personal",
+  },
+  aura: {
+    id: "aura",
+    label: "aura (personal)",
+    remote: "origin",
+  },
+};
+
+/** Set once per run by resolveRemote(). */
+let REMOTE = "";
 
 const SECRET_HINT =
   /(^|\/)(\.env|\.env\.|.*credentials.*|.*secret.*|.*\.pem$|.*id_rsa|.*kubeconfig)/i;
@@ -59,12 +81,74 @@ function die(msg, code = 1) {
   process.exit(code);
 }
 
-function assertRemote() {
-  const urls = gitOut("remote", "-v");
-  if (!urls.includes(REMOTE)) {
-    die(`Missing remote "${REMOTE}". Expected littlepriests/comeholyghost.`);
+function parseMachineFlags(args) {
+  const rest = [];
+  let machine = null;
+  for (const a of args) {
+    if (a === "--thinkpad") {
+      if (machine && machine !== "thinkpad") {
+        die("Use only one of --aura / --thinkpad.");
+      }
+      machine = "thinkpad";
+    } else if (a === "--aura") {
+      if (machine && machine !== "aura") {
+        die("Use only one of --aura / --thinkpad.");
+      }
+      machine = "aura";
+    } else {
+      rest.push(a);
+    }
   }
-  if (!/littlepriests\/comeholyghost/.test(urls)) {
+  return { machine, rest };
+}
+
+function promptMachine() {
+  return new Promise((resolve) => {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+    console.log("Which machine?");
+    console.log("  1) thinkpad (work)     — remote: personal");
+    console.log("  2) aura (personal)     — remote: origin");
+    rl.question("Choose [1/2 or thinkpad/aura]: ", (answer) => {
+      rl.close();
+      const a = String(answer || "").trim().toLowerCase();
+      if (a === "1" || a === "thinkpad" || a === "t" || a === "work") {
+        resolve("thinkpad");
+        return;
+      }
+      if (a === "2" || a === "aura" || a === "a" || a === "home") {
+        resolve("aura");
+        return;
+      }
+      die("Need thinkpad or aura (1 or 2).");
+    });
+  });
+}
+
+async function resolveRemote(machineFlag) {
+  const id = machineFlag || (await promptMachine());
+  const profile = MACHINES[id];
+  if (!profile) die(`Unknown machine: ${id}`);
+  REMOTE = profile.remote;
+  console.log(`Using ${profile.label} → remote "${REMOTE}"`);
+  return profile;
+}
+
+function assertRemote() {
+  if (!REMOTE) die("Internal error: remote not resolved.");
+  const urls = gitOut("remote", "-v");
+  const lines = urls.split("\n").map((s) => s.trim()).filter(Boolean);
+  const forName = lines.filter((line) => line.startsWith(`${REMOTE}\t`) || line.startsWith(`${REMOTE} `));
+  if (!forName.length) {
+    die(
+      `Missing remote "${REMOTE}". Expected littlepriests/comeholyghost.\n` +
+        `  thinkpad → remote name "personal"\n` +
+        `  aura     → remote name "origin"`
+    );
+  }
+  if (!forName.some((line) => /littlepriests\/comeholyghost/.test(line))) {
     die(`Remote "${REMOTE}" should point at littlepriests/comeholyghost.`);
   }
 }
@@ -174,6 +258,33 @@ function assertNoSecrets(paths) {
   }
 }
 
+function isDirty() {
+  return Boolean(gitOut("status", "--porcelain"));
+}
+
+/** @returns {boolean} true if a stash entry was created */
+function stashPush(message) {
+  if (!isDirty()) return false;
+  console.log("Stashing local changes (including untracked)…");
+  run("git", ["stash", "push", "-u", "-m", message], { stdio: "inherit" });
+  console.log("If something fails mid-sync, recover with: git stash pop");
+  return true;
+}
+
+function stashPop() {
+  console.log("Restoring stash…");
+  const r = run("git", ["stash", "pop"], {
+    allowFail: true,
+    stdio: "inherit",
+  });
+  if (r.status !== 0) {
+    die(
+      "stash pop hit conflicts. Fix files, then `git add` / finish the merge.\n" +
+        "If the stash entry remains: git stash list"
+    );
+  }
+}
+
 async function cmdBranch() {
   assertRemote();
   updatePreviewFromMain();
@@ -182,37 +293,74 @@ async function cmdBranch() {
   console.log(`Created ${name} from ${INTEGRATION}.`);
 }
 
-async function cmdAdd() {
+/**
+ * Default: stage + commit + push on the current feature branch (no preview checkout).
+ * --sync: stash if dirty → preview←main → merge preview into branch → pop → commit.
+ * On main/preview: always sync enough to create update-* (stash if dirty).
+ */
+async function cmdAdd(args = []) {
   assertRemote();
-  updatePreviewFromMain();
+  const sync = args.includes("--sync");
+  const unknown = args.filter((a) => a !== "--sync");
+  if (unknown.length) {
+    die(`Unknown add flag(s): ${unknown.join(" ")}`);
+  }
 
   let branch = currentBranch();
-  if (branch === INTEGRATION || branch === PRODUCTION) {
-    const name = nextUpdateBranch();
-    git("checkout", "-b", name, INTEGRATION);
-    branch = name;
-    console.log(`Not on a feature branch — created ${branch}.`);
-  } else if (!branch.startsWith("update-")) {
+  const onProtected =
+    !branch || branch === INTEGRATION || branch === PRODUCTION;
+  const startBranch = branch;
+  const needSync = sync || onProtected;
+
+  if (needSync) {
+    const stashMsg = sync ? "corn-add-sync" : "corn-add-new-branch";
+    const stashed = stashPush(stashMsg);
+    try {
+      updatePreviewFromMain();
+
+      if (onProtected) {
+        const name = nextUpdateBranch();
+        git("checkout", "-b", name, INTEGRATION);
+        branch = name;
+        console.log(`Not on a feature branch — created ${branch}.`);
+      } else {
+        git("checkout", startBranch);
+        branch = startBranch;
+        console.log(`Merging ${INTEGRATION} into ${branch}…`);
+        const merge = run("git", ["merge", "--no-edit", INTEGRATION], {
+          allowFail: true,
+          stdio: "inherit",
+        });
+        if (merge.status !== 0) {
+          die(
+            `Merge from ${INTEGRATION} failed. Resolve conflicts, then re-run corn add.\n` +
+              (stashed
+                ? "Your work may still be in: git stash list (corn-add-sync)"
+                : "")
+          );
+        }
+      }
+
+      if (stashed) stashPop();
+    } catch (err) {
+      if (stashed) {
+        console.error(
+          "Sync failed with a stash still saved. Recover with: git stash pop"
+        );
+      }
+      throw err;
+    }
+  } else if (branch && !branch.startsWith("update-")) {
     console.warn(
       `On "${branch}" (not update-*). Continuing; PR base will still be ${INTEGRATION}.`
     );
   }
 
-  // Fold latest preview (incl. main) into the feature branch.
-  const merge = run("git", ["merge", "--no-edit", INTEGRATION], {
-    allowFail: true,
-    stdio: "inherit"
-  });
-  if (merge.status !== 0) {
-    die(`Merge from ${INTEGRATION} failed. Resolve conflicts, then re-run corn add.`);
-  }
-
+  branch = currentBranch();
   const paths = listChanges();
   if (!paths.length) {
-    const dirty = gitOut("status", "--porcelain");
-    if (!dirty) {
+    if (!isDirty()) {
       console.log("Nothing to commit.");
-      // Still ensure remote branch exists for later corn push.
       ensureRemoteBranch(branch);
       return;
     }
@@ -233,7 +381,9 @@ async function cmdAdd() {
   // Avoid Cursor attribution trailers; repo hook also strips them.
   run("git", ["commit", "-m", msg], { stdio: "inherit" });
   ensureRemoteBranch(branch);
-  console.log(`Committed on ${branch}. Remote branch ${REMOTE}/${branch} is up (base: ${INTEGRATION}).`);
+  console.log(
+    `Committed on ${branch}. Remote branch ${REMOTE}/${branch} is up (base: ${INTEGRATION}).`
+  );
   console.log(`Next: corn push`);
 }
 
@@ -422,6 +572,12 @@ async function cmdDeploy(args) {
   assertRemote();
   const dry = args.includes("--dry-run");
   const prOnly = args.includes("--pr-only");
+  const unknown = args.filter(
+    (a) => a !== "--dry-run" && a !== "--pr-only"
+  );
+  if (unknown.length) {
+    die(`Unknown deploy flag(s): ${unknown.join(" ")}`);
+  }
 
   fetchAll();
   const behind = gitOut(
@@ -536,10 +692,16 @@ async function cmdDeploy(args) {
 }
 
 function usage() {
-  console.log(`Usage: corn <branch|add|push|deploy> [flags]
+  console.log(`Usage: corn <branch|add|push|deploy> [--thinkpad|--aura] [flags]
+
+  Machine (required wiring; all ship commands):
+    --thinkpad    Work box → git remote "personal"
+    --aura        Home box → git remote "origin"
+    (neither)     Prompt: thinkpad or aura
 
   corn branch     Create update-MMDDYY from preview (after preview ← main)
-  corn add        Sync preview ← main, stage, commit (prompt), push -u branch
+  corn add        Stage + commit (prompt) + push -u on current feature branch
+  corn add --sync Stash if dirty, preview←main, merge into branch, pop, commit
   corn push       Push branch + open/update PR into preview
   corn deploy     If preview checks are green, PR + merge preview → main
   corn deploy --pr-only   Open/update release PR only (no merge)
@@ -549,14 +711,21 @@ You merge feature PRs into preview on GitHub. corn deploy only promotes to main.
 }
 
 async function main() {
-  const [cmd, ...args] = process.argv.slice(2);
+  const [cmd, ...rawArgs] = process.argv.slice(2);
   try {
+    if (cmd === "help" || cmd === "--help" || !cmd) {
+      usage();
+      return;
+    }
+    if (!["branch", "add", "push", "deploy"].includes(cmd)) {
+      die(`Unknown git-flow command: ${cmd}`);
+    }
+    const { machine, rest } = parseMachineFlags(rawArgs);
+    await resolveRemote(machine);
     if (cmd === "branch") await cmdBranch();
-    else if (cmd === "add") await cmdAdd();
+    else if (cmd === "add") await cmdAdd(rest);
     else if (cmd === "push") await cmdPush();
-    else if (cmd === "deploy") await cmdDeploy(args);
-    else if (cmd === "help" || cmd === "--help" || !cmd) usage();
-    else die(`Unknown git-flow command: ${cmd}`);
+    else if (cmd === "deploy") await cmdDeploy(rest);
   } catch (err) {
     die(err.message || String(err));
   }

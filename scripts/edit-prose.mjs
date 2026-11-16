@@ -1,23 +1,25 @@
-#!/usr/bin/env node
+﻿#!/usr/bin/env node
 /**
  * Prose lint for this site: Vale (vale.ini + styles/wraith) + be-density.
  *
  * Only markdown under content/ is in scope.
  *
- *   corn edit                         all markdown under content/
+ *   corn edit                         prompt for content/blog/<name>
+ *   corn edit --all                   all markdown under content/
  *   corn edit --read-me.md            content/read-me.md
  *   corn edit --guestbook.md
  *   corn edit --blog/crossroad-beauty content/blog/crossroad-beauty/
  *   corn edit content/blog/foo        same, positional under content/
- *   corn edit --review …              walk fixable Vale alerts, y/n each
- *   corn edit --fix …                 alias of --review (Vale picker, not md wrap)
+ *   corn edit …                       Vale picker by default (same as --fix)
+ *   corn edit --report …              report-only Vale (no interactive picker)
  *
  * Options:
+ *   --all           Sweep every markdown file under content/ (skip blog prompt)
  *   --skip-sync     Do not run vale sync
  *   --vale-only     Skip be-density
  *   --density-only  Skip Vale
- *   --review        Interactive y/n (and numbered picks) for fixable alerts
- *   --fix           Alias of --review (Vale Action walk — not corn md --fix)
+ *   --fix/--review  Explicit picker (default on; kept for clarity)
+ *   --report        Report-only Vale (old non-interactive default)
  *   --help
  */
 import { spawn, spawnSync } from "node:child_process";
@@ -35,31 +37,37 @@ const densityDir = path.join(root, "tools", "be-density");
 const densityBin = path.join(densityDir, "be-density.mjs");
 
 const FIXED_FLAGS = new Set([
+  "--all",
   "--skip-sync",
   "--vale-only",
   "--density-only",
   "--review",
   "--fix",
+  "--report",
   "--help",
   "-h",
 ]);
 
 function parseArgs(argv) {
   const opts = {
+    all: false,
     skipSync: false,
     valeOnly: false,
     densityOnly: false,
-    review: false,
+    /** Interactive Vale picker — default on; --report for report-only. */
+    review: true,
     help: false,
     /** @type {string[]} paths relative to content/ (posix) or absolute under content */
     targets: [],
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
-    if (a === "--skip-sync") opts.skipSync = true;
+    if (a === "--all") opts.all = true;
+    else if (a === "--skip-sync") opts.skipSync = true;
     else if (a === "--vale-only") opts.valeOnly = true;
     else if (a === "--density-only") opts.densityOnly = true;
     else if (a === "--review" || a === "--fix") opts.review = true;
+    else if (a === "--report") opts.review = false;
     else if (a === "--help" || a === "-h") opts.help = true;
     else if (a.startsWith("--") && !FIXED_FLAGS.has(a)) {
       // corn edit --read-me.md  →  content/read-me.md
@@ -73,6 +81,51 @@ function parseArgs(argv) {
     }
   }
   return opts;
+}
+
+/** Normalize a typed blog name into a content/-relative target (blog/…). */
+function normalizeBlogName(raw) {
+  let name = String(raw || "")
+    .trim()
+    .replace(/\\/g, "/")
+    .replace(/^\/+/, "");
+  if (!name) return "";
+  name = name.replace(/^(content\/)?blog\//, "");
+  name = name.replace(/\/+$/, "");
+  // Folder posts are usual; allow typing crossroad-beauty.md → crossroad-beauty
+  if (/\.mdx?$/i.test(name) && !name.includes("/")) {
+    name = name.replace(/\.mdx?$/i, "");
+  }
+  if (!name || name.includes("..")) {
+    throw new Error("Need a blog slug under content/blog/ (no ..).");
+  }
+  return `blog/${name}`;
+}
+
+function promptBlogTarget() {
+  return new Promise((resolve, reject) => {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+    rl.question("content/blog/<name>: ", (answer) => {
+      rl.close();
+      try {
+        const target = normalizeBlogName(answer);
+        if (!target) {
+          reject(
+            new Error(
+              "Empty name — type a post slug (e.g. crossroad-beauty) or pass --all.",
+            ),
+          );
+          return;
+        }
+        resolve(target);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  });
 }
 
 function whichVale() {
@@ -138,13 +191,20 @@ function resolveUnderContent(raw) {
   return abs;
 }
 
-function collectMarkdown(targets) {
+function collectMarkdown(targets, { all = false } = {}) {
   if (!fs.existsSync(contentRoot)) {
     throw new Error(`Missing content/ at ${contentRoot}`);
   }
 
-  if (targets.length === 0) {
+  if (all) {
+    if (targets.length) {
+      throw new Error("Pass --all alone, or pass a path — not both.");
+    }
     return walkMarkdown(contentRoot).sort();
+  }
+
+  if (targets.length === 0) {
+    throw new Error("No target — pass a path, --all, or answer the blog prompt.");
   }
 
   const files = [];
@@ -518,7 +578,7 @@ function filterReviewQueue(queue, skipped, ignoredItems) {
 async function reviewFixable(relFiles) {
   if (!process.stdin.isTTY || !process.stdout.isTTY) {
     console.error(
-      "corn edit --fix / --review needs an interactive terminal (TTY). Use plain corn edit instead.",
+      "corn edit's Vale picker needs an interactive terminal (TTY). Pass --report for report-only.",
     );
     return 2;
   }
@@ -720,33 +780,48 @@ async function main() {
     console.log(`Usage: corn edit [--name.md | path…] [options]
 
 Lint markdown under content/ only (Vale + be-density).
+Default: interactive Vale picker (same as former --fix).
 
-  corn edit                         all markdown under content/
+  corn edit                         prompt for content/blog/<name> + picker
+  corn edit --all                   all markdown under content/ + picker
+  corn edit --report --blog/post    report-only Vale (no picker)
   corn edit --read-me.md            content/read-me.md
   corn edit --blog/your-post        content/blog/your-post/
   corn edit content/blog/your-post  same (positional must stay under content/)
-  corn edit --review --blog/post    y/n each fixable Vale alert
-  corn edit --fix --blog/post       same as --review (Vale picker)
 
+  --all            sweep all content markdown
   --skip-sync      skip vale sync
   --vale-only      Vale only
-  --density-only   be-density only
-  --review         interactive yes/no (or 1–N); i ignores; a accepts to vocab
-  --fix            alias of --review (not corn md --fix)
+  --density-only   be-density only (implies no picker)
+  --fix/--review  explicit picker (default; optional)
+  --report         report-only Vale (not corn md --fix)
 
 Spelling alerts that only differ by case (illinois vs Illinois) are dropped;
 real typos stay.`);
     process.exit(0);
   }
 
-  if (opts.review && opts.densityOnly) {
-    console.error("corn edit --review cannot combine with --density-only (Vale only).");
+  if (opts.densityOnly) {
+    opts.review = false;
+  }
+
+  if (opts.all && opts.targets.length) {
+    console.error("Pass --all alone, or pass a path — not both.");
     process.exit(2);
+  }
+
+  if (!opts.all && opts.targets.length === 0) {
+    try {
+      opts.targets.push(await promptBlogTarget());
+    } catch (err) {
+      console.error(err.message);
+      process.exit(2);
+    }
   }
 
   let files;
   try {
-    files = collectMarkdown(opts.targets);
+    files = collectMarkdown(opts.targets, { all: opts.all });
   } catch (err) {
     console.error(err.message);
     process.exit(2);
