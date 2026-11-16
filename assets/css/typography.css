@@ -15,6 +15,23 @@ body {
     color: var(--fg);
 }
 
+/*
+  Orphans / widows (print conceit, CSS-only — no content rewrites).
+  balance = headings / short display lines; pretty = body-ish blocks.
+  Chromium leads; Safari/Firefox may still leave a lone last word.
+*/
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.blog-index__heading,
+.blog-entry__title,
+.home-site-title__line {
+    text-wrap: balance;
+}
+
 /* Headings — page title gold, h2+ link blue, stepped sizes so levels read apart */
 h1, 
 h2, 
@@ -26,7 +43,6 @@ h6 {
     font-weight: 600;
     color: var(--link);
     line-height: 1.35;
-    text-wrap: balance;
 }
 
 h1 { font-size: 1.45rem; color: #ffd749; }
@@ -102,11 +118,17 @@ h1:first-child {
     margin-top: 0.4rem;
 }
 
-/* Paragraphs. pretty keeps a lone word off the last line where supported. */
+/* Body-ish blocks: keep a lone word off the last line where supported. */
 p,
 li,
 figcaption,
-blockquote {
+blockquote,
+.blog-entry__summary,
+.blog-entry__caption,
+.article-figure__caption,
+.content__body td,
+.content__body th,
+.page__aside {
     text-wrap: pretty;
 }
 
