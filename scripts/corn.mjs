@@ -2,27 +2,23 @@
 /**
  * Site CLI: corn <command> …
  *
- *   corn run [hugo args…]   hugo server -D --disableFastRender --navigateToChanged
- *   corn run --cache        wipe resources/_gen, then server with --ignoreCache
- *   corn compress [path…]   in-place WebP recompress (lean repo masters)
- *   corn edit [path…]       Vale + be-density prose check
- *   corn md [path…]         markdownlint + 80-col wrap
- *   corn email              rebuild emails/preview (newsletter templates)
- *   corn update [--latest]  npm update site package roots (public registry)
- *   corn branch             update-MMDDYY from preview
- *   corn add                sync preview←main, stage, commit, push -u
- *   corn push               push + PR into preview
- *   corn deploy             preview → main when checks green
- *   corn help
+ * Writer (personal / writing machine):
+ *   corn run | edit | md | compress | email
  *
- * Install a shell alias (PowerShell):  powershell -File scripts/install-corn.ps1
- * Or from the repo root:               .\corn compress
+ * Ship (deploy machine):
+ *   writer cmds + corn update | branch | add | push | deploy
+ *
+ * Install (PowerShell, any cwd):  powershell -File scripts/install-corn.ps1
+ * Or from the repo root:          .\corn help
+ *                                 node scripts\corn.mjs help
  */
 import { spawnSync } from "node:child_process";
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+const root = path.resolve(here, "..");
 
 const COMMANDS = {
   run: "run-hugo.mjs",
@@ -35,29 +31,45 @@ const COMMANDS = {
 
 const GIT_FLOW = new Set(["branch", "add", "push", "deploy"]);
 
+/** Scripts that need scripts/node_modules (sharp, markdownlint, …). */
+const NEEDS_SCRIPTS_DEPS = new Set(["compress", "md"]);
+
 function usage() {
   console.log(`Usage: corn <command> [args]
 
-Local site
+Two machine profiles (same binary; pick the commands you need):
+
+  Writer — personal / writing machine
+    run, edit, md, compress, email
+
+  Ship — deploy machine (this repo’s usual git/Netlify box)
+    everything in Writer, plus update, branch, add, push, deploy
+
+Install (PowerShell, once per machine)
+  From the repo root:
+    powershell -File scripts/install-corn.ps1
+    . $PROFILE
+    corn help
+  Also once:  npm install --prefix scripts
+  Without install:  .\\corn help   or   node scripts\\corn.mjs help
+
+Writer
   run [hugo args…]   Dev server at http://localhost:1313/
   run --cache        Wipe Hugo image cache, then server (stale thumbs)
-
-Content / assets
-  compress [path…]   In-place WebP recompress (default: content/blog).
-                     Commits refuse staged content/ images this would still change.
+  compress [path…]   In-place WebP recompress (default: content/blog)
   edit [path…]       Vale + be-density prose check (default: content/)
-  md [path…]         markdownlint + wrap prose to 80 cols
+  edit --fix …      Interactive Vale picker (alias of --review)
+  edit --review …    Same as --fix: y/n (or 1–N) each fixable alert
+  md [path…]         markdownlint + report lines over 80 cols
+  md --fix …         Structure only: wrap prose to 80 + markdownlint --fix
+                     (does NOT run Vale — use corn edit --fix for that)
   email              Rebuild newsletter HTML under emails/preview/
+  email --watch      Rebuild when emails/ or templates change
 
-Deps
+Ship
   update             npm update in ./, scripts/, tools/be-density/
   update --latest    Bump package.json ranges to newest + reinstall
   update --dry-run   List outdated packages only
-
-Git (remote: personal → littlepriests/comeholyghost)
-  Netlify Deploy Previews / preview branch = free to build; visit URLs to
-  test. Production (main) costs deploy credits — only via corn deploy.
-
   branch             Start update-MMDDYY from preview (after folding main in)
   add                Sync preview←main, stage, prompt commit, push -u branch
   push               Push branch + open/reuse PR into preview (Deploy Preview)
@@ -65,21 +77,27 @@ Git (remote: personal → littlepriests/comeholyghost)
   deploy --pr-only   Open release PR only; you merge in GitHub
   deploy --dry-run   Print what deploy would do
 
-  help               Show this help
-
 Typical ship: corn branch → edit → corn add → corn push → merge PR on
 GitHub into preview → poke the Deploy Preview → corn deploy when ready.
 
 Examples:
   corn run
-  corn run --cache
-  corn compress content/blog/crossroad-beauty
-  corn edit --blog/crossroad-beauty
+  corn edit --fix --blog/crossroad-beauty
   corn md --fix --blog/crossroad-beauty
-  corn email
-  corn update --dry-run
+  corn email --watch
   corn branch && corn add && corn push
   corn deploy --pr-only`);
+}
+
+function warnMissingScriptsDeps(cmd) {
+  if (!NEEDS_SCRIPTS_DEPS.has(cmd)) return;
+  const marker = path.join(here, "node_modules");
+  if (fs.existsSync(marker)) return;
+  console.error(
+    `[corn] scripts/node_modules missing. From the repo root run:\n` +
+      `  npm install --prefix scripts\n` +
+      `(needed for corn ${cmd})\n`
+  );
 }
 
 function main() {
@@ -93,7 +111,7 @@ function main() {
     const r = spawnSync(
       process.execPath,
       [path.join(here, "git-flow.mjs"), cmd, ...rest],
-      { stdio: "inherit" }
+      { stdio: "inherit", cwd: root }
     );
     process.exit(r.status ?? 1);
   }
@@ -105,8 +123,11 @@ function main() {
     process.exit(2);
   }
 
+  warnMissingScriptsDeps(cmd);
+
   const r = spawnSync(process.execPath, [path.join(here, script), ...rest], {
     stdio: "inherit",
+    cwd: root,
   });
   process.exit(r.status ?? 1);
 }
