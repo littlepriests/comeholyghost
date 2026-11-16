@@ -469,7 +469,16 @@ You still **merge feature PRs into `preview` in GitHub** yourself. `corn deploy`
 
 **PR base must be `preview`.** GitHub’s default compare URL targets `main` (the default branch). Prefer `corn push`, or open `compare/preview...<branch>?expand=1`. Cadence: land many feature PRs on `preview` through the month; one `corn deploy` (`preview` → `main`) when you want production.
 
-**Vale CI:** `.github/workflows/vale.yml` runs Vale on `content/` for PRs/pushes (added lines only). It posts a check with annotations; it does **not** fail the job yet (house-style lowercase still looks like spelling errors). Local: `corn edit` (picker by default; `--report` for report-only). Accepted house words live in `styles/config/vocabularies/Site/accept.txt` (`Vocab = Site` in `vale.ini`; key `a` in the review picker).
+**Vale CI:** `.github/workflows/vale.yml` runs on pull requests and on pushes to `preview` and `main`. Annotations stay non-blocking. The job fails only for a real misspelling on a line added since the base. A case change (`illinois` / `Illinois`) is not a misspelling. Posts already on the base are not checked again.
+
+Two accept lists, both in `vale.ini` (`Vocab = Site, Batch`):
+
+| List | File | How it changes |
+| --- | --- | --- |
+| Permanent | `styles/config/vocabularies/Site/accept.txt` | `corn edit` key `p`, or edit the file |
+| Batch | `styles/config/vocabularies/Batch/accept.txt` | `corn edit` key `a` |
+
+Commit the batch file with the feature PR so the check can see it. It stays on `preview` through the `preview` → `main` merge. `corn deploy` then clears the batch file on `preview` (that commit only touches the accept file, so Vale does not re-read the posts). The next `corn branch` starts empty. If the release PR was merged by hand, run `corn deploy` once more: with nothing left to promote, it still clears a batch list that is already on `main`.
 
 ### Do Deploy Previews burn credits?
 

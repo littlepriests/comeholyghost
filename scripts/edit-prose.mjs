@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env node
+#!/usr/bin/env node
 /**
  * Prose lint for this site: Vale (vale.ini + styles/wraith) + be-density.
  *
@@ -286,21 +286,41 @@ function ignoreLogLabel(alert) {
   return JSON.stringify(match);
 }
 
-/** Site Vocab accept list (vale.ini Vocab = Site). Survives vale sync. */
-const SITE_ACCEPT_PATH = path.join(
-  root,
-  "styles",
-  "config",
-  "vocabularies",
-  "Site",
-  "accept.txt",
-);
+/**
+ * Vale vocabularies (vale.ini `Vocab = Site, Batch`). Both survive vale sync.
+ * Batch is the current preview batch. corn deploy clears it after preview is on main.
+ * Site is the permanent list.
+ */
+const BATCH_ACCEPT_NOTE =
+  "# Words for the current preview batch. corn deploy clears this after preview is on main.";
+
+const VOCAB_FILES = {
+  batch: path.join(root, "styles", "config", "vocabularies", "Batch", "accept.txt"),
+  site: path.join(root, "styles", "config", "vocabularies", "Site", "accept.txt"),
+};
+
+function readAcceptEntries(filePath) {
+  /** @type {string[]} */
+  const comments = [];
+  /** @type {string[]} */
+  const words = [];
+  if (!fs.existsSync(filePath)) return { comments, words };
+  for (const raw of fs.readFileSync(filePath, "utf8").split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line) continue;
+    if (line.startsWith("#")) comments.push(line);
+    else words.push(line);
+  }
+  return { comments, words };
+}
 
 /**
- * Persist a Match into the Site vocabulary (sorted, de-duped, lowercase stem
- * for spelling; exact match otherwise). Returns the word written.
+ * Persist a Match (sorted, de-duped, lowercase stem for spelling; exact match
+ * otherwise). `which` is `batch` or `site`. Returns the word written.
  */
-function acceptToSiteVocab(alert) {
+function acceptToVocab(alert, which) {
+  const filePath = VOCAB_FILES[which];
+  if (!filePath) throw new Error(`unknown vocab ${which}`);
   const match = String(alert?.Match ?? "").trim();
   if (!match) throw new Error("empty Match; nothing to accept");
   const word = isSpellingCheck(alert)
@@ -308,21 +328,17 @@ function acceptToSiteVocab(alert) {
     : match.toLowerCase();
   if (!word) throw new Error("empty stem; nothing to accept");
 
-  fs.mkdirSync(path.dirname(SITE_ACCEPT_PATH), { recursive: true });
-  let lines = [];
-  if (fs.existsSync(SITE_ACCEPT_PATH)) {
-    lines = fs
-      .readFileSync(SITE_ACCEPT_PATH, "utf8")
-      .split(/\r?\n/)
-      .map((s) => s.trim())
-      .filter(Boolean);
-  }
-  const set = new Set(lines.map((s) => s.toLowerCase()));
-  if (!set.has(word.toLowerCase())) {
-    lines.push(word);
-    lines.sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }));
-    fs.writeFileSync(SITE_ACCEPT_PATH, lines.join("\n") + "\n", "utf8");
-  }
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  const { comments, words } = readAcceptEntries(filePath);
+  const notes =
+    which === "batch" && !comments.some((c) => c.includes("preview batch"))
+      ? [BATCH_ACCEPT_NOTE, ...comments]
+      : comments;
+  const set = new Set(words.map((s) => s.toLowerCase()));
+  if (!set.has(word.toLowerCase())) words.push(word);
+  words.sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }));
+  const body = [...notes, ...words];
+  fs.writeFileSync(filePath, body.length ? `${body.join("\n")}\n` : "", "utf8");
   return word;
 }
 
@@ -592,6 +608,23 @@ async function reviewFixable(relFiles) {
   let acceptedN = 0;
   let quit = false;
 
+  function takeAccept(alert, which) {
+    try {
+      const word = acceptToVocab(alert, which);
+      ignoredItems.add(ignoreItemKey(alert));
+      acceptedN++;
+      const rel =
+        which === "site"
+          ? "styles/config/vocabularies/Site/accept.txt"
+          : "styles/config/vocabularies/Batch/accept.txt";
+      console.log(`  accepted ${JSON.stringify(word)} → ${rel}`);
+      return true;
+    } catch (err) {
+      console.error(`  accept failed: ${err.message}`);
+      return false;
+    }
+  }
+
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -604,7 +637,11 @@ Review fixable Vale alerts (Action set; case-only spelling already filtered).
   n / s       skip this one only
   i           ignore this match for the rest of this run (all repeats;
               spelling also covers possessives: amaral → amaral's)
-  a           accept into Site vocab (styles/config/vocabularies/Site/accept.txt)
+  a           accept into the batch list for this preview batch
+              (styles/config/vocabularies/Batch/accept.txt)
+              and ignore for the rest of this run
+  p           accept into the permanent Site list
+              (styles/config/vocabularies/Site/accept.txt)
               and ignore for the rest of this run
   q           quit review
 `);
@@ -643,7 +680,7 @@ Review fixable Vale alerts (Action set; case-only spelling already filtered).
       if (suggestions.length === 0) {
         console.log("  (no auto-fix suggestion from vale fix)");
         const ans = (
-          await ask(rl, "  [Enter=skip, i=ignore, a=accept vocab, q=quit] ")
+          await ask(rl, "  [Enter=skip, i=ignore, a=batch, p=permanent, q=quit] ")
         ).toLowerCase();
         if (ans === "q") {
           quit = true;
@@ -655,16 +692,8 @@ Review fixable Vale alerts (Action set; case-only spelling already filtered).
           console.log(`  ignoring ${ignoreLogLabel(alert)} for this run`);
           continue;
         }
-        if (ans === "a") {
-          try {
-            const word = acceptToSiteVocab(alert);
-            ignoredItems.add(ignoreItemKey(alert));
-            acceptedN++;
-            console.log(
-              `  accepted ${JSON.stringify(word)} → styles/config/vocabularies/Site/accept.txt`,
-            );
-          } catch (err) {
-            console.error(`  accept failed: ${err.message}`);
+        if (ans === "a" || ans === "p") {
+          if (!takeAccept(alert, ans === "p" ? "site" : "batch")) {
             skipped.add(key);
             skippedN++;
           }
@@ -685,8 +714,8 @@ Review fixable Vale alerts (Action set; case-only spelling already filtered).
 
       const hint =
         suggestions.length === 1
-          ? "y/Enter=apply, n=skip, i=ignore, a=accept, q=quit"
-          : `1-${suggestions.length}=pick, n=skip, i=ignore, a=accept, q=quit`;
+          ? "y/Enter=apply, n=skip, i=ignore, a=batch, p=permanent, q=quit"
+          : `1-${suggestions.length}=pick, n=skip, i=ignore, a=batch, p=permanent, q=quit`;
       const ans = (await ask(rl, `  [${hint}] `)).toLowerCase();
 
       if (ans === "q") {
@@ -699,16 +728,8 @@ Review fixable Vale alerts (Action set; case-only spelling already filtered).
         console.log(`  ignoring ${ignoreLogLabel(alert)} for this run`);
         continue;
       }
-      if (ans === "a") {
-        try {
-          const word = acceptToSiteVocab(alert);
-          ignoredItems.add(ignoreItemKey(alert));
-          acceptedN++;
-          console.log(
-            `  accepted ${JSON.stringify(word)} → styles/config/vocabularies/Site/accept.txt`,
-          );
-        } catch (err) {
-          console.error(`  accept failed: ${err.message}`);
+      if (ans === "a" || ans === "p") {
+        if (!takeAccept(alert, ans === "p" ? "site" : "batch")) {
           skipped.add(key);
           skippedN++;
         }
@@ -762,7 +783,7 @@ Review fixable Vale alerts (Action set; case-only spelling already filtered).
   }
 
   console.log(
-    `\nReview done: ${applied} applied, ${skippedN} skipped, ${ignoredN} ignore-item(s), ${acceptedN} accepted to vocab.`,
+    `\nReview done: ${applied} applied, ${skippedN} skipped, ${ignoredN} ignore-item(s), ${acceptedN} accepted.`,
   );
   return 0;
 }
