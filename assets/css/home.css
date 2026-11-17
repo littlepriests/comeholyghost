@@ -1,7 +1,7 @@
 /* Homepage layout.
    The column (.home-page) is banner, title row, nav, main, then the footer dock.
-   The dock is a 3-column grid: Sango, the ticker, Kagura. home.js scales that
-   row as one unit (--home-dock-scale) and places the clouds.
+   The dock is a 3-column grid: Sango, the ticker, Kagura. home/dock.js scales
+   that row as one unit (--home-dock-scale); home/clouds.js places the clouds.
    Clouds and the angel sit in .home-root, outside the column, and may paint
    into the gutters. Starfield rules are stars.css. The footer row's slots are
    site-shell.css. */
@@ -12,8 +12,8 @@
     --ascii-fit: 0.86;
 }
 
-/* Small clouds from emojicombos.com/cloud-ascii-art (top entry). Placed by home.js.
-   Stay invisible until placed — otherwise the nest’s scaleX flashes stretched at 0,0. */
+/* Small clouds from emojicombos.com/cloud-ascii-art (top entry), placed by home/clouds.js.
+   Hidden until .is-placed, or the nest's scaleX flashes stretched at 0,0. */
 .home-clouds {
     position: absolute;
     inset: 0;
@@ -336,11 +336,8 @@ body.home .page__logo-slot .page__logo {
     margin-bottom: 3rem;
 }
 
-/* Braille angel: transparent stage, pink wing/halo glow, gold halo sparkles.
-   Theme `pre` paints a solid --inner-bg !important — kill that on .ascii-art.
-   These four hues are local to the angel (mauve matches --base0E).
-   pink #ff69b4, mauve #ba8baf, gold #ffd27a, hot #fff1c2.
-   The 2.1rem top margin and 1.75rem / 3.25rem padding are the cloud pocket, not colors. */
+/* Braille angel. Its four hues are local to the figure, so they stay here rather than in tokens.css.
+   The base `pre` style paints a solid --inner-bg with !important; .ascii-art overrides it. */
 .home-main .ascii-angel {
     --ascii-pink: #ff69b4;
     --ascii-mauve: #ba8baf;
@@ -351,7 +348,7 @@ body.home .page__logo-slot .page__logo {
     display: block;
     width: fit-content;
     max-width: 100%;
-    /* Extra top margin leaves a pocket for the hovering cloud above the halo. */
+    /* The top margin and padding leave room for the heart cloud above and the nest below. */
     margin: 2.1rem auto 2.75rem;
     padding: 1.75rem 0.35rem 3.25rem;
     overflow: visible;

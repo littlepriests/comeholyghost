@@ -58,14 +58,12 @@ export default async (request) => {
         });
     }
 
-    // Welcome only for brand-new contacts (409 = already on the list).
     if (contact.created) {
-        // Owner ping (webhook is the other path; this covers when webhooks lag).
+        // resend-webhook.mjs also pings on contact.created; this covers a lagging
+        // or unconfigured webhook. A failed ping must not fail the subscriber.
         try {
             await notifyOwnerSubscribe(cfg, email);
-        } catch (error) {
-            // Don't fail the subscriber on a notify blip.
-        }
+        } catch (error) {}
         try {
             const welcome = await renderWelcomeEmail({
                 email,

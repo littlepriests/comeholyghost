@@ -3,6 +3,7 @@ import { existsSync, readdirSync, statSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { DEFAULT_ORIGIN } from "./site.mjs";
+import { unsubscribeQuery, unsubscribeSecret } from "./unsubscribe-token.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -405,8 +406,9 @@ export async function renderWelcomeEmail(options) {
     const opts = options || {};
     const origin = String(opts.origin || DEFAULT_ORIGIN).replace(/\/$/, "");
     const email = String(opts.email || "").trim().toLowerCase();
-    const unsubscribeUrl = email
-        ? `${origin}/unsubscribe/?email=${encodeURIComponent(email)}`
+    const secret = opts.unsubscribeSecret || unsubscribeSecret();
+    const unsubscribeUrl = email && secret
+        ? `${origin}/unsubscribe/?${unsubscribeQuery(secret, email)}`
         : `${origin}/unsubscribe/`;
     const mdPath = path.join(emailsDir(), "welcome.md");
     const raw = await readFile(mdPath, "utf8");

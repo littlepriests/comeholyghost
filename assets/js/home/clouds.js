@@ -42,13 +42,13 @@ export function initHomeClouds(windowBound) {
             if (t === "♡" || t === "#♡") heartHeading = h;
         });
 
-        // Top cloud: above the cat over the halo↔right-wing pocket — no overlap.
+        // Heart cloud: between the halo and right wing, squeezed (font shrinks)
+        // into the space between the ♡ heading and the top of the angel.
         if (heart && halo && wingR) {
             let hr = halo.getBoundingClientRect();
             let wr = wingR.getBoundingClientRect();
             let haloCx = (hr.left + hr.right) / 2;
             let wingCx = (wr.left + wr.right) / 2;
-            // Between halo and right wing, then ~8% further right.
             let zoneX = haloCx + (wingCx - haloCx) * 0.72 + ar.width * 0.08;
             let catClear = hr.top - 16;
             let textClear = heartHeading
@@ -71,8 +71,7 @@ export function initHomeClouds(windowBound) {
             setCloud("heart", zoneX, top, true, false);
         }
 
-        // Two smaller clouds in the negative space right of # ♡.
-        // gap-a left of the top heart cloud; gap-b peeks to its right (bg, no overlap).
+        // gap-a and gap-b flank the heart cloud; without it they share the space right of the heading.
         if (heartHeading) {
             let hb = heartHeading.getBoundingClientRect();
             let heartEl = document.querySelector('.ascii-cloud[data-cloud="heart"]');
@@ -100,14 +99,13 @@ export function initHomeClouds(windowBound) {
             }
         }
 
-        // Nest cloud just under the cat (guestbook sits inside on hover).
+        // The guestbook link appears inside the nest cloud on hover.
         let nestY = Math.min(ar.bottom + 10, hairY - 24);
         setCloud("nest", (ar.left + ar.right) / 2, nestY, true, true);
 
         let nestEl = document.querySelector(".ascii-cloud-nest");
         let nestBox = nestEl ? nestEl.getBoundingClientRect() : null;
 
-        // Lower flanks — beside the nest; right stays in the background (no overlap).
         let flankY = nestBox
             ? (nestBox.top + nestBox.bottom) / 2
             : ar.bottom - ar.height * 0.16;
@@ -128,8 +126,7 @@ export function initHomeClouds(windowBound) {
             setCloud("mid", ar.right + 10, flankY + 4, false, true);
         }
 
-        // Keep the guestbook CTA over the nest cloud when clouds are visible.
-        // On narrow screens .home-clouds is display:none — clear inline coords so CSS can place it.
+        // Below 45rem .home-clouds is display:none; clear the inline position so CSS places the CTA.
         let cta = angel.querySelector(".ascii-angel__cta");
         if (cta && nestEl) {
             let wrapCs = cloudsWrap ? window.getComputedStyle(cloudsWrap) : null;
@@ -162,7 +159,6 @@ export function initHomeClouds(windowBound) {
         if (cloudsWrap) cloudsWrap.classList.add("is-placed");
     }
 
-    // Guestbook copy falls into the nest cloud on angel hover, then fades out on leave.
     (function bindAngelGuest() {
         let fig = document.querySelector(".ascii-angel");
         let nest = document.querySelector(".ascii-cloud-nest");
@@ -195,7 +191,7 @@ export function initHomeClouds(windowBound) {
         });
     })();
 
-    // Hide twinkling stars whose viewport point sits behind a cloud / moon box.
+    // Stars are fixed and the clouds scroll, so this re-runs on scroll.
     function clearStarsBehindClouds() {
         let masks = document.querySelectorAll(
             ".ascii-cloud[data-cloud='heart'], .ascii-cloud[data-cloud='nest'], .ascii-cloud-nest, .ascii-moon"
@@ -247,8 +243,13 @@ export function initHomeClouds(windowBound) {
         window.addEventListener("load", function () {
             window.placeHomeDecor();
         });
+        let starFrame = 0;
         window.addEventListener("scroll", function () {
-            window.__homeClearStars();
+            if (starFrame) return;
+            starFrame = requestAnimationFrame(function () {
+                starFrame = 0;
+                window.__homeClearStars();
+            });
         }, { passive: true });
     }
 }

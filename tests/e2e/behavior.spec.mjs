@@ -113,6 +113,36 @@ test("subscribe opens from the nav and posts the address", async ({ page, api })
     expect(JSON.parse(sent.body)).toEqual({ email: "reader@example.com", website: "" });
 });
 
+test("Enter in the subscribe field subscribes instead of closing the dialog", async ({ page, api }) => {
+    await page.goto("/blog/");
+    await settle(page);
+    await page.locator("[data-subscribe-open]").first().click();
+    const dialog = page.locator("[data-subscribe-dialog]");
+    await dialog.locator('input[name="email"]').fill("reader@example.com");
+    await dialog.locator('input[name="email"]').press("Enter");
+    await expect(dialog.locator("[data-subscribe-ok]")).toContainText("on the list");
+    await expect(dialog).toBeVisible();
+    expect(api.filter((c) => c.path === "/api/subscribe")).toHaveLength(1);
+});
+
+test("after a same-site swap, focus moves to the new page's main content", async ({ page }, testInfo) => {
+    test.skip(isPhone(testInfo), "nav links are the same on phones; one run is enough");
+    await page.goto("/");
+    await settle(page);
+    await page.getByRole("link", { name: "writing" }).click();
+    await expect(page).toHaveURL(/\/blog\/$/);
+    await expect(page.locator("main")).toBeFocused();
+});
+
+test("the unsubscribe page does nothing without the link from the email", async ({ page, api }) => {
+    await page.goto("/unsubscribe/");
+    await settle(page);
+    await expect(page.locator("[data-unsubscribe-error]")).toContainText("unsubscribe link");
+    await expect(page.locator("[data-unsubscribe-submit]")).toBeDisabled();
+    await page.locator("[data-unsubscribe-form]").evaluate((form) => form.requestSubmit());
+    expect(api.filter((c) => c.path === "/api/unsubscribe")).toHaveLength(0);
+});
+
 test("no page logs a script error", async ({ page }) => {
     const errors = [];
     page.on("pageerror", (err) => errors.push(err.message));

@@ -1,10 +1,8 @@
-/** Hide stars behind the reading column, and refill the sword-figure pocket. */
+/** Hides stars behind the reading column and fills the read-me sword-figure pocket. */
 export function bindStarVoids(starsHost) {
     let reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let narrow = window.matchMedia("(max-width: 44.99rem)").matches;
 
-    // On inner pages, hide twinkles behind the reading column (title + body).
-    // Header, footer, side gutters, and the aside keep stars.
     function clearReadingMask() {
         starsHost.classList.remove("is-reading-masked");
         starsHost.style.removeProperty("--read-void-x");
@@ -18,9 +16,9 @@ export function bindStarVoids(starsHost) {
         for (let i = 0; i < old.length; i++) old[i].remove();
     }
 
-    // Same sitewide dots, parked in the read-me column above the h1 so the
-    // pocket around .sword-figure isn't an empty mid-band (random sky underserves it).
-    // Nodes are reused; only left/top update on scroll so twinkles don't restart.
+    // The random sky rarely lands in the read-me pocket around .sword-figure,
+    // so extra dots are placed there. Nodes are reused and only left/top change
+    // on scroll, so their twinkle animations don't restart.
     function syncSwordPocketStars() {
         let fig = document.querySelector(".sword-figure");
         if (!fig || document.body.classList.contains("home")) {
@@ -41,7 +39,7 @@ export function bindStarVoids(starsHost) {
         let vw = Math.max(window.innerWidth || 1, 1);
         let vh = Math.max(window.innerHeight || 1, 1);
 
-        // Full main-column band from a little above the figure down to the h1.
+        // Band: the column's width, from just above the figure down to the h1.
         let left = Math.max(0, col.left);
         let right = Math.min(vw, col.right);
         let top = Math.max(0, Math.min(fr.top, col.top) - 12);
@@ -51,7 +49,7 @@ export function bindStarVoids(starsHost) {
             return;
         }
 
-        // Opaque art core — keep dots on flanks / above rather than under paint.
+        // Dots under the figure's opaque middle would be invisible; move them to the flanks.
         let corePadX = Math.max(12, fr.width * 0.18);
         let corePadY = Math.max(8, fr.height * 0.08);
         let coreLeft = fr.left + corePadX;
@@ -112,7 +110,7 @@ export function bindStarVoids(starsHost) {
                 px = fr.right + tx * rightFlank;
             } else {
                 px = left + tx * (right - left);
-                // Above-band bias for the full-width lane.
+                // Full-width lane stays above the figure.
                 py = top + ty * Math.max(12, Math.min(fr.top, bottom) - top);
             }
 
@@ -125,8 +123,9 @@ export function bindStarVoids(starsHost) {
         }
     }
 
-    // The host is fixed and the page scrolls under it, so the hole is redrawn
-    // from the reading column's current rect. The mask clips each star's glow too.
+    // Inner pages: a CSS mask on the fixed star host punches one hole behind the
+    // reading column (masking the host also clips each star's glow). The page
+    // scrolls under the host, so the hole is recomputed from current rects.
     function voidBehindArticleBodies() {
         syncSwordPocketStars();
 
@@ -136,9 +135,8 @@ export function bindStarVoids(starsHost) {
         }
 
         let narrowNow = window.matchMedia("(max-width: 44.99rem)").matches;
-        // Prefer the full main column so the h1 isn't left twinkling through.
-        // Read-me sword figure: keep sitewide stars in the column above the h1
-        // (negative space around the figure); void from the title down.
+        // Read-me masks from the h1 down so the pocket above stays starry;
+        // everything else masks the whole column.
         let swordPage = !!document.querySelector(".sword-figure");
         let masks;
         if (swordPage) {
@@ -153,9 +151,7 @@ export function bindStarVoids(starsHost) {
                 );
             }
         }
-        // Pad so a star beside the hole can't sit right against the letters.
-        // On sword pages, do not pad upward into the figure pocket above the h1.
-        // On a phone the pad stays small so the side gutter can still twinkle.
+        // Padding keeps glows off the letters; small on phones so the gutter still twinkles.
         let padX = narrowNow ? 12 : 64;
         let padY = narrowNow ? 12 : 48;
         let padYTop = swordPage ? 0 : padY;
@@ -185,7 +181,6 @@ export function bindStarVoids(starsHost) {
             }
         }
 
-        // Host-level mask punches one hole for the whole reading strip (glow-safe).
         if (union) {
             starsHost.style.setProperty("--read-void-x", Math.round(union.left) + "px");
             starsHost.style.setProperty("--read-void-y", Math.round(union.top) + "px");
@@ -217,7 +212,7 @@ export function bindStarVoids(starsHost) {
     window.addEventListener("resize", scheduleVoids);
     window.addEventListener("scroll", scheduleVoids, { passive: true });
     window.addEventListener("load", voidBehindArticleBodies);
-    // Images / fonts can shift the reading column after first paint (SPA + cold).
+    // Late images and fonts move the column after first paint.
     window.setTimeout(voidBehindArticleBodies, 120);
     window.setTimeout(voidBehindArticleBodies, 480);
 }

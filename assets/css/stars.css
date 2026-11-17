@@ -30,7 +30,7 @@
     animation-name: home-star-twinkle-bright;
 }
 
-/* Cleared when a cloud sits over this star (home.js). */
+/* Set by home/clouds.js when a cloud or the moon covers this star. */
 .home-stars__star.is-cloud-void,
 .home-stars__ascii-star.is-cloud-void {
     visibility: hidden !important;
@@ -40,8 +40,8 @@
 
 /*
   Inner pages: punch a hole in the starfield over the reading column so
-  soft glows cannot sit in letter gaps. Vars set by stars.js from .page__body
-  on scroll and resize. The homepage has no hole.
+  soft glows cannot sit in letter gaps. stars/voids.js sets the vars from the
+  column's rect on scroll and resize. The homepage has no hole.
 */
 .home-stars.is-reading-masked {
     -webkit-mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);

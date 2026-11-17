@@ -36,6 +36,13 @@
 	/* Logo */
 	--logo: var(--base0B);
 
+	/* Page titles (h1, writing-index titles). */
+	--title: #ffd749;
+
+	/* Heart particles: sword fountain, Grundo spill, back-to-top rise, click hearts. */
+	--heart: #ff2a4a;
+	--heart-bright: #ff4d6d;
+
 	/* Homepage counter, player buttons, and back-to-top. */
 	--chip-bg: #111;
 	--chip-fg: var(--highlight);

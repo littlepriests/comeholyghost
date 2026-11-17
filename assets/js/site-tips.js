@@ -1,9 +1,9 @@
-/* Floating data-tip labels — follow the pointer, above Winamp / sprites / images. */
+/* Floating label for .site-tip[data-tip]; follows the pointer, or sits over the element on keyboard focus. */
 (function () {
     if (window.__siteTips) return;
     window.__siteTips = true;
 
-    // Sit ahead of the cursor (LTR): right + slightly above so the tip isn't under it.
+    // Up and to the right of the pointer so the custom cursor doesn't cover it.
     let OFFSET_X = 16;
     let OFFSET_Y = -18;
 
@@ -37,7 +37,6 @@
         let th = tip.offsetHeight || 0;
         let left = clientX + OFFSET_X;
         let top = clientY + OFFSET_Y - th;
-        // Flip below / left if we'd clip the viewport.
         if (top < 4) top = clientY - OFFSET_Y;
         if (left + tw > window.innerWidth - 4) left = clientX - tw - OFFSET_X;
         left = Math.max(4, Math.min(left, window.innerWidth - tw - 4));

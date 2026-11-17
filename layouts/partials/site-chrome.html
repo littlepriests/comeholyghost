@@ -1,4 +1,4 @@
-{{- /* Sitewide chrome after #page-root, so same-site nav keeps it. */ -}}
+{{- /* Outside #page-root: SPA nav never replaces these, and their scripts run once. */ -}}
 {{ partial "stars.html" . }}
 {{ partial "backdrop.html" . }}
 {{ partial "player.html" . }}
@@ -6,7 +6,7 @@
 {{- if .IsHome }}
 {{ partial "cursor-effects.html" . }}
 {{- end }}
-{{- /* Ghost click hearts + idle bubbles — desktop fine pointer only (script self-gates). */ -}}
+{{- /* Click hearts and idle bubbles belong to the custom cursor; the script gates itself to desktop. */ -}}
 {{- with .Site.Params.cursor.image }}
 {{- $cursorFile := printf "static/%s" (strings.TrimPrefix "/" .) -}}
 {{- if os.FileExists $cursorFile }}

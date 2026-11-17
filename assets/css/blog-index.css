@@ -1,4 +1,4 @@
-/* Writing index (/blog/): vajra-style feed — title, date, thumb + caption, summary. */
+/* Writing index (/blog/): one entry per post — title, date, thumb + caption, summary. */
 
 .blog-index {
     font-family: var(--font-site, "Fira Mono", ui-monospace, monospace);
@@ -6,13 +6,12 @@
     max-width: 36rem;
 }
 
-/* Same gold as site h1 (#ffd749). This one is 1.2rem. */
 .blog-index__heading {
     margin: 0 0 1.25rem;
     font-family: inherit;
     font-size: 1.2rem;
     font-weight: 600;
-    color: #ffd749;
+    color: var(--title);
     text-transform: lowercase;
 }
 

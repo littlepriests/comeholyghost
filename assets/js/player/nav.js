@@ -1,124 +1,152 @@
-/** Same-site links swap #page-root and leave the player (and the audio element) in place. */
+/**
+ * Same-site navigation that swaps #page-root and leaves the player (and its
+ * <audio>) in place. Any failure falls back to a full page load.
+ */
 export function defineNav(s) {
-    s.stylesheetPresent = function (absolute) {
-        return Array.prototype.some.call(document.querySelectorAll('link[rel="stylesheet"]'), function (link) {
+    let navToken = 0;
+
+    function stylesheetPresent(absolute) {
+        return Array.prototype.some.call(document.querySelectorAll('link[rel="stylesheet"]'), (link) => {
             try {
                 return new URL(link.href, location.href).href === absolute;
             } catch (error) {
                 return false;
             }
         });
-    };
+    }
 
-    s.ensureStyles = function (doc, baseHref) {
-        let waits = [];
-        doc.querySelectorAll('link[rel="stylesheet"]').forEach(function (link) {
-            let href = link.getAttribute("href");
+    /** Adds the incoming page's stylesheets and resolves once they apply, so the swap doesn't flash unstyled. */
+    function ensureStyles(doc, baseHref) {
+        const waits = [];
+        doc.querySelectorAll('link[rel="stylesheet"]').forEach((link) => {
+            const href = link.getAttribute("href");
             if (!href) return;
-            let absolute = new URL(href, baseHref).href;
-            if (s.stylesheetPresent(absolute)) return;
-            waits.push(new Promise(function (resolve) {
-                let copy = document.createElement("link");
+            const absolute = new URL(href, baseHref).href;
+            if (stylesheetPresent(absolute)) return;
+            waits.push(new Promise((resolve) => {
+                const copy = document.createElement("link");
                 copy.rel = "stylesheet";
                 copy.href = absolute;
-                let integrity = link.getAttribute("integrity");
+                const integrity = link.getAttribute("integrity");
                 if (integrity) {
                     copy.integrity = integrity;
                     copy.crossOrigin = link.getAttribute("crossorigin") || "anonymous";
                 }
-                copy.onload = resolve;
-                copy.onerror = resolve;
+                copy.onload = copy.onerror = resolve;
                 document.head.appendChild(copy);
             }));
         });
         return Promise.all(waits);
-    };
+    }
 
-    s.waitForFonts = function () {
+    /** Short cap: a page-only font shouldn't hold the swap, just avoid most reflow. */
+    function waitForFonts() {
         if (!document.fonts || !document.fonts.ready) return Promise.resolve();
         return Promise.race([
-            document.fonts.ready.catch(function () {}),
-            new Promise(function (resolve) {
-                window.setTimeout(resolve, 180);
-            })
+            document.fonts.ready.catch(() => {}),
+            new Promise((resolve) => window.setTimeout(resolve, 180)),
         ]);
-    };
+    }
+
+    /** importNode leaves <script> inert, so each src is re-added to run it. */
+    function runScripts(root, baseHref) {
+        root.querySelectorAll("script[src]").forEach((old) => {
+            const created = document.createElement("script");
+            created.src = new URL(old.getAttribute("src"), baseHref).href;
+            const integrity = old.getAttribute("integrity");
+            if (integrity) created.integrity = integrity;
+            created.onload = created.onerror = () => created.remove();
+            document.body.appendChild(created);
+        });
+    }
+
+    /** Put keyboard and screen-reader focus on the new content instead of the removed node. */
+    function focusMain(root) {
+        const target = root.querySelector("main") || root;
+        if (!target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");
+        target.focus({ preventScroll: true });
+    }
+
+    function afterSwap(root, fromPop) {
+        const home = document.body.classList.contains("home");
+        if (home) {
+            requestAnimationFrame(() => {
+                if (typeof window.revealHomeBanner === "function") window.revealHomeBanner();
+            });
+            s.chromeClosed = false;
+        }
+        s.applyPlayerChrome();
+        if (typeof window.refreshStarReadingVoids === "function") {
+            // Re-measure across the next frames and once more after late image/font layout.
+            requestAnimationFrame(() => {
+                window.refreshStarReadingVoids();
+                requestAnimationFrame(() => {
+                    window.refreshStarReadingVoids();
+                    window.setTimeout(window.refreshStarReadingVoids, 200);
+                });
+            });
+        }
+        const target = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+        if (target) target.scrollIntoView();
+        else window.scrollTo(0, 0);
+        focusMain(root);
+        requestAnimationFrame(() => root.classList.remove("is-page-pending"));
+    }
 
     s.adopt = function (href, fromPop) {
-        let current = document.getElementById("page-root");
-        if (current) current.classList.add("is-page-pending");
+        const token = ++navToken;
+        const pending = document.getElementById("page-root");
+        if (pending) pending.classList.add("is-page-pending");
         return fetch(href)
-            .then(function (response) { return response.text(); })
-            .then(function (text) {
-                let doc = new DOMParser().parseFromString(text, "text/html");
-                let incoming = doc.getElementById("page-root");
-                current = document.getElementById("page-root");
-                if (!incoming || !current) {
-                    location.assign(href);
-                    return;
-                }
-                return s.ensureStyles(doc, href)
-                    .then(s.waitForFonts)
-                    .then(function () {
-                        current.replaceWith(document.importNode(incoming, true));
+            .then((response) => {
+                const type = response.headers.get("content-type") || "";
+                if (!response.ok || !type.includes("text/html")) throw new Error("nav " + response.status);
+                return response.text();
+            })
+            .then((text) => {
+                if (token !== navToken) return;
+                const doc = new DOMParser().parseFromString(text, "text/html");
+                const incoming = doc.getElementById("page-root");
+                if (!incoming || !document.getElementById("page-root")) throw new Error("nav: no #page-root");
+                return ensureStyles(doc, href)
+                    .then(waitForFonts)
+                    .then(() => {
+                        if (token !== navToken) return;
+                        const current = document.getElementById("page-root");
+                        const next = document.importNode(incoming, true);
+                        next.classList.add("is-page-pending");
+                        current.replaceWith(next);
                         document.title = doc.title;
                         document.body.className = doc.body.className;
-                        let nextRoot = document.getElementById("page-root");
-                        if (nextRoot) {
-                            nextRoot.classList.add("is-page-pending");
-                            nextRoot.querySelectorAll("script[src]").forEach(function (old) {
-                                let created = document.createElement("script");
-                                created.src = new URL(old.getAttribute("src"), href).href;
-                                created.onload = created.onerror = function () {
-                                    created.remove();
-                                };
-                                document.body.appendChild(created);
-                            });
-                        }
-                        // Bottom-right art is read-me .sword-figure only — never a
-                        // fixed corner twin on home (SPA leftover cleanup).
-                        if (document.body.classList.contains("home")) {
-                            document.querySelectorAll(
-                                '.site-backdrop[data-anchor="bottom-right"]'
-                            ).forEach(function (node) {
-                                node.remove();
-                            });
-                            // Banner decode gate if home.js has not run yet (or re-run).
-                            requestAnimationFrame(function () {
-                                if (typeof window.revealHomeBanner === "function") {
-                                    window.revealHomeBanner();
-                                }
-                            });
-                        }
-                        // Homepage always opens on the minimalist chrome.
-                        if (document.body.classList.contains("home")) s.chromeClosed = false;
-                        s.applyPlayerChrome();
-                        if (typeof window.refreshStarReadingVoids === "function") {
-                            requestAnimationFrame(function () {
-                                window.refreshStarReadingVoids();
-                                requestAnimationFrame(function () {
-                                    window.refreshStarReadingVoids();
-                                    window.setTimeout(window.refreshStarReadingVoids, 200);
-                                });
-                            });
-                        }
                         if (!fromPop) history.pushState({ player: true }, "", href);
-                        if (location.hash) {
-                            let target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
-                            if (target) target.scrollIntoView();
-                        } else {
-                            window.scrollTo(0, 0);
-                        }
-                        requestAnimationFrame(function () {
-                            let root = document.getElementById("page-root");
-                            if (root) root.classList.remove("is-page-pending");
-                        });
+                        runScripts(next, href);
+                        afterSwap(next, fromPop);
                     });
             })
-            .catch(function () {
-                let root = document.getElementById("page-root");
-                if (root) root.classList.remove("is-page-pending");
+            .catch(() => {
+                if (token !== navToken) return;
                 location.assign(href);
             });
+    };
+
+    s.onLinkClick = function (event) {
+        if (event.defaultPrevented || event.button !== 0) return;
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        const link = event.target.closest("a");
+        if (!link || !link.href || s.player.contains(link)) return;
+        if (link.hasAttribute("download") || (link.target && link.target !== "_self")) return;
+        let url;
+        try {
+            url = new URL(link.href);
+        } catch (error) {
+            return;
+        }
+        if (url.origin !== location.origin) return;
+        // Same page (including #hash jumps) is left to the browser.
+        if (url.pathname === location.pathname && url.search === location.search) return;
+        // Feeds, images, audio, and other files aren't pages to swap in.
+        if (/\.[a-z0-9]+$/i.test(url.pathname) && !/\.html?$/i.test(url.pathname)) return;
+        event.preventDefault();
+        s.adopt(url.href, false);
     };
 }

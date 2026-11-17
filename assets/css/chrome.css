@@ -1,9 +1,14 @@
 /* Sitewide chrome: SPA page fade, hover tips, back-to-top link. Type lives in typography.css. */
 
-/* SPA nav: hold the outgoing/incoming page briefly while new CSS settles. */
+/* SPA nav (player/nav.js): hidden while the incoming page's CSS and fonts load. */
 #page-root.is-page-pending {
     opacity: 0;
     pointer-events: none;
+}
+
+/* nav.js focuses <main> after a swap for screen readers; no ring on a non-control. */
+main[tabindex="-1"]:focus {
+    outline: none;
 }
 
 #page-root {
@@ -100,8 +105,7 @@
     overflow: visible;
 }
 
-/* Click ♡. Same hues as the sword (255 42 74 / 255 77 109), drawn softer.
-   Glyph 0.75rem, bright 0.85rem, times --scale. Burst distance is set in site-cursor-fx.js. */
+/* Same hues as the sword hearts, softer. Burst distance (--dx/--dy) comes from site-cursor-fx.js. */
 .site-cursor-hearts__heart {
     position: absolute;
     left: 0;
@@ -110,7 +114,7 @@
     font-family: var(--font-site, ui-monospace, monospace);
     font-size: calc(0.75rem * var(--scale, 1));
     line-height: 1;
-    color: rgb(255 42 74 / 0.7);
+    color: color-mix(in srgb, var(--heart) 70%, transparent);
     text-shadow: 0 0 4px rgb(255 107 129 / 0.35);
     opacity: 0;
     transform: translate(-50%, -50%) scale(0.35);
@@ -118,7 +122,7 @@
 }
 
 .site-cursor-hearts__heart.is-bright {
-    color: rgb(255 77 109 / 0.75);
+    color: color-mix(in srgb, var(--heart-bright) 75%, transparent);
     font-size: calc(0.85rem * var(--scale, 1));
     text-shadow: 0 0 5px rgb(255 107 129 / 0.4);
 }

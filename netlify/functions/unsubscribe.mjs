@@ -6,6 +6,7 @@ import {
     unsubscribeContact
 } from "../lib/resend.mjs";
 import { DEFAULT_ORIGIN } from "../lib/site.mjs";
+import { unsubscribeSecret, validUnsubscribeToken } from "../lib/unsubscribe-token.mjs";
 
 function emailFromRequest(request, payload) {
     const url = new URL(request.url);
@@ -14,19 +15,29 @@ function emailFromRequest(request, payload) {
     );
 }
 
+function tokenFromRequest(request, payload) {
+    const url = new URL(request.url);
+    return String((payload && payload.token) || url.searchParams.get("token") || "");
+}
+
 export default async (request) => {
     if (request.method === "OPTIONS") {
         return preflight("GET, POST, OPTIONS");
     }
 
     if (request.method === "GET") {
-        // Human clicks should land on the Hugo page; API GET is for probes.
+        // A clicked link lands on the Hugo page so a mail scanner's GET can't unsubscribe anyone.
         const url = new URL(request.url);
         const email = cleanEmail(url.searchParams.get("email") || "");
+        const token = url.searchParams.get("token") || "";
         const origin = (process.env.URL || DEFAULT_ORIGIN).replace(/\/$/, "");
-        const dest = email
-            ? `${origin}/unsubscribe/?email=${encodeURIComponent(email)}`
-            : `${origin}/unsubscribe/`;
+        // Pass the token through unchanged. Re-signing here would mint a valid
+        // link for whatever address the query named.
+        let dest = `${origin}/unsubscribe/`;
+        if (email) {
+            dest += `?email=${encodeURIComponent(email)}`;
+            if (token) dest += `&token=${encodeURIComponent(token)}`;
+        }
         return Response.redirect(dest, 302);
     }
 
@@ -46,7 +57,7 @@ export default async (request) => {
             const form = await request.formData();
             payload = Object.fromEntries(form.entries());
         } else {
-            // RFC 8058 one-click may POST with little/no body; email is in the query.
+            // RFC 8058 one-click POSTs may omit the content type; the email is in the query.
             const text = await request.text();
             if (text && text.includes("=")) {
                 payload = Object.fromEntries(new URLSearchParams(text).entries());
@@ -65,6 +76,16 @@ export default async (request) => {
         return json(400, { error: "that doesn’t look like an email address." });
     }
 
+    const secret = unsubscribeSecret();
+    if (!secret) {
+        return json(503, {
+            error: "unsubscribe isn’t wired yet (set RESEND_API_KEY on Netlify)."
+        });
+    }
+    if (!validUnsubscribeToken(secret, email, tokenFromRequest(request, payload))) {
+        return json(403, { error: "that unsubscribe link isn’t valid. use the one from your email." });
+    }
+
     if (isPreviewDeploy()) {
         return json(200, {
             message: "preview deploy — not changed on the real list.",
@@ -81,7 +102,7 @@ export default async (request) => {
 
     const result = await unsubscribeContact(cfg, email);
     if (!result.ok) {
-        // 404 = already gone / never listed — treat as success for the user.
+        // 404: never listed or already removed; same outcome for the visitor.
         if (result.status === 404) {
             return json(200, { message: "you're off the list." });
         }

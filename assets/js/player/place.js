@@ -1,4 +1,10 @@
-/** Float the bar while reading, then park it on the footer line. */
+/**
+ * The bar is position: sticky at the bottom of the window ("floating") until the
+ * footer line scrolls into view, then rests on that line ("parked"). The footer
+ * line is the dock row on the homepage and the footer's padding edge elsewhere.
+ * On phones, once parked, the footer lead (counter or yeti), the bar, and ↑ are
+ * laid out as one centered row by placeFooterRow().
+ */
 export function definePlace(s) {
     s.syncBackTop = function () {
         if (s.backTopBtn) s.backTopBtn.hidden = s.chromeClosed || window.scrollY < s.BACK_TOP_MIN_SCROLL;
@@ -36,13 +42,15 @@ export function definePlace(s) {
             let line = dock
                 ? dock.getBoundingClientRect().bottom
                 : footer.getBoundingClientRect().bottom - (parseFloat(getComputedStyle(footer).paddingBottom) || 0);
+            // The sticky track starts after #page-root; the shell's bottom margin
+            // collapses through #page-root onto it, so add it back.
             let spot = root.getBoundingClientRect().bottom + (parseFloat(getComputedStyle(shell).marginBottom) || 0);
             lift = spot - line;
             s.parkLineY = line + window.scrollY;
         }
         lift = Math.max(0, Math.round(lift));
         s.player.style.setProperty("--player-lift", lift + "px");
-        // Computed bottom is --player-float minus the lift.
+        // player.css sets bottom to --player-float minus --player-lift.
         s.floatGap = (parseFloat(getComputedStyle(s.player).bottom) || 0) + lift;
         s.syncFloating();
         s.placeFooterRow(footer);
@@ -68,6 +76,8 @@ export function definePlace(s) {
             if (title) title.style.width = "";
             return;
         }
+        // Reset before measuring; hidden buttons keep their slots, so the bar is
+        // the same width floating or parked.
         if (title) title.style.width = "";
         shifter.style.marginLeft = "0px";
         let visual = shifter.querySelector("[data-visitor-count]") || shifter.querySelector(".sprite-anim") || shifter;
@@ -79,6 +89,7 @@ export function definePlace(s) {
         let prefer = s.cssPx(getComputedStyle(footer).getPropertyValue("--footer-row-gap")) || 20;
         let minGap = 8;
         let slack = foot.width - leadW - playerW - upW;
+        // Too narrow for the row: shrink the track title (it marquees) before the gaps.
         if (title && slack < minGap * 2) {
             let titleW = title.getBoundingClientRect().width;
             title.style.width = Math.max(24, Math.floor(titleW - (minGap * 2 - slack))) + "px";

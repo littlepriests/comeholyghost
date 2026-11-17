@@ -1,4 +1,8 @@
-/** Grundo kick, heart spill, and the back-to-top beat. */
+/**
+ * Back-to-top sequence. Desktop: Grundo kicks, hearts spill from the dock, a
+ * page-wide heart fountain starts, then the page scrolls. Phones and reduced
+ * motion skip straight to the fountain (or the scroll).
+ */
 export function definePet(s) {
     s.isMobileViewport = function () {
         return s.mobileQuery.matches;
@@ -32,11 +36,11 @@ export function definePet(s) {
         s.dockKick.removeAttribute("hidden");
         if (s.dockKickStrip) {
             s.dockKickStrip.classList.remove("is-kick-play");
-            void s.dockKickStrip.offsetWidth;
+            void s.dockKickStrip.offsetWidth; // reflow so the animation restarts
             s.dockKickStrip.classList.add("is-kick-play");
         }
         let timing = s.dockKickTiming();
-        // One kick cycle, brief hold, then static idle again.
+        // One kick cycle plus a short hold on the last frame.
         let kickMs = Math.max(320, Math.round((timing.frames / timing.fps) * 1000) + 120);
         s.dockPetTimer = window.setTimeout(function () {
             s.showDockIdle();
@@ -63,7 +67,7 @@ export function definePet(s) {
         if (s.prefersReducedMotion()) return;
         window.clearTimeout(s.dockHeartsTimer);
         s.dockHearts.classList.remove("is-stomp");
-        void s.dockHearts.offsetWidth;
+        void s.dockHearts.offsetWidth; // reflow so the animation restarts
         s.dockHearts.classList.add("is-stomp");
         s.dockHeartsTimer = window.setTimeout(function () {
             s.dockHearts.classList.remove("is-stomp");
@@ -104,7 +108,7 @@ export function definePet(s) {
         }
         document.body.appendChild(layer);
         s.pageHeartsLayer = layer;
-        // Start scroll once the rise is readable.
+        // Scroll starts once the hearts are visibly rising, so the page reads as floating up.
         window.setTimeout(finish, s.isMobileViewport() ? 260 : 360);
         s.pageHeartsTimer = window.setTimeout(function () {
             if (layer.parentNode) layer.parentNode.removeChild(layer);

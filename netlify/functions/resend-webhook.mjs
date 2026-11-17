@@ -7,9 +7,9 @@ import {
 } from "../lib/resend.mjs";
 
 /**
- * Resend → Netlify webhook.
- * Configure in Resend dashboard: POST https://cornfieldjournal.com/api/resend-webhook
- * Event: contact.created. Signing secret → RESEND_WEBHOOK_SECRET on Netlify.
+ * Owner ping for Resend's contact.created event. In the Resend dashboard, point
+ * a webhook at /api/resend-webhook and put its signing secret in the Netlify
+ * env var RESEND_WEBHOOK_SECRET. Other event types get a 200 so Resend stops retrying.
  */
 export default async (request) => {
     if (request.method === "OPTIONS") {

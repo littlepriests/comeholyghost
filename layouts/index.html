@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{- site.Language.Lang -}}">
-{{- /* Banner pick in Hugo so first paint is already the chosen file (no JS src swap). */ -}}
+{{- /* Hugo picks the banner so it can be preloaded; home/banner.js only reveals it once decoded. A new pick needs a rebuild. */ -}}
 {{- $bannerFallback := .Site.Params.home.banner | default "images/banner.svg" -}}
 {{- $bannerDir := .Site.Params.home.bannerDir | default "" -}}
 {{- $bannerAlt := .Site.Params.home.bannerAlt | default "Site banner" -}}
@@ -43,7 +43,6 @@
 <body class="home">
     <div id="page-root" class="home-root">
     <div class="home-page site-shell">
-        {{- /* Chosen above in <head> (shuffle + preload). Decode-gated reveal is home.js. */ -}}
         {{- $bannerW := .Site.Params.home.bannerWidth | default 1200 -}}
         {{- $bannerH := .Site.Params.home.bannerHeight | default 280 -}}
         <div class="home-banner is-pending" style="--home-banner-ratio: {{ $bannerW }} / {{ $bannerH }}">

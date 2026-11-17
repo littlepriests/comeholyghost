@@ -225,7 +225,7 @@ body {
     animation-fill-mode: forwards;
 }
 
-/* Sword ♡ spill from Grundo’s feet — brief lift, then cascading waterfall. */
+/* Hearts spill from Grundo's feet on the back-to-top stomp. */
 #site-player .player-dock-pet__hearts {
     position: absolute;
     left: 50%;
@@ -237,8 +237,7 @@ body {
     z-index: 6;
 }
 
-/* Same hues as the sword (#ff2a4a / #ff4d6d). Glyphs 0.95rem, bright 1.2rem.
-   Spill distance is --lift / --fall on each heart in player.html. */
+/* Each heart's path (--dx, --lift, --dx2, --fall) is set inline in player.html. */
 #site-player .player-dock-pet__heart {
     position: absolute;
     left: 0;
@@ -248,7 +247,7 @@ body {
     font-family: var(--font-monospace, ui-monospace, "Cascadia Mono", "Fira Mono", monospace);
     font-size: 0.95rem;
     line-height: 1;
-    color: #ff2a4a;
+    color: var(--heart);
     text-shadow:
         0 0 4px #ff6b81,
         0 0 10px #ff1744,
@@ -260,11 +259,11 @@ body {
 }
 
 #site-player .player-dock-pet__heart.is-bright {
-    color: #ff4d6d;
+    color: var(--heart-bright);
     font-size: 1.2rem;
     text-shadow:
         0 0 5px #fff,
-        0 0 10px #ff2a4a,
+        0 0 10px var(--heart),
         0 0 18px #ff1744,
         0 0 28px rgb(255 20 60 / 0.9),
         0 0 40px rgb(255 40 80 / 0.55);
@@ -345,7 +344,7 @@ body {
     }
 }
 
-/* Full-page ♡ rise on back-to-top (spawned in JS; works on mobile simple chrome). */
+/* Full-page hearts rising on back-to-top; spawned by player/pet.js on every viewport. */
 .player-page-hearts {
     position: fixed;
     inset: 0;
@@ -362,7 +361,7 @@ body {
     font-family: var(--font-monospace, ui-monospace, "Cascadia Mono", "Fira Mono", monospace);
     font-size: calc(0.85rem * var(--scale, 1));
     line-height: 1;
-    color: #ff2a4a;
+    color: var(--heart);
     text-shadow:
         0 0 4px #ff6b81,
         0 0 10px #ff1744,
@@ -374,11 +373,11 @@ body {
 }
 
 .player-page-hearts__heart.is-bright {
-    color: #ff4d6d;
+    color: var(--heart-bright);
     font-size: calc(1.15rem * var(--scale, 1));
     text-shadow:
         0 0 5px #fff,
-        0 0 10px #ff2a4a,
+        0 0 10px var(--heart),
         0 0 20px #ff1744,
         0 0 32px rgb(255 40 80 / 0.55);
 }

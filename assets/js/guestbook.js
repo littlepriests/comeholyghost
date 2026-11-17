@@ -156,12 +156,15 @@
                 website: website
             })
         }).then(function (response) {
-            return response.json().then(function (body) {
-                return { ok: response.ok, body: body };
+            // A gateway error can come back as HTML; keep the status either way.
+            return response.json().catch(function () {
+                return {};
+            }).then(function (body) {
+                return { ok: response.ok, body: body || {} };
             });
         }).then(function (result) {
             if (!result.ok) {
-                setError((result.body && result.body.error) || "Could not save that entry.");
+                setError(result.body.error || "Could not save that entry.");
                 return;
             }
             entries = Array.isArray(result.body.entries) ? result.body.entries : entries;

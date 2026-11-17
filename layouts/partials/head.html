@@ -1,7 +1,7 @@
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{ with .Title }}{{ . }} &ndash; {{end}}{{ .Site.Title }}</title>
 {{ with .Site.Params.about.description }}<meta name="description" content="{{ . }}">{{ end }}
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta charset="UTF-8"/>
 {{ if .Site.Params.noindex }}<meta name="robots" content="noindex" /> {{ end }}
 {{- $fontPreload := .Site.Params.fonts.preload | default (slice "fonts/fira-mono-400.woff2" "fonts/DotMatrixNarrow.woff2") -}}
 {{- range $fontPreload }}
@@ -15,7 +15,7 @@
     --font-article: {{ $fontArticle | safeCSS }};
   }
 </style>
-{{- /* Netlify sets CONTEXT at build (production | deploy-preview | branch-deploy). */ -}}
+{{- /* Netlify sets CONTEXT at build (production | deploy-preview | branch-deploy); previews skip metered function calls. */ -}}
 {{- $ctx := getenv "CONTEXT" | default "dev" -}}
 <script>
   window.__SITE_CONTEXT__ = {{ $ctx | jsonify }};
@@ -23,9 +23,8 @@
 </script>
 {{ partial "js.html" "site-context" }}
 {{- /*
-  Sitewide CSS: one fingerprinted bundle (order = cascade order), then the
-  player sheet on its own. Page-only sheets are fingerprinted in their layouts
-  via partial "css.html".
+  Sitewide bundle; list order is cascade order. player.css stays a separate
+  sheet. Page-only sheets come from partial "css.html" in their layouts.
 */ -}}
 {{ $site := slice
   (resources.Get "css/fonts.css")
@@ -48,17 +47,14 @@
 | fingerprint }}
 <link rel="stylesheet" href="{{ $site.RelPermalink }}" integrity="{{ $site.Data.Integrity }}">
 {{ partial "css.html" "player" }}
-<!-- favicon -->
 {{ if os.FileExists "static/favicon.ico" }}<link rel="icon" href="{{ "favicon.ico" | absURL }}">{{ end }}
 {{ if os.FileExists "static/favicon-32x32.png" }}<link rel="icon" type="image/png" sizes="32x32" href="{{ "favicon-32x32.png" | absURL }}">{{ end }}
 {{ if os.FileExists "static/favicon-16x16.png" }}<link rel="icon" type="image/png" sizes="16x16" href="{{ "favicon-16x16.png" | absURL }}">{{ end }}
 {{ if os.FileExists "static/apple-touch-icon.png" }}<link rel="apple-touch-icon" href="{{ "apple-touch-icon.png" | absURL }}">{{ end }}
 {{ if os.FileExists "static/site.webmanifest" }}<link rel="manifest" href="{{ "site.webmanifest" | absURL }}">{{ end }}
-<!-- RSS -->
 {{ with .OutputFormats.Get "rss" -}}
   {{ printf `<link rel=%q type=%q href=%q title=%q>` .Rel .MediaType.Type .Permalink site.Title | safeHTML }}
 {{ end }}
-<!-- OG meta properties -->
 <meta property="og:title" content="{{ with .Title }}{{ . }} &ndash; {{end}}{{ .Site.Title }}" />
 <meta property="og:url" content="{{ .Page.Permalink }}" />
 {{ if isset .Params "description" }}
@@ -70,12 +66,16 @@
 {{ end }}
 {{ with .Site.Language.Locale }}<meta property="og:locale" content="{{ . }}" />{{ end }}
 {{ with .Site.Params.about.logo_image }}<meta property="og:image" content="{{ . | absURL }}" />{{ end }}
-{{/* Custom cursor image, when static/ holds the file named in params.cursor.image. */}}
+{{/* The ghost replaces every cursor, including the link hand; !important beats component cursor rules. */}}
 {{ $cursor := .Site.Params.cursor.image }}
 {{ if and $cursor (os.FileExists (printf "static/%s" (strings.TrimPrefix "/" $cursor))) }}
 <style>
   :root { --site-cursor: url("{{ $cursor | relURL }}") {{ .Site.Params.cursor.x | default 0 }} {{ .Site.Params.cursor.y | default 0 }}, auto; }
   * { cursor: var(--site-cursor) !important; }
-  input, textarea, [contenteditable="true"] { cursor: text !important; }
+  textarea, [contenteditable="true"],
+  input:not([type="button"], [type="submit"], [type="reset"], [type="checkbox"], [type="radio"], [type="range"], [type="color"], [type="file"], [type="image"]) {
+    cursor: text !important;
+  }
+  :disabled { cursor: not-allowed !important; }
 </style>
 {{ end }}

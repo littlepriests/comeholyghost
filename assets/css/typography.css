@@ -16,9 +16,9 @@ body {
 }
 
 /*
-  Orphans / widows (print conceit, CSS-only — no content rewrites).
-  balance = headings / short display lines; pretty = body-ish blocks.
-  Chromium leads; Safari/Firefox may still leave a lone last word.
+  Avoid lone last words in CSS rather than by editing prose: balance for
+  headings and short display lines, pretty for body blocks. Safari and
+  Firefox support is partial, so a lone word can still appear there.
 */
 h1,
 h2,
@@ -32,7 +32,7 @@ h6,
     text-wrap: balance;
 }
 
-/* Headings — page title gold, h2+ link blue, stepped sizes so levels read apart */
+/* h1 is --title, h2–h6 --link; sizes step so levels read apart. */
 h1, 
 h2, 
 h3, 
@@ -45,8 +45,7 @@ h6 {
     line-height: 1.35;
 }
 
-/* Gold #ffd749 at 1.45rem. h2–h6 stay --link. A theme key can replace this hue; the size stays here. */
-h1 { font-size: 1.45rem; color: #ffd749; }
+h1 { font-size: 1.45rem; color: var(--title); }
 h2 { font-size: 1.28rem; }
 h3 { font-size: 1.14rem; }
 h4 { font-size: 1.06rem; }
@@ -89,7 +88,7 @@ h6:before {
 }
 
 h1:before {
-    color: color-mix(in srgb, #ffd749 55%, var(--muted));
+    color: color-mix(in srgb, var(--title) 55%, var(--muted));
 }
 
 h1:first-child {

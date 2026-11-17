@@ -51,6 +51,16 @@
         openDialog();
     });
 
+    // Enter would trigger implicit submission with the form's first submit
+    // button, which is close (method="dialog"); route it to subscribe instead.
+    if (emailInput && submitBtn) {
+        emailInput.addEventListener("keydown", function (event) {
+            if (event.key !== "Enter" || event.isComposing) return;
+            event.preventDefault();
+            submitBtn.click();
+        });
+    }
+
     if (submitBtn) {
         submitBtn.addEventListener("click", function () {
             if (!form || busy) return;

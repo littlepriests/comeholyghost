@@ -2,7 +2,6 @@
 export function paintStarfield(starsHost) {
     let reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let narrow = window.matchMedia("(max-width: 44.99rem)").matches;
-    // Desktop ~110; phone ~55; reduced-motion: fewer static dots, no CSS anim relied on.
     let total = reduceMotion ? 40 : narrow ? 55 : 110;
     let positions = [];
     let minDist = narrow ? 4.2 : 3.8;
@@ -20,15 +19,14 @@ export function paintStarfield(starsHost) {
         positions.push({ x: x, y: y });
     }
 
-    // Keep ASCII stars out of the middle reading column (roughly 20–80% on desktop).
+    // Positions are viewport percentages; the reading column is roughly 22–78% wide.
     function awayFromText(x, y) {
         let inMiddleBand = x > 22 && x < 78;
         let inReadingHeight = y > 8 && y < 78;
         return !(inMiddleBand && inReadingHeight);
     }
 
-    // Only a tight core around the moon art — leave the rest of the upper-left sky twinkling.
-    // home.js also voids stars that land directly on .ascii-moon.
+    // A tight box around the homepage moon; home/clouds.js hides any star that still lands on it.
     function awayFromMoon(x, y) {
         return !(x < 14 && y > 10 && y < 22);
     }
@@ -57,11 +55,12 @@ export function paintStarfield(starsHost) {
         starsHost.appendChild(star);
     }
 
-    // Sparse Joan-style star motif only (no ,O, / 000 blobs). Credit in docs/resources.md.
+    // Phones have no side gutter for the ASCII stars.
+    if (narrow) return;
+
+    // Joan Stark's star motif; credit in docs/resources.md.
     let asciiStar = "  \\/\n-= * =-\n  /\\";
     minDist = 28;
-    /* ASCII stars sit in the desktop gutters. A phone has no gutter. */
-    if (!narrow) {
     let slots = reduceMotion
         ? [{ x: 6, y: 8 }, { x: 92, y: 22 }]
         : [
@@ -72,8 +71,7 @@ export function paintStarfield(starsHost) {
             { x: 90, y: 62 },
             { x: 12, y: 88 }
         ];
-    let asciiCount = slots.length;
-    for (let g = 0; g < asciiCount; g++) {
+    for (let g = 0; g < slots.length; g++) {
         let gx = slots[g].x + (Math.random() * 6 - 3);
         let gy = slots[g].y + (Math.random() * 8 - 4);
         let gTries = 0;
@@ -96,6 +94,5 @@ export function paintStarfield(starsHost) {
         glyph.style.setProperty("--glyph-opacity", (0.22 + Math.random() * 0.28).toFixed(2));
         glyph.style.setProperty("--glyph-scale", (0.75 + Math.random() * 0.45).toFixed(2));
         starsHost.appendChild(glyph);
-    }
     }
 }

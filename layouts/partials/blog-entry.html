@@ -3,17 +3,14 @@
 
     title          → linked heading
     date           → date line
-    summary        → teaser (falls back to description, then .Summary)
+    summary        → teaser (falls back to description, then index_summary)
     index_image    → page-resource filename or static/ path
     index_caption  → figcaption under the thumb (optional)
 
-  Thumb at top, centered in the column; title / date / summary stay left.
+  The teaser never falls back to Hugo's auto .Summary, which would pull a body
+  stub like "soon!" onto /blog/.
   The card image is 480 and 1200. Click opens the 1600 copy. The file in the
   post folder is not published. Display caps live in assets/css/blog-index.css.
-*/ -}}
-{{- /*
-  Index teaser is front matter only — never Hugo's auto .Summary, which
-  would pull the article body stub (e.g. "soon!") onto /blog/.
 */ -}}
 {{- $summary := "" -}}
 {{- with .Param "summary" }}{{ $summary = . }}{{ end -}}

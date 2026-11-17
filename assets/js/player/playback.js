@@ -1,25 +1,23 @@
-/** Playlist load and the audio element. The same element survives page swaps. */
+/** Playlist loading and the <audio> element, which survives SPA page swaps. */
 export function definePlayback(s) {
-    s.loadLocalPlaylist = function () {
-        return fetch(s.playlistLocal).then(function (response) {
-            if (!response.ok) throw new Error("local playlist " + response.status);
+    let pendingCanPlay = null;
+
+    function fetchJson(url, label) {
+        return fetch(url).then((response) => {
+            if (!response.ok) throw new Error(label + " playlist " + response.status);
             return response.json();
         });
-    };
+    }
 
     s.loadPlaylist = function () {
-        if (!s.playlistRemote) return s.loadLocalPlaylist();
-        return fetch(s.playlistRemote)
-            .then(function (response) {
-                if (!response.ok) throw new Error("remote playlist " + response.status);
-                return response.json();
-            })
-            .catch(s.loadLocalPlaylist);
+        const local = () => fetchJson(s.playlistLocal, "local");
+        if (!s.playlistRemote) return local();
+        return fetchJson(s.playlistRemote, "remote").catch(local);
     };
 
     s.currentTitle = function () {
         if (s.trackTitle) return s.trackTitle;
-        let track = s.tracks[s.index];
+        const track = s.tracks[s.index];
         return track ? track.title : "Playlist";
     };
 
@@ -27,7 +25,7 @@ export function definePlayback(s) {
         if (!s.label || !s.labelText) return;
         s.label.classList.remove("is-marquee");
         s.label.style.removeProperty("--marquee-distance");
-        let overflow = s.labelText.scrollWidth - s.label.clientWidth;
+        const overflow = s.labelText.scrollWidth - s.label.clientWidth;
         if (overflow > 1) {
             s.label.style.setProperty("--marquee-distance", "-" + overflow + "px");
             s.label.classList.add("is-marquee");
@@ -37,15 +35,8 @@ export function definePlayback(s) {
     s.show = function () {
         if (s.labelText) s.labelText.textContent = s.currentTitle();
         else if (s.label) s.label.textContent = s.currentTitle();
-        // Play chevron when paused; speaker when audio is on (tab-style cue).
-        if (s.toggleIconPlay) {
-            if (s.playing) s.toggleIconPlay.setAttribute("hidden", "");
-            else s.toggleIconPlay.removeAttribute("hidden");
-        }
-        if (s.toggleIconPlaying) {
-            if (s.playing) s.toggleIconPlaying.removeAttribute("hidden");
-            else s.toggleIconPlaying.setAttribute("hidden", "");
-        }
+        if (s.toggleIconPlay) s.toggleIconPlay.hidden = s.playing;
+        if (s.toggleIconPlaying) s.toggleIconPlaying.hidden = !s.playing;
         if (s.toggle) {
             s.toggle.classList.toggle("is-playing", s.playing);
             s.toggle.setAttribute("aria-label", s.playing ? "Pause" : "Play");
@@ -54,44 +45,49 @@ export function definePlayback(s) {
         requestAnimationFrame(s.syncTitleMarquee);
     };
 
+    /** play() rejects on autoplay policy or decode errors; the UI only flips once it resolves. */
+    function attemptPlay() {
+        let promise;
+        try {
+            promise = s.audio.play();
+        } catch (error) {
+            promise = Promise.reject(error);
+        }
+        Promise.resolve(promise).then(
+            () => {
+                s.playing = true;
+                s.show();
+            },
+            () => {
+                s.playing = false;
+                s.show();
+            }
+        );
+    }
+
     s.load = function (nextIndex, andPlay) {
         if (!s.tracks.length) return;
         s.index = (nextIndex + s.tracks.length) % s.tracks.length;
-        s.trackTitle = s.tracks[s.index].title || "";
-        let src = s.tracks[s.index].src;
-        let changed = s.audio.getAttribute("src") !== src;
+        const track = s.tracks[s.index];
+        s.trackTitle = track.title || "";
+        const changed = s.audio.getAttribute("src") !== track.src;
+        if (pendingCanPlay) {
+            s.audio.removeEventListener("canplay", pendingCanPlay);
+            pendingCanPlay = null;
+        }
         if (changed) {
-            s.audio.src = src;
+            s.audio.src = track.src;
             s.audio.load();
         }
-        if (!andPlay) {
-            s.show();
-            return;
-        }
-        function attemptPlay() {
-            let playPromise = s.audio.play();
-            if (playPromise && typeof playPromise.then === "function") {
-                playPromise.then(function () {
-                    s.playing = true;
-                    s.show();
-                }).catch(function () {
-                    // Autoplay / decode can reject; leave chrome paused.
-                    s.playing = false;
-                    s.show();
-                });
-            } else {
-                s.playing = true;
-                s.show();
-            }
-        }
-        // After a src change, wait until the element can play or play() no-ops.
-        if (changed && s.audio.readyState < 2) {
-            let onReady = function () {
-                s.audio.removeEventListener("canplay", onReady);
+        s.show();
+        if (!andPlay) return;
+        // Calling play() on a freshly loaded src can no-op in some browsers; wait for canplay.
+        if (changed && s.audio.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+            pendingCanPlay = function () {
+                pendingCanPlay = null;
                 attemptPlay();
             };
-            s.audio.addEventListener("canplay", onReady);
-            s.show();
+            s.audio.addEventListener("canplay", pendingCanPlay, { once: true });
             return;
         }
         attemptPlay();
@@ -104,29 +100,23 @@ export function definePlayback(s) {
         }
         s.playWhenReady = false;
         if (!s.audio.getAttribute("src")) s.load(0, true);
-        else {
-            s.audio.play();
-            s.playing = true;
-            s.show();
-        }
+        else attemptPlay();
     };
 
+    // playing flips before pause() so the element's "pause" event doesn't re-render.
     s.pauseMedia = function () {
-        // Set playing first so the audio "pause" listener does not run a second show().
         s.playing = false;
         s.show();
-        try {
-            s.audio.pause();
-        } catch (error) {}
+        s.audio.pause();
     };
 
     s.stopMedia = function () {
-        s.playing = false;
-        s.show();
+        s.pauseMedia();
         try {
-            s.audio.pause();
             s.audio.currentTime = 0;
-        } catch (error) {}
+        } catch (error) {
+            // Throws when no source is loaded yet.
+        }
     };
 
     s.skipMedia = function () {

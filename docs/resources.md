@@ -479,16 +479,16 @@ You still **merge feature PRs into `preview` in GitHub** yourself. `corn deploy`
 
 **PR base must be `preview`.** GitHub’s default compare URL targets `main` (the default branch). Prefer `corn push`, or open `compare/preview...<branch>?expand=1`. Cadence: land many feature PRs on `preview` through the month; one `corn deploy` (`preview` → `main`) when you want production.
 
-**Vale CI:** `.github/workflows/vale.yml` runs on pull requests and on pushes to `preview` and `main`. Annotations stay non-blocking. The job fails only for a real misspelling on a line added since the base. A case change (`illinois` / `Illinois`) is not a misspelling. Posts already on the base are not checked again.
+**Vale CI:** `.github/workflows/vale.yml` uses the same `vale.ini` as `corn edit` (`Vocab = Site, Batch`). Annotations stay non-blocking. The job fails only for a real misspelling on a line added since the base that is **not** on either accept list. A case change (`illinois` / `Illinois`) is not a misspelling. Posts already on the base are not checked again.
 
-Two accept lists, both in `vale.ini` (`Vocab = Site, Batch`):
+Two accept lists (local picker and GitHub check read the same files):
 
 | List | File | How it changes |
 | --- | --- | --- |
 | Permanent | `styles/config/vocabularies/Site/accept.txt` | `corn edit` key `p`, or edit the file |
 | Batch | `styles/config/vocabularies/Batch/accept.txt` | `corn edit` key `a` |
 
-Commit the batch file with the feature PR so the check can see it. It stays on `preview` through the `preview` → `main` merge. `corn deploy` then clears the batch file on `preview` (that commit only touches the accept file, so Vale does not re-read the posts). The next `corn branch` starts empty. If the release PR was merged by hand, run `corn deploy` once more: with nothing left to promote, it still clears a batch list that is already on `main`.
+Run `corn edit`, accept names with `a`/`p`, and **commit the accept file with the feature PR** so CI sees it. Batch stays on `preview` through the `preview` → `main` merge. `corn deploy` then clears the batch file on `preview` (that commit only touches the accept file, so Vale does not re-read the posts). The next `corn branch` starts empty. If the release PR was merged by hand, run `corn deploy` once more: with nothing left to promote, it still clears a batch list that is already on `main`.
 
 ### Do Deploy Previews burn credits?
 
@@ -521,6 +521,7 @@ Templates live in git under `emails/` (not published by Hugo). Site subscribe UI
 | `RESEND_SEGMENT_ID` | segment id from step 3 |
 | `RESEND_NOTIFY_TO` | `fellbeasts@proton.me` (owner ping on new subscribe; optional, this is the default) |
 | `RESEND_WEBHOOK_SECRET` | `whsec_…` from the Resend webhook details page |
+| `UNSUBSCRIBE_SECRET` | optional. signs unsubscribe links; without it they are signed with `RESEND_API_KEY`, so rotating that key breaks links already sent |
 | `NEWSLETTER_AUTO_SEND` | `1` when you want deploys to broadcast **net-new** posts |
 
 Optional local: same vars in a gitignored `.env` for `netlify dev` / `--send`.
@@ -529,7 +530,7 @@ Optional local: same vars in a gitignored `.env` for `netlify dev` / `--send`.
 
 ### Behavior
 
-- **Subscribe:** adds the contact to the segment; sends the welcome letter once (skipped if they were already on the list); pings the owner. **All welcome copy** (subject, greeting, headline, preheader, footer, body, optional `image`) lives in `emails/welcome.md` only; `emails/welcome.html` is chrome/tokens. Welcome is transactional (not a Broadcast), so unsub is a site link to `/unsubscribe/` + `POST /api/unsubscribe` (**deletes** the Resend contact). Post letters still use `{{{RESEND_UNSUBSCRIBE_URL}}}`.
+- **Subscribe:** adds the contact to the segment; sends the welcome letter once (skipped if they were already on the list); pings the owner. **All welcome copy** (subject, greeting, headline, preheader, footer, body, optional `image`) lives in `emails/welcome.md` only; `emails/welcome.html` is chrome/tokens. Welcome is transactional (not a Broadcast), so unsub is a site link to `/unsubscribe/?email&token` + `POST /api/unsubscribe` (the token is an HMAC of that address; a POST without it does nothing). A valid one **deletes** the Resend contact. Post letters still use `{{{RESEND_UNSUBSCRIBE_URL}}}`.
 - **New posts:** `scripts/newsletter-on-deploy.mjs` runs after Hugo. First run **seeds** a ledger with every existing post (nothing historical is emailed). Later deploys broadcast only slugs not yet in the ledger via Resend **Broadcasts** (not transactional `/emails`). Skip a post with front matter `newsletter = false`.
 - **Ledger:** Netlify Blobs store `newsletter` / key `sent` on deploy; locally `.newsletter-sent.json` (gitignored).
 

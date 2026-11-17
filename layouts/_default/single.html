@@ -1,5 +1,4 @@
 {{ define "main" }}
-    {{/* Page-scoped: article media + lightbox (not on home / blog index). */}}
     {{- partial "css.html" "article-media" }}
     {{- if eq .Section "blog" }}
     {{- partial "css.html" "article-reading" }}

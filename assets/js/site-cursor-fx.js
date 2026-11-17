@@ -1,8 +1,7 @@
 /**
- * Ghost cursor extras (desktop, fine pointer, motion OK):
- *  - click → soft ♡ burst (sword / back-to-top style)
- *  - idle → rare soft bubble near the pointer
- * Star trail on move lives in cursor-effects.html (homepage).
+ * Cursor extras on desktop with a fine pointer and motion allowed: a ♡ burst
+ * on click and an occasional bubble at the resting pointer. The homepage star
+ * trail is separate (cursor-effects.html).
  */
 (function () {
   let mqReduce = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -14,23 +13,34 @@
   }
 
   let mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-  let lastTwinkle = 0;
   let running = false;
-  let raf = 0;
+  let bubbleTimer = 0;
 
-  function burstHearts(x, y) {
+  function spawnLayer(className, x, y, children, lifetimeMs) {
     let layer = document.createElement("div");
-    layer.className = "site-cursor-hearts";
+    layer.className = className;
     layer.style.left = x + "px";
     layer.style.top = y + "px";
     layer.setAttribute("aria-hidden", "true");
-    let count = 4 + Math.floor(Math.random() * 3); // 4–6
+    children.forEach(function (child) {
+      layer.appendChild(child);
+    });
+    document.body.appendChild(layer);
+    window.setTimeout(function () {
+      layer.remove();
+    }, lifetimeMs);
+  }
+
+  function burstHearts(x, y) {
+    let hearts = [];
+    let count = 4 + Math.floor(Math.random() * 3);
     for (let i = 0; i < count; i++) {
       let heart = document.createElement("span");
       heart.className =
         "site-cursor-hearts__heart" +
         (Math.random() > 0.65 ? " is-bright" : "");
       heart.textContent = "♡";
+      // Fan upward: straight up ± ~85°.
       let angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 0.95;
       let dist = 22 + Math.random() * 36;
       heart.style.setProperty("--dx", Math.cos(angle) * dist + "px");
@@ -38,40 +48,20 @@
       heart.style.setProperty("--hd", (Math.random() * 0.15).toFixed(2) + "s");
       heart.style.setProperty("--rot", ((Math.random() * 28) - 14).toFixed(1) + "deg");
       heart.style.setProperty("--scale", (0.75 + Math.random() * 0.35).toFixed(2));
-      layer.appendChild(heart);
+      hearts.push(heart);
     }
-    document.body.appendChild(layer);
-    window.setTimeout(function () {
-      if (layer.parentNode) layer.parentNode.removeChild(layer);
-    }, 1800);
+    // Outlasts the 1.55s pop plus the max delay.
+    spawnLayer("site-cursor-hearts", x, y, hearts, 1800);
   }
 
-  function burstBubbles(x, y, count) {
-    let layer = document.createElement("div");
-    layer.className = "site-cursor-bubbles";
-    layer.style.left = x + "px";
-    layer.style.top = y + "px";
-    layer.setAttribute("aria-hidden", "true");
-    let n = count || 1;
-    for (let i = 0; i < n; i++) {
-      let bubble = document.createElement("span");
-      bubble.className = "site-cursor-bubbles__bubble";
-      bubble.style.setProperty(
-        "--dx",
-        ((Math.random() * 28) - 14).toFixed(1) + "px"
-      );
-      bubble.style.setProperty(
-        "--dy",
-        (-8 - Math.random() * 22).toFixed(1) + "px"
-      );
-      bubble.style.setProperty("--hd", (Math.random() * 0.05).toFixed(2) + "s");
-      bubble.style.setProperty("--scale", (0.7 + Math.random() * 0.45).toFixed(2));
-      layer.appendChild(bubble);
-    }
-    document.body.appendChild(layer);
-    window.setTimeout(function () {
-      if (layer.parentNode) layer.parentNode.removeChild(layer);
-    }, 900);
+  function burstBubble(x, y) {
+    let bubble = document.createElement("span");
+    bubble.className = "site-cursor-bubbles__bubble";
+    bubble.style.setProperty("--dx", ((Math.random() * 28) - 14).toFixed(1) + "px");
+    bubble.style.setProperty("--dy", (-8 - Math.random() * 22).toFixed(1) + "px");
+    bubble.style.setProperty("--hd", (Math.random() * 0.05).toFixed(2) + "s");
+    bubble.style.setProperty("--scale", (0.7 + Math.random() * 0.45).toFixed(2));
+    spawnLayer("site-cursor-bubbles", x, y, [bubble], 900);
   }
 
   function onMove(e) {
@@ -80,44 +70,36 @@
   }
 
   function onDown(e) {
-    if (!allowed()) return;
     if (e.button != null && e.button !== 0) return;
-    let t = e.target;
-    if (
-      t &&
-      t.closest &&
-      t.closest("input, textarea, select, [contenteditable='true']")
-    ) {
-      return;
-    }
+    if (e.target && e.target.closest && e.target.closest("input, textarea, select, [contenteditable='true']")) return;
     burstHearts(e.clientX, e.clientY);
   }
 
-  function idleTick(now) {
-    raf = requestAnimationFrame(idleTick);
-    if (!allowed()) return;
-    if (now - lastTwinkle < 4000 + Math.random() * 3000) return;
-    lastTwinkle = now;
-    if (Math.random() > 0.55) return;
-    burstBubbles(mouse.x, mouse.y, 1);
+  // Every 4–7s, a 55% chance of one bubble; skipped while the tab is hidden.
+  function scheduleBubble() {
+    bubbleTimer = window.setTimeout(function () {
+      if (!running) return;
+      if (!document.hidden && Math.random() < 0.55) burstBubble(mouse.x, mouse.y);
+      scheduleBubble();
+    }, 4000 + Math.random() * 3000);
   }
 
   function start() {
-    if (running || !allowed()) return;
+    if (running) return;
     running = true;
-    lastTwinkle = performance.now();
     window.addEventListener("pointermove", onMove, { passive: true });
     window.addEventListener("pointerdown", onDown, true);
-    raf = requestAnimationFrame(idleTick);
+    scheduleBubble();
   }
 
   function stop() {
+    if (!running) return;
     running = false;
     window.removeEventListener("pointermove", onMove);
     window.removeEventListener("pointerdown", onDown, true);
-    cancelAnimationFrame(raf);
+    window.clearTimeout(bubbleTimer);
     document.querySelectorAll(".site-cursor-hearts, .site-cursor-bubbles").forEach(function (n) {
-      if (n.parentNode) n.parentNode.removeChild(n);
+      n.remove();
     });
   }
 

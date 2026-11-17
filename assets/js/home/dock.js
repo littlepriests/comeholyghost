@@ -1,15 +1,15 @@
+/**
+ * Scales the footer dock (Sango, ticker, Kagura) as one unit to the available
+ * width so the row never wraps or overflows. Window listeners call
+ * window.__homeFitDock, which each run re-points at its own closure.
+ */
 export function initHomeDock(windowBound) {
-    // Same-site nav re-runs this file on every return home. Window listeners
-    // bind once and call whichever run is current, so they never stack.
-
-    // Scale the footer dock (pets + ticker) as one unit to the
-    // available width so the row never wraps or spills horizontally.
     let dockFit = document.querySelector("[data-home-dock-fit]");
     let dock = document.querySelector("[data-home-dock]");
     let dockScale = 1;
 
-    /* Equal padding on the counter pushes Sango and Kagura apart.
-       Stop at the text column, or halfway from Kagura to the player. */
+    /* Pads the ticker equally on both sides to push the pets apart, limited by
+       the text column and by half the gap between Kagura and the player. */
     function spaceDockPets() {
         let ticker = dock.querySelector(".ticker");
         let sango = dock.querySelector(".home-dock__pet--left");
@@ -34,7 +34,6 @@ export function initHomeDock(windowBound) {
         let kaguraColumn = cr.right - kr.right;
         let kaguraHalf = (pr.left - kr.right) / 2;
         let room = Math.min(sangoRoom, kaguraColumn, kaguraHalf);
-        /* Halfway back from the full spread toward the counter. */
         let pad = Math.max(0, Math.round(room / 2));
         ticker.style.paddingLeft = pad + "px";
         ticker.style.paddingRight = pad + "px";
@@ -72,6 +71,7 @@ export function initHomeDock(windowBound) {
         dock.style.setProperty("--home-dock-scale", token);
         dockFit.style.setProperty("--home-dock-scale", token);
         dockFit.style.setProperty("--home-dock-h", dock.offsetHeight + "px");
+        // The player parks on the dock row and the clouds avoid it; both re-measure on resize.
         window.dispatchEvent(new Event("resize"));
     }
 

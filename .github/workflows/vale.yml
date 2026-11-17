@@ -1,5 +1,6 @@
-# Prose lint for content/. Annotations stay non-blocking.
-# The job fails only on a real misspelling in an added line.
+# Prose lint for content/. Same Vocab as corn edit (Site + Batch).
+# Annotations stay non-blocking. Job fails only on a real misspelling in an
+# added line that is not on Site/Batch accept (corn edit `p` / `a`).
 # A case change (illinois / Illinois) is not a misspelling.
 name: Vale
 
@@ -32,6 +33,7 @@ jobs:
           filter_mode: added
           reporter: github-pr-check
           fail_on_error: false
+          fail_level: none
           level: warning
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

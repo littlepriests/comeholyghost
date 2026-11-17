@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 /**
- * Fail only on real misspellings in lines added since a base commit.
+ * Fail on real misspellings in lines added since a base commit.
+ * Same Vocab as corn edit (vale.ini: Site, Batch) — accepted words do not fail.
  * House-style case ("illinois" vs "Illinois") is not a typo.
  * Style rules (write-good, Voices, wraith) are ignored.
  *
- *   node scripts/vale-typos.mjs --base <sha>
+ *   node scripts/vale-typos.mjs --base <sha> [--advisory]
+ *
+ * Exit 1 when misspellings are found, unless --advisory.
  */
 import { spawnSync } from "node:child_process";
 import path from "node:path";
@@ -87,13 +90,17 @@ function repoRel(fileKey) {
   return norm;
 }
 
-function parseBase(argv) {
+function parseArgs(argv) {
   const i = argv.indexOf("--base");
   if (i < 0 || !argv[i + 1]) {
-    throw new Error("Usage: node scripts/vale-typos.mjs --base <sha>");
+    throw new Error(
+      "Usage: node scripts/vale-typos.mjs --base <sha> [--advisory]",
+    );
   }
-  const base = argv[i + 1];
-  if (/^0+$/.test(base)) {
+  const baseArg = argv[i + 1];
+  const advisory = argv.includes("--advisory");
+  let base;
+  if (/^0+$/.test(baseArg)) {
     const empty = spawnSync("git", ["hash-object", "-t", "tree", "--stdin"], {
       cwd: root,
       encoding: "utf8",
@@ -103,15 +110,17 @@ function parseBase(argv) {
     if (empty.status !== 0 || !empty.stdout.trim()) {
       throw new Error("could not resolve an empty tree for a new branch");
     }
-    return empty.stdout.trim();
+    base = empty.stdout.trim();
+  } else {
+    const ok = git(["rev-parse", "--verify", "--quiet", `${baseArg}^{commit}`]);
+    if (ok.status !== 0) throw new Error(`base commit not found: ${baseArg}`);
+    base = ok.stdout.trim();
   }
-  const ok = git(["rev-parse", "--verify", "--quiet", `${base}^{commit}`]);
-  if (ok.status !== 0) throw new Error(`base commit not found: ${base}`);
-  return ok.stdout.trim();
+  return { base, advisory };
 }
 
 function main() {
-  const base = parseBase(process.argv.slice(2));
+  const { base, advisory } = parseArgs(process.argv.slice(2));
   const lines = addedLines(base);
   const files = [...lines.keys()].filter((f) => lines.get(f).size > 0);
   if (files.length === 0) {
@@ -155,6 +164,12 @@ function main() {
     console.error(
       `${rel}:${alert.Line}: ${alert.Check}: ${JSON.stringify(alert.Match)}${hint}`,
     );
+  }
+  if (advisory) {
+    console.error(
+      `${typos.length} misspelling(s) (advisory; not failing CI). Use corn edit locally.`,
+    );
+    return 0;
   }
   console.error(`${typos.length} misspelling(s).`);
   return 1;

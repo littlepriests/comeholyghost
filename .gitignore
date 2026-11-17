@@ -23,11 +23,13 @@
 styles/*
 !styles/wraith/
 !styles/wraith/**
-# Site Vocab (corn edit --fix / --review key `a`) — keep through vale sync.
+# Vocab (corn edit: `a` = Batch, `p` = Site) — keep through vale sync / CI.
 !styles/config/
 !styles/config/vocabularies/
 !styles/config/vocabularies/Site/
 !styles/config/vocabularies/Site/**
+!styles/config/vocabularies/Batch/
+!styles/config/vocabularies/Batch/**
 .vale.ini
 .vale/
 vale

@@ -45,7 +45,7 @@ export function initHomePets() {
         try {
             localStorage.setItem(countKey, String(n));
         } catch (error) {}
-        // Refit dock if digit width changed (fitHomeDock lives in the home IIFE).
+        // An extra digit widens the ticker; resize makes dock.js refit the row.
         window.dispatchEvent(new Event("resize"));
     }
 
@@ -55,9 +55,8 @@ export function initHomePets() {
         if (withFx) showBumpFx(count);
     }
 
-    // Global tally via Netlify Blobs (/api/visitors). Plain hugo server has no
-    // functions, so GET/POST fall back to the cached localStorage number.
-    // Deploy preview / branch: skip the function entirely (local tally only).
+    // Without functions (plain hugo server) or on a deploy preview, the count
+    // falls back to the number cached in localStorage.
     function skipMetered() {
         return typeof window.siteSkipMeteredApi === "function" && window.siteSkipMeteredApi();
     }
@@ -245,8 +244,7 @@ export function initHomePets() {
         let throwAt = Math.round(attackMs * 0.28);
         let returnMs = 650;
 
-        // Throw strip ends before the boomerang returns — park on idle pose so she
-        // doesn't freeze on a blank cell after the one-shot attack animation.
+        // The one-shot attack strip ends on a blank cell, before the boomerang returns.
         window.setTimeout(function () {
             if (!sangoBusy) return;
             sango.classList.remove("is-attacking");
@@ -286,7 +284,6 @@ export function initHomePets() {
             }, 700);
         }, throwAt);
 
-        // Fallback idle if boomerang markup is missing.
         if (!boomerang) {
             window.setTimeout(knockKaguraDown, Math.round(attackMs * 0.45));
             window.setTimeout(setSangoIdle, attackMs + 40);
@@ -325,8 +322,8 @@ export function initHomePets() {
         kagura.classList.add("is-traveling");
         setKaguraStrip("attack");
         restartStripAnim(kAttackStrip);
-        // Paint the start pose, then enable an explicit transform transition so the
-        // wind slash actually sweeps across Sango/ticker instead of jumping to park.
+        // Commit the start position with transitions off, then animate on the
+        // second frame; otherwise the browser merges both and she jumps to park.
         kagura.style.transition = "none";
         kagura.style.transform = "translateX(" + travel.startX + "px)";
         void kagura.offsetWidth;
@@ -347,7 +344,6 @@ export function initHomePets() {
 
                 window.setTimeout(function () {
                     ticker && ticker.classList.remove("is-attacking");
-                    // Keep the wind-attack strip until she parks, then swap to walk.
                     parkKaguraIdle();
                     cleanup();
                 }, slashMs);
@@ -360,6 +356,8 @@ export function initHomePets() {
         commitBump(false);
     }
 
+    // An SPA swap never fires pagehide, so commit the bump on the link click
+    // itself, in the capture phase before player.js handles it.
     function onSameSiteNav(event) {
         if (!pending) return;
         let link = event.target.closest && event.target.closest("a");
@@ -407,7 +405,6 @@ export function initHomePets() {
         });
     }
 
-    // Returning visitors in this session: she's already settled beside the player.
     if (!pending) {
         if (!reduceMotion) parkKaguraIdle();
         return;

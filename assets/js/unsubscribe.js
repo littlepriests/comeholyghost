@@ -9,16 +9,23 @@
     let okEl = form.querySelector("[data-unsubscribe-ok]");
     let emailInput = form.querySelector("[data-unsubscribe-email]");
     let busy = false;
+    // The token is the signed half of the link in the email. Without it the
+    // API refuses, so a typed-in address cannot remove someone else.
+    let token = "";
 
     try {
         let params = new URLSearchParams(window.location.search || "");
+        token = params.get("token") || "";
         let fromQuery = params.get("email");
         if (fromQuery && emailInput && !emailInput.value) {
             emailInput.value = fromQuery;
         }
     } catch (error) {
-        // ignore
+        token = "";
     }
+
+    if (emailInput) emailInput.readOnly = true;
+    if (!token && submitBtn) submitBtn.disabled = true;
 
     function setError(message) {
         if (!errEl) return;
@@ -42,11 +49,18 @@
         }
     }
 
+    if (!token) setError("use the unsubscribe link from your email.");
+
     form.addEventListener("submit", function (event) {
         event.preventDefault();
         if (busy) return;
         setError("");
         setOk("");
+
+        if (!token) {
+            setError("use the unsubscribe link from your email.");
+            return;
+        }
 
         if (typeof form.reportValidity === "function" && !form.reportValidity()) {
             return;
@@ -56,6 +70,7 @@
         let honey = form.querySelector('input[name="website"]');
         let payload = {
             email: email,
+            token: token,
             website: honey ? String(honey.value || "") : ""
         };
 

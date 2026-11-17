@@ -1,6 +1,8 @@
+/**
+ * Hugo picks and preloads the banner; this only holds .is-pending until the
+ * image decodes, so first paint and SPA returns home never show a half-drawn frame.
+ */
 export function initHomeBanner() {
-    // Banner URL is chosen in Hugo (shuffle + preload). Hold .is-pending until
-    // decode so cold paint and SPA home returns do not flash an empty/half frame.
     function revealHomeBanner() {
         let bannerHost = document.querySelector(".home-banner");
         let bannerImg = document.querySelector("[data-home-banner]");

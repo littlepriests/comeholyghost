@@ -1,7 +1,7 @@
 {{- /*
-  SkiFree yeti wherever $ echo $LANG used to sit (any page using this footer).
-  Frame 32×43. scale 2 paints 64×86; under 45rem the transform is cleared so he stays 32×43.
-  Whole yeti opens subscribe; small badge position is [params.subscribe] yetiIconPos.
+  Inner-page footer lead: the SkiFree yeti, which opens the subscribe dialog.
+  Frame 32×43 at scale 2 (64×86); below 45rem site-shell.css clears the
+  transform so he stays 32×43. Badge side: [params.subscribe] yetiIconPos.
 */ -}}
 {{- with partial "sprite-by-id.html" "skifree-yeti" }}
 {{- $yetiTip := partial "tip-text.html" (dict "key" "skifree" "fallback" "subscribe") -}}

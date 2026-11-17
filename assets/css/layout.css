@@ -53,7 +53,7 @@ body {
         grid-column: 1;
     }
 
-    .site-shell > :is(.page__body, main) {
+    .site-shell > main {
         overflow-x: clip;
     }
 

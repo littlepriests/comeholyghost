@@ -8,6 +8,8 @@ import {
     publishedImageUrl,
     renderWelcomeEmail
 } from "../../netlify/lib/email-templates.mjs";
+import { unsubscribeQuery } from "../../netlify/lib/unsubscribe-token.mjs";
+import { withEnv } from "./helpers.mjs";
 
 test("parseFrontMatter reads key: value lines and strips quotes", () => {
     const { meta, body } = parseFrontMatter('---\nsubject: "hi there"\ngreeting: hey\n---\nbody text\n');
@@ -88,11 +90,17 @@ test("markdownToEmailHtml keeps figcaption images and static photo paths", () =>
 });
 
 test("renderWelcomeEmail fills every template slot and links a personal unsubscribe", async () => {
-    const { html, subject } = await renderWelcomeEmail({
-        email: "A+b@Site.test",
-        origin: "https://site.test"
-    });
-    assert.ok(subject.length > 0);
-    assert.doesNotMatch(html, /\{\{[A-Z_]+\}\}/, "no unfilled {{SLOT}} left behind");
-    assert.match(html, /https:\/\/site\.test\/unsubscribe\/\?email=a%2Bb%40site\.test/);
+    const restore = withEnv({ UNSUBSCRIBE_SECRET: "test-secret" });
+    try {
+        const { html, subject } = await renderWelcomeEmail({
+            email: "A+b@Site.test",
+            origin: "https://site.test"
+        });
+        assert.ok(subject.length > 0);
+        assert.doesNotMatch(html, /\{\{[A-Z_]+\}\}/, "no unfilled {{SLOT}} left behind");
+        const link = unsubscribeQuery("test-secret", "a+b@site.test");
+        assert.match(html, new RegExp(link.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+    } finally {
+        restore();
+    }
 });

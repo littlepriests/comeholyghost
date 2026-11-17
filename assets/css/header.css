@@ -4,7 +4,7 @@
     /* Native Misdreavus frame (50×100); Pancham centers in the same row height. */
     --nav-logo-w: 50px;
     --nav-logo-h: 108px;
-    /* Native GIF size — max scale vs ./read-me.txt (do not upscale past this). */
+    /* Pancham's native size; larger blurs the pixel art. */
     --nav-sub-w: 50px;
     --nav-gap-x: 0.85rem;
     display: flex;
@@ -92,7 +92,6 @@
     overflow: visible;
 }
 
-/* Pancham centered in the row (same as before the platform experiment). */
 .main-nav__item--tail .nav-subscribe-pet {
     position: absolute;
     left: 50%;
@@ -110,7 +109,7 @@
     filter: brightness(1.12);
 }
 
-/* Tiny DotMatrix “sub” to the right of Pancham (same 2px gap as before). */
+/* DotMatrix “sub” label, 2px right of Pancham. */
 .nav-subscribe.nav-pet .nav-pet__label {
     position: absolute;
     left: calc(50% + (var(--nav-sub-w) / 2) + 2px);

@@ -1,4 +1,5 @@
 import { getStore } from "@netlify/blobs";
+import { updateJSON } from "../lib/blob-update.mjs";
 import { json, preflight, readPayload } from "../lib/http.mjs";
 import { isPreviewDeploy } from "../lib/preview-guard.mjs";
 
@@ -8,17 +9,17 @@ const MAX_ENTRIES = 100;
 const MAX_NAME = 80;
 const MAX_MESSAGE = 500;
 
+/** Trims, caps length, and drops control characters other than newline and tab. */
 function cleanText(value, max) {
     return String(value || "")
         .replace(/\r\n/g, "\n")
-        .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "")
+        .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "")
         .trim()
         .slice(0, max);
 }
 
-async function loadEntries(store) {
-    const entries = await store.get(ENTRIES_KEY, { type: "json" });
-    return Array.isArray(entries) ? entries : [];
+function asEntries(value) {
+    return Array.isArray(value) ? value : [];
 }
 
 export default async (request) => {
@@ -26,7 +27,7 @@ export default async (request) => {
         return preflight("GET, POST, OPTIONS");
     }
 
-    // Deploy preview / branch: no shared Blobs — keep production signatures clean.
+    // Previews have no access to the production store; the page falls back to localStorage.
     if (isPreviewDeploy()) {
         if (request.method === "GET") {
             return json(200, { entries: [], preview: true });
@@ -44,8 +45,7 @@ export default async (request) => {
     const store = getStore({ name: STORE_NAME, consistency: "strong" });
 
     if (request.method === "GET") {
-        const entries = await loadEntries(store);
-        return json(200, { entries });
+        return json(200, { entries: asEntries(await store.get(ENTRIES_KEY, { type: "json" })) });
     }
 
     if (request.method !== "POST") {
@@ -59,9 +59,9 @@ export default async (request) => {
         return json(400, { error: "Could not read that submission." });
     }
 
-    // Honeypot: real visitors leave this empty.
+    // Bots fill the hidden field; answer like a success without saving.
     if (cleanText(payload.website || payload.company, MAX_NAME)) {
-        return json(200, { entries: await loadEntries(store) });
+        return json(200, { entries: asEntries(await store.get(ENTRIES_KEY, { type: "json" })) });
     }
 
     const name = cleanText(payload.name, MAX_NAME);
@@ -70,18 +70,15 @@ export default async (request) => {
         return json(400, { error: "Write a name, a comment, or both." });
     }
 
-    const now = new Date();
-    const entry = {
-        name,
-        message,
-        at: now.toISOString()
-    };
-
-    const entries = await loadEntries(store);
-    entries.unshift(entry);
-    await store.setJSON(ENTRIES_KEY, entries.slice(0, MAX_ENTRIES));
-
-    return json(201, { entries: entries.slice(0, MAX_ENTRIES) });
+    const entry = { name, message, at: new Date().toISOString() };
+    try {
+        const entries = await updateJSON(store, ENTRIES_KEY, (value) =>
+            [entry, ...asEntries(value)].slice(0, MAX_ENTRIES)
+        );
+        return json(201, { entries });
+    } catch (error) {
+        return json(503, { error: "The guestbook is busy. Try again in a moment." });
+    }
 };
 
 export const config = {

@@ -1,5 +1,4 @@
-/* Stabbed-girl figure + ♡ fountain (read-me hero). Image from backdrop.bottom-right.
-   Sitewide .home-stars fill the column above the h1 around this figure. */
+/* Read-me hero figure and its ♡ fountain (sword-figure.html). The image is [params.backdrop.bottom-right]. */
 .sword-figure {
     position: relative;
     display: block;
@@ -29,7 +28,7 @@
     pointer-events: none;
 }
 
-/* Particle origin centered on the figure (tune left/top if the blade exit moves). */
+/* Particle origin: where the blade exits the figure. Re-tune left/top if the image changes. */
 .sword-figure__wound {
     position: absolute;
     left: 50%;
@@ -40,8 +39,7 @@
     pointer-events: none;
 }
 
-/* ♡ fountain. Hue #ff2a4a, bright #ff4d6d. Glyphs 0.95rem, bright 1.15rem.
-   The spread is the --dx/--dy on each heart in sword-figure.html. A theme key can replace the hues. */
+/* Each heart's end point (--dx/--dy) is set inline in sword-figure.html. */
 .sword-figure__heart {
     position: absolute;
     left: 0;
@@ -52,7 +50,7 @@
     font-family: var(--font-monospace, ui-monospace, "Cascadia Mono", "Fira Mono", monospace);
     font-size: 0.95rem;
     line-height: 1;
-    color: #ff2a4a;
+    color: var(--heart);
     text-shadow:
         0 0 4px #ff6b81,
         0 0 10px #ff1744,
@@ -62,10 +60,10 @@
 }
 
 .sword-figure__heart.is-bright {
-    color: #ff4d6d;
+    color: var(--heart-bright);
     text-shadow:
         0 0 5px #fff,
-        0 0 10px #ff2a4a,
+        0 0 10px var(--heart),
         0 0 18px #ff1744,
         0 0 26px rgb(255 20 60 / 0.85);
     font-size: 1.15rem;

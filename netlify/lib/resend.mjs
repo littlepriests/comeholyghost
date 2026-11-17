@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { DEFAULT_ORIGIN, siteOrigin } from "./site.mjs";
+import { unsubscribeQuery, unsubscribeSecret } from "./unsubscribe-token.mjs";
 
 const DEFAULT_NOTIFY_TO = "fellbeasts@proton.me";
 const WEBHOOK_TOLERANCE_SEC = 300;
@@ -106,7 +107,7 @@ function escapeHtml(value) {
         .replace(/"/g, "&quot;");
 }
 
-/** Add contact to segment. Returns { ok, created, status, body }. */
+/** Adds the contact to the segment. created is false when Resend returns 409 (already listed). */
 export async function addContact(cfg, email) {
     const result = await resendRequest(cfg.apiKey, "/contacts", {
         email,
@@ -116,7 +117,6 @@ export async function addContact(cfg, email) {
     if (result.ok) {
         return { ok: true, created: true, status: result.status, body: result.body };
     }
-    // Already exists
     if (result.status === 409) {
         return { ok: true, created: false, status: 409, body: result.body };
     }
@@ -132,7 +132,7 @@ export async function unsubscribeContact(cfg, email) {
 /** htmlOrOpts: HTML string, or { html, subject } from renderWelcomeEmail (emails/welcome.md). */
 export async function sendWelcomeEmail(cfg, email, htmlOrOpts) {
     const origin = (cfg.siteOrigin || DEFAULT_ORIGIN).replace(/\/$/, "");
-    const unsubApi = `${origin}/api/unsubscribe?email=${encodeURIComponent(email)}`;
+    const unsubApi = `${origin}/api/unsubscribe?${unsubscribeQuery(unsubscribeSecret(), email)}`;
     const opts =
         htmlOrOpts && typeof htmlOrOpts === "object"
             ? htmlOrOpts

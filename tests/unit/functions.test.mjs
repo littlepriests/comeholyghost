@@ -2,6 +2,7 @@ import { test, beforeEach, afterEach } from "node:test";
 import assert from "node:assert/strict";
 import subscribe from "../../netlify/functions/subscribe.mjs";
 import unsubscribe from "../../netlify/functions/unsubscribe.mjs";
+import { unsubscribeQuery } from "../../netlify/lib/unsubscribe-token.mjs";
 import { mockFetch, withEnv } from "./helpers.mjs";
 
 const realFetch = globalThis.fetch;
@@ -14,7 +15,8 @@ beforeEach(() => {
         RESEND_API_KEY: "re_test",
         RESEND_FROM: "site <hi@site.test>",
         RESEND_SEGMENT_ID: "seg_1",
-        RESEND_NOTIFY_TO: "owner@site.test"
+        RESEND_NOTIFY_TO: "owner@site.test",
+        UNSUBSCRIBE_SECRET: null
     });
 });
 
@@ -78,7 +80,9 @@ test("subscribe: a new contact gets the owner ping and a welcome email", async (
     assert.deepEqual(routes, ["/contacts", "/emails", "/emails"]);
     const welcome = JSON.parse(calls[2].init.body);
     assert.deepEqual(welcome.to, ["new@b.co"]);
-    assert.match(welcome.headers["List-Unsubscribe"], /email=new%40b\.co/);
+    const link = unsubscribeQuery("re_test", "new@b.co");
+    assert.match(welcome.headers["List-Unsubscribe"], new RegExp(link.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+    assert.match(welcome.html, new RegExp(link.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 });
 
 test("subscribe: an owner-ping failure does not fail the subscriber", async () => {
@@ -99,16 +103,25 @@ test("subscribe: an existing contact gets no second welcome", async () => {
     assert.equal(calls.length, 1);
 });
 
-test("unsubscribe: GET redirects people to the unsubscribe page", async () => {
-    const res = await unsubscribe(new Request("https://site.test/api/unsubscribe?email=A%40b.co"));
+test("unsubscribe: GET redirects people to the unsubscribe page, token unchanged", async () => {
+    const q = unsubscribeQuery("re_test", "A@b.co");
+    const res = await unsubscribe(new Request(`https://site.test/api/unsubscribe?${q}`));
     assert.equal(res.status, 302);
-    assert.equal(res.headers.get("location"), "https://site.test/unsubscribe/?email=a%40b.co");
+    assert.equal(res.headers.get("location"), `https://site.test/unsubscribe/?${q}`);
 });
 
-test("unsubscribe: one-click POST with the email in the query removes the contact", async () => {
+test("unsubscribe: a POST with no token, or a token for a different address, deletes nothing", async () => {
+    const calls = noNetwork();
+    assert.equal((await unsubscribe(post("/api/unsubscribe", { email: "a@b.co" }))).status, 403);
+    const foreign = new URLSearchParams(unsubscribeQuery("re_test", "other@b.co")).get("token");
+    assert.equal((await unsubscribe(post("/api/unsubscribe", { email: "a@b.co", token: foreign }))).status, 403);
+    assert.equal(calls.length, 0);
+});
+
+test("unsubscribe: one-click POST with the signed query removes the contact", async () => {
     const calls = mockFetch(() => ({ status: 200 }));
     const res = await unsubscribe(
-        new Request("https://site.test/api/unsubscribe?email=a%40b.co", {
+        new Request(`https://site.test/api/unsubscribe?${unsubscribeQuery("re_test", "a@b.co")}`, {
             method: "POST",
             body: "List-Unsubscribe=One-Click"
         })
@@ -119,5 +132,7 @@ test("unsubscribe: one-click POST with the email in the query removes the contac
 
 test("unsubscribe: an address that is already gone still reads as success", async () => {
     mockFetch(() => ({ status: 404 }));
-    assert.equal((await unsubscribe(post("/api/unsubscribe", { email: "a@b.co" }))).status, 200);
+    const q = new URLSearchParams(unsubscribeQuery("re_test", "a@b.co"));
+    const res = await unsubscribe(post("/api/unsubscribe", { email: "a@b.co", token: q.get("token") }));
+    assert.equal(res.status, 200);
 });
