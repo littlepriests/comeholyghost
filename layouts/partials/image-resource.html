@@ -1,0 +1,19 @@
+{{- /*
+  The image a shortcode named. Page bundle first, then assets/ (so
+  assets/images/nongrid is processed and not copied raw from static/).
+  dict: page, src. Returns the resource, or false.
+*/ -}}
+{{- $img := false -}}
+{{- $src := .src -}}
+{{- with .page -}}
+  {{- with .Resources.GetMatch $src -}}
+    {{- $img = . -}}
+  {{- end -}}
+{{- end -}}
+{{- if not $img -}}
+  {{- $clean := strings.TrimPrefix "/" $src -}}
+  {{- with resources.Get $clean -}}
+    {{- $img = . -}}
+  {{- end -}}
+{{- end -}}
+{{- return $img -}}

@@ -1,0 +1,91 @@
+{{- /*
+  Published copies of one page-resource photo. The file in the post folder is
+  the input and is not published (publishResources = false).
+
+  dict: res, widths (slice of px), crop ("square" or empty), lightbox (bool).
+  Returns src, width, height, webpSrcset, avifSrcset, full, fullAvif.
+  src is the widest WebP that fits. Widths larger than the input are skipped,
+  so a small file is not upscaled. The lightbox copy is Fit 1600 and is not
+  part of the srcset.
+*/ -}}
+{{- $res := .res -}}
+{{- $widths := .widths | default (slice) -}}
+{{- $crop := eq .crop "square" -}}
+{{- $lightbox := .lightbox -}}
+{{- $webpQ := 75 -}}
+{{- $avifQ := 60 -}}
+{{- $fullWebpQ := 70 -}}
+{{- $fullAvifQ := 60 -}}
+{{- $webpParts := slice -}}
+{{- $avifParts := slice -}}
+{{- $src := "" -}}
+{{- $w := 0 -}}
+{{- $h := 0 -}}
+{{- $full := "" -}}
+{{- $fullAvif := "" -}}
+{{- if and $res (ge $res.Width 1) (ge $res.Height 1) -}}
+  {{- range $widths -}}
+    {{- $target := . -}}
+    {{- $fits := false -}}
+    {{- if $crop -}}
+      {{- if and (le $target $res.Width) (le $target $res.Height) }}{{ $fits = true }}{{ end -}}
+    {{- else if le $target $res.Width -}}
+      {{- $fits = true -}}
+    {{- end -}}
+    {{- if $fits -}}
+      {{- if $crop -}}
+        {{- $webp := $res.Fill (printf "%dx%d Center webp q%d" $target $target $webpQ) -}}
+        {{- $avif := $res.Fill (printf "%dx%d Center avif q%d" $target $target $avifQ) -}}
+        {{- $webpParts = $webpParts | append (printf "%s %dw" $webp.RelPermalink $webp.Width) -}}
+        {{- $avifParts = $avifParts | append (printf "%s %dw" $avif.RelPermalink $avif.Width) -}}
+        {{- $src = $webp.RelPermalink -}}
+        {{- $w = $webp.Width -}}
+        {{- $h = $webp.Height -}}
+      {{- else -}}
+        {{- $webp := $res.Resize (printf "%dx webp q%d" $target $webpQ) -}}
+        {{- $avif := $res.Resize (printf "%dx avif q%d" $target $avifQ) -}}
+        {{- $webpParts = $webpParts | append (printf "%s %dw" $webp.RelPermalink $webp.Width) -}}
+        {{- $avifParts = $avifParts | append (printf "%s %dw" $avif.RelPermalink $avif.Width) -}}
+        {{- $src = $webp.RelPermalink -}}
+        {{- $w = $webp.Width -}}
+        {{- $h = $webp.Height -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if not $src -}}
+    {{- $edge := $res.Width -}}
+    {{- if and $crop (lt $res.Height $edge) }}{{ $edge = $res.Height }}{{ end -}}
+    {{- if $crop -}}
+      {{- $webp := $res.Fill (printf "%dx%d Center webp q%d" $edge $edge $webpQ) -}}
+      {{- $avif := $res.Fill (printf "%dx%d Center avif q%d" $edge $edge $avifQ) -}}
+      {{- $src = $webp.RelPermalink -}}
+      {{- $w = $webp.Width -}}
+      {{- $h = $webp.Height -}}
+      {{- $webpParts = $webpParts | append (printf "%s %dw" $webp.RelPermalink $webp.Width) -}}
+      {{- $avifParts = $avifParts | append (printf "%s %dw" $avif.RelPermalink $avif.Width) -}}
+    {{- else -}}
+      {{- $webp := $res.Resize (printf "%dx webp q%d" $res.Width $webpQ) -}}
+      {{- $avif := $res.Resize (printf "%dx avif q%d" $res.Width $avifQ) -}}
+      {{- $src = $webp.RelPermalink -}}
+      {{- $w = $webp.Width -}}
+      {{- $h = $webp.Height -}}
+      {{- $webpParts = $webpParts | append (printf "%s %dw" $webp.RelPermalink $webp.Width) -}}
+      {{- $avifParts = $avifParts | append (printf "%s %dw" $avif.RelPermalink $avif.Width) -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if $lightbox -}}
+    {{- $fullRes := $res.Fit (printf "1600x1600 webp q%d" $fullWebpQ) -}}
+    {{- $fullAvifRes := $res.Fit (printf "1600x1600 avif q%d" $fullAvifQ) -}}
+    {{- $full = $fullRes.RelPermalink -}}
+    {{- $fullAvif = $fullAvifRes.RelPermalink -}}
+  {{- end -}}
+{{- end -}}
+{{- return (dict
+  "src" $src
+  "width" $w
+  "height" $h
+  "webpSrcset" (delimit $webpParts ", ")
+  "avifSrcset" (delimit $avifParts ", ")
+  "full" $full
+  "fullAvif" $fullAvif
+) -}}

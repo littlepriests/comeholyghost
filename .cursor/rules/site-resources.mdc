@@ -7,6 +7,7 @@ alwaysApply: true
 
 Maintainer notes live in `docs/resources.md`. Never copy them into `content/`, `static/`, a Hugo page, or a commit message that restates secrets. Hugo publishes `content/` and `static/` only.
 
+- Photos: the file in the post folder, or in `assets/images/nongrid/`, is the input and is not published. `layouts/partials/image-set.html` publishes AVIF then WebP at the slot widths (photo 480/1200, grid 480/800, gallery 480 square, click 1600). `corn compress` is an optional resize for a camera dump. The commit hook rejects a source over 2000px or 1.5MB.
 - Styles: one source of truth in `assets/css/` (sitewide bundle in `layouts/partials/head.html`, homepage bundle in `layouts/index.html`, page sheets via `partial "css.html"`). All fingerprinted — no `?v=`; `player.css` is its own sheet linked right after the bundle. Scripts likewise live in `assets/js/` via `partial "js.html"`. Colors in `tokens.css`, every `@font-face` in `fonts.css`.
 - Tests: `corn test` (unit + behavior, same as CI) and `corn test --visual` (screenshots, local). Run `--visual` after layout or CSS changes; `--update` only when the look change is intended.
 - Cursor: `[params.cursor]` in `hugo.toml` and `static/images/cursor.gif` (32×32). `x` and `y` are the hotspot. Delete `image` to use the normal pointer.

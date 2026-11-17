@@ -5,6 +5,7 @@ import {
     fillTemplate,
     markdownToEmailHtml,
     parseFrontMatter,
+    publishedImageUrl,
     renderWelcomeEmail
 } from "../../netlify/lib/email-templates.mjs";
 
@@ -53,6 +54,37 @@ test("markdownToEmailHtml turns photo shortcodes into images and drops other sho
     assert.match(html, /<img src="https:\/\/site\.test\/cat\.webp"/);
     assert.match(html, /a cat/);
     assert.doesNotMatch(html, /\{\{</);
+});
+
+test("static newsletter images use the site root, not the post folder", () => {
+    const base = "https://site.test/blog/crossroad-beauty";
+    assert.match(
+        publishedImageUrl("images/nongrid/text.webp", base, { email: true }),
+        /^https:\/\/site\.test\/images\/nongrid\/text(_hu_[a-z0-9]+)?\.webp$/
+    );
+    assert.match(
+        publishedImageUrl("/images/nongrid/peachtree-gran-amaral.webp", base, { email: true }),
+        /^https:\/\/site\.test\/images\/nongrid\/peachtree-gran-amaral(_hu_[a-z0-9]+)?\.webp$/
+    );
+});
+
+test("page-bundle newsletter images stay on the processed post url", () => {
+    const url = publishedImageUrl("amaral-red-qi.webp", "https://site.test/blog/crossroad-beauty", {
+        email: true
+    });
+    assert.match(url, /^https:\/\/site\.test\/blog\/crossroad-beauty\/amaral-red-qi(_hu_[a-z0-9]+)?\.webp$/);
+});
+
+test("markdownToEmailHtml keeps figcaption images and static photo paths", () => {
+    const html = markdownToEmailHtml(
+        '{{< photo src="images/nongrid/text.webp" caption="kyle" />}}\n\n{{< figcaption src="/images/nongrid/peachtree-gran-amaral.webp" caption="muro" />}}',
+        { origin: "https://site.test", assetBase: "https://site.test/blog/crossroad-beauty" }
+    );
+    assert.match(html, /src="https:\/\/site\.test\/images\/nongrid\/text(_hu_[a-z0-9]+)?\.webp"/);
+    assert.match(html, /src="https:\/\/site\.test\/images\/nongrid\/peachtree-gran-amaral(_hu_[a-z0-9]+)?\.webp"/);
+    assert.match(html, /kyle/);
+    assert.match(html, /muro/);
+    assert.doesNotMatch(html, /\/blog\/crossroad-beauty\/images\//);
 });
 
 test("renderWelcomeEmail fills every template slot and links a personal unsubscribe", async () => {

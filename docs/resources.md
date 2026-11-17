@@ -8,13 +8,13 @@ The dev server is `hugo server -D --disableFastRender --navigateToChanged` from 
 
 What we tightened (keep the GeoCities vibe; don’t gut atmosphere):
 
-- **Images:** article masters stay in the repo as WebP and are not published. `photo` / `figcaption` / `photo-grid` / writing-index serve Hugo-processed WebP only (click-to-expand is 1600px q70). Prefer masters under ~300–500 KB (see `docs/posting.md`).
+- **Images:** the file you drop in the post folder, or in `assets/images/nongrid/`, stays in git and is not published. `layouts/partials/image-set.html` builds every published copy (AVIF, then WebP). Page slots are 480/1200 (photo and writing card), 480/800 (grid), 800/1280 (figcaption and markdown), and a 480 square (gallery). Click-to-expand is 1600. A commit refuses a source over 2000px or 1.5MB. `corn compress` is an optional resize, not the quality setting. See `docs/posting.md`.
 - **Fonts / icons:** self-hosted WOFF2 only — Fira Mono, Montserrat variable (articles), DotMatrixNarrow (homepage title line 2). Every `@font-face` lives in `assets/css/fonts.css`; files under `static/fonts/`. Site vs article faces via `[params.fonts]` (see **Fonts** below). No Google Fonts / Font Awesome / Academicons CDN. Icons via `layouts/partials/icon.html`.
 - **CSS / JS scope:** all site CSS lives in `assets/css/` and all site JS in `assets/js/`, minified and fingerprinted, so Netlify caches `/css/*` and `/js/*` for a year. See **Stylesheets** and **Scripts** below.
 - **Atmosphere JS:** gold star cursor trail self-hosted (`assets/js/vendor/cursor-effects.esm.js` v1.0.18 motion), homepage + desktop only. Background stars: fewer on phone / `prefers-reduced-motion`; no scroll voiding on narrow viewports.
 - **npm:** project `.npmrc` → `registry.npmjs.org` only. Before any zip, confirm lockfile `resolved` URLs are all `registry.npmjs.org` (no private registry hosts).
 
-Quick check: cold Network on `/`, `/blog/`, `/blog/crossroad-beauty/` — no cdnjs/fonts.googleapis/unpkg `@latest`; banner/post thumbs are WebP-sized responses.
+Quick check: cold Network on `/`, `/blog/`, `/blog/crossroad-beauty/` — no cdnjs/fonts.googleapis/unpkg `@latest`; post photos arrive as AVIF (WebP if the browser skips it), sized to the slot.
 
 ## Design direction
 
@@ -150,12 +150,12 @@ Script is included from `baseof.html` (and gallery/guestbook shells). Keep `aria
 
 Tune preview size in two places (no stretch/crop — `object-fit: contain`):
 
-1. **Hugo Fit caps** — `layouts/partials/blog-entry.html` (`$previewMaxW` / `$previewMaxH`, default 960×720). Masters larger than the box are downscaled to WebP; smaller masters keep native pixel size inside the box.
+1. **Published widths** — `layouts/partials/image-set.html`, called from `layouts/partials/blog-entry.html`. The card is 480 and 1200. Click opens the 1600 copy.
 2. **CSS display caps** — `assets/css/blog-index.css`:
    - `.blog-entry__figure { max-width: … }` — how wide the card image may run in the column
-   - `.blog-entry__thumb > img { max-height: … }` — vertical cap (phone rules in the same file’s media query)
+   - `.blog-entry__thumb picture img { max-height: … }` — vertical cap (phone rules in the same file’s media query)
 
-CSS is fingerprinted, so edits ship without a version bump. Lightbox still uses the larger Fit (`1600x1600`) full URL from the same partial.
+CSS is fingerprinted, so edits ship without a version bump.
 
 ## Footer SkiFree
 
@@ -205,7 +205,7 @@ Sizes the layout actually uses. `1rem` is 16px unless the browser's default font
 - Cursor image: 32×32. Hotspot `x` and `y` are pixels from the top left. The starter arrow is `0` `0`.
 - Banner file: the starter SVG is 1200×280. On the page it fills the content column, and its height follows the picture, capped at 16rem. The empty frame is at least 8rem tall.
 - Every page (homepage, writing, articles, photobook, guestbook): one `.site-shell` grid in `assets/css/layout.css`, at most 53rem wide (`--middle-column`), with the same top and bottom margin everywhere. At 45rem and wider the header and footer span the full shell, and the body stays in the content column. The aside column is `--aside-width` (275px) with `--aside-gap` (1.5rem). Sidebar matter (date, etc.) sits in that column on writing pages; the homepage, photobook, and guestbook leave it empty so the player has the same gutter. Homepage banner, title, prose, and dock sit in the content column. Body is clipped so images don’t spill into the aside. The only side inset is `--page-gutter` (1.25rem a side on desktop, 2.5rem on phones, where it holds the floating player). `body` has no margin, so the gradient runs edge to edge on every page. Below 45rem the player uses that same footer park.
-- Gallery tiles: 9.5rem square. Each thumb is cropped to 600×600 before it is shown.
+- Gallery tiles: 9.5rem square. Each thumb is a 480px center crop. Click opens the uncropped 1600 copy.
 - Homepage player: the same footer stack as the other pages (Grundo over the stop button, ↑ below), on the dock baseline and at the same page edge. Sango, the ticker, and Kagura stay centered in the content column. Below 45rem the pets are hidden. On a phone the counter, the player, and the ↑ share one centered footer row once parked; while floating, play / pause mirrors to the top of the right gutter and the ↑ keeps the bottom corner. The homepage counter, the player buttons, and the ↑ share one chip theme (`--chip-bg`, `--chip-fg`, `--chip-border`, `--chip-font` in `assets/css/tokens.css`). Phone nav: Misdreavus and Pancham are bookends, with the links centered between them (two per row when they fit).
 - Atmosphere: `.home-stars` via `layouts/partials/stars.html` / `assets/js/stars.js` (~153 CSS dots + ~5 sparse Joan-style `\/` ASCII stars in the side gutters, away from text). Homepage moon is Joan G. Stark’s “man in the moon” (`.ascii-moon`, `jgs` kept) in `.home-title-row` beside the centered site title. First homepage session only: when the visitor ticker scrolls into view, large Kagura attacks across the dock with feet on the ticker baseline, the count bumps mid-slash with `+1` (Sango in `.home-dock__pet--left` stays idle), then Kagura crossfades to a ~30% smaller `kagura-walk` and parks in `.home-dock__pet--right` (`assets/js/home.js`). Returning visits keep Kagura idle-walking right and Sango idle left. Click Sango to play `sango-attack`; mid-swing knocks Kagura into `kagura-down`, then she gets back up to walk; Sango returns to idle when the attack strip finishes (Hiraikotsu home). If they leave without seeing the attack, the count still bumps once with no park. Counts 10 / 100 / 1000 also get a green milestone glow.
 - Media polish: `assets/css/retro.css` adds twinkling corner sparkles on the **homepage banner only** — not gallery, article, or writing-index thumbs. No border, no purple wash, no scanlines.

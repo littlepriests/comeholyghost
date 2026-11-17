@@ -68,8 +68,9 @@ sections:
 
       - invoke: corn compress [path…]
         about: |
-          In-place WebP recompress (lean repo masters). Default path: content/blog.
-          Path = where to look; already corn-stamped .webp are skipped unless --force.
+          Optional. Shrink a camera dump before you commit it (long edge 2000, WebP q82).
+          The site build, not this command, publishes the page sizes. Default path: content/blog.
+          Already corn-stamped .webp are skipped unless --force. The commit hook does not require a stamp.
           Examples:
             corn compress content/blog/crossroad-beauty
             corn compress --new content/blog/crossroad-beauty

@@ -17,7 +17,7 @@
     dialog.innerHTML =
       '<div class="article-photo-lightbox__inner">' +
       '<button type="button" class="article-photo-lightbox__close" aria-label="Close">&times;</button>' +
-      '<img alt="" class="article-photo-lightbox__img">' +
+      '<picture><source type="image/avif" data-lightbox-avif><img alt="" class="article-photo-lightbox__img"></picture>' +
       "</div>";
     document.body.appendChild(dialog);
     imgEl = dialog.querySelector(".article-photo-lightbox__img");
@@ -64,6 +64,7 @@
     let thumb = node.querySelector("img");
     return {
       full: full,
+      fullAvif: node.getAttribute("data-full-avif") || "",
       alt: (thumb && thumb.alt) || ""
     };
   }
@@ -101,6 +102,11 @@
     if (!items.length || !imgEl) return;
     index = ((nextIndex % items.length) + items.length) % items.length;
     let item = items[index];
+    let source = dialog.querySelector("[data-lightbox-avif]");
+    if (source) {
+      if (item.fullAvif) source.setAttribute("srcset", item.fullAvif);
+      else source.removeAttribute("srcset");
+    }
     imgEl.src = item.full;
     imgEl.alt = item.alt || "";
     imgEl.classList.toggle("is-carousel", items.length > 1);

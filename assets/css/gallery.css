@@ -48,6 +48,12 @@
     outline-offset: 2px;
 }
 
+.gallery picture {
+    position: absolute;
+    inset: 0;
+    display: block;
+}
+
 /* Crop to the square — never stretch oddly sized sources. */
 .gallery img {
     position: absolute;

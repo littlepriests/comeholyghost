@@ -247,8 +247,8 @@ yetiIconPos = "right"
     url = "/read-me/"
     weight = 11
 
-# Article photos live in the post folder. Publish only the resized files
-# templates ask for, not the master next to index.md.
+# Article photos live in the post folder. Publish only the sizes the
+# templates ask for (layouts/partials/image-set.html), not that file.
 [[cascade]]
   [cascade.build]
     publishResources = false

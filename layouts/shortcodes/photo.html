@@ -4,8 +4,8 @@
   {{< photo src="photo.png" caption="Hello" >}}
   {{< photo src="photo.png" alt="Hello" tip="fun hover" >}}Caption{{< /photo >}}
 
-  Page resources: display thumb is Fit 1400x webp q75; lightbox is Fit 1600x webp q70.
-  The master stays in the repo and is not published.
+  The file in the post folder is not published. The page gets 480 and 1200
+  (AVIF, then WebP). Click opens the 1600 copy.
 */ -}}
 {{- $src := .Get "src" | default (.Get 0) -}}
 {{- if not $src -}}
@@ -14,33 +14,21 @@
 {{- $alt := .Get "alt" | default "" -}}
 {{- $tip := .Get "tip" | default "" -}}
 {{- $caption := .Get "caption" | default (strings.TrimSpace .Inner) -}}
-{{- $img := false -}}
-{{- with .Page.Resources.GetMatch $src -}}
-  {{- $img = . -}}
-{{- end -}}
-{{- $thumb := $src | relURL -}}
-{{- $full := $thumb -}}
-{{- $disp := false -}}
-{{- if $img -}}
-  {{- if ge $img.Width 1 -}}
-    {{- $disp = $img.Fit "1400x1400 webp q75" -}}
-    {{- $large := $img.Fit "1600x1600 webp q70" -}}
-    {{- $thumb = $disp.RelPermalink -}}
-    {{- $full = $large.RelPermalink -}}
-  {{- else -}}
-    {{- $thumb = $img.RelPermalink -}}
-    {{- $full = $thumb -}}
-  {{- end -}}
+{{- $img := partial "image-resource.html" (dict "page" .Page "src" $src) -}}
+{{- $set := dict -}}
+{{- $full := $src | relURL -}}
+{{- if and $img (ge $img.Width 1) -}}
+  {{- $set = partial "image-set.html" (dict "res" $img "widths" (slice 480 1200) "lightbox" true) -}}
+  {{- $full = $set.full -}}
+{{- else if $img -}}
+  {{- $full = $img.RelPermalink -}}
 {{- end -}}
 {{- if and (not $alt) $caption -}}
   {{- $alt = $caption | plainify -}}
 {{- end -}}
 <figure class="article-photo">
-  <button type="button" class="article-photo__thumb{{ with $tip }} site-tip{{ end }}" data-article-photo data-full="{{ $full }}"{{ with $tip }} data-tip="{{ . }}"{{ end }} aria-label="{{ if $alt }}View larger: {{ $alt }}{{ else }}View larger image{{ end }}">
-    {{- $w := 0 -}}
-    {{- $h := 0 -}}
-    {{- with $disp }}{{ $w = .Width }}{{ $h = .Height }}{{ end -}}
-    {{ partial "responsive-img.html" (dict "src" $thumb "alt" $alt "res" $img "width" $w "height" $h "sizes" "(min-width: 28rem) 28rem, 100vw") }}
+  <button type="button" class="article-photo__thumb{{ with $tip }} site-tip{{ end }}" data-article-photo data-full="{{ $full }}"{{ with $set.fullAvif }} data-full-avif="{{ . }}"{{ end }}{{ with $tip }} data-tip="{{ . }}"{{ end }} aria-label="{{ if $alt }}View larger: {{ $alt }}{{ else }}View larger image{{ end }}">
+    {{ partial "responsive-img.html" (dict "set" $set "src" $full "alt" $alt "sizes" "(min-width: 28rem) 28rem, 100vw") }}
   </button>
   {{- with $caption }}
   <figcaption class="article-figure__caption">{{ . | $.Page.RenderString }}</figcaption>
