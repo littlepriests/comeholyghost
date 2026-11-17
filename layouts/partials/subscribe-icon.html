@@ -1,13 +1,4 @@
 {{- /*
-<<<<<<< HEAD
-  Yeti subscribe badge. Pass "icon":
-    word   — DotMatrix “subscribe” (default; not the read-me envelope)
-    plane | bell | rss | at — tiny SVG
-*/ -}}
-{{- $icon := .icon | default "word" -}}
-{{- if or (eq $icon "word") (eq $icon "label") (eq $icon "subscribe") -}}
-<span class="subscribe-icon subscribe-icon--word">subscribe</span>
-=======
   Word / icon badge (yeti, nav pets). Pass "icon":
     word   — DotMatrix label (default; text via "text", else “subscribe”)
     plane | bell | rss | at — tiny SVG
@@ -16,7 +7,6 @@
 {{- $text := .text | default "subscribe" -}}
 {{- if or (eq $icon "word") (eq $icon "label") (eq $icon "subscribe") -}}
 <span class="subscribe-icon subscribe-icon--word">{{ $text }}</span>
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 {{- else if eq $icon "bell" -}}
 <svg class="subscribe-icon" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
   <path fill="currentColor" d="M8 1.5a3.5 3.5 0 0 0-3.5 3.5v1.3c0 .5-.15.98-.42 1.4L3.2 9.3A1 1 0 0 0 4 10.8h8a1 1 0 0 0 .8-1.5l-.88-1.6a2.7 2.7 0 0 1-.42-1.4V5A3.5 3.5 0 0 0 8 1.5Zm0 12.2a1.7 1.7 0 0 0 1.6-1.2H6.4A1.7 1.7 0 0 0 8 13.7Z"/>

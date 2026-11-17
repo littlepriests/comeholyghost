@@ -1,13 +1,5 @@
 #!/usr/bin/env node
 /**
-<<<<<<< HEAD
- * Git ship helpers for littlepriests/comeholyghost (remote: personal).
- *
- *   corn branch   Create update-MMDDYY from latest preview
- *   corn add      Sync preview ← main, stage, commit (prompt), push -u
- *   corn push     Push branch + open/update PR into preview
- *   corn deploy   Promote preview → main when checks are green
-=======
  * Git ship helpers for littlepriests/comeholyghost.
  *
  *   corn branch   Create update-MMDDYY from latest preview
@@ -21,24 +13,10 @@
  *   --thinkpad  work box → git remote "personal" (github.com-personal)
  *   --aura      home box → git remote "origin" (standard github.com)
  *   (neither)   interactive prompt
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
  *
  * Feature merges into preview stay manual on GitHub. Production is main only.
  */
 import { spawnSync } from "node:child_process";
-<<<<<<< HEAD
-import path from "node:path";
-import readline from "node:readline";
-import { fileURLToPath } from "node:url";
-
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const REMOTE = "personal";
-const INTEGRATION = "preview";
-const PRODUCTION = "main";
-
-const SECRET_HINT =
-  /(^|\/)(\.env|\.env\.|.*credentials.*|.*secret.*|.*\.pem$|.*id_rsa|.*kubeconfig)/i;
-=======
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -65,7 +43,6 @@ const BATCH_ACCEPT_NOTE =
 
 /** Set once per run by resolveRemote(). */
 let REMOTE = "";
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 
 function run(cmd, args, opts = {}) {
   const r = spawnSync(cmd, args, {
@@ -104,14 +81,6 @@ function die(msg, code = 1) {
   process.exit(code);
 }
 
-<<<<<<< HEAD
-function assertRemote() {
-  const urls = gitOut("remote", "-v");
-  if (!urls.includes(REMOTE)) {
-    die(`Missing remote "${REMOTE}". Expected littlepriests/comeholyghost.`);
-  }
-  if (!/littlepriests\/comeholyghost/.test(urls)) {
-=======
 function promptMachine() {
   return new Promise((resolve) => {
     const rl = readline.createInterface({
@@ -159,7 +128,6 @@ function assertRemote() {
     );
   }
   if (!forName.some((line) => /littlepriests\/comeholyghost/.test(line))) {
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     die(`Remote "${REMOTE}" should point at littlepriests/comeholyghost.`);
   }
 }
@@ -168,16 +136,6 @@ function currentBranch() {
   return gitOut("branch", "--show-current");
 }
 
-<<<<<<< HEAD
-function mmddyy(d = new Date()) {
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  const yy = String(d.getFullYear()).slice(-2);
-  return `${mm}${dd}${yy}`;
-}
-
-=======
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 function nextUpdateBranch() {
   const base = `update-${mmddyy()}`;
   const local = gitOut("branch", "--list", `${base}*`)
@@ -188,19 +146,9 @@ function nextUpdateBranch() {
     .split("\n")
     .map((s) => s.trim().replace(new RegExp(`^${REMOTE}/`), ""))
     .filter(Boolean);
-<<<<<<< HEAD
-  const taken = new Set([...local, ...remote]);
-  if (!taken.has(base)) return base;
-  for (let i = 2; i < 50; i++) {
-    const name = `${base}-${i}`;
-    if (!taken.has(name)) return name;
-  }
-  die("Too many update-* branches for today.");
-=======
   const name = pickUpdateBranchName(base, new Set([...local, ...remote]));
   if (!name) die("Too many update-* branches for today.");
   return name;
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 }
 
 function fetchAll() {
@@ -270,11 +218,7 @@ function listChanges() {
 }
 
 function assertNoSecrets(paths) {
-<<<<<<< HEAD
-  const bad = paths.filter((p) => SECRET_HINT.test(p));
-=======
   const bad = findSecretPaths(paths);
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
   if (bad.length) {
     die(
       `Refusing to stage likely secrets:\n  ${bad.join("\n  ")}\nMove them out of the tree or rename before corn add.`
@@ -282,8 +226,6 @@ function assertNoSecrets(paths) {
   }
 }
 
-<<<<<<< HEAD
-=======
 function isDirty() {
   return Boolean(gitOut("status", "--porcelain"));
 }
@@ -311,7 +253,6 @@ function stashPop() {
   }
 }
 
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 async function cmdBranch() {
   assertRemote();
   updatePreviewFromMain();
@@ -320,19 +261,6 @@ async function cmdBranch() {
   console.log(`Created ${name} from ${INTEGRATION}.`);
 }
 
-<<<<<<< HEAD
-async function cmdAdd() {
-  assertRemote();
-  updatePreviewFromMain();
-
-  let branch = currentBranch();
-  if (branch === INTEGRATION || branch === PRODUCTION) {
-    const name = nextUpdateBranch();
-    git("checkout", "-b", name, INTEGRATION);
-    branch = name;
-    console.log(`Not on a feature branch — created ${branch}.`);
-  } else if (!branch.startsWith("update-")) {
-=======
 /**
  * Default: stage + commit + push on the current feature branch (no preview checkout).
  * --sync: stash if dirty → preview←main → merge preview into branch → pop → commit.
@@ -391,35 +319,16 @@ async function cmdAdd(args = []) {
       throw err;
     }
   } else if (branch && !branch.startsWith("update-")) {
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     console.warn(
       `On "${branch}" (not update-*). Continuing; PR base will still be ${INTEGRATION}.`
     );
   }
 
-<<<<<<< HEAD
-  // Fold latest preview (incl. main) into the feature branch.
-  const merge = run("git", ["merge", "--no-edit", INTEGRATION], {
-    allowFail: true,
-    stdio: "inherit"
-  });
-  if (merge.status !== 0) {
-    die(`Merge from ${INTEGRATION} failed. Resolve conflicts, then re-run corn add.`);
-  }
-
-  const paths = listChanges();
-  if (!paths.length) {
-    const dirty = gitOut("status", "--porcelain");
-    if (!dirty) {
-      console.log("Nothing to commit.");
-      // Still ensure remote branch exists for later corn push.
-=======
   branch = currentBranch();
   const paths = listChanges();
   if (!paths.length) {
     if (!isDirty()) {
       console.log("Nothing to commit.");
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
       ensureRemoteBranch(branch);
       return;
     }
@@ -440,13 +349,9 @@ async function cmdAdd(args = []) {
   // Avoid Cursor attribution trailers; repo hook also strips them.
   run("git", ["commit", "-m", msg], { stdio: "inherit" });
   ensureRemoteBranch(branch);
-<<<<<<< HEAD
-  console.log(`Committed on ${branch}. Remote branch ${REMOTE}/${branch} is up (base: ${INTEGRATION}).`);
-=======
   console.log(
     `Committed on ${branch}. Remote branch ${REMOTE}/${branch} is up (base: ${INTEGRATION}).`
   );
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
   console.log(`Next: corn push`);
 }
 
@@ -564,18 +469,7 @@ function previewChecksGreen() {
       { allowFail: true }
     );
     const out = `${checks.stdout || ""}\n${checks.stderr || ""}`;
-<<<<<<< HEAD
-    if (/fail|pending|error/i.test(out) && !/pass/i.test(out)) {
-      return { ok: false, detail: out.trim() || "checks not green", prNum };
-    }
-    // gh pr checks exits 0 when all pass, 1 when pending/fail
-    if (checks.status !== 0) {
-      return { ok: false, detail: out.trim() || "checks not green", prNum };
-    }
-    return { ok: true, detail: out.trim() || "all checks passed", prNum };
-=======
     return { ...judgePrChecks(checks.status, out), prNum };
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
   }
 
   // No PR yet — inspect latest commit status on preview via API.
@@ -609,38 +503,11 @@ function previewChecksGreen() {
     } catch {
       list = [];
     }
-<<<<<<< HEAD
-    if (!list.length) {
-      return {
-        ok: true,
-        detail: "No check runs reported on preview (treating as clear).",
-        prNum: null
-      };
-    }
-    const bad = list.filter(
-      (c) =>
-        c.status !== "completed" ||
-        (c.conclusion && !["success", "neutral", "skipped"].includes(c.conclusion))
-    );
-    if (bad.length) {
-      return {
-        ok: false,
-        detail: bad
-          .map((c) => `${c.name}: ${c.status}/${c.conclusion || "?"}`)
-          .join("\n"),
-        prNum: null
-      };
-    }
-    return { ok: true, detail: "All check runs completed successfully.", prNum: null };
-=======
     return { ...judgeCheckRuns(list), prNum: null };
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
   }
   return { ok: false, detail: `preview commit status: ${state}`, prNum: null };
 }
 
-<<<<<<< HEAD
-=======
 function batchAcceptText(rev) {
   const shown = run("git", ["show", `${rev}:${BATCH_ACCEPT}`], { allowFail: true });
   if (shown.status !== 0) return "";
@@ -699,20 +566,16 @@ function clearBatchAcceptOnPreview() {
   }
 }
 
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 async function cmdDeploy(args) {
   assertRemote();
   const dry = args.includes("--dry-run");
   const prOnly = args.includes("--pr-only");
-<<<<<<< HEAD
-=======
   const unknown = args.filter(
     (a) => a !== "--dry-run" && a !== "--pr-only"
   );
   if (unknown.length) {
     die(`Unknown deploy flag(s): ${unknown.join(" ")}`);
   }
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 
   fetchAll();
   const behind = gitOut(
@@ -724,10 +587,6 @@ async function cmdDeploy(args) {
   // ahead of main = second number
   const parts = behind.split(/\s+/).map(Number);
   const previewAhead = parts[1] || 0;
-<<<<<<< HEAD
-  if (!previewAhead) {
-    console.log(`${INTEGRATION} has nothing new for ${PRODUCTION}.`);
-=======
   const batchPending = batchAcceptHasWords(
     batchAcceptText(`${REMOTE}/${INTEGRATION}`)
   );
@@ -740,7 +599,6 @@ async function cmdDeploy(args) {
     } else if (batchPending) {
       clearBatchAcceptOnPreview();
     }
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     return;
   }
   console.log(`${INTEGRATION} is ${previewAhead} commit(s) ahead of ${PRODUCTION}.`);
@@ -758,14 +616,11 @@ async function cmdDeploy(args) {
   if (!prNum) {
     if (dry) {
       console.log(`[dry-run] Would open PR ${INTEGRATION} → ${PRODUCTION}.`);
-<<<<<<< HEAD
-=======
       if (batchPending) {
         console.log(
           `[dry-run] After that merge, would clear ${BATCH_ACCEPT} on ${INTEGRATION}.`
         );
       }
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
       return;
     }
     const created = ghOut(
@@ -824,8 +679,6 @@ async function cmdDeploy(args) {
   if (prOnly || dry) {
     if (dry) console.log("[dry-run] Skipping merge.");
     else console.log("Stopped at PR (--pr-only). Merge in GitHub when ready.");
-<<<<<<< HEAD
-=======
     if (batchPending && dry) {
       console.log(
         `[dry-run] After that merge, would clear ${BATCH_ACCEPT} on ${INTEGRATION}.`
@@ -835,7 +688,6 @@ async function cmdDeploy(args) {
         `Batch accept list stays until this release is on ${PRODUCTION}. Run corn deploy again after the merge to clear it.`
       );
     }
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     return;
   }
 
@@ -859,17 +711,6 @@ async function cmdDeploy(args) {
     { stdio: "inherit" }
   );
   console.log(`Merged ${INTEGRATION} → ${PRODUCTION}. Netlify will production-deploy main.`);
-<<<<<<< HEAD
-}
-
-function usage() {
-  console.log(`Usage: corn <branch|add|push|deploy> [flags]
-
-  corn branch     Create update-MMDDYY from preview (after preview ← main)
-  corn add        Sync preview ← main, stage, commit (prompt), push -u branch
-  corn push       Push branch + open/update PR into preview
-  corn deploy     If preview checks are green, PR + merge preview → main
-=======
   clearBatchAcceptOnPreview();
 }
 
@@ -887,7 +728,6 @@ function usage() {
   corn push       Push branch + open/update PR into preview
   corn deploy     If preview checks are green, PR + merge preview → main,
                   then clear the batch Vale accept list on preview
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
   corn deploy --pr-only   Open/update release PR only (no merge)
   corn deploy --dry-run   Show what would happen
 
@@ -895,16 +735,6 @@ You merge feature PRs into preview on GitHub. corn deploy only promotes to main.
 }
 
 async function main() {
-<<<<<<< HEAD
-  const [cmd, ...args] = process.argv.slice(2);
-  try {
-    if (cmd === "branch") await cmdBranch();
-    else if (cmd === "add") await cmdAdd();
-    else if (cmd === "push") await cmdPush();
-    else if (cmd === "deploy") await cmdDeploy(args);
-    else if (cmd === "help" || cmd === "--help" || !cmd) usage();
-    else die(`Unknown git-flow command: ${cmd}`);
-=======
   const [cmd, ...rawArgs] = process.argv.slice(2);
   try {
     if (cmd === "help" || cmd === "--help" || !cmd) {
@@ -920,7 +750,6 @@ async function main() {
     else if (cmd === "add") await cmdAdd(rest);
     else if (cmd === "push") await cmdPush();
     else if (cmd === "deploy") await cmdDeploy(rest);
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
   } catch (err) {
     die(err.message || String(err));
   }

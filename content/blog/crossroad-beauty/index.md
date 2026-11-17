@@ -16,19 +16,10 @@ tl;dr i saw cool art and listened to cool music.
 
 my sister picked up some artwork in stl for an upcoming show at her museum, so i tagged along as entertainment for the two hour drive. we checked out the pulitzer arts foundation since they're hosting a collection by [olga de amaral](https://olgadeamaral.art/), a colombian fiber artist.
 
-<<<<<<< HEAD
-what i realized belatedly while editing my photos + reading up on amaral +
-writing this post is that my initial response was maybe, probably, reactionary.
-i went into the exhibition blind with little knowledge about textiles and no
-knowledge about amaral, let alone experimental/abstract fabric art. still,
-amaral's work is often bizarre, but the variety holds your attention long enough
-to get you up to speed.
-=======
 i went into the exhibition blind with little knowledge about textiles and no
 knowledge about amaral, let alone experimental/abstract fabric art. what i
 realized belatedly while editing my photos + reading up on amaral + writing this
 post is that my initial response was maybe, probably, reactionary.
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 
 {{< photo-grid caption="olga de amaral @ pulitzer arts foundation (_weaving the infinite_, st louis, MO,  sep 10, 2026–jan 31, 2027)" >}}
 amaral-wicker-figure.webp
@@ -53,15 +44,9 @@ amaral-gold-room.webp
 
 i didn't expect amaral's work to share more with structure, sculpture, and built
 environments than it does with, say, renaissance tapestries. to accommodate how
-<<<<<<< HEAD
-amaral's objects occupy space, pulitzer curated most galleries (maybe all?) with
-at least one structure, often several, suspended away from the walls. that let
-me + other museum-goers do a little dance with amaral's work.
-=======
 amaral's objects should occupy space, the pulitzer curated most galleries (maybe
 all?) with at least one structure, often several, suspended away from the walls.
 that let me + other museum-goers do a little dance with amaral's work.
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 
 we can't touch, but we can move through space as we look, perceive changes in
 light + shadow, experience how repetition affects depth + space, and watch how
@@ -73,11 +58,7 @@ amaral-el-gran-muro-sheesh.webp
 /images/nongrid/peachtree-gran-amaral.webp
 {{< /photo-grid >}}
 
-<<<<<<< HEAD
-[_el gran muro_ (1976)](https://smarthistory.org/olga-de-amaral-el-gran-muro/) was a commission for the peachtree hotel in atlanta, and spans about six stories. the gallery attendant told us each section weighed several hundred pounds and was the most difficult install for the exhibition. my sister grilled the attendant about insurance policies (they're expensive), whether it was shipped in a freight (yes), and the process the museum used to handle the install (i walked away).
-=======
 [_el gran muro_ (1976)](https://smarthistory.org/olga-de-amaral-el-gran-muro/) was a commission for the peachtree hotel in atlanta, and spans about six stories. the gallery attendant told us each section weighed several hundred pounds and was the most difficult install for the exhibition. my sister grilled the attendant about insurance policies (they're expensive), whether it was shipped in a freight (yes), and the process the museum used to handle the install (don't know; i had walked away).
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 
  anyway, i'm getting a d- in museum-goer because i forgot to note the name/material for the photos. the pulitzer [wrote a guide](https://issuu.com/pulitzerarts/docs/fall_2026_exhibition_guide_olga_de_b6974811d4b584?fr=sNGI0NjkyODE2OTQ) to accompany their exhibition, overviewing amaral's background as an architect and her different eras working with experimental form + material. the guide doesn't pair pictures with their write-up, so scroll through their [(limited) digital gallery](https://pulitzerarts.org/art/olga-de-amaral-weaving-the-infinite/), too.
 

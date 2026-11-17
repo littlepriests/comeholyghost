@@ -1,9 +1,6 @@
-<<<<<<< HEAD
-=======
 {{- /*
   Grundo beside the player. Idle 42×56, kick 46×56, no scale (native pixels). Desktop only, from 45rem.
 */ -}}
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 {{- $idle := partial "sprite-by-id.html" "grundo-idle" -}}
 {{- $kick := partial "sprite-by-id.html" "grundo-kick" -}}
 <div id="site-player"{{ with site.Params.player.playlist }} data-playlist="{{ . }}"{{ end }}>
@@ -19,21 +16,13 @@
                 <div class="player-dock-pet{{ with $grundoTip }} site-tip{{ end }}" data-player-dock-pet{{ with $grundoTip }} data-tip="{{ . }}"{{ end }} aria-hidden="true">
                     {{- with $idle }}
                     <span class="player-dock-pet__strip player-dock-pet__strip--idle" data-player-dock-idle>
-<<<<<<< HEAD
-                        {{- partial "sprite.html" (merge . (dict "src" (printf "%s?v=5" .src) "frames" 1 "fps" 1 "alt" "" "scale" "")) -}}
-=======
                         {{- partial "sprite.html" (merge . (dict "frames" 1 "fps" 1 "alt" "" "scale" "")) -}}
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
                     </span>
                     {{- end }}
                     {{- with $kick }}
                     <span class="player-dock-pet__strip player-dock-pet__strip--kick" data-player-dock-kick hidden>
                         {{- /* Hidden + static until click adds .is-kick-play for one cycle. */ -}}
-<<<<<<< HEAD
-                        {{- partial "sprite.html" (merge . (dict "src" (printf "%s?v=5" .src) "fps" 8 "alt" "" "scale" "")) -}}
-=======
                         {{- partial "sprite.html" (merge . (dict "fps" 8 "alt" "" "scale" "")) -}}
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
                     </span>
                     {{- end }}
                     {{- /* Sword ♡ look; cascading spill from feet on back-to-top stomp. */ -}}
@@ -102,8 +91,4 @@
         <span aria-hidden="true">↑</span>
     </button>
 </div>
-<<<<<<< HEAD
-<script src="{{ "js/player.js" | relURL }}?v=92"></script>
-=======
 {{ partial "js.html" "player" }}
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3

@@ -2,29 +2,6 @@
 /**
  * Site CLI: corn <command> …
  *
-<<<<<<< HEAD
- *   corn run [hugo args…]   hugo server -D --disableFastRender --navigateToChanged
- *   corn run --cache        wipe resources/_gen, then server with --ignoreCache
- *   corn compress [path…]   in-place WebP recompress (lean repo masters)
- *   corn edit [path…]       Vale + be-density prose check
- *   corn md [path…]         markdownlint + 80-col wrap
- *   corn email              rebuild emails/preview (newsletter templates)
- *   corn update [--latest]  npm update site package roots (public registry)
- *   corn branch             update-MMDDYY from preview
- *   corn add                sync preview←main, stage, commit, push -u
- *   corn push               push + PR into preview
- *   corn deploy             preview → main when checks green
- *   corn help
- *
- * Install a shell alias (PowerShell):  powershell -File scripts/install-corn.ps1
- * Or from the repo root:               .\corn compress
- */
-import { spawnSync } from "node:child_process";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-
-const here = path.dirname(fileURLToPath(import.meta.url));
-=======
  * Help text lives in scripts/corn-help.yaml — edit that file, not this one.
  * Install (PowerShell):  powershell -File scripts/install-corn.ps1
  */
@@ -40,7 +17,6 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..");
 const HELP_YAML = path.join(here, "corn-help.yaml");
 const require = createRequire(import.meta.url);
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 
 const COMMANDS = {
   run: "run-hugo.mjs",
@@ -48,68 +24,12 @@ const COMMANDS = {
   edit: "edit-prose.mjs",
   md: "lint-markdown.mjs",
   email: "preview-emails.mjs",
-<<<<<<< HEAD
-=======
   test: "run-tests.mjs",
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
   update: "update-deps.mjs",
 };
 
 const GIT_FLOW = new Set(["branch", "add", "push", "deploy"]);
 
-<<<<<<< HEAD
-function usage() {
-  console.log(`Usage: corn <command> [args]
-
-Local site
-  run [hugo args…]   Dev server at http://localhost:1313/
-  run --cache        Wipe Hugo image cache, then server (stale thumbs)
-
-Content / assets
-  compress [path…]   In-place WebP recompress (default: content/blog).
-                     Commits refuse staged content/ images this would still change.
-  edit [path…]       Vale + be-density prose check (default: content/)
-  md [path…]         markdownlint + wrap prose to 80 cols
-  email              Rebuild newsletter HTML under emails/preview/
-
-Deps
-  update             npm update in ./, scripts/, tools/be-density/
-  update --latest    Bump package.json ranges to newest + reinstall
-  update --dry-run   List outdated packages only
-
-Git (remote: personal → littlepriests/comeholyghost)
-  Netlify Deploy Previews / preview branch = free to build; visit URLs to
-  test. Production (main) costs deploy credits — only via corn deploy.
-
-  branch             Start update-MMDDYY from preview (after folding main in)
-  add                Sync preview←main, stage, prompt commit, push -u branch
-  push               Push branch + open/reuse PR into preview (Deploy Preview)
-  deploy             If preview checks are green, merge preview → main (live)
-  deploy --pr-only   Open release PR only; you merge in GitHub
-  deploy --dry-run   Print what deploy would do
-
-  help               Show this help
-
-Typical ship: corn branch → edit → corn add → corn push → merge PR on
-GitHub into preview → poke the Deploy Preview → corn deploy when ready.
-
-Examples:
-  corn run
-  corn run --cache
-  corn compress content/blog/crossroad-beauty
-  corn edit --blog/crossroad-beauty
-  corn md --fix --blog/crossroad-beauty
-  corn email
-  corn update --dry-run
-  corn branch && corn add && corn push
-  corn deploy --pr-only`);
-}
-
-function main() {
-  const [cmd, ...rest] = process.argv.slice(2);
-  if (!cmd || cmd === "help" || cmd === "--help" || cmd === "-h") {
-    usage();
-=======
 /** Scripts that need scripts/node_modules (sharp, markdownlint, yaml, …). */
 const NEEDS_SCRIPTS_DEPS = new Set(["compress", "md"]);
 
@@ -644,7 +564,6 @@ async function main() {
     // `corn` / `corn help` → prompt; `corn help writer|ship|all|install` skips it
     const helpArgs = !cmd || cmd === "help" ? rest : [];
     await usage(helpArgs);
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     process.exit(0);
   }
 
@@ -652,11 +571,7 @@ async function main() {
     const r = spawnSync(
       process.execPath,
       [path.join(here, "git-flow.mjs"), cmd, ...rest],
-<<<<<<< HEAD
-      { stdio: "inherit" }
-=======
       { stdio: "inherit", cwd: root }
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     );
     process.exit(r.status ?? 1);
   }
@@ -664,14 +579,6 @@ async function main() {
   const script = COMMANDS[cmd];
   if (!script) {
     console.error(`Unknown command: ${cmd}\n`);
-<<<<<<< HEAD
-    usage();
-    process.exit(2);
-  }
-
-  const r = spawnSync(process.execPath, [path.join(here, script), ...rest], {
-    stdio: "inherit",
-=======
     await usage(["all"]);
     process.exit(2);
   }
@@ -681,16 +588,11 @@ async function main() {
   const r = spawnSync(process.execPath, [path.join(here, script), ...rest], {
     stdio: "inherit",
     cwd: root,
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
   });
   process.exit(r.status ?? 1);
 }
 
-<<<<<<< HEAD
-main();
-=======
 main().catch((err) => {
   console.error(err);
   process.exit(1);
 });
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3

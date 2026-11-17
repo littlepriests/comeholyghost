@@ -4,64 +4,6 @@
  * Open emails/preview/index.html in a browser (not published by Hugo).
  *
  *   node scripts/preview-emails.mjs
-<<<<<<< HEAD
- */
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { listBlogPosts } from "../netlify/lib/newsletter-posts.mjs";
-import {
-    renderPostEmail,
-    renderWelcomeEmail
-} from "../netlify/lib/email-templates.mjs";
-import { DEFAULT_ORIGIN } from "../netlify/lib/site.mjs";
-
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const OUT = path.join(ROOT, "emails", "preview");
-
-async function main() {
-    await mkdir(OUT, { recursive: true });
-    // Image URLs must match files in local public/ (Hugo Fit hashes). Point at a
-    // local static server for assets — production CDN may not have this build’s names yet.
-    const assetOrigin =
-        process.env.EMAIL_PREVIEW_ORIGIN || "http://127.0.0.1:3940";
-    const siteOrigin = DEFAULT_ORIGIN;
-
-    const welcome = await renderWelcomeEmail({
-        email: "you@example.com",
-        origin: siteOrigin
-    });
-    // Strip outer html/body from template so we can embed, or use full doc in iframe srcdoc.
-    // Easiest: write the template as-is (full document) for welcome/post; index links to them.
-    await writeFile(path.join(OUT, "welcome.html"), welcome, "utf8");
-    const posts = await listBlogPosts(assetOrigin);
-    const sample =
-        posts[0] ||
-        {
-            title: "sample post title",
-            summary: "a short preview blurb for the letter.",
-            dateLabel: "Nov 13, 2026",
-            permalink: `${siteOrigin}/blog/sample/`,
-            heroUrl: "",
-            markdown:
-                "hello from the preview.\n\n## section\n\nmore words, then a [link](https://cornfieldjournal.com/).",
-            assetBase: `${assetOrigin}/blog/sample`,
-            origin: siteOrigin
-        };
-
-    // Keep subscriber-facing links on the real site; only media hits assetOrigin.
-    if (posts[0]) {
-        sample.permalink = `${siteOrigin}/blog/${sample.slug}/`;
-        sample.origin = siteOrigin;
-    }
-
-    let postHtml = await renderPostEmail(sample);
-    // Preview: fake the Resend unsub token so the link is clickable-looking.
-    postHtml = postHtml.split("{{{RESEND_UNSUBSCRIBE_URL}}}").join("#unsubscribe-preview");
-    await writeFile(path.join(OUT, "post.html"), postHtml, "utf8");
-
-    const index = `<!DOCTYPE html>
-=======
  *   node scripts/preview-emails.mjs --watch
  *   corn email           rebuild + serve welcome & post at :3939 (+ public/ :3940)
  *   corn email --watch   same, and rebuild when templates/posts change
@@ -166,16 +108,11 @@ async function rebuild() {
 
   const stamp = new Date().toISOString().replace("T", " ").slice(0, 19);
   const index = `<!DOCTYPE html>
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-<<<<<<< HEAD
-  <title>FIELD email previews</title>
-=======
 ${refreshMeta(2)}  <title>FIELD email previews</title>
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
   <style>
     body { margin: 0; background: #0a0810; color: #f2efe8; font-family: "Fira Mono", ui-monospace, monospace; padding: 2rem; }
     a { color: #18ff6d; }
@@ -185,31 +122,14 @@ ${refreshMeta(2)}  <title>FIELD email previews</title>
 </head>
 <body>
   <h1>email previews</h1>
-<<<<<<< HEAD
-  <p class="muted">edit <code>emails/welcome.md</code> (copy) or <code>emails/*.html</code> (chrome), then <code>corn email</code>.</p>
-=======
   <p class="muted">edit <code>emails/welcome.md</code> (copy) or <code>emails/*.html</code> (chrome)${WATCH ? " — watching; this page auto-refreshes" : ", then <code>corn email</code>"}.</p>
   <p class="muted">built ${stamp}</p>
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
   <ul>
     <li><a href="./welcome.html">welcome</a> — first-time subscriber</li>
     <li><a href="./post.html">new post</a> — ${sample.title ? sample.title.replace(/</g, "") : "sample"}</li>
   </ul>
 </body>
 </html>`;
-<<<<<<< HEAD
-    await writeFile(path.join(OUT, "index.html"), index, "utf8");
-    console.log(`wrote ${OUT}`);
-    console.log(
-        `images → ${assetOrigin}/blog/…  (run: npx serve public -p 3940)\n` +
-            `html   → open emails/preview/ or npx serve emails/preview -p 3939`
-    );
-}
-
-main().catch(function (error) {
-    console.error(error);
-    process.exitCode = 1;
-=======
   await writeFile(path.join(OUT, "index.html"), index, "utf8");
   console.log(`[email] wrote ${OUT} (${stamp})`);
 }
@@ -364,5 +284,4 @@ async function main() {
 main().catch(function (error) {
   console.error(error);
   process.exitCode = 1;
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 });

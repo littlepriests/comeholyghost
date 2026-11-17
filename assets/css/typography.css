@@ -4,13 +4,8 @@
   --font-article in article-reading.css.
 */
 :root {
-<<<<<<< HEAD
-    /* Legacy name still read by player.css and a few component sheets. */
-    --font-monospace: "Fira Mono", monospace;
-=======
     /* Older rules still say --font-monospace. It is the site face. */
     --font-monospace: var(--font-site, "Fira Mono", ui-monospace, monospace);
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 }
 
 body {
@@ -20,8 +15,6 @@ body {
     color: var(--fg);
 }
 
-<<<<<<< HEAD
-=======
 /*
   Orphans / widows (print conceit, CSS-only — no content rewrites).
   balance = headings / short display lines; pretty = body-ish blocks.
@@ -39,7 +32,6 @@ h6,
     text-wrap: balance;
 }
 
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 /* Headings — page title gold, h2+ link blue, stepped sizes so levels read apart */
 h1, 
 h2, 
@@ -51,15 +43,9 @@ h6 {
     font-weight: 600;
     color: var(--link);
     line-height: 1.35;
-<<<<<<< HEAD
-    text-wrap: balance;
-}
-
-=======
 }
 
 /* Gold #ffd749 at 1.45rem. h2–h6 stay --link. A theme key can replace this hue; the size stays here. */
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 h1 { font-size: 1.45rem; color: #ffd749; }
 h2 { font-size: 1.28rem; }
 h3 { font-size: 1.14rem; }
@@ -133,13 +119,6 @@ h1:first-child {
     margin-top: 0.4rem;
 }
 
-<<<<<<< HEAD
-/* Paragraphs. pretty keeps a lone word off the last line where supported. */
-p,
-li,
-figcaption,
-blockquote {
-=======
 /* Body-ish blocks: keep a lone word off the last line where supported. */
 p,
 li,
@@ -151,7 +130,6 @@ blockquote,
 .content__body td,
 .content__body th,
 .page__aside {
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     text-wrap: pretty;
 }
 

@@ -26,11 +26,7 @@
     <li class="main-nav__item main-nav__item--tail">
       <a class="nav-main-item{{ if $active }} active{{ end }}" href="{{ $item.URL | relLangURL }}" title="{{ $item.Title }}">{{ $item.Name }}</a>
       {{- /* Pancham glued to last link so he never wraps alone under writing. */ -}}
-<<<<<<< HEAD
-      <a class="nav-subscribe site-tip" href="#subscribe" data-subscribe-open aria-label="{{ $subTip }}" data-tip="{{ $subTip }}">
-=======
       <a class="nav-subscribe site-tip nav-pet" href="#subscribe" data-subscribe-open aria-label="{{ $subTip }}" data-tip="{{ $subTip }}">
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
         <img
           class="nav-subscribe-pet"
           src="{{ "images/sprites/pancham-shiny.gif" | relURL }}"
@@ -40,10 +36,7 @@
           decoding="async"
           draggable="false"
         >
-<<<<<<< HEAD
-=======
         <span class="nav-pet__label" aria-hidden="true">{{- partial "subscribe-icon.html" (dict "icon" "word" "text" "sub") -}}</span>
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
       </a>
     </li>
       {{- else -}}

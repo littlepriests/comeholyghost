@@ -1,15 +1,4 @@
 {{/*
-<<<<<<< HEAD
-  Bubble cursor — homepage only (see layouts/index.html).
-  Self-hosted pin: static/js/vendor/cursor-effects.esm.js (v1.0.18, trimmed to
-  bubbleCursor). Need another effect? Re-vendor it from the upstream release.
-  Skip on coarse pointers / narrow viewports / reduced motion.
-*/}}
-<script type="module">
-    import { bubbleCursor } from "{{ "js/vendor/cursor-effects.esm.js" | relURL }}";
-
-    var bubbles = null;
-=======
   Star trail (homepage only — see layouts/index.html).
   Self-hosted pin: assets/js/vendor/cursor-effects.esm.js (v1.0.18 motion,
   star particles instead of bubbles). Skip on coarse / narrow / reduced motion.
@@ -19,7 +8,6 @@
     import { starCursor } from "{{ $vendor.RelPermalink }}";
 
     var trail = null;
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     var overSword = false;
     var mqReduce = window.matchMedia("(prefers-reduced-motion: reduce)");
     var mqNarrow = window.matchMedia("(max-width: 44.99rem)");
@@ -29,24 +17,6 @@
         return !mqReduce.matches && !mqNarrow.matches && !mqCoarse.matches;
     }
 
-<<<<<<< HEAD
-    function startBubbles() {
-        if (bubbles || overSword || !allowed()) return;
-        bubbles = bubbleCursor({
-            colors: ["#ff69b4", "#ffffff", "#b388ff"]
-        });
-    }
-
-    function stopBubbles() {
-        if (!bubbles) return;
-        if (typeof bubbles.destroy === "function") bubbles.destroy();
-        bubbles = null;
-    }
-
-    function sync() {
-        if (allowed()) startBubbles();
-        else stopBubbles();
-=======
     function startTrail() {
         if (trail || overSword || !allowed()) return;
         trail = starCursor({
@@ -64,7 +34,6 @@
     function sync() {
         if (allowed()) startTrail();
         else stopTrail();
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     }
 
     function isSword(node) {
@@ -74,11 +43,7 @@
     document.addEventListener("pointerover", function (event) {
         if (!isSword(event.target)) return;
         overSword = true;
-<<<<<<< HEAD
-        stopBubbles();
-=======
         stopTrail();
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     }, true);
 
     document.addEventListener("pointerout", function (event) {

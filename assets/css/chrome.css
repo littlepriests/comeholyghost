@@ -23,11 +23,7 @@
 }
 
 /*
-<<<<<<< HEAD
-  Hover tip: .site-tip[data-tip] + floating layer from static/js/site-tips.js.
-=======
   Hover tip: .site-tip[data-tip] + floating layer from assets/js/site-tips.js.
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
   Follows the pointer (ahead of the cursor). Copy lives in data/tips.yaml.
   z-index above sprites, images, and the back-to-top heart layer.
 */
@@ -90,8 +86,6 @@
     color: var(--hover, #ffd749);
     opacity: 1;
 }
-<<<<<<< HEAD
-=======
 
 /* Ghost cursor extras (site-cursor-fx.js): soft ♡ on click + idle bubbles.
    Move trail is gold stars (cursor-effects.html / starCursor). */
@@ -225,4 +219,3 @@
         display: none;
     }
 }
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3

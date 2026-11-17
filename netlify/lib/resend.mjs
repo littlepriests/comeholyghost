@@ -1,14 +1,9 @@
-<<<<<<< HEAD
-import { DEFAULT_ORIGIN, siteOrigin } from "./site.mjs";
-
-=======
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { DEFAULT_ORIGIN, siteOrigin } from "./site.mjs";
 
 const DEFAULT_NOTIFY_TO = "fellbeasts@proton.me";
 const WEBHOOK_TOLERANCE_SEC = 300;
 
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 export async function resendRequest(apiKey, route, payload, method) {
     const response = await fetch(`https://api.resend.com${route}`, {
         method: method || "POST",
@@ -32,13 +27,9 @@ export function resendConfig() {
         apiKey: process.env.RESEND_API_KEY || "",
         from: process.env.RESEND_FROM || "",
         segmentId: process.env.RESEND_SEGMENT_ID || "",
-<<<<<<< HEAD
-        siteOrigin: siteOrigin()
-=======
         siteOrigin: siteOrigin(),
         notifyTo: process.env.RESEND_NOTIFY_TO || DEFAULT_NOTIFY_TO,
         webhookSecret: process.env.RESEND_WEBHOOK_SECRET || ""
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     };
 }
 
@@ -46,8 +37,6 @@ export function resendConfigured(cfg) {
     return !!(cfg && cfg.apiKey && cfg.from && cfg.segmentId);
 }
 
-<<<<<<< HEAD
-=======
 /**
  * Verify a Resend (Svix) webhook signature against the raw body string.
  * Throws on failure; returns parsed JSON on success.
@@ -117,7 +106,6 @@ function escapeHtml(value) {
         .replace(/"/g, "&quot;");
 }
 
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 /** Add contact to segment. Returns { ok, created, status, body }. */
 export async function addContact(cfg, email) {
     const result = await resendRequest(cfg.apiKey, "/contacts", {
@@ -135,22 +123,6 @@ export async function addContact(cfg, email) {
     return { ok: false, created: false, status: result.status, body: result.body };
 }
 
-<<<<<<< HEAD
-/** Mark a contact unsubscribed (stops Broadcasts). */
-export async function unsubscribeContact(cfg, email) {
-    const encoded = encodeURIComponent(String(email || "").trim().toLowerCase());
-    return resendRequest(cfg.apiKey, `/contacts/${encoded}`, { unsubscribed: true }, "PATCH");
-}
-
-export async function sendWelcomeEmail(cfg, email, html) {
-    const origin = (cfg.siteOrigin || DEFAULT_ORIGIN).replace(/\/$/, "");
-    const unsubApi = `${origin}/api/unsubscribe?email=${encodeURIComponent(email)}`;
-    return resendRequest(cfg.apiKey, "/emails", {
-        from: cfg.from,
-        to: [email],
-        subject: "welcome to the FIELD",
-        html,
-=======
 /** Remove a contact entirely (drops them from the Resend Contacts list). */
 export async function unsubscribeContact(cfg, email) {
     const encoded = encodeURIComponent(String(email || "").trim().toLowerCase());
@@ -170,7 +142,6 @@ export async function sendWelcomeEmail(cfg, email, htmlOrOpts) {
         to: [email],
         subject: String(opts.subject || "welcome").trim(),
         html: opts.html,
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
         headers: {
             "List-Unsubscribe": `<${unsubApi}>`,
             "List-Unsubscribe-Post": "List-Unsubscribe=One-Click"

@@ -48,15 +48,12 @@
     outline-offset: 2px;
 }
 
-<<<<<<< HEAD
-=======
 .gallery picture {
     position: absolute;
     inset: 0;
     display: block;
 }
 
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 /* Crop to the square — never stretch oddly sized sources. */
 .gallery img {
     position: absolute;

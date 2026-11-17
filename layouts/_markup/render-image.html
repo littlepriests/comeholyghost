@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-<span class="retro-media">
-<img id="{{ .Destination | path.Base | anchorize }}" src="{{ .Destination | safeURL }}" alt="{{ .PlainText }}"{{ with .Title }} title="{{ . }}"{{ end }} loading="lazy">
-=======
 {{- $res := partial "image-resource.html" (dict "page" .Page "src" .Destination) -}}
 {{- if not $res }}{{ $res = partial "image-resource.html" (dict "page" .Page "src" (.Destination | path.Base)) }}{{ end -}}
 {{- $set := dict -}}
@@ -17,5 +13,4 @@
 {{- else -}}
 <img id="{{ .Destination | path.Base | anchorize }}" src="{{ .Destination | safeURL }}" alt="{{ .PlainText }}"{{ with .Title }} title="{{ . }}"{{ end }} loading="lazy" decoding="async">
 {{- end -}}
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 </span>

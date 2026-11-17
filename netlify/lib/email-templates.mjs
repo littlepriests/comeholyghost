@@ -54,10 +54,7 @@ export function fillTemplate(html, vars) {
 }
 
 const EMAIL_IMG_ALT = "go to site for full image";
-<<<<<<< HEAD
-=======
 /* Photo well. Same hex as --inner-bg (#44355B). Hero is 520px wide; a single photo is 360px. */
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 const EMAIL_INNER_BG = "#44355B";
 
 export function heroBlock(src, alt) {
@@ -156,8 +153,6 @@ export function markdownToEmailHtml(markdown, options) {
     const assetBase = String(opts.assetBase || origin).replace(/\/$/, "");
     let text = String(markdown || "").replace(/\r\n/g, "\n");
 
-<<<<<<< HEAD
-=======
     // Escape the prose first, with shortcodes masked so their `<` survives for the
     // replacements below. Tags inserted after this (`<a>`, `<strong>`, photos) stay real
     // HTML, and a `<b>` written in a paragraph is text.
@@ -172,7 +167,6 @@ export function markdownToEmailHtml(markdown, options) {
         return shortcodes[Number(n)];
     });
 
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     // {{< photo src="x" caption="y" >}} / photo-grid blocks
     text = text.replace(/\{\{<\s*photo\s+([^>]*?)\s*\/?>\}\}/g, function (_, attrs) {
         const src = /src\s*=\s*"([^"]+)"/.exec(attrs);
@@ -206,8 +200,6 @@ export function markdownToEmailHtml(markdown, options) {
         }
     );
 
-<<<<<<< HEAD
-=======
     // {{< figcaption src="x" caption="y" />}} and the paired form. Same image rules as photo.
     text = text.replace(
         /\{\{<\s*figcaption\s+([^>]*?)\s*\/?>\}\}(?:([\s\S]*?)\{\{<\s*\/\s*figcaption\s*>\}\})?/g,
@@ -227,7 +219,6 @@ export function markdownToEmailHtml(markdown, options) {
         }
     );
 
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     // Drop any remaining shortcodes.
     text = text.replace(/\{\{<[\s\S]*?>\}\}/g, "");
 
@@ -238,30 +229,11 @@ export function markdownToEmailHtml(markdown, options) {
     });
     text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function (_, label, href) {
         const url = absolutize(href, origin);
-<<<<<<< HEAD
-        return `<a href="${url}" style="color:#18ff6d;text-decoration:underline;">${escapeHtml(label)}</a>`;
-=======
         return `<a href="${url}" style="color:#18ff6d;text-decoration:underline;">${label}</a>`;
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     });
 
     // Headings / emphasis (after links so we don't nest badly on raw md)
     text = text.replace(/^### (.+)$/gm, function (_, t) {
-<<<<<<< HEAD
-        return `<p style="margin:18px 0 8px;font-size:15px;color:#f2efe8;">${escapeHtml(t)}</p>`;
-    });
-    text = text.replace(/^## (.+)$/gm, function (_, t) {
-        return `<p style="margin:20px 0 8px;font-size:16px;color:#f2efe8;">${escapeHtml(t)}</p>`;
-    });
-    text = text.replace(/^# (.+)$/gm, function (_, t) {
-        return `<p style="margin:20px 0 8px;font-size:18px;color:#f2efe8;">${escapeHtml(t)}</p>`;
-    });
-    text = text.replace(/\*\*([^*]+)\*\*/g, function (_, t) {
-        return `<strong>${escapeHtml(t)}</strong>`;
-    });
-    text = text.replace(/\*([^*]+)\*/g, function (_, t) {
-        return `<em>${escapeHtml(t)}</em>`;
-=======
         return `<p style="margin:18px 0 8px;font-size:15px;color:#f2efe8;">${t}</p>`;
     });
     text = text.replace(/^## (.+)$/gm, function (_, t) {
@@ -275,7 +247,6 @@ export function markdownToEmailHtml(markdown, options) {
     });
     text = text.replace(/\*([^*]+)\*/g, function (_, t) {
         return `<em>${t}</em>`;
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     });
 
     const blocks = text.split(/\n{2,}/);
@@ -311,41 +282,18 @@ function collapseSoftWrapsHtml(text) {
         .trim();
 }
 
-<<<<<<< HEAD
-/** Plain prose: escape, then soft-wrap → space; hard break → <br>. */
-=======
 /** Plain prose is already escaped. Soft-wrap → space; hard break → <br>. */
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 function collapseSoftWrapsPlain(text) {
     return String(text || "")
         .split(/  \n/)
         .map(function (part) {
-<<<<<<< HEAD
-            return escapeHtml(
-                part.replace(/\n+/g, " ").replace(/[ \t]{2,}/g, " ").trim()
-            );
-=======
             return part.replace(/\n+/g, " ").replace(/[ \t]{2,}/g, " ").trim();
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
         })
         .filter(Boolean)
         .join("<br>\n");
 }
 
 /**
-<<<<<<< HEAD
- * Masters are not published. After a Hugo build, pick a resized copy in
- * public/blog/<slug>/. For email, prefer a mid-size Fit (~800–1400 thumb),
- * not the huge lightbox file (largest on disk).
- */
-export function publishedImageUrl(filename, assetBase, options) {
-    const email = !!(options && options.email);
-    const fallback = absolutize(filename, assetBase);
-    const slug = String(assetBase || "").match(/\/blog\/([^/]+)\/?$/);
-    if (!slug) return fallback;
-    const dir = path.join(ROOT, "public", "blog", slug[1]);
-    if (!existsSync(dir)) return fallback;
-=======
  * URL an email client can fetch.
  *
  * The file in the post folder is not published. After a Hugo build, use a
@@ -410,7 +358,6 @@ function pickProcessedImage(slug, filename, email) {
 
 function pickProcessedIn(dir, filename, email) {
     if (!existsSync(dir)) return "";
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     const stem = path.basename(String(filename), path.extname(String(filename)));
     const candidates = [];
     for (const name of readdirSync(dir)) {
@@ -420,11 +367,7 @@ function pickProcessedIn(dir, filename, email) {
             size: statSync(path.join(dir, name)).size
         });
     }
-<<<<<<< HEAD
-    if (!candidates.length) return fallback;
-=======
     if (!candidates.length) return "";
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     candidates.sort(function (a, b) {
         return a.size - b.size;
     });
@@ -441,13 +384,7 @@ function pickProcessedIn(dir, filename, email) {
             pick = candidates[Math.floor(candidates.length / 2)];
         }
     }
-<<<<<<< HEAD
-
-    const origin = String(assetBase).replace(/\/blog\/[^/]+\/?$/, "");
-    return `${origin}/blog/${slug[1]}/${pick.name}`;
-=======
     return pick.name;
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 }
 
 function absolutize(url, base) {
@@ -459,14 +396,11 @@ function absolutize(url, base) {
     return `${base}/${raw.replace(/^\.\//, "")}`;
 }
 
-<<<<<<< HEAD
-=======
 /**
  * Welcome letter from emails/welcome.md (all copy) + welcome.html (chrome only).
  * Returns { html, subject }. Blank / commented-out fields omit their blocks
  * (no empty shells). Unsubscribe link always remains in the footer block.
  */
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 export async function renderWelcomeEmail(options) {
     const opts = options || {};
     const origin = String(opts.origin || DEFAULT_ORIGIN).replace(/\/$/, "");
@@ -478,20 +412,6 @@ export async function renderWelcomeEmail(options) {
     const raw = await readFile(mdPath, "utf8");
     const { meta, body } = parseFrontMatter(raw);
     const tpl = await loadEmailTemplate("welcome.html");
-<<<<<<< HEAD
-    return fillTemplate(tpl, {
-        TITLE: escapeHtml(meta.title || "hi there"),
-        PREHEADER: escapeHtml(
-            meta.preheader || "read what i write."
-        ),
-        HEADLINE: escapeHtml(meta.headline || "thanks for joining"),
-        FOOTER: escapeHtml(
-            meta.footer || "cornfieldjournal.com"
-        ),
-        UNSUBSCRIBE_URL: unsubscribeUrl,
-        BODY: markdownToEmailHtml(body, { origin })
-    });
-=======
     const subject = String(meta.subject || meta.title || "welcome").trim();
     const preheader = String(meta.preheader || "").trim();
     const greeting = String(meta.greeting || "").trim();
@@ -548,7 +468,6 @@ function welcomeImageBlock(image, alt, origin) {
         src = `https:${raw}`;
     }
     return heroBlock(src, alt || EMAIL_IMG_ALT);
->>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 }
 
 export async function renderPostEmail(post) {
