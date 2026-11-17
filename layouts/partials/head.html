@@ -21,11 +21,11 @@
   window.__SITE_CONTEXT__ = {{ $ctx | jsonify }};
   window.__SITE_SKIP_METERED_API__ = {{ if or (eq $ctx "deploy-preview") (eq $ctx "branch-deploy") }}true{{ else }}false{{ end }};
 </script>
-<script src="{{ "js/site-context.js" | relURL }}?v=1"></script>
+{{ partial "js.html" "site-context" }}
 {{- /*
   Sitewide CSS: one fingerprinted bundle (order = cascade order), then the
   player sheet on its own. Page-only sheets are fingerprinted in their layouts
-  via partial "css.html". Every file lives in assets/css/ except player.css.
+  via partial "css.html".
 */ -}}
 {{ $site := slice
   (resources.Get "css/fonts.css")
@@ -47,7 +47,7 @@
 | minify
 | fingerprint }}
 <link rel="stylesheet" href="{{ $site.RelPermalink }}" integrity="{{ $site.Data.Integrity }}">
-<link rel="stylesheet" href="{{ "css/player.css" | relURL }}?v=92">
+{{ partial "css.html" "player" }}
 <!-- favicon -->
 {{ if os.FileExists "static/favicon.ico" }}<link rel="icon" href="{{ "favicon.ico" | absURL }}">{{ end }}
 {{ if os.FileExists "static/favicon-32x32.png" }}<link rel="icon" type="image/png" sizes="32x32" href="{{ "favicon-32x32.png" | absURL }}">{{ end }}

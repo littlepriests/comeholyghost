@@ -17,10 +17,10 @@
             {{- partial "page-buttons.html" . -}}
 
             <form class="guestbook__form" data-guestbook-form>
-                <label>{{ site.Data.chrome.guestbook.name_label }}
+                <label>{{ hugo.Data.chrome.guestbook.name_label }}
                     <input type="text" name="name" maxlength="80" autocomplete="nickname">
                 </label>
-                <label>{{ site.Data.chrome.guestbook.message_label }}
+                <label>{{ hugo.Data.chrome.guestbook.message_label }}
                     <textarea name="message" maxlength="500" rows="4"></textarea>
                 </label>
                 <label class="site-hp" aria-hidden="true">Leave blank
@@ -28,18 +28,18 @@
                 </label>
                 <p class="guestbook__error" data-guestbook-error hidden></p>
                 <p class="guestbook__status" data-guestbook-status hidden></p>
-                <button type="submit">{{ site.Data.chrome.guestbook.submit }}</button>
+                <button type="submit">{{ hugo.Data.chrome.guestbook.submit }}</button>
             </form>
 
-            <section aria-label="{{ site.Data.chrome.guestbook.entries_label }}">
-                <h2>{{ site.Data.chrome.guestbook.entries_heading }}</h2>
+            <section aria-label="{{ hugo.Data.chrome.guestbook.entries_label }}">
+                <h2>{{ hugo.Data.chrome.guestbook.entries_heading }}</h2>
                 <ol class="guestbook__entries" data-guestbook-list></ol>
             </section>
         </main>
 
         {{- partial "site-footer.html" (dict "page" .) }}
     </div>
-            <script src="{{ "js/guestbook.js" | relURL }}?v=2"></script>
+            {{ partial "js.html" "guestbook" }}
     </div>
     {{- partial "site-chrome.html" . }}
 </body>

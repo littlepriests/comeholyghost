@@ -4,10 +4,10 @@
   if (window.__articleMediaLightbox) return;
   window.__articleMediaLightbox = true;
 
-  var dialog = null;
-  var imgEl = null;
-  var items = [];
-  var index = 0;
+  let dialog = null;
+  let imgEl = null;
+  let items = [];
+  let index = 0;
 
   function ensureDialog() {
     if (dialog) return dialog;
@@ -17,7 +17,7 @@
     dialog.innerHTML =
       '<div class="article-photo-lightbox__inner">' +
       '<button type="button" class="article-photo-lightbox__close" aria-label="Close">&times;</button>' +
-      '<img alt="" class="article-photo-lightbox__img">' +
+      '<picture><source type="image/avif" data-lightbox-avif><img alt="" class="article-photo-lightbox__img"></picture>' +
       "</div>";
     document.body.appendChild(dialog);
     imgEl = dialog.querySelector(".article-photo-lightbox__img");
@@ -59,19 +59,20 @@
   }
 
   function nodeToItem(node) {
-    var full = node.getAttribute("data-full");
+    let full = node.getAttribute("data-full");
     if (!full) return null;
-    var thumb = node.querySelector("img");
+    let thumb = node.querySelector("img");
     return {
       full: full,
+      fullAvif: node.getAttribute("data-full-avif") || "",
       alt: (thumb && thumb.alt) || ""
     };
   }
 
   function collectSet(button) {
-    var grid = button.closest(".article-photo-grid");
-    var gallery = button.closest(".gallery");
-    var nodes;
+    let grid = button.closest(".article-photo-grid");
+    let gallery = button.closest(".gallery");
+    let nodes;
     if (grid) {
       nodes = grid.querySelectorAll("[data-article-photo][data-full]");
     } else if (gallery) {
@@ -79,16 +80,16 @@
     } else {
       nodes = [button];
     }
-    var list = [];
-    var start = 0;
-    for (var i = 0; i < nodes.length; i++) {
-      var item = nodeToItem(nodes[i]);
+    let list = [];
+    let start = 0;
+    for (let i = 0; i < nodes.length; i++) {
+      let item = nodeToItem(nodes[i]);
       if (!item) continue;
       if (nodes[i] === button) start = list.length;
       list.push(item);
     }
     if (!list.length) {
-      var alone = nodeToItem(button);
+      let alone = nodeToItem(button);
       if (alone) {
         list = [alone];
         start = 0;
@@ -100,7 +101,12 @@
   function showAt(nextIndex) {
     if (!items.length || !imgEl) return;
     index = ((nextIndex % items.length) + items.length) % items.length;
-    var item = items[index];
+    let item = items[index];
+    let source = dialog.querySelector("[data-lightbox-avif]");
+    if (source) {
+      if (item.fullAvif) source.setAttribute("srcset", item.fullAvif);
+      else source.removeAttribute("srcset");
+    }
     imgEl.src = item.full;
     imgEl.alt = item.alt || "";
     imgEl.classList.toggle("is-carousel", items.length > 1);
@@ -116,7 +122,7 @@
   }
 
   function openPhoto(button) {
-    var set = collectSet(button);
+    let set = collectSet(button);
     if (!set.items.length) return;
     ensureDialog();
     items = set.items;
@@ -129,7 +135,7 @@
   }
 
   document.addEventListener("click", function (event) {
-    var button = event.target.closest("[data-article-photo]");
+    let button = event.target.closest("[data-article-photo]");
     if (!button || button.closest("dialog")) return;
     event.preventDefault();
     openPhoto(button);

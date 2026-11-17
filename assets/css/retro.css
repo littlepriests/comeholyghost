@@ -21,9 +21,17 @@ body.home .home-banner {
     overflow: hidden;
 }
 
+body.home .retro-media picture,
+body.home .article-photo__thumb picture {
+    display: block;
+    width: 100%;
+}
+
 body.home .retro-media > img,
+body.home .retro-media picture img,
 body.home .home-banner > img,
-body.home .article-photo__thumb > img {
+body.home .article-photo__thumb > img,
+body.home .article-photo__thumb picture img {
     display: block;
     width: 100%;
     max-width: 100%;

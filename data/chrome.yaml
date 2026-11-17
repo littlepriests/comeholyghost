@@ -1,6 +1,6 @@
 # Visible site wording outside your posts: dialogs, forms, and page lines.
 # Edit here → Hugo rebuild. Hover lines live in tips.yaml.
-# The JavaScript status and error messages stay in static/js/*.js.
+# The JavaScript status and error messages stay in assets/js/*.js.
 
 subscribe:
   title: "subscribe"

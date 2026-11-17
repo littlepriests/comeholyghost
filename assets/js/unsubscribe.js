@@ -1,18 +1,18 @@
 (function () {
     // Same-site nav swaps #page-root and re-runs this script, so bind per form.
-    var form = document.querySelector("[data-unsubscribe-form]");
+    let form = document.querySelector("[data-unsubscribe-form]");
     if (!form || form.dataset.bound) return;
     form.dataset.bound = "1";
 
-    var submitBtn = form.querySelector("[data-unsubscribe-submit]");
-    var errEl = form.querySelector("[data-unsubscribe-error]");
-    var okEl = form.querySelector("[data-unsubscribe-ok]");
-    var emailInput = form.querySelector("[data-unsubscribe-email]");
-    var busy = false;
+    let submitBtn = form.querySelector("[data-unsubscribe-submit]");
+    let errEl = form.querySelector("[data-unsubscribe-error]");
+    let okEl = form.querySelector("[data-unsubscribe-ok]");
+    let emailInput = form.querySelector("[data-unsubscribe-email]");
+    let busy = false;
 
     try {
-        var params = new URLSearchParams(window.location.search || "");
-        var fromQuery = params.get("email");
+        let params = new URLSearchParams(window.location.search || "");
+        let fromQuery = params.get("email");
         if (fromQuery && emailInput && !emailInput.value) {
             emailInput.value = fromQuery;
         }
@@ -52,9 +52,9 @@
             return;
         }
 
-        var email = emailInput ? String(emailInput.value || "").trim() : "";
-        var honey = form.querySelector('input[name="website"]');
-        var payload = {
+        let email = emailInput ? String(emailInput.value || "").trim() : "";
+        let honey = form.querySelector('input[name="website"]');
+        let payload = {
             email: email,
             website: honey ? String(honey.value || "") : ""
         };

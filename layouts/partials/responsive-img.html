@@ -1,0 +1,34 @@
+{{- /*
+  <picture> for a processed photo. dict: set (from image-set.html), alt, title,
+  id, sizes. Without a set, falls back to a plain <img src>.
+*/ -}}
+{{- $set := .set -}}
+{{- if and $set $set.src -}}
+<picture>
+  {{- with $set.avifSrcset }}
+  <source type="image/avif" srcset="{{ . }}"{{ with $.sizes }} sizes="{{ . }}"{{ end }}>
+  {{- end }}
+  <img
+    {{- with $.id }} id="{{ . }}"{{ end }}
+    src="{{ $set.src }}"
+    alt="{{ $.alt }}"
+    {{- with $.title }} title="{{ . }}"{{ end -}}
+    {{- with $set.width }} width="{{ . }}"{{ end -}}
+    {{- with $set.height }} height="{{ . }}"{{ end -}}
+    {{- with $set.webpSrcset }} srcset="{{ . }}"{{ end -}}
+    {{- with $.sizes }} sizes="{{ . }}"{{ end }}
+    loading="lazy"
+    decoding="async">
+</picture>
+{{- else -}}
+<img
+  {{- with .id }} id="{{ . }}"{{ end }}
+  src="{{ .src }}"
+  alt="{{ .alt }}"
+  {{- with .title }} title="{{ . }}"{{ end -}}
+  {{- with .width }} width="{{ . }}"{{ end -}}
+  {{- with .height }} height="{{ . }}"{{ end -}}
+  {{- with .sizes }} sizes="{{ . }}"{{ end }}
+  loading="lazy"
+  decoding="async">
+{{- end -}}

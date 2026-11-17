@@ -1,3 +1,16 @@
+{{- $res := partial "image-resource.html" (dict "page" .Page "src" .Destination) -}}
+{{- if not $res }}{{ $res = partial "image-resource.html" (dict "page" .Page "src" (.Destination | path.Base)) }}{{ end -}}
+{{- $set := dict -}}
+{{- $fallback := .Destination | safeURL -}}
+{{- if and $res (ge $res.Width 1) -}}
+  {{- $set = partial "image-set.html" (dict "res" $res "widths" (slice 800 1280)) -}}
+{{- else if $res -}}
+  {{- $fallback = $res.RelPermalink -}}
+{{- end -}}
 <span class="retro-media">
-<img id="{{ .Destination | path.Base | anchorize }}" src="{{ .Destination | safeURL }}" alt="{{ .PlainText }}"{{ with .Title }} title="{{ . }}"{{ end }} loading="lazy">
+{{- if or $set.src $res -}}
+  {{ partial "responsive-img.html" (dict "set" $set "src" $fallback "alt" .PlainText "title" .Title "id" (.Destination | path.Base | anchorize) "sizes" "(min-width: 40rem) 40rem, 100vw") }}
+{{- else -}}
+<img id="{{ .Destination | path.Base | anchorize }}" src="{{ .Destination | safeURL }}" alt="{{ .PlainText }}"{{ with .Title }} title="{{ . }}"{{ end }} loading="lazy" decoding="async">
+{{- end -}}
 </span>

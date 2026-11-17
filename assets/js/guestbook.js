@@ -1,14 +1,14 @@
 (function () {
-    var apiUrl = "/api/guestbook";
-    var localKey = "pd-guestbook-local";
-    var form = document.querySelector("[data-guestbook-form]");
-    var list = document.querySelector("[data-guestbook-list]");
-    var error = document.querySelector("[data-guestbook-error]");
-    var status = document.querySelector("[data-guestbook-status]");
+    let apiUrl = "/api/guestbook";
+    let localKey = "pd-guestbook-local";
+    let form = document.querySelector("[data-guestbook-form]");
+    let list = document.querySelector("[data-guestbook-list]");
+    let error = document.querySelector("[data-guestbook-error]");
+    let status = document.querySelector("[data-guestbook-status]");
     if (!form || !list) return;
 
-    var mode = "remote";
-    var entries = [];
+    let mode = "remote";
+    let entries = [];
 
     function setStatus(text) {
         if (!status) return;
@@ -34,14 +34,14 @@
 
     function formatWhen(iso) {
         if (!iso) return "";
-        var date = new Date(iso);
+        let date = new Date(iso);
         if (Number.isNaN(date.getTime())) return "";
         return date.toLocaleString();
     }
 
     function loadLocal() {
         try {
-            var parsed = JSON.parse(localStorage.getItem(localKey) || "[]");
+            let parsed = JSON.parse(localStorage.getItem(localKey) || "[]");
             return Array.isArray(parsed) ? parsed : [];
         } catch (err) {
             return [];
@@ -55,29 +55,29 @@
     function render(items) {
         list.replaceChildren();
         if (!items.length) {
-            var empty = document.createElement("li");
+            let empty = document.createElement("li");
             empty.className = "guestbook__empty";
             empty.textContent = "No entries yet.";
             list.appendChild(empty);
             return;
         }
         items.forEach(function (entry) {
-            var item = document.createElement("li");
-            var when = document.createElement("p");
+            let item = document.createElement("li");
+            let when = document.createElement("p");
             when.className = "guestbook__when";
-            var time = document.createElement("time");
+            let time = document.createElement("time");
             time.dateTime = entry.at || "";
             time.textContent = formatWhen(entry.at);
             when.appendChild(time);
             item.appendChild(when);
             if (entry.name) {
-                var who = document.createElement("p");
+                let who = document.createElement("p");
                 who.className = "guestbook__who";
                 who.textContent = entry.name;
                 item.appendChild(who);
             }
             if (entry.message) {
-                var message = document.createElement("p");
+                let message = document.createElement("p");
                 message.className = "guestbook__message";
                 message.textContent = entry.message;
                 item.appendChild(message);
@@ -112,10 +112,10 @@
         event.preventDefault();
         setError("");
 
-        var data = new FormData(form);
-        var name = String(data.get("name") || "").trim().slice(0, 80);
-        var message = String(data.get("message") || "").trim().slice(0, 500);
-        var website = String(data.get("website") || "").trim();
+        let data = new FormData(form);
+        let name = String(data.get("name") || "").trim().slice(0, 80);
+        let message = String(data.get("message") || "").trim().slice(0, 500);
+        let website = String(data.get("website") || "").trim();
 
         if (!name && !message) {
             setError("Write a name, a comment, or both.");
@@ -127,7 +127,7 @@
                 form.reset();
                 return;
             }
-            var now = new Date();
+            let now = new Date();
             entries.unshift({
                 name: name,
                 message: message,
@@ -140,7 +140,7 @@
             return;
         }
 
-        var submit = form.querySelector("button[type='submit']");
+        let submit = form.querySelector("button[type='submit']");
         if (submit) submit.disabled = true;
 
         fetch(apiUrl, {

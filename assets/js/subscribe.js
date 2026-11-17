@@ -2,15 +2,15 @@
     if (window.__siteSubscribe) return;
     window.__siteSubscribe = true;
 
-    var dialog = document.querySelector("[data-subscribe-dialog]");
+    let dialog = document.querySelector("[data-subscribe-dialog]");
     if (!dialog || typeof dialog.showModal !== "function") return;
 
-    var form = dialog.querySelector("[data-subscribe-form]");
-    var submitBtn = dialog.querySelector("[data-subscribe-submit]");
-    var errEl = dialog.querySelector("[data-subscribe-error]");
-    var okEl = dialog.querySelector("[data-subscribe-ok]");
-    var emailInput = form ? form.querySelector('input[name="email"]') : null;
-    var busy = false;
+    let form = dialog.querySelector("[data-subscribe-form]");
+    let submitBtn = dialog.querySelector("[data-subscribe-submit]");
+    let errEl = dialog.querySelector("[data-subscribe-error]");
+    let okEl = dialog.querySelector("[data-subscribe-ok]");
+    let emailInput = form ? form.querySelector('input[name="email"]') : null;
+    let busy = false;
 
     function setError(message) {
         if (!errEl) return;
@@ -45,7 +45,7 @@
     }
 
     document.addEventListener("click", function (event) {
-        var open = event.target.closest("[data-subscribe-open]");
+        let open = event.target.closest("[data-subscribe-open]");
         if (!open) return;
         event.preventDefault();
         openDialog();
@@ -61,9 +61,9 @@
                 return;
             }
 
-            var email = emailInput ? String(emailInput.value || "").trim() : "";
-            var honey = form.querySelector('input[name="website"]');
-            var payload = {
+            let email = emailInput ? String(emailInput.value || "").trim() : "";
+            let honey = form.querySelector('input[name="website"]');
+            let payload = {
                 email: email,
                 website: honey ? String(honey.value || "") : ""
             };

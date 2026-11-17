@@ -38,26 +38,15 @@ content/blog/<slug>/
 ```
 
 - **Page resources** = files next to `index.md`. Reference them by filename in shortcodes (`src="cover.webp"`).
-- **`static/` paths** also work (`src="images/foo.webp"` → `static/images/foo.webp`), but keeping media with the post is easier to move/delete later.
+- **`assets/` paths** (`src="images/nongrid/photo.webp"`) are processed with the post photos and the original is not published. Shared pictures that should not join the photobook live in `assets/images/nongrid/`.
+- **`static/` paths** are copied as-is (`src="images/foo.webp"` → `static/images/foo.webp`). Use that only for a file that should be served unchanged.
 - Photobook (`/gallery/`) auto-picks **image** page resources from every blog post. If it should appear in the photobook, put it in the post folder.
 
-### Image size (masters)
+### Image size
 
-Prefer **WebP** (or compressed JPEG) under ~300–500 KB for article masters so the repo stays small. Blog bundles set `publishResources = false`, so the build does not publish that master. `photo` serves a 1400px WebP and a 1600px click-to-expand WebP; `photo-grid` uses an 800px tile and the same 1600px expand; `figcaption` and the writing-index preview use their own resized WebP. Keep the source file reasonable so Hugo has less to resize.
+Drop one JPEG or WebP in the post folder, at about 1600px on the long side. That file stays in git and is not published (`publishResources = false`). `layouts/partials/image-set.html` publishes the copies the layout uses: AVIF first, WebP as the fallback. A single photo is 480 and 1200 on the page and 1600 on click. A grid tile is 480 and 800. A gallery tile is a 480 square. The click-to-expand file is the 1600 copy.
 
-**In-place recompress (keep the repo lean):** drop camera files into the post folder, then:
-
-```text
-corn compress content/blog/your-post
-```
-
-Default path is `content/blog`. Converts `.jpg`/`.png` → lossy WebP (long edge 2000, q82), stamps EXIF `Software=comeholyghost-corn`, and rewrites nearby markdown `src=` names.
-
-- **Default:** compress JPG/PNG and **oversized/unmarked** WebP; skip corn-marked files and lean unmarked WebP (≤512 KB and within edge).
-- **`corn compress --new`:** same rules, but only files **new to git** (not on `HEAD`).
-- **`--force`:** recompress even corn-marked WebP (opt-in; can soften).
-
-Use `--dry-run` first.
+A commit refuses a file whose long edge is over 2000px or whose size is over 1.5MB. Export a smaller copy. `corn compress content/blog/your-post` can do that resize (long edge 2000, WebP q82). It is optional. It is not the quality setting for the site. `--force` re-encodes a file that was already compressed and can soften it. Use `--dry-run` first.
 
 ### Corn CLI (Writer vs Ship)
 
@@ -79,9 +68,9 @@ corn help
 
 Without install: from the repo root `.\corn help` or `node scripts\corn.mjs help`.
 
-A commit runs the compress check on staged images under `content/`. If `corn compress` would still change one, the commit stops. Corn-marked WebPs and already-small unmarked WebPs pass with nothing to do.
+A commit checks staged images under `content/`. A file over 2000px on the long edge, or over 1.5MB, stops the commit. Smaller files pass with nothing to do.
 
-Writing-index (`/blog/`) preview: shows near-full size with `object-fit: contain` (no crop/stretch). Oversized masters are Fit-capped in `layouts/partials/blog-entry.html`; on-page max width/height live in `assets/css/blog-index.css`. Adjust those when a card looks too big or too small — details in `docs/resources.md`.
+Writing-index (`/blog/`) preview: shows the picture with `object-fit: contain` (no crop/stretch). The card image is 480 and 1200 from `image-set.html`. On-page max width and height live in `assets/css/blog-index.css`. Adjust those when a card looks too big or too small — details in `docs/resources.md`.
 
 ### Local preview (`corn run`)
 
@@ -247,7 +236,7 @@ Raw HTML in markdown works when you need it, but prefer shortcodes for pictures 
 
 ## Shortcodes (site-specific)
 
-All live under `layouts/shortcodes/`. Styles: `assets/css/article-media.css`. Lightbox: `static/js/article-media.js`.
+All live under `layouts/shortcodes/`. Styles: `assets/css/article-media.css`. Lightbox: `assets/js/article-media.js`.
 
 Self-closing form is fine when there is no inner body: `{{< photo src="x.png" />}}`.
 

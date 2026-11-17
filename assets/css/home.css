@@ -1,9 +1,14 @@
-/* Starfield CSS lives in assets/css/stars.css (sitewide). */
+/* Homepage layout.
+   The column (.home-page) is banner, title row, nav, main, then the footer dock.
+   The dock is a 3-column grid: Sango, the ticker, Kagura. home.js scales that
+   row as one unit (--home-dock-scale) and places the clouds.
+   Clouds and the angel sit in .home-root, outside the column, and may paint
+   into the gutters. Starfield rules are stars.css. The footer row's slots are
+   site-shell.css. */
 
-/* Shell is .site-shell (assets/css/layout.css). Clouds live outside it in
-   .home-root and may paint into the side gutters. */
+/* Shell is .site-shell (assets/css/layout.css). */
 .home-root {
-    /* Trial: cat + clouds share one scale so the cluster stays in the content column. */
+    /* Cat and clouds share one scale so the cluster stays in the content column. */
     --ascii-fit: 0.86;
 }
 
@@ -822,7 +827,8 @@ body.home .page__logo-slot .page__logo {
     filter: drop-shadow(0 0 8px color-mix(in srgb, #fff 35%, var(--highlight) 45%));
 }
 
-.dock-kagura.is-idle {
+.dock-kagura.is-idle,
+.dock-kagura.is-down {
     position: relative;
     left: auto;
     top: auto;
@@ -862,18 +868,6 @@ body.home .page__logo-slot .page__logo {
     animation-timing-function: steps(var(--sprite-steps, 1), end);
     animation-iteration-count: 1;
     animation-fill-mode: forwards;
-}
-
-.dock-kagura.is-down {
-    position: relative;
-    left: auto;
-    top: auto;
-    bottom: auto;
-    transform: none !important;
-    filter: none;
-    transition: none;
-    opacity: 1;
-    visibility: visible;
 }
 
 .dock-kagura.is-idle .sprite-anim.is-scale-3,
