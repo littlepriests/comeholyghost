@@ -9,8 +9,23 @@
     color: var(--bg);
 }
 
+<<<<<<< HEAD
 .page__logo:before {
     content: none;
+=======
+.page__logo:before,
+.page__logo::before {
+    content: none !important;
+}
+
+/* Sprite logo is chrome, not a page title — kill heading type inheritance. */
+.page__logo.page__logo--sprite {
+    font-size: 0;
+    font-weight: 400;
+    line-height: 0;
+    color: inherit;
+    overflow: visible;
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 }
 
 a.page__logo-inner:link, a.page__logo-inner:visited {

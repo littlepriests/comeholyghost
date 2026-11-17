@@ -1,0 +1,14 @@
+---
+description: Never change site writing under content/ unless the user explicitly asks in this turn.
+alwaysApply: true
+---
+
+# No-touch writing
+
+Published prose lives under `content/` (blog posts, read-me, guestbook copy, gallery notes, unsubscribe text, `_index` pages, archetypes used as drafts, etc.).
+
+**Never** edit, rewrite, rephrase, wrap, “fix,” lint-apply into, or commit changes to that writing unless the user **explicitly** asked to change that writing in the **current** turn.
+
+- Drive-by typos, style “improvements,” Vale auto-fixes, and `corn md --fix` on their behalf are **not** allowed without that explicit ask.
+- Layouts, CSS, shortcodes, scripts, Netlify functions, `docs/`, `emails/` chrome/templates, and other non-`content/` paths remain fair game when the task needs them.
+- If a task seems to require touching `content/` prose and the user did not ask for a writing change, stop and ask — do not invent a fix.

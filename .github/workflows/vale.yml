@@ -1,5 +1,11 @@
+<<<<<<< HEAD
 # Prose lint for content/ (same folder as `corn edit`). House-style lowercase
 # still trips Vale.Spelling, so this check annotates but does not fail the job.
+=======
+# Prose lint for content/. Annotations stay non-blocking.
+# The job fails only on a real misspelling in an added line.
+# A case change (illinois / Illinois) is not a misspelling.
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 name: Vale
 
 on:
@@ -17,10 +23,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+<<<<<<< HEAD
 
       - name: Vale
         # v3 honors fail_on_error / sync; v2.1.1 still failed the job on
         # Vale.Spelling (house-style lowercase) and rejected the sync input.
+=======
+        with:
+          fetch-depth: 0
+
+      - name: Vale
+        # Annotations only. Style rules and house lowercase must not fail the job.
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
         uses: vale-cli/vale-action@v3
         with:
           files: content
@@ -30,7 +44,18 @@ jobs:
           filter_mode: added
           reporter: github-pr-check
           fail_on_error: false
+<<<<<<< HEAD
           # Keep annotations without failing the check conclusion.
           level: warning
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+=======
+          level: warning
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fail on misspellings
+        env:
+          VALE_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: node scripts/vale-typos.mjs --base "$VALE_BASE"
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3

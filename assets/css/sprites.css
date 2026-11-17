@@ -122,6 +122,14 @@
         transform: translateY(-50%) scale(0.69);
         transform-origin: center left;
     }
+<<<<<<< HEAD
+=======
+
+    .main-nav__item--tail .nav-subscribe-pet {
+        transform: translate(-50%, -50%) scale(0.8);
+        transform-origin: center center;
+    }
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 }
 
 @media (prefers-reduced-motion: reduce) {

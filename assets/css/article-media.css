@@ -17,7 +17,18 @@
     width: 100%;
 }
 
+<<<<<<< HEAD
 .article-figure__frame > img {
+=======
+.article-figure__frame picture,
+.article-photo__thumb picture {
+    display: block;
+    width: 100%;
+}
+
+.article-figure__frame > img,
+.article-figure__frame picture img {
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     display: block;
     width: 100%;
     height: auto;
@@ -41,7 +52,12 @@
     -webkit-appearance: none;
 }
 
+<<<<<<< HEAD
 .article-photo__thumb > img {
+=======
+.article-photo__thumb > img,
+.article-photo__thumb picture img {
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     display: block;
     width: 100%;
     height: auto;
@@ -49,6 +65,7 @@
 }
 
 .article-figure__caption {
+<<<<<<< HEAD
     margin: 0.45rem 0 0;
     padding: 0 0.25rem;
     color: var(--off-fg, #d8d8d8);
@@ -56,6 +73,19 @@
     font-size: 0.9rem;
     line-height: 1.35;
     text-align: center;
+=======
+    margin: 0.55rem 0 0;
+    padding: 0 0.35rem;
+    color: color-mix(in srgb, var(--off-fg, #d8d8d8) 72%, var(--muted, #9a93a8));
+    font-family: var(--font-site, "Fira Mono", ui-monospace, monospace);
+    font-size: 0.78rem;
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: 0.02em;
+    line-height: 1.4;
+    text-align: center;
+    opacity: 0.92;
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 }
 
 /* Grouped photos: 2-up rows; odd leftover tile centered under. */
@@ -97,7 +127,18 @@
     -webkit-appearance: none;
 }
 
+<<<<<<< HEAD
 .article-photo-grid__item > img {
+=======
+.article-photo-grid__item picture {
+    position: absolute;
+    inset: 0;
+    display: block;
+}
+
+.article-photo-grid__item > img,
+.article-photo-grid__item picture img {
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     position: absolute;
     inset: 0;
     display: block;
@@ -134,6 +175,13 @@
     padding: 0;
 }
 
+<<<<<<< HEAD
+=======
+.article-photo-lightbox__inner picture {
+    display: block;
+}
+
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 .article-photo-lightbox__inner img,
 .article-photo-lightbox__img {
     display: block;

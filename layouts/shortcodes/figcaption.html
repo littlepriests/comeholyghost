@@ -4,8 +4,13 @@
   {{< figcaption src="photo.png" caption="Hello" >}}
   {{< figcaption src="photo.png" alt="Hello" >}}Caption text{{< /figcaption >}}
 
+<<<<<<< HEAD
   src may be a page resource (same folder as the post) or a path under static/.
   Page resources use Fit 1600x webp q75. The master is not published.
+=======
+  src may be a page resource, or a path under assets/ (images/nongrid/…).
+  Those are published at 800 and 1280. The file you dropped is not.
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 */ -}}
 {{- $src := .Get "src" | default (.Get 0) -}}
 {{- if not $src -}}
@@ -13,6 +18,7 @@
 {{- end -}}
 {{- $alt := .Get "alt" | default "" -}}
 {{- $caption := .Get "caption" | default (strings.TrimSpace .Inner) -}}
+<<<<<<< HEAD
 {{- $img := false -}}
 {{- with .Page.Resources.GetMatch $src -}}
   {{- $img = . -}}
@@ -25,13 +31,27 @@
   {{- else -}}
     {{- $href = $img.RelPermalink -}}
   {{- end -}}
+=======
+{{- $img := partial "image-resource.html" (dict "page" .Page "src" $src) -}}
+{{- $set := dict -}}
+{{- $href := $src | relURL -}}
+{{- if and $img (ge $img.Width 1) -}}
+  {{- $set = partial "image-set.html" (dict "res" $img "widths" (slice 800 1280)) -}}
+  {{- $href = $set.src -}}
+{{- else if $img -}}
+  {{- $href = $img.RelPermalink -}}
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 {{- end -}}
 {{- if and (not $alt) $caption -}}
   {{- $alt = $caption | plainify -}}
 {{- end -}}
 <figure class="article-figure">
   <div class="article-figure__frame">
+<<<<<<< HEAD
     <img src="{{ $href }}" alt="{{ $alt }}" loading="lazy" decoding="async">
+=======
+    {{ partial "responsive-img.html" (dict "set" $set "src" $href "alt" $alt "sizes" "(min-width: 40rem) 40rem, 100vw") }}
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
   </div>
   {{- with $caption }}
   <figcaption class="article-figure__caption">{{ . | $.Page.RenderString }}</figcaption>

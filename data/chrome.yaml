@@ -1,0 +1,25 @@
+# Visible site wording outside your posts: dialogs, forms, and page lines.
+# Edit here → Hugo rebuild. Hover lines live in tips.yaml.
+# The JavaScript status and error messages stay in assets/js/*.js.
+
+subscribe:
+  title: "subscribe"
+  lede: "read from your inbox"
+  email_label: "email"
+  email_placeholder: "♡ you@example.com ♡"
+  close: "♡"
+  submit: "yes pleathe"
+  cancel: "no ty"
+
+guestbook:
+  name_label: "name"
+  message_label: "say anything..."
+  submit: "≽(◉˕ ◉ ≼マ"
+  entries_heading: "beautiful angels ˚₊‧꒰ა ♡ ໒꒱ ‧₊˚"
+  entries_label: "Guestbook entries"
+
+unsubscribe:
+  lede: "ya, i hate emails too lol."
+  email_label: "♡"
+  email_placeholder: "you@example.com ♡"
+  submit: "adios"

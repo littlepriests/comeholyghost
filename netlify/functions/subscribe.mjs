@@ -6,6 +6,10 @@ import { isPreviewDeploy } from "../lib/preview-guard.mjs";
 import {
     addContact,
     errorMessage,
+<<<<<<< HEAD
+=======
+    notifyOwnerSubscribe,
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     resendConfig,
     resendConfigured,
     sendWelcomeEmail
@@ -59,12 +63,27 @@ export default async (request) => {
 
     // Welcome only for brand-new contacts (409 = already on the list).
     if (contact.created) {
+<<<<<<< HEAD
         try {
             const welcomeHtml = await renderWelcomeEmail({
                 email,
                 origin: cfg.siteOrigin
             });
             const sent = await sendWelcomeEmail(cfg, email, welcomeHtml);
+=======
+        // Owner ping (webhook is the other path; this covers when webhooks lag).
+        try {
+            await notifyOwnerSubscribe(cfg, email);
+        } catch (error) {
+            // Don't fail the subscriber on a notify blip.
+        }
+        try {
+            const welcome = await renderWelcomeEmail({
+                email,
+                origin: cfg.siteOrigin
+            });
+            const sent = await sendWelcomeEmail(cfg, email, welcome);
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
             if (!sent.ok) {
                 return json(502, {
                     error: errorMessage(sent, "you’re listed, but the welcome note didn’t send.")

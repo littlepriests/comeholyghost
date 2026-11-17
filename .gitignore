@@ -12,12 +12,28 @@
 # Netlify function deps
 /node_modules/
 
+<<<<<<< HEAD
+=======
+# Test deps + run output (screenshot baselines in tests/e2e/__screenshots__/ DO ship)
+/tests/node_modules/
+/tests/test-results/
+/tests/playwright-report/
+
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 # Vale binary + sync cache (reinstall Vale, then `vale sync` / `corn edit`).
 # House rules live in styles/wraith/ and DO ship. Do not ignore that folder.
 # (Old `Styles/` entry matched styles/ on Windows and hid wraith.)
 styles/*
 !styles/wraith/
 !styles/wraith/**
+<<<<<<< HEAD
+=======
+# Site Vocab (corn edit --fix / --review key `a`) — keep through vale sync.
+!styles/config/
+!styles/config/vocabularies/
+!styles/config/vocabularies/Site/
+!styles/config/vocabularies/Site/**
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 .vale.ini
 .vale/
 vale

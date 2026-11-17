@@ -8,9 +8,14 @@
     index_caption  → figcaption under the thumb (optional)
 
   Thumb at top, centered in the column; title / date / summary stay left.
+<<<<<<< HEAD
   Index image shows at natural size up to the CSS max box; oversized masters are
   Fit-shrunk in Hugo (no stretch). Click expands via article-media lightbox.
   Tune caps in this partial + assets/css/blog-index.css (see docs/resources.md).
+=======
+  The card image is 480 and 1200. Click opens the 1600 copy. The file in the
+  post folder is not published. Display caps live in assets/css/blog-index.css.
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 */ -}}
 {{- /*
   Index teaser is front matter only — never Hugo's auto .Summary, which
@@ -27,16 +32,22 @@
 
 {{- $imgSrc := .Params.index_image | default .Params.image | default "" -}}
 {{- $caption := .Params.index_caption | default "" -}}
+<<<<<<< HEAD
 {{- $thumb := false -}}
 {{- $full := "" -}}
 {{- /* Preview box: Fit only when wider/taller than these; else keep native. */ -}}
 {{- $previewMaxW := 960 -}}
 {{- $previewMaxH := 720 -}}
+=======
+{{- $set := dict -}}
+{{- $full := "" -}}
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 {{- $res := false -}}
 {{- if $imgSrc }}{{ $res = .Resources.GetMatch $imgSrc }}{{ end -}}
 {{- if $imgSrc -}}
   {{- with $res -}}
     {{- if ge .Width 1 -}}
+<<<<<<< HEAD
       {{- /* Fit downscales only; smaller masters keep native pixel size. */ -}}
       {{- $thumb = (.Fit (printf "%dx%d webp q80" $previewMaxW $previewMaxH)).RelPermalink -}}
       {{- $full = (.Fit "1600x1600 webp q70").RelPermalink -}}
@@ -47,6 +58,15 @@
   {{- else -}}
     {{- $full = $imgSrc | relURL -}}
     {{- $thumb = $full -}}
+=======
+      {{- $set = partial "image-set.html" (dict "res" . "widths" (slice 480 1200) "lightbox" true) -}}
+      {{- $full = $set.full -}}
+    {{- else -}}
+      {{- $full = .RelPermalink -}}
+    {{- end -}}
+  {{- else -}}
+    {{- $full = $imgSrc | relURL -}}
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
   {{- end -}}
 {{- end -}}
 {{- if not $caption -}}
@@ -55,15 +75,25 @@
   {{- end -}}
 {{- end -}}
 <article class="blog-entry">
+<<<<<<< HEAD
     {{- if $thumb }}
+=======
+    {{- if or $set.src $full }}
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     <figure class="blog-entry__figure">
         <button
             type="button"
             class="blog-entry__thumb"
             data-article-photo
             data-full="{{ $full }}"
+<<<<<<< HEAD
             aria-label="{{ if $caption }}view larger: {{ $caption | plainify }}{{ else }}view larger image{{ end }}">
             <img src="{{ $thumb }}" alt="{{ $caption | default .Title | plainify }}" loading="lazy" decoding="async">
+=======
+            {{- with $set.fullAvif }} data-full-avif="{{ . }}"{{ end }}
+            aria-label="{{ if $caption }}view larger: {{ $caption | plainify }}{{ else }}view larger image{{ end }}">
+            {{ partial "responsive-img.html" (dict "set" $set "src" $full "alt" ($caption | default .Title | plainify) "sizes" "(min-width: 45rem) 36rem, 100vw") }}
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
         </button>
         {{- with $caption }}
         <figcaption class="blog-entry__caption">{{ . | $.RenderString }}</figcaption>

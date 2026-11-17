@@ -29,6 +29,7 @@
                 {{ range . }}
                 {{ $img := .img }}
                 {{ $post := .post }}
+<<<<<<< HEAD
                 {{ $thumb := $img }}
                 {{ $full := "" }}
                 {{ if ne $img.MediaType.SubType "svg" }}
@@ -36,6 +37,14 @@
                     {{ $thumb = $img.Fill "600x600 Center" }}
                     {{ $large := $img.Fit "1600x1600 webp q70" }}
                     {{ $full = $large.RelPermalink }}
+=======
+                {{ $set := dict }}
+                {{ $full := "" }}
+                {{ if ne $img.MediaType.SubType "svg" }}
+                    {{/* Square crop for the 9.5rem tile. Click opens the uncropped 1600. */}}
+                    {{ $set = partial "image-set.html" (dict "res" $img "widths" (slice 480) "crop" "square" "lightbox" true) }}
+                    {{ $full = $set.full }}
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
                 {{ else }}
                     {{ $full = $img.RelPermalink }}
                 {{ end }}
@@ -47,8 +56,14 @@
                         class="gallery__item"
                         data-article-photo
                         data-full="{{ $full }}"
+<<<<<<< HEAD
                         aria-label="View larger: {{ $alt }}">
                         <img src="{{ $thumb.RelPermalink }}" alt="{{ $alt }}" width="600" height="600" loading="lazy" decoding="async">
+=======
+                        {{ with $set.fullAvif }}data-full-avif="{{ . }}"{{ end }}
+                        aria-label="View larger: {{ $alt }}">
+                        {{ partial "responsive-img.html" (dict "set" $set "src" $full "alt" $alt "sizes" "(max-width: 44.99rem) 7rem, 9.5rem") }}
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
                     </button>
                 </li>
                 {{ end }}
@@ -60,7 +75,11 @@
 
         {{- partial "site-footer.html" (dict "page" .) }}
     </div>
+<<<<<<< HEAD
     <script src="{{ "js/article-media.js" | relURL }}?v=2"></script>
+=======
+    {{ partial "js.html" "article-media" }}
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     </div>
     {{- partial "site-chrome.html" . }}
 </body>

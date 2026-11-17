@@ -3,10 +3,17 @@
   <h1>{{ .Title }}</h1>
 </header>
 <div class="content__body unsubscribe-page" data-unsubscribe-page>
+<<<<<<< HEAD
   <p class="unsubscribe-page__lede">accident? no hard feelings — leave the FIELD list here.</p>
   <form class="unsubscribe-page__form" data-unsubscribe-form>
     <label class="unsubscribe-page__label">email
       <input type="email" name="email" required autocomplete="email" maxlength="200" placeholder="you@example.com" data-unsubscribe-email>
+=======
+  <p class="unsubscribe-page__lede">{{ hugo.Data.chrome.unsubscribe.lede }}</p>
+  <form class="unsubscribe-page__form" data-unsubscribe-form>
+    <label class="unsubscribe-page__label">{{ hugo.Data.chrome.unsubscribe.email_label }}
+      <input type="email" name="email" required autocomplete="email" maxlength="200" placeholder="{{ hugo.Data.chrome.unsubscribe.email_placeholder }}" data-unsubscribe-email>
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     </label>
     <label class="site-hp" aria-hidden="true">Leave blank
       <input type="text" name="website" tabindex="-1" autocomplete="off">
@@ -14,9 +21,16 @@
     <p class="unsubscribe-page__error" data-unsubscribe-error hidden></p>
     <p class="unsubscribe-page__ok" data-unsubscribe-ok hidden></p>
     <div class="unsubscribe-page__actions">
+<<<<<<< HEAD
       <button type="submit" class="unsubscribe-page__submit" data-unsubscribe-submit>unsubscribe</button>
     </div>
   </form>
   <script src="{{ "js/unsubscribe.js" | relURL }}?v=2"></script>
+=======
+      <button type="submit" class="unsubscribe-page__submit" data-unsubscribe-submit>{{ hugo.Data.chrome.unsubscribe.submit }}</button>
+    </div>
+  </form>
+  {{ partial "js.html" "unsubscribe" }}
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 </div>
 {{ end }}

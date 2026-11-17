@@ -7,6 +7,11 @@
   "dependencies": {
     "markdownlint-cli2": "0.24.1",
     "pngjs": "7.0.0",
+<<<<<<< HEAD
     "sharp": "^0.34.4"
+=======
+    "sharp": "^0.34.4",
+    "yaml": "2.9.1"
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
   }
 }

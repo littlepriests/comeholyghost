@@ -1,7 +1,11 @@
 /*
   GeoCities vibe, modern restraint.
   Corner sparkles: homepage banner only — never gallery, article, or index thumbs.
+<<<<<<< HEAD
   Sitewide stars live in stars.css / stars.js. Bubble cursor is layouts/partials/cursor-effects.html.
+=======
+  Sitewide stars live in stars.css / stars.js. Star cursor trail is layouts/partials/cursor-effects.html.
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 */
 
 body.home .retro-media,
@@ -21,9 +25,23 @@ body.home .home-banner {
     overflow: hidden;
 }
 
+<<<<<<< HEAD
 body.home .retro-media > img,
 body.home .home-banner > img,
 body.home .article-photo__thumb > img {
+=======
+body.home .retro-media picture,
+body.home .article-photo__thumb picture {
+    display: block;
+    width: 100%;
+}
+
+body.home .retro-media > img,
+body.home .retro-media picture img,
+body.home .home-banner > img,
+body.home .article-photo__thumb > img,
+body.home .article-photo__thumb picture img {
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     display: block;
     width: 100%;
     max-width: 100%;

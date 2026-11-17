@@ -1,0 +1,529 @@
+/*
+  One player on every page. Desktop: Grundo above the stop button, 1rem in
+  from the page's right edge. The ↑ sits halfway between the skip button
+  and the window edge on desktop. On a phone, while floating, play/pause
+  sits in the right gutter the same distance from the top of the screen as
+  the ↑ sits from the bottom; once parked, the counter or yeti, the bar,
+  and the ↑ share the footer row. The ↑ slot stays reserved.
+
+  #site-player is a zero-height sticky track after #page-root. The browser
+  floats it --player-float above the window bottom and lets it ride the page
+  once the footer line arrives; player.js only measures --player-lift (page
+  end to footer line) when the layout changes, never on scroll.
+*/
+#site-player {
+    /* 100% of the track = the window without its scrollbar. */
+    --player-edge-right: calc((100% - min(53rem, 100% - 2 * var(--page-gutter))) / 2 + 1rem);
+    --player-float: 1rem;
+    --player-back-top-size: 1.65rem;
+    --player-button-gap: 0.25rem;
+    position: sticky;
+    bottom: calc(var(--player-float) - var(--player-lift, 0px));
+    translate: 0 calc(-1 * var(--player-lift, 0px));
+    z-index: 30;
+    height: 0;
+    pointer-events: none;
+}
+
+#site-player .player-bar {
+    position: absolute;
+    right: var(--player-edge-right);
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    pointer-events: auto;
+}
+
+#site-player [hidden],
+#site-player.site-player--closed .player-chrome {
+    display: none !important;
+}
+
+#site-player .player-chrome {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+#site-player .player-chrome__dock {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+#site-player .player-title {
+    margin: 0;
+    width: 4.25rem;
+    overflow: hidden;
+    white-space: nowrap;
+    color: var(--off-fg);
+    font-size: 0.75rem;
+}
+
+#site-player .player-title [data-player-title-text] {
+    display: inline-block;
+    will-change: transform;
+}
+
+#site-player .player-title.is-marquee [data-player-title-text] {
+    padding-right: 1.5rem;
+    animation: player-title-marquee 9s linear infinite;
+}
+
+@keyframes player-title-marquee {
+    0%,
+    12% {
+        transform: translateX(0);
+    }
+    88%,
+    100% {
+        transform: translateX(var(--marquee-distance, 0px));
+    }
+}
+
+#site-player .player-chrome__buttons {
+    display: flex;
+    align-items: center;
+    gap: var(--player-button-gap);
+}
+
+#site-player button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    margin: 0;
+    padding: 0;
+    font-family: var(--chip-font);
+    font-weight: 600;
+    color: var(--chip-fg);
+    background: var(--chip-bg);
+    border: 1px solid var(--chip-border);
+    border-radius: 999px;
+    cursor: pointer;
+}
+
+#site-player button:hover {
+    color: var(--chip-fg);
+    border-color: var(--chip-border-hot);
+    box-shadow: var(--chip-glow);
+}
+
+#site-player button i,
+#site-player button .site-icon {
+    font-size: 0.75rem;
+    line-height: 1;
+}
+
+#site-player [data-player-toggle] .player-toggle-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;
+}
+
+#site-player .player-back-top {
+    position: absolute;
+    right: calc(var(--player-edge-right) / 2 - var(--player-back-top-size) / 2);
+    bottom: 0;
+    z-index: 2;
+    pointer-events: auto;
+    width: var(--player-back-top-size);
+    height: var(--player-back-top-size);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1;
+    border-radius: 50%;
+    opacity: 1;
+    box-sizing: border-box;
+}
+
+#site-player .player-back-top span {
+    display: block;
+    line-height: 1;
+}
+
+#site-player .player-back-top:is(:hover, :focus-visible) {
+    color: var(--chip-fg);
+    background: var(--chip-bg);
+    border-color: var(--chip-border-hot);
+    box-shadow: var(--chip-glow);
+    opacity: 1;
+    text-shadow: none;
+}
+
+#site-player .player-reopen {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.95rem;
+    line-height: 1;
+    color: var(--logo, #18ff6d);
+    background: transparent;
+    border: 0;
+    opacity: 0.9;
+}
+
+#site-player .player-reopen:hover {
+    color: var(--logo, #18ff6d);
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    opacity: 1;
+    text-shadow: 0 0 8px color-mix(in srgb, var(--logo, #18ff6d) 55%, transparent);
+}
+
+body {
+    position: relative;
+}
+
+/* Dock pet (Grundo) — above the stop button on desktop. */
+#site-player .player-dock-pet {
+    --dock-pet-size: 100px;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    flex: none;
+    position: relative;
+    line-height: 0;
+    width: var(--dock-pet-size);
+    height: var(--dock-pet-size);
+    pointer-events: auto;
+    cursor: help;
+}
+
+#site-player .player-dock-pet__strip {
+    display: block;
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    line-height: 0;
+    /* Native cell is 56px tall; scale() needs a unitless ratio (px/px). */
+    transform: translateX(-50%) scale(calc(var(--dock-pet-size) / 56px));
+    transform-origin: bottom center;
+}
+
+#site-player .player-dock-pet__strip .sprite-anim {
+    display: block;
+}
+
+/* Idle is a one-frame static PNG (.is-static). Kick stays frozen until click. */
+#site-player .player-dock-pet__strip--kick .sprite-anim:not(.is-kick-play) {
+    animation: none !important;
+    background-position: 0 0 !important;
+}
+
+/* Kick is a one-shot; restart by toggling .is-kick-play in JS. */
+#site-player .player-dock-pet__strip--kick .sprite-anim.is-kick-play {
+    animation-name: sprite-anim-play-hold;
+    animation-duration: calc(var(--sprite-frames, 2) / var(--sprite-fps, 8) * 1s);
+    animation-timing-function: steps(var(--sprite-steps, 1), end);
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+}
+
+/* Sword ♡ spill from Grundo’s feet — brief lift, then cascading waterfall. */
+#site-player .player-dock-pet__hearts {
+    position: absolute;
+    left: 50%;
+    bottom: 0.15rem;
+    width: 0;
+    height: 0;
+    overflow: visible;
+    pointer-events: none;
+    z-index: 6;
+}
+
+/* Same hues as the sword (#ff2a4a / #ff4d6d). Glyphs 0.95rem, bright 1.2rem.
+   Spill distance is --lift / --fall on each heart in player.html. */
+#site-player .player-dock-pet__heart {
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin: 0;
+    pointer-events: none;
+    font-family: var(--font-monospace, ui-monospace, "Cascadia Mono", "Fira Mono", monospace);
+    font-size: 0.95rem;
+    line-height: 1;
+    color: #ff2a4a;
+    text-shadow:
+        0 0 4px #ff6b81,
+        0 0 10px #ff1744,
+        0 0 18px rgb(255 20 60 / 0.75),
+        0 0 28px rgb(255 20 60 / 0.45);
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.35);
+    will-change: transform, opacity;
+}
+
+#site-player .player-dock-pet__heart.is-bright {
+    color: #ff4d6d;
+    font-size: 1.2rem;
+    text-shadow:
+        0 0 5px #fff,
+        0 0 10px #ff2a4a,
+        0 0 18px #ff1744,
+        0 0 28px rgb(255 20 60 / 0.9),
+        0 0 40px rgb(255 40 80 / 0.55);
+}
+
+#site-player .player-dock-pet__hearts.is-stomp .player-dock-pet__heart {
+    animation: player-dock-heart-spill var(--hspurt, 1.8s) cubic-bezier(0.2, 0.75, 0.2, 1) var(--hd, 0s) 1 both;
+}
+
+/* Pop up from the stomp, then pour outward and down. */
+@keyframes player-dock-heart-spill {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.2) rotate(0deg);
+        filter: brightness(1.2);
+    }
+    6% {
+        opacity: 1;
+        transform:
+            translate(
+                calc(-50% + var(--dx, 0rem) * 0.35),
+                calc(-50% + var(--lift, -1.2rem) * 0.55)
+            )
+            scale(1.35)
+            rotate(calc(var(--rot, 0deg) * 0.2));
+        filter: brightness(1.7);
+    }
+    18% {
+        opacity: 1;
+        transform:
+            translate(
+                calc(-50% + var(--dx, 0rem)),
+                calc(-50% + var(--lift, -1.2rem))
+            )
+            scale(1.15)
+            rotate(calc(var(--rot, 0deg) * 0.55));
+        filter: brightness(1.45);
+    }
+    42% {
+        opacity: 0.95;
+        transform:
+            translate(
+                calc(-50% + var(--dx2, var(--dx, 0rem)) * 0.55),
+                calc(-50% + var(--lift, -1.2rem) * 0.15 + var(--fall, 5rem) * 0.35)
+            )
+            scale(1)
+            rotate(var(--rot, 0deg));
+        filter: brightness(1.25);
+    }
+    72% {
+        opacity: 0.7;
+        transform:
+            translate(
+                calc(-50% + var(--dx2, var(--dx, 0rem)) * 0.85),
+                calc(-50% + var(--fall, 5rem) * 0.75)
+            )
+            scale(0.85)
+            rotate(calc(var(--rot, 0deg) * 1.25));
+        filter: brightness(1.05);
+    }
+    100% {
+        opacity: 0;
+        transform:
+            translate(
+                calc(-50% + var(--dx2, var(--dx, 0rem))),
+                calc(-50% + var(--fall, 5rem))
+            )
+            scale(0.35)
+            rotate(calc(var(--rot, 0deg) * 1.6));
+        filter: brightness(0.9);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #site-player .player-dock-pet__hearts.is-stomp .player-dock-pet__heart {
+        animation: none;
+        opacity: 0;
+    }
+}
+
+/* Full-page ♡ rise on back-to-top (spawned in JS; works on mobile simple chrome). */
+.player-page-hearts {
+    position: fixed;
+    inset: 0;
+    z-index: 12000;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.player-page-hearts__heart {
+    position: absolute;
+    left: var(--x, 50%);
+    bottom: -1.5rem;
+    margin: 0;
+    font-family: var(--font-monospace, ui-monospace, "Cascadia Mono", "Fira Mono", monospace);
+    font-size: calc(0.85rem * var(--scale, 1));
+    line-height: 1;
+    color: #ff2a4a;
+    text-shadow:
+        0 0 4px #ff6b81,
+        0 0 10px #ff1744,
+        0 0 18px rgb(255 20 60 / 0.7);
+    opacity: 0;
+    transform: translate(-50%, 0) scale(var(--scale, 1));
+    animation: player-page-heart-rise var(--dur, 2s) cubic-bezier(0.22, 0.7, 0.25, 1) var(--delay, 0s) 1 both;
+    will-change: transform, opacity;
+}
+
+.player-page-hearts__heart.is-bright {
+    color: #ff4d6d;
+    font-size: calc(1.15rem * var(--scale, 1));
+    text-shadow:
+        0 0 5px #fff,
+        0 0 10px #ff2a4a,
+        0 0 20px #ff1744,
+        0 0 32px rgb(255 40 80 / 0.55);
+}
+
+@keyframes player-page-heart-rise {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, 0) scale(calc(var(--scale, 1) * 0.4));
+    }
+    10% {
+        opacity: 1;
+        transform:
+            translate(calc(-50% + var(--drift, 0px) * 0.15), -12vh)
+            scale(calc(var(--scale, 1) * 1.15));
+    }
+    55% {
+        opacity: 0.95;
+        transform:
+            translate(calc(-50% + var(--drift, 0px) * 0.7), -58vh)
+            scale(var(--scale, 1));
+    }
+    100% {
+        opacity: 0;
+        transform:
+            translate(calc(-50% + var(--drift, 0px)), -112vh)
+            scale(calc(var(--scale, 1) * 0.55));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .player-page-hearts {
+        display: none;
+    }
+}
+
+@media (min-width: 45rem) {
+    /* Desktop, every page: Grundo sits above the stop button. */
+    #site-player .player-chrome {
+        flex-direction: column;
+        gap: 0.15rem;
+    }
+
+    #site-player .player-chrome__dock {
+        display: grid;
+        grid-template-columns: auto auto;
+        justify-items: center;
+        align-items: end;
+        gap: 0.15rem 0.35rem;
+    }
+
+    /* Button column, so the pet stands on the stop button (middle of the three). */
+    #site-player .player-dock-pet {
+        display: flex;
+        grid-area: 1 / 2;
+    }
+
+    #site-player .player-title {
+        grid-area: 2 / 1;
+    }
+
+    #site-player .player-chrome__buttons {
+        grid-area: 2 / 2;
+    }
+}
+
+/* Phone: player circles match the ↑. While floating, play/pause mirrors to
+   the top of the screen and the ↑ keeps the bottom corner. Parked, JS lays
+   out the footer row (.site-player--row). */
+@media (max-width: 44.99rem) {
+    html,
+    body {
+        overflow-x: clip;
+    }
+
+    #site-player {
+        /* Right edge of the column centered in the right page gutter. */
+        --player-column-right: calc((var(--page-gutter) - var(--player-back-top-size)) / 2);
+        --player-float: max(0.75rem, env(safe-area-inset-bottom));
+        z-index: 40;
+    }
+
+    #site-player .player-bar {
+        right: var(--player-column-right);
+        gap: 0.5rem;
+    }
+
+    #site-player .player-back-top {
+        right: var(--player-column-right);
+        bottom: 0;
+    }
+
+    /* Stop and skip keep their slots while hidden (so the bar's width never
+       changes); push them past the window edge so play lands in the column.
+       The track already sits --player-float above the window bottom, so this
+       bottom offset puts play's top edge that same distance below the window
+       top. The lift translate cancels out of the visual position. The hidden
+       title must not catch taps on the text beside it. */
+    #site-player.site-player--floating:not(.site-player--closed) .player-bar {
+        bottom: calc(100dvh - 2 * var(--player-float) - var(--player-back-top-size));
+        right: calc(var(--player-column-right) - 2 * (var(--player-back-top-size) + var(--player-button-gap)));
+        pointer-events: none;
+    }
+
+    #site-player.site-player--floating:not(.site-player--closed) [data-player-toggle] {
+        pointer-events: auto;
+    }
+
+    #site-player.site-player--row:not(.site-player--floating) .player-bar {
+        left: var(--player-left);
+        right: auto;
+    }
+
+    #site-player.site-player--row:not(.site-player--floating) .player-back-top {
+        left: var(--back-top-left);
+        right: auto;
+        bottom: 0;
+    }
+
+    #site-player.site-player--closed .player-bar {
+        gap: 0;
+    }
+
+    #site-player .player-chrome {
+        gap: 0.5rem;
+    }
+
+    #site-player button:not(.player-reopen, .player-back-top) {
+        box-sizing: border-box;
+        width: var(--player-back-top-size);
+        height: var(--player-back-top-size);
+    }
+
+    /* While floating only play/pause (and the ↑) show. */
+    #site-player :is(.player-title, [data-player-stop], [data-player-skip]) {
+        transition: opacity 0.2s ease, visibility 0.2s;
+    }
+
+    #site-player.site-player--floating :is(.player-title, [data-player-stop], [data-player-skip]) {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+@media (max-width: 44.99rem) and (prefers-reduced-motion: reduce) {
+    #site-player :is(.player-title, [data-player-stop], [data-player-skip]) {
+        transition: none;
+    }
+}

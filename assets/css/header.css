@@ -1,8 +1,13 @@
 /* Main menu: Misdreavus | links (last link + Pancham glued). */
 
 .main-nav {
+<<<<<<< HEAD
     /* Home-button slot (sprites.css) and the Pancham row height share these. */
     --nav-logo-w: 52px;
+=======
+    /* Native Misdreavus frame (50×100); Pancham centers in the same row height. */
+    --nav-logo-w: 50px;
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     --nav-logo-h: 108px;
     /* Native GIF size — max scale vs ./read-me.txt (do not upscale past this). */
     --nav-sub-w: 50px;
@@ -26,6 +31,15 @@
 .main-nav .page__logo {
     flex: 0 0 auto;
     margin: 0;
+<<<<<<< HEAD
+=======
+    overflow: visible;
+}
+
+.main-nav .page__logo-slot,
+.main-nav .page__logo-slot--sprite {
+    overflow: visible;
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 }
 
 .main-nav__list {
@@ -76,6 +90,7 @@
 }
 
 .main-nav__item--tail .nav-subscribe {
+<<<<<<< HEAD
     display: flex;
     align-items: center;
     justify-content: center;
@@ -89,6 +104,27 @@
     display: block;
     width: var(--nav-sub-w);
     height: var(--nav-sub-w);
+=======
+    position: relative;
+    display: block;
+    /* Match Misdreavus slot so centers line up on a shared row. */
+    height: var(--nav-logo-h);
+    width: var(--nav-sub-w);
+    line-height: 0;
+    text-decoration: none !important;
+    overflow: visible;
+}
+
+/* Pancham centered in the row (same as before the platform experiment). */
+.main-nav__item--tail .nav-subscribe-pet {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    display: block;
+    width: var(--nav-sub-w);
+    height: var(--nav-sub-w);
+    transform: translate(-50%, -50%);
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     image-rendering: pixelated;
     image-rendering: crisp-edges;
 }
@@ -98,6 +134,50 @@
     filter: brightness(1.12);
 }
 
+<<<<<<< HEAD
+=======
+/* Tiny DotMatrix “sub” to the right of Pancham (same 2px gap as before). */
+.nav-subscribe.nav-pet .nav-pet__label {
+    position: absolute;
+    left: calc(50% + (var(--nav-sub-w) / 2) + 2px);
+    top: 50%;
+    z-index: 2;
+    transform: translateY(-50%);
+    box-sizing: border-box;
+    width: max-content;
+    margin: 0;
+    padding: 0;
+    pointer-events: none;
+    line-height: 1;
+    white-space: nowrap;
+    font-size: 0.55rem;
+    font-weight: 400;
+    color: color-mix(in srgb, var(--highlight, #18ff6d) 85%, #fff);
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    text-shadow:
+        0 0 2px color-mix(in srgb, var(--highlight, #18ff6d) 40%, transparent);
+}
+
+.nav-subscribe.nav-pet .nav-pet__label .subscribe-icon--word {
+    display: block;
+    white-space: nowrap;
+    font-size: 0.55rem;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    color: inherit;
+}
+
+.nav-subscribe.nav-pet:hover .nav-pet__label,
+.nav-subscribe.nav-pet:focus-visible .nav-pet__label {
+    color: var(--highlight, #18ff6d);
+    text-shadow:
+        0 0 4px color-mix(in srgb, var(--highlight, #18ff6d) 55%, transparent);
+}
+
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 /* Phone: Misdreavus | links | Pancham as bookends; links go 2-up when they fit. */
 @media (max-width: 44.99rem) {
     .main-nav {

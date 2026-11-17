@@ -3,9 +3,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta charset="UTF-8"/>
 {{ if .Site.Params.noindex }}<meta name="robots" content="noindex" /> {{ end }}
+<<<<<<< HEAD
 <link rel="preload" href="{{ "fonts/fira-mono-400.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
 {{- $fontSite := .Site.Params.fonts.site | default `"Fira Mono", ui-monospace, monospace` -}}
 {{- $fontArticle := .Site.Params.fonts.article | default `Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, "Times New Roman", serif` -}}
+=======
+{{- $fontPreload := .Site.Params.fonts.preload | default (slice "fonts/fira-mono-400.woff2" "fonts/DotMatrixNarrow.woff2") -}}
+{{- range $fontPreload }}
+<link rel="preload" href="{{ . | relURL }}" as="font" type="font/woff2" crossorigin>
+{{- end }}
+{{- $fontSite := .Site.Params.fonts.site | default `"Fira Mono", ui-monospace, monospace` -}}
+{{- $fontArticle := .Site.Params.fonts.article | default `"Montserrat", sans-serif` -}}
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 <style>
   :root {
     --font-site: {{ $fontSite | safeCSS }};
@@ -18,11 +27,19 @@
   window.__SITE_CONTEXT__ = {{ $ctx | jsonify }};
   window.__SITE_SKIP_METERED_API__ = {{ if or (eq $ctx "deploy-preview") (eq $ctx "branch-deploy") }}true{{ else }}false{{ end }};
 </script>
+<<<<<<< HEAD
 <script src="{{ "js/site-context.js" | relURL }}?v=1"></script>
 {{- /*
   Sitewide CSS: one fingerprinted bundle (order = cascade order), then the
   player sheet on its own. Page-only sheets are fingerprinted in their layouts
   via partial "css.html". Every file lives in assets/css/ except player.css.
+=======
+{{ partial "js.html" "site-context" }}
+{{- /*
+  Sitewide CSS: one fingerprinted bundle (order = cascade order), then the
+  player sheet on its own. Page-only sheets are fingerprinted in their layouts
+  via partial "css.html".
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 */ -}}
 {{ $site := slice
   (resources.Get "css/fonts.css")
@@ -44,7 +61,11 @@
 | minify
 | fingerprint }}
 <link rel="stylesheet" href="{{ $site.RelPermalink }}" integrity="{{ $site.Data.Integrity }}">
+<<<<<<< HEAD
 <link rel="stylesheet" href="{{ "css/player.css" | relURL }}?v=91">
+=======
+{{ partial "css.html" "player" }}
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 <!-- favicon -->
 {{ if os.FileExists "static/favicon.ico" }}<link rel="icon" href="{{ "favicon.ico" | absURL }}">{{ end }}
 {{ if os.FileExists "static/favicon-32x32.png" }}<link rel="icon" type="image/png" sizes="32x32" href="{{ "favicon-32x32.png" | absURL }}">{{ end }}

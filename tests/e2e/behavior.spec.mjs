@@ -1,0 +1,124 @@
+import { test, expect, settle, scrollToEnd, isPhone } from "./fixtures.mjs";
+
+/* Behavior checks: platform-independent, so these also run in CI. */
+
+test("same-site links swap the page without reloading, so music keeps playing", async ({ page }, testInfo) => {
+    test.skip(isPhone(testInfo), "nav links are the same on phones; one run is enough");
+    await page.goto("/");
+    await settle(page);
+    await page.evaluate(() => {
+        window.__noReload = true;
+        document.querySelector("#site-player audio").dataset.marker = "same-element";
+    });
+
+    await page.getByRole("link", { name: "writing" }).click();
+    await expect(page).toHaveURL(/\/blog\/$/);
+    await expect(page.locator("body")).not.toHaveClass(/\bhome\b/);
+    await expect(page.locator("#site-player audio")).toHaveAttribute("data-marker", "same-element");
+    expect(await page.evaluate(() => window.__noReload)).toBe(true);
+
+    await page.goBack();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator("body")).toHaveClass(/\bhome\b/);
+    expect(await page.evaluate(() => window.__noReload)).toBe(true);
+});
+
+test.describe("first visit", () => {
+    test.use({ returning: false });
+
+    test("Kagura's slash bumps the visitor count once", async ({ page, api }, testInfo) => {
+        test.skip(isPhone(testInfo), "the dock pets are hidden below 45rem");
+        await page.goto("/");
+        await settle(page);
+        await page.locator("[data-visitor-ticker]").scrollIntoViewIfNeeded();
+        await expect(page.locator("[data-visitor-count]")).toHaveText("43", { timeout: 8000 });
+        await expect(page.locator("[data-visitor-kagura]")).toHaveClass(/is-idle/, { timeout: 8000 });
+        const posts = api.filter((c) => c.path === "/api/visitors" && c.method === "POST");
+        expect(posts).toHaveLength(1);
+    });
+});
+
+test("returning visitors see the count without bumping it", async ({ page, api }) => {
+    await page.goto("/");
+    await settle(page);
+    await scrollToEnd(page);
+    await expect(page.locator("[data-visitor-count]")).toHaveText("42");
+    await page.waitForTimeout(1500);
+    expect(api.filter((c) => c.path === "/api/visitors" && c.method === "POST")).toHaveLength(0);
+});
+
+test("clicking Sango throws the boomerang and knocks Kagura down, then both recover", async ({ page }, testInfo) => {
+    test.skip(isPhone(testInfo), "the dock pets are hidden below 45rem");
+    await page.goto("/");
+    await settle(page);
+    await scrollToEnd(page);
+    const kagura = page.locator("[data-visitor-kagura]");
+    const sango = page.locator("[data-dock-sango]");
+    await expect(kagura).toHaveClass(/is-idle/);
+
+    await sango.click();
+    await expect(sango).toHaveClass(/is-busy/);
+    await expect(kagura).toHaveClass(/is-down/, { timeout: 4000 });
+    await expect(kagura).toHaveClass(/is-idle/, { timeout: 6000 });
+    await expect(sango).not.toHaveClass(/is-busy/, { timeout: 6000 });
+});
+
+test("the player floats while reading and parks on the footer line at the end", async ({ page }, testInfo) => {
+    await page.goto("/blog/crossroad-beauty/");
+    await settle(page);
+    const player = page.locator("#site-player");
+    await expect(player).toHaveClass(/site-player--floating/);
+
+    await scrollToEnd(page);
+    await expect(player).not.toHaveClass(/site-player--floating/);
+    if (isPhone(testInfo)) {
+        await expect(player).toHaveClass(/site-player--row/);
+    }
+});
+
+test("the ↑ button appears after scrolling and returns to the top", async ({ page }) => {
+    await page.goto("/blog/crossroad-beauty/");
+    await settle(page);
+    const up = page.locator("[data-player-back-top]");
+    await expect(up).toBeHidden();
+
+    await scrollToEnd(page);
+    await expect(up).toBeVisible();
+    await up.click();
+    await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 8000 }).toBe(0);
+});
+
+test("the stop button hides the player and the ♡ brings it back", async ({ page }) => {
+    await page.goto("/blog/");
+    await settle(page);
+    // While floating, phones show only play/pause; the full bar is on the footer line.
+    await scrollToEnd(page);
+    const player = page.locator("#site-player");
+    await page.locator("[data-player-stop]").click();
+    await expect(player).toHaveClass(/site-player--closed/);
+    await page.locator("[data-player-reopen]").click();
+    await expect(player).not.toHaveClass(/site-player--closed/);
+});
+
+test("subscribe opens from the nav and posts the address", async ({ page, api }) => {
+    await page.goto("/blog/");
+    await settle(page);
+    await page.locator("[data-subscribe-open]").first().click();
+    const dialog = page.locator("[data-subscribe-dialog]");
+    await expect(dialog).toBeVisible();
+    await dialog.locator('input[name="email"]').fill("reader@example.com");
+    await dialog.locator("[data-subscribe-submit]").click();
+    await expect(dialog.locator("[data-subscribe-ok]")).toContainText("on the list");
+    const sent = api.find((c) => c.path === "/api/subscribe");
+    expect(JSON.parse(sent.body)).toEqual({ email: "reader@example.com", website: "" });
+});
+
+test("no page logs a script error", async ({ page }) => {
+    const errors = [];
+    page.on("pageerror", (err) => errors.push(err.message));
+    for (const path of ["/", "/blog/", "/blog/crossroad-beauty/", "/gallery/", "/guestbook/", "/read-me/", "/unsubscribe/"]) {
+        await page.goto(path);
+        await settle(page);
+    }
+    expect(errors).toEqual([]);
+});

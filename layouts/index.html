@@ -26,7 +26,10 @@
     {{ $home := slice (resources.Get "css/home.css") (resources.Get "css/retro.css") | resources.Concat "css/home.css" | minify | fingerprint }}
     <link rel="stylesheet" href="{{ $home.RelPermalink }}" integrity="{{ $home.Data.Integrity }}">
     <link rel="preload" as="image" href="{{ $bannerSrc }}" fetchpriority="high">
+<<<<<<< HEAD
     <link rel="preload" href="{{ "fonts/DotMatrixNarrow.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
+=======
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     {{- /* Title look comes only from [params.home] title*; home.css holds the fallbacks. */ -}}
     {{- $t := .Site.Params.home -}}
     {{- if or $t.titleFont $t.titleFontLine2 $t.titleColor $t.titleColorLine2 $t.titleHighlight }}
@@ -45,12 +48,23 @@
     <div id="page-root" class="home-root">
     <div class="home-page site-shell">
         {{- /* Chosen above in <head> (shuffle + preload). Decode-gated reveal is home.js. */ -}}
+<<<<<<< HEAD
         <div class="home-banner is-pending">
             <img
                 src="{{ $bannerSrc }}"
                 alt="{{ $bannerAlt }}"
                 width="1200"
                 height="280"
+=======
+        {{- $bannerW := .Site.Params.home.bannerWidth | default 1200 -}}
+        {{- $bannerH := .Site.Params.home.bannerHeight | default 280 -}}
+        <div class="home-banner is-pending" style="--home-banner-ratio: {{ $bannerW }} / {{ $bannerH }}">
+            <img
+                src="{{ $bannerSrc }}"
+                alt="{{ $bannerAlt }}"
+                width="{{ $bannerW }}"
+                height="{{ $bannerH }}"
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
                 fetchpriority="high"
                 decoding="async"
                 data-home-banner>
@@ -96,8 +110,13 @@ jgs   `'-..._____.-`</pre>
         {{- partial "site-footer.html" (dict "page" . "variant" "home" "class" "home-footer") }}
     </div>
     {{- partial "home-clouds.html" . -}}
+<<<<<<< HEAD
     <script src="{{ "js/home.js" | relURL }}?v=62"></script>
     <script src="{{ "js/article-media.js" | relURL }}?v=2"></script>
+=======
+    {{ partial "js.html" "home" }}
+    {{ partial "js.html" "article-media" }}
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     </div>
     {{- partial "site-chrome.html" . }}
 </body>

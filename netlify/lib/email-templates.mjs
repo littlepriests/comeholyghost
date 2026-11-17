@@ -54,6 +54,10 @@ export function fillTemplate(html, vars) {
 }
 
 const EMAIL_IMG_ALT = "go to site for full image";
+<<<<<<< HEAD
+=======
+/* Photo well. Same hex as --inner-bg (#44355B). Hero is 520px wide; a single photo is 360px. */
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 const EMAIL_INNER_BG = "#44355B";
 
 export function heroBlock(src, alt) {
@@ -152,6 +156,23 @@ export function markdownToEmailHtml(markdown, options) {
     const assetBase = String(opts.assetBase || origin).replace(/\/$/, "");
     let text = String(markdown || "").replace(/\r\n/g, "\n");
 
+<<<<<<< HEAD
+=======
+    // Escape the prose first, with shortcodes masked so their `<` survives for the
+    // replacements below. Tags inserted after this (`<a>`, `<strong>`, photos) stay real
+    // HTML, and a `<b>` written in a paragraph is text.
+    const shortcodes = [];
+    text = text.replace(/\{\{<[\s\S]*?>\}\}/g, function (match) {
+        const token = `%%SC${shortcodes.length}%%`;
+        shortcodes.push(match);
+        return token;
+    });
+    text = escapeHtml(text);
+    text = text.replace(/%%SC(\d+)%%/g, function (_, n) {
+        return shortcodes[Number(n)];
+    });
+
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     // {{< photo src="x" caption="y" >}} / photo-grid blocks
     text = text.replace(/\{\{<\s*photo\s+([^>]*?)\s*\/?>\}\}/g, function (_, attrs) {
         const src = /src\s*=\s*"([^"]+)"/.exec(attrs);
@@ -185,6 +206,28 @@ export function markdownToEmailHtml(markdown, options) {
         }
     );
 
+<<<<<<< HEAD
+=======
+    // {{< figcaption src="x" caption="y" />}} and the paired form. Same image rules as photo.
+    text = text.replace(
+        /\{\{<\s*figcaption\s+([^>]*?)\s*\/?>\}\}(?:([\s\S]*?)\{\{<\s*\/\s*figcaption\s*>\}\})?/g,
+        function (_, attrs, inner) {
+            const src = /src\s*=\s*"([^"]+)"/.exec(attrs);
+            const caption = /caption\s*=\s*"([^"]*)"/.exec(attrs);
+            if (!src) return "";
+            const url = publishedImageUrl(src[1], assetBase, { email: true });
+            const cap = (caption && caption[1]) || String(inner || "").trim();
+            return (
+                `\n\n${emailPhotoImg(url, EMAIL_IMG_ALT)}` +
+                (cap
+                    ? `<p style="margin:0 0 14px;font-size:12px;line-height:1.4;color:#9a93a8;text-align:center;">${escapeHtml(cap)}</p>`
+                    : "") +
+                "\n\n"
+            );
+        }
+    );
+
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     // Drop any remaining shortcodes.
     text = text.replace(/\{\{<[\s\S]*?>\}\}/g, "");
 
@@ -195,11 +238,16 @@ export function markdownToEmailHtml(markdown, options) {
     });
     text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function (_, label, href) {
         const url = absolutize(href, origin);
+<<<<<<< HEAD
         return `<a href="${url}" style="color:#18ff6d;text-decoration:underline;">${escapeHtml(label)}</a>`;
+=======
+        return `<a href="${url}" style="color:#18ff6d;text-decoration:underline;">${label}</a>`;
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     });
 
     // Headings / emphasis (after links so we don't nest badly on raw md)
     text = text.replace(/^### (.+)$/gm, function (_, t) {
+<<<<<<< HEAD
         return `<p style="margin:18px 0 8px;font-size:15px;color:#f2efe8;">${escapeHtml(t)}</p>`;
     });
     text = text.replace(/^## (.+)$/gm, function (_, t) {
@@ -213,6 +261,21 @@ export function markdownToEmailHtml(markdown, options) {
     });
     text = text.replace(/\*([^*]+)\*/g, function (_, t) {
         return `<em>${escapeHtml(t)}</em>`;
+=======
+        return `<p style="margin:18px 0 8px;font-size:15px;color:#f2efe8;">${t}</p>`;
+    });
+    text = text.replace(/^## (.+)$/gm, function (_, t) {
+        return `<p style="margin:20px 0 8px;font-size:16px;color:#f2efe8;">${t}</p>`;
+    });
+    text = text.replace(/^# (.+)$/gm, function (_, t) {
+        return `<p style="margin:20px 0 8px;font-size:18px;color:#f2efe8;">${t}</p>`;
+    });
+    text = text.replace(/\*\*([^*]+)\*\*/g, function (_, t) {
+        return `<strong>${t}</strong>`;
+    });
+    text = text.replace(/\*([^*]+)\*/g, function (_, t) {
+        return `<em>${t}</em>`;
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     });
 
     const blocks = text.split(/\n{2,}/);
@@ -248,20 +311,29 @@ function collapseSoftWrapsHtml(text) {
         .trim();
 }
 
+<<<<<<< HEAD
 /** Plain prose: escape, then soft-wrap → space; hard break → <br>. */
+=======
+/** Plain prose is already escaped. Soft-wrap → space; hard break → <br>. */
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 function collapseSoftWrapsPlain(text) {
     return String(text || "")
         .split(/  \n/)
         .map(function (part) {
+<<<<<<< HEAD
             return escapeHtml(
                 part.replace(/\n+/g, " ").replace(/[ \t]{2,}/g, " ").trim()
             );
+=======
+            return part.replace(/\n+/g, " ").replace(/[ \t]{2,}/g, " ").trim();
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
         })
         .filter(Boolean)
         .join("<br>\n");
 }
 
 /**
+<<<<<<< HEAD
  * Masters are not published. After a Hugo build, pick a resized copy in
  * public/blog/<slug>/. For email, prefer a mid-size Fit (~800–1400 thumb),
  * not the huge lightbox file (largest on disk).
@@ -273,6 +345,72 @@ export function publishedImageUrl(filename, assetBase, options) {
     if (!slug) return fallback;
     const dir = path.join(ROOT, "public", "blog", slug[1]);
     if (!existsSync(dir)) return fallback;
+=======
+ * URL an email client can fetch.
+ *
+ * The file in the post folder is not published. After a Hugo build, use a
+ * resized WebP in public/blog/<slug>/ (`name_hu_….webp`). AVIF copies are
+ * skipped. For email, prefer a mid-size file (~40–280 KB), not the 1600px click.
+ *
+ * A path under assets/ (images/nongrid/…) is published the same way, next to
+ * that folder (`/images/nongrid/name_hu_….webp`). A static/ file that was not
+ * processed stays on the site origin.
+ */
+export function publishedImageUrl(filename, assetBase, options) {
+    const email = !!(options && options.email);
+    const raw = String(filename || "").trim();
+    const asset = String(assetBase || "").replace(/\/$/, "");
+    const slugMatch = asset.match(/\/blog\/([^/]+)\/?$/);
+    const origin = (slugMatch ? asset.replace(/\/blog\/[^/]+\/?$/, "") : asset).replace(/\/$/, "");
+    if (!raw) return origin || asset;
+    if (/^https?:\/\//i.test(raw) || raw.startsWith("mailto:") || raw.startsWith("//")) {
+        return absolutize(raw, origin || asset);
+    }
+
+    const rel = raw.replace(/^\.\//, "");
+    const slug = slugMatch ? slugMatch[1] : "";
+    if (slug && !rel.startsWith("/") && isPageResource(slug, rel)) {
+        const processed = pickProcessedImage(slug, rel, email);
+        if (processed) return `${origin}/blog/${slug}/${processed}`;
+        // The source file is not published. This path only works after Hugo writes public/.
+        return `${asset}/${rel.replace(/^\/+/, "")}`;
+    }
+    const clean = rel.replace(/^\/+/, "");
+    if (clean && existsSync(path.join(ROOT, "assets", clean))) {
+        const dir = clean.split("/").slice(0, -1).join("/");
+        const processed = pickProcessedIn(path.join(ROOT, "public", dir), clean, email);
+        if (processed) return `${origin}/${dir}/${processed}`;
+        return `${origin}/${clean}`;
+    }
+    return siteImageUrl(rel, origin || asset);
+}
+
+/** True when content/blog/<slug>/ holds this file. Mirrors Resources.GetMatch. */
+function isPageResource(slug, rel) {
+    const clean = String(rel || "").replace(/^\/+/, "");
+    if (!clean || clean.split("/").includes("..")) return false;
+    return existsSync(path.join(ROOT, "content", "blog", slug, clean));
+}
+
+function siteImageUrl(filename, origin) {
+    const base = String(origin || "").replace(/\/$/, "");
+    let rel = String(filename || "")
+        .trim()
+        .replace(/^\.\//, "")
+        .replace(/^\/+/, "")
+        .replace(/^static\//, "");
+    if (!rel || rel.split("/").includes("..")) return base;
+    return `${base}/${rel}`;
+}
+
+/** Basename of the resized WebP to embed, or "" when public/ has none yet. */
+function pickProcessedImage(slug, filename, email) {
+    return pickProcessedIn(path.join(ROOT, "public", "blog", slug), filename, email);
+}
+
+function pickProcessedIn(dir, filename, email) {
+    if (!existsSync(dir)) return "";
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     const stem = path.basename(String(filename), path.extname(String(filename)));
     const candidates = [];
     for (const name of readdirSync(dir)) {
@@ -282,7 +420,11 @@ export function publishedImageUrl(filename, assetBase, options) {
             size: statSync(path.join(dir, name)).size
         });
     }
+<<<<<<< HEAD
     if (!candidates.length) return fallback;
+=======
+    if (!candidates.length) return "";
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     candidates.sort(function (a, b) {
         return a.size - b.size;
     });
@@ -299,9 +441,13 @@ export function publishedImageUrl(filename, assetBase, options) {
             pick = candidates[Math.floor(candidates.length / 2)];
         }
     }
+<<<<<<< HEAD
 
     const origin = String(assetBase).replace(/\/blog\/[^/]+\/?$/, "");
     return `${origin}/blog/${slug[1]}/${pick.name}`;
+=======
+    return pick.name;
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 }
 
 function absolutize(url, base) {
@@ -313,6 +459,14 @@ function absolutize(url, base) {
     return `${base}/${raw.replace(/^\.\//, "")}`;
 }
 
+<<<<<<< HEAD
+=======
+/**
+ * Welcome letter from emails/welcome.md (all copy) + welcome.html (chrome only).
+ * Returns { html, subject }. Blank / commented-out fields omit their blocks
+ * (no empty shells). Unsubscribe link always remains in the footer block.
+ */
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 export async function renderWelcomeEmail(options) {
     const opts = options || {};
     const origin = String(opts.origin || DEFAULT_ORIGIN).replace(/\/$/, "");
@@ -324,6 +478,7 @@ export async function renderWelcomeEmail(options) {
     const raw = await readFile(mdPath, "utf8");
     const { meta, body } = parseFrontMatter(raw);
     const tpl = await loadEmailTemplate("welcome.html");
+<<<<<<< HEAD
     return fillTemplate(tpl, {
         TITLE: escapeHtml(meta.title || "hi there"),
         PREHEADER: escapeHtml(
@@ -336,6 +491,64 @@ export async function renderWelcomeEmail(options) {
         UNSUBSCRIBE_URL: unsubscribeUrl,
         BODY: markdownToEmailHtml(body, { origin })
     });
+=======
+    const subject = String(meta.subject || meta.title || "welcome").trim();
+    const preheader = String(meta.preheader || "").trim();
+    const greeting = String(meta.greeting || "").trim();
+    const headline = String(meta.headline || "").trim();
+    const footer = String(meta.footer || "").trim();
+    const unsubLabel = String(meta.unsubscribe || "unsubscribe").trim() || "unsubscribe";
+    const bodyHtml = markdownToEmailHtml(body, { origin });
+    const imageBlock = welcomeImageBlock(meta.image, meta.image_alt, origin);
+
+    const html = fillTemplate(tpl, {
+        TITLE: escapeHtml(meta.title || subject),
+        PREHEADER_BLOCK: preheader
+            ? `<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">${escapeHtml(preheader)}</div>\n`
+            : "",
+        GREETING_BLOCK: greeting
+            ? `<p style="margin:0;font-size:13px;line-height:1.4;color:#9a93a8;"><span style="color:#ffe566;font-family:Impact,Haettenschweiler,'Arial Black',sans-serif;font-size:24px;letter-spacing:0.05em;">${escapeHtml(greeting)}</span></p>` +
+              `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:14px 0 18px;"><tr><td style="height:2px;line-height:2px;font-size:0;background:#18ff6d;">&nbsp;</td></tr></table>\n`
+            : "",
+        IMAGE_BLOCK: imageBlock,
+        HEADLINE_BLOCK: headline
+            ? `<h1 style="margin:0 0 14px;font-size:20px;line-height:1.3;font-weight:normal;color:#f2efe8;">${escapeHtml(headline)}</h1>\n`
+            : "",
+        BODY_BLOCK: bodyHtml
+            ? `<div style="font-size:14px;line-height:1.6;color:#d8d2e0;">${bodyHtml}</div>\n`
+            : "",
+        FOOTER_BLOCK: welcomeFooterBlock(footer, unsubLabel, unsubscribeUrl)
+    });
+    return { html, subject };
+}
+
+function welcomeFooterBlock(footer, unsubLabel, unsubscribeUrl) {
+    const line = footer
+        ? `${escapeHtml(footer)}<br>\n                `
+        : "";
+    return (
+        `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">` +
+        `<tr><td style="height:1px;line-height:1px;font-size:0;background:#3a3348;">&nbsp;</td></tr>` +
+        `</table>` +
+        `<p style="margin:14px 0 0;font-size:12px;line-height:1.55;color:#9a93a8;">` +
+        `${line}<a href="${unsubscribeUrl}" style="color:#f2efe8;text-decoration:underline;">${escapeHtml(unsubLabel)}</a>` +
+        `</p>`
+    );
+}
+
+/** Optional welcome image from front matter (`image:` under static/ or absolute URL). */
+function welcomeImageBlock(image, alt, origin) {
+    const raw = String(image || "").trim();
+    if (!raw) return "";
+    let src = raw;
+    if (!/^https?:\/\//i.test(raw) && !raw.startsWith("//")) {
+        const rel = raw.replace(/^\/+/, "").replace(/^static\//, "");
+        src = `${origin}/${rel}`;
+    } else if (raw.startsWith("//")) {
+        src = `https:${raw}`;
+    }
+    return heroBlock(src, alt || EMAIL_IMG_ALT);
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 }
 
 export async function renderPostEmail(post) {

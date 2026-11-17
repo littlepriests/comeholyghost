@@ -1,9 +1,23 @@
+<<<<<<< HEAD
 /* Starfield CSS lives in assets/css/stars.css (sitewide). */
 
 /* Shell is .site-shell (assets/css/layout.css). Clouds live outside it in
    .home-root and may paint into the side gutters. */
 .home-root {
     /* Trial: cat + clouds share one scale so the cluster stays in the content column. */
+=======
+/* Homepage layout.
+   The column (.home-page) is banner, title row, nav, main, then the footer dock.
+   The dock is a 3-column grid: Sango, the ticker, Kagura. home.js scales that
+   row as one unit (--home-dock-scale) and places the clouds.
+   Clouds and the angel sit in .home-root, outside the column, and may paint
+   into the gutters. Starfield rules are stars.css. The footer row's slots are
+   site-shell.css. */
+
+/* Shell is .site-shell (assets/css/layout.css). */
+.home-root {
+    /* Cat and clouds share one scale so the cluster stays in the content column. */
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     --ascii-fit: 0.86;
 }
 
@@ -183,8 +197,13 @@ body.home .ascii-angel__cta-art {
 
 .home-banner {
     position: relative;
+<<<<<<< HEAD
     /* Shared banner display size — reserve space before decode. */
     aspect-ratio: 1200 / 280;
+=======
+    /* Box comes from [params.home] bannerWidth / bannerHeight. */
+    aspect-ratio: var(--home-banner-ratio, 1200 / 280);
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     overflow: hidden;
     /* Frame / sparkle come from assets/css/retro.css */
 }
@@ -332,7 +351,14 @@ body.home .page__logo-slot .page__logo {
 }
 
 /* Braille angel: transparent stage, pink wing/halo glow, gold halo sparkles.
+<<<<<<< HEAD
    Theme `pre` paints a solid --inner-bg !important — kill that on .ascii-art. */
+=======
+   Theme `pre` paints a solid --inner-bg !important — kill that on .ascii-art.
+   These four hues are local to the angel (mauve matches --base0E).
+   pink #ff69b4, mauve #ba8baf, gold #ffd27a, hot #fff1c2.
+   The 2.1rem top margin and 1.75rem / 3.25rem padding are the cloud pocket, not colors. */
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 .home-main .ascii-angel {
     --ascii-pink: #ff69b4;
     --ascii-mauve: #ba8baf;
@@ -819,7 +845,12 @@ body.home .page__logo-slot .page__logo {
     filter: drop-shadow(0 0 8px color-mix(in srgb, #fff 35%, var(--highlight) 45%));
 }
 
+<<<<<<< HEAD
 .dock-kagura.is-idle {
+=======
+.dock-kagura.is-idle,
+.dock-kagura.is-down {
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     position: relative;
     left: auto;
     top: auto;
@@ -861,6 +892,7 @@ body.home .page__logo-slot .page__logo {
     animation-fill-mode: forwards;
 }
 
+<<<<<<< HEAD
 .dock-kagura.is-down {
     position: relative;
     left: auto;
@@ -873,6 +905,8 @@ body.home .page__logo-slot .page__logo {
     visibility: visible;
 }
 
+=======
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 .dock-kagura.is-idle .sprite-anim.is-scale-3,
 .dock-kagura.is-down .sprite-anim.is-scale-3 {
     transform: scale(2.1);

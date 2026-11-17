@@ -2,7 +2,12 @@
 /**
  * Markdown structure + 80-col wrap for content/ only.
  *
+<<<<<<< HEAD
  *   corn md                         lint all markdown under content/
+=======
+ *   corn md                         prompt for content/blog/<name>
+ *   corn md --all                   lint all markdown under content/
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
  *   corn md --blog/crossroad-beauty
  *   corn md --fix …                 wrap prose to 80 + markdownlint --fix
  *   corn md --wrap-only …           wrap only (no markdownlint)
@@ -13,6 +18,10 @@
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
+<<<<<<< HEAD
+=======
+import readline from "node:readline";
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 
@@ -23,6 +32,10 @@ const WRAP_WIDTH = 80;
 const require = createRequire(import.meta.url);
 
 const FIXED_FLAGS = new Set([
+<<<<<<< HEAD
+=======
+  "--all",
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
   "--fix",
   "--wrap-only",
   "--lint-only",
@@ -33,6 +46,10 @@ const FIXED_FLAGS = new Set([
 
 function parseArgs(argv) {
   const opts = {
+<<<<<<< HEAD
+=======
+    all: false,
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     fix: false,
     wrapOnly: false,
     lintOnly: false,
@@ -41,7 +58,12 @@ function parseArgs(argv) {
     targets: [],
   };
   for (const a of argv) {
+<<<<<<< HEAD
     if (a === "--fix") opts.fix = true;
+=======
+    if (a === "--all") opts.all = true;
+    else if (a === "--fix") opts.fix = true;
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     else if (a === "--wrap-only") opts.wrapOnly = true;
     else if (a === "--lint-only") opts.lintOnly = true;
     else if (a === "--dry-run") opts.dryRun = true;
@@ -59,6 +81,52 @@ function parseArgs(argv) {
   return opts;
 }
 
+<<<<<<< HEAD
+=======
+function normalizeBlogName(raw) {
+  let name = String(raw || "")
+    .trim()
+    .replace(/\\/g, "/")
+    .replace(/^\/+/, "");
+  if (!name) return "";
+  name = name.replace(/^(content\/)?blog\//, "");
+  name = name.replace(/\/+$/, "");
+  if (/\.mdx?$/i.test(name) && !name.includes("/")) {
+    name = name.replace(/\.mdx?$/i, "");
+  }
+  if (!name || name.includes("..")) {
+    throw new Error("Need a blog slug under content/blog/ (no ..).");
+  }
+  return `blog/${name}`;
+}
+
+function promptBlogTarget() {
+  return new Promise((resolve, reject) => {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+    rl.question("content/blog/<name>: ", (answer) => {
+      rl.close();
+      try {
+        const target = normalizeBlogName(answer);
+        if (!target) {
+          reject(
+            new Error(
+              "Empty name — type a post slug (e.g. crossroad-beauty) or pass --all.",
+            ),
+          );
+          return;
+        }
+        resolve(target);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  });
+}
+
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 function walkMarkdown(dir, out = []) {
   if (!fs.existsSync(dir)) return out;
   for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -92,11 +160,27 @@ function resolveUnderContent(raw) {
   return abs;
 }
 
+<<<<<<< HEAD
 function collectMarkdown(targets) {
   if (!fs.existsSync(contentRoot)) {
     throw new Error(`Missing content/ at ${contentRoot}`);
   }
   if (targets.length === 0) return walkMarkdown(contentRoot).sort();
+=======
+function collectMarkdown(targets, { all = false } = {}) {
+  if (!fs.existsSync(contentRoot)) {
+    throw new Error(`Missing content/ at ${contentRoot}`);
+  }
+  if (all) {
+    if (targets.length) {
+      throw new Error("Pass --all alone, or pass a path — not both.");
+    }
+    return walkMarkdown(contentRoot).sort();
+  }
+  if (targets.length === 0) {
+    throw new Error("No target — pass a path, --all, or answer the blog prompt.");
+  }
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
   const files = [];
   for (const t of targets) {
     const p = resolveUnderContent(t);
@@ -366,7 +450,11 @@ function reportLongLines(files) {
   return n;
 }
 
+<<<<<<< HEAD
 function main() {
+=======
+async function main() {
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
   let opts;
   try {
     opts = parseArgs(process.argv.slice(2));
@@ -381,13 +469,22 @@ function main() {
 Markdown structure lint + ${WRAP_WIDTH}-col prose wrap under content/ only.
 (Prose/style stays with corn edit / Vale.)
 
+<<<<<<< HEAD
   corn md                         lint all content/**/*.md
+=======
+  corn md                         prompt for content/blog/<name>
+  corn md --all                   lint all content/**/*.md
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
   corn md --blog/your-post
   corn md --fix --blog/your-post  wrap to ${WRAP_WIDTH} + markdownlint --fix
   corn md --wrap-only …
   corn md --lint-only …
   corn md --dry-run --fix …      show wrap changes without writing
 
+<<<<<<< HEAD
+=======
+  --all          sweep all content/**/*.md
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
   --fix         wrap prose + apply markdownlint fixes
   --wrap-only    wrap only
   --lint-only    markdownlint only
@@ -400,9 +497,29 @@ Markdown structure lint + ${WRAP_WIDTH}-col prose wrap under content/ only.
     process.exit(2);
   }
 
+<<<<<<< HEAD
   let files;
   try {
     files = collectMarkdown(opts.targets);
+=======
+  if (opts.all && opts.targets.length) {
+    console.error("Pass --all alone, or pass a path — not both.");
+    process.exit(2);
+  }
+
+  if (!opts.all && opts.targets.length === 0) {
+    try {
+      opts.targets.push(await promptBlogTarget());
+    } catch (err) {
+      console.error(err.message);
+      process.exit(2);
+    }
+  }
+
+  let files;
+  try {
+    files = collectMarkdown(opts.targets, { all: opts.all });
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
   } catch (err) {
     console.error(err.message);
     process.exit(2);
@@ -456,4 +573,11 @@ Markdown structure lint + ${WRAP_WIDTH}-col prose wrap under content/ only.
   process.exit(code);
 }
 
+<<<<<<< HEAD
 main();
+=======
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3

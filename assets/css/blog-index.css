@@ -1,11 +1,19 @@
 /* Writing index (/blog/): vajra-style feed — title, date, thumb + caption, summary. */
 
 .blog-index {
+<<<<<<< HEAD
     font-family: "Fira Mono", var(--font-monospace, ui-monospace, monospace);
+=======
+    font-family: var(--font-site, "Fira Mono", ui-monospace, monospace);
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     text-transform: lowercase;
     max-width: 36rem;
 }
 
+<<<<<<< HEAD
+=======
+/* Same gold as site h1 (#ffd749). This one is 1.2rem. */
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 .blog-index__heading {
     margin: 0 0 1.25rem;
     font-family: inherit;
@@ -66,7 +74,11 @@
   Index thumb size knobs:
   - .blog-entry__figure max-width = column cap for the preview
   - img max-height = vertical cap (object-fit: contain — no crop/stretch)
+<<<<<<< HEAD
   Hugo Fit caps live in layouts/partials/blog-entry.html ($previewMaxW/H).
+=======
+  Published widths live in layouts/partials/image-set.html.
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 */
 .blog-entry__figure {
     margin: 0 auto 1rem;
@@ -88,7 +100,16 @@
     -webkit-appearance: none;
 }
 
+<<<<<<< HEAD
 .blog-entry__thumb > img {
+=======
+.blog-entry__thumb picture {
+    display: block;
+}
+
+.blog-entry__thumb > img,
+.blog-entry__thumb picture img {
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
     display: block;
     width: auto;
     max-width: 100%;
@@ -101,6 +122,7 @@
 }
 
 .blog-entry__caption {
+<<<<<<< HEAD
     margin: 0.4rem 0 0;
     padding: 0;
     font-family: inherit;
@@ -109,6 +131,19 @@
     line-height: 1.35;
     color: var(--off-fg, #d8d8d8);
     text-transform: lowercase;
+=======
+    margin: 0.45rem 0 0;
+    padding: 0 0.15rem;
+    font-family: inherit;
+    font-size: 0.72rem;
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: 0.02em;
+    line-height: 1.4;
+    color: color-mix(in srgb, var(--off-fg, #d8d8d8) 72%, var(--muted, #9a93a8));
+    text-transform: lowercase;
+    opacity: 0.92;
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 }
 
 .blog-entry__summary {
@@ -140,7 +175,12 @@
         max-width: 100%;
     }
 
+<<<<<<< HEAD
     .blog-entry__thumb > img {
+=======
+    .blog-entry__thumb > img,
+    .blog-entry__thumb picture img {
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
         max-height: 18rem;
     }
 }

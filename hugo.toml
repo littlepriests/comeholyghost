@@ -22,6 +22,11 @@ noindex = true
 [params.fonts]
 site = "\"Fira Mono\", ui-monospace, monospace"
 article = "\"Montserrat\", sans-serif"
+<<<<<<< HEAD
+=======
+# woff2 paths under static/. The @font-face for each file stays in assets/css/fonts.css.
+preload = ["fonts/fira-mono-400.woff2", "fonts/DotMatrixNarrow.woff2"]
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 
 [params.about]
 title = ""
@@ -47,6 +52,12 @@ playlist = "https://administrator-corporation-syntax-page.trycloudflare.com/play
 bannerDir = "images/banners"
 banner = "images/banner.webp"
 bannerAlt = "Site banner"
+<<<<<<< HEAD
+=======
+# Display box for every banner. The image is covered to this frame.
+bannerWidth = 1200
+bannerHeight = 280
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 # Text under the banner only (.home-site-title). Independent of the tab `title` above.
 displayTitle = "welcome to the "
 displayTitleLine2 = "FIELD🌽"
@@ -242,8 +253,13 @@ yetiIconPos = "right"
     url = "/read-me/"
     weight = 11
 
+<<<<<<< HEAD
 # Article photos live in the post folder. Publish only the resized files
 # templates ask for, not the master next to index.md.
+=======
+# Article photos live in the post folder. Publish only the sizes the
+# templates ask for (layouts/partials/image-set.html), not that file.
+>>>>>>> 55e89f4566953d7c84d0ad767b1721fe205d0ec3
 [[cascade]]
   [cascade.build]
     publishResources = false
