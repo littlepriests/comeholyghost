@@ -827,7 +827,8 @@ body.home .page__logo-slot .page__logo {
     filter: drop-shadow(0 0 8px color-mix(in srgb, #fff 35%, var(--highlight) 45%));
 }
 
-.dock-kagura.is-idle {
+.dock-kagura.is-idle,
+.dock-kagura.is-down {
     position: relative;
     left: auto;
     top: auto;
@@ -867,18 +868,6 @@ body.home .page__logo-slot .page__logo {
     animation-timing-function: steps(var(--sprite-steps, 1), end);
     animation-iteration-count: 1;
     animation-fill-mode: forwards;
-}
-
-.dock-kagura.is-down {
-    position: relative;
-    left: auto;
-    top: auto;
-    bottom: auto;
-    transform: none !important;
-    filter: none;
-    transition: none;
-    opacity: 1;
-    visibility: visible;
 }
 
 .dock-kagura.is-idle .sprite-anim.is-scale-3,
