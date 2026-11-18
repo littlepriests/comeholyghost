@@ -14,11 +14,23 @@ export function definePlace(s) {
     s.syncParked = function () {
         let parked = window.scrollY + window.innerHeight - s.floatGap >= s.parkLineY - 1;
         s.player.classList.toggle("site-player--parked", parked);
-        // The first placement is not animated; only later moves are.
-        if (!s.placed) {
-            s.placed = true;
-            requestAnimationFrame(() => requestAnimationFrame(() => s.player.classList.add("site-player--live")));
-        }
+    };
+
+    /*
+     * Snap, don't slide, while the page is still settling. A new page (first
+     * paint or a same-site swap) is measured before its images and fonts have
+     * their final size, so the first answer can be wrong and the next one fixes
+     * it; with the transition on, that fix would be a visible slide across the
+     * page. The slide comes back once placement has been quiet for a moment.
+     */
+    s.holdTransition = function () {
+        s.holding = true;
+        s.player.classList.remove("site-player--live");
+        window.clearTimeout(s.holdTimer);
+        s.holdTimer = window.setTimeout(() => {
+            s.holding = false;
+            s.player.classList.add("site-player--live");
+        }, 300);
     };
 
     s.onScroll = function () {
@@ -58,6 +70,8 @@ export function definePlace(s) {
         s.player.style.setProperty("--player-lift", lift + "px");
         // player.css sets bottom to --player-float minus --player-lift.
         s.floatGap = (parseFloat(getComputedStyle(s.player).bottom) || 0) + lift;
+        // Every re-measure while settling pushes the slide's return back.
+        if (s.holding) s.holdTransition();
         s.syncParked();
     };
 }

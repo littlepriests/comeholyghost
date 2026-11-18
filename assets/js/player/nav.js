@@ -75,6 +75,12 @@ export function defineNav(s) {
             });
             s.chromeClosed = false;
         }
+        // Scroll first: the park test reads scrollY, and the old page's offset means nothing here.
+        const target = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+        if (target) target.scrollIntoView();
+        else window.scrollTo(0, 0);
+        // A new page places the bar where it belongs without sliding there from the old page's spot.
+        s.holdTransition();
         s.applyPlayerChrome();
         if (window.__site && typeof window.__site.refreshStarReadingVoids === "function") {
             // Re-measure across the next frames and once more after late image/font layout.
@@ -86,9 +92,6 @@ export function defineNav(s) {
                 });
             });
         }
-        const target = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
-        if (target) target.scrollIntoView();
-        else window.scrollTo(0, 0);
         focusMain(root);
         requestAnimationFrame(() => root.classList.remove("is-page-pending"));
     }

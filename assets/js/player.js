@@ -96,6 +96,8 @@ if (bar && !window.__site.playerReady) {
     s.audio.addEventListener("ended", () => s.load(s.index + 1, true));
 
     // Show the chrome before the playlist arrives; a slow fetch must not hide it.
+    // The first placement is not animated; see holdTransition().
+    s.holdTransition();
     s.applyPlayerChrome();
     window.addEventListener("scroll", s.onScroll, { passive: true });
     // Phone toolbars change innerHeight without resizing <html>.

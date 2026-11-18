@@ -51,6 +51,7 @@
             type="button"
             class="blog-entry__thumb"
             data-article-photo
+            {{- with and $set.width $set.height }} style="--img-w: {{ $set.width }}; --img-h: {{ $set.height }}"{{ end }}
             data-full="{{ $full }}"
             {{- with $set.fullAvif }} data-full-avif="{{ . }}"{{ end }}
             aria-label="{{ if $caption }}view larger: {{ $caption | plainify }}{{ else }}view larger image{{ end }}">

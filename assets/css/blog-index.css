@@ -91,13 +91,33 @@
     display: block;
 }
 
+/*
+  The thumb's box is known before the file loads: --img-w / --img-h come from
+  the published copy (blog-entry.html). Width is the largest the height cap
+  allows, so the page does not grow when the image arrives (the player parks
+  and unparks off the page height). Without them it stays width: auto.
+*/
+.blog-entry__thumb {
+    --thumb-max-h: 28rem;
+}
+
+/* The button holds the width (its percentage resolves against the figure; on
+   the image it would collapse the shrink-wrapped button to nothing). */
+.blog-entry__thumb[style*="--img-w"] {
+    width: min(100%, calc(var(--thumb-max-h) * var(--img-w) / var(--img-h)));
+}
+
+.blog-entry__thumb[style*="--img-w"] picture img {
+    width: 100%;
+}
+
 .blog-entry__thumb > img,
 .blog-entry__thumb picture img {
     display: block;
     width: auto;
     max-width: 100%;
     height: auto;
-    max-height: 28rem;
+    max-height: var(--thumb-max-h);
     margin: 0 auto;
     object-fit: contain;
     object-position: center;
@@ -143,8 +163,7 @@
         max-width: 100%;
     }
 
-    .blog-entry__thumb > img,
-    .blog-entry__thumb picture img {
-        max-height: 18rem;
+    .blog-entry__thumb {
+        --thumb-max-h: 18rem;
     }
 }
