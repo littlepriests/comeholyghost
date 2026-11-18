@@ -1,11 +1,13 @@
 /**
  * Cursor extras on desktop with a fine pointer and motion allowed: a ♡ burst
  * on click and an occasional bubble at the resting pointer. The homepage star
- * trail is separate (cursor-effects.html).
+ * trail is separate (cursor-trail.js).
  */
+import { mq } from "./lib/media.js";
+
 (function () {
   let mqReduce = window.matchMedia("(prefers-reduced-motion: reduce)");
-  let mqNarrow = window.matchMedia("(max-width: 44.99rem)"); // matches CSS mobile breakpoint
+  let mqNarrow = mq("mobile");
   let mqCoarse = window.matchMedia("(pointer: coarse)");
 
   function allowed() {

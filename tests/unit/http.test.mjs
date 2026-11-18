@@ -45,3 +45,19 @@ test("readPayload reads JSON bodies and form bodies", async () => {
     });
     assert.deepEqual(await readPayload(asForm), { email: "a@b.co", website: "" });
 });
+
+test("readPayload reads a urlencoded body with no content type, as one-click unsubscribe sends", async () => {
+    const bare = new Request("https://x.test/", { method: "POST", body: "List-Unsubscribe=One-Click" });
+    bare.headers.delete("content-type");
+    assert.deepEqual(await readPayload(bare), { "List-Unsubscribe": "One-Click" });
+});
+
+test("readPayload treats an empty body or non-object JSON as no fields, and throws on bad JSON", async () => {
+    assert.deepEqual(await readPayload(new Request("https://x.test/", { method: "POST" })), {});
+    for (const body of ["null", "[1,2]", "7"]) {
+        const req = new Request("https://x.test/", { method: "POST", headers: { "content-type": "application/json" }, body });
+        assert.deepEqual(await readPayload(req), {}, body);
+    }
+    const bad = new Request("https://x.test/", { method: "POST", headers: { "content-type": "application/json" }, body: "{" });
+    await assert.rejects(readPayload(bad));
+});

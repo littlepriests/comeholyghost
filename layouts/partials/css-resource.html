@@ -1,0 +1,20 @@
+{{- /*
+  One sheet from assets/css/, with each `@media (--name)` replaced by the
+  query assets/css/media.css defines for it. Returns the resource, not a tag:
+    {{ $css := partial "css-resource.html" "player" }}
+  Every sheet goes through here (head.html, index.html, css.html), so a
+  breakpoint changes in media.css alone.
+*/ -}}
+{{- $name := . -}}
+{{- $res := resources.Get (printf "css/%s.css" $name) -}}
+{{- if not $res -}}
+  {{- errorf "css-resource.html: assets/css/%s.css not found" $name -}}
+{{- end -}}
+{{- $css := $res.Content -}}
+{{- range $key, $query := partialCached "media-queries.html" "media" -}}
+  {{- $css = replaceRE (printf `(@media[^{;]*)\(--%s\)` $key) (printf "${1}%s" $query) $css -}}
+{{- end -}}
+{{- with findRE `@media[^{;]*\(--[\w-]+\)` $css 1 -}}
+  {{- errorf "css-resource.html: assets/css/%s.css uses an undefined media name in %q; add it to assets/css/media.css" $name (index . 0) -}}
+{{- end -}}
+{{- return resources.FromString (printf "css/%s.css" $name) $css -}}

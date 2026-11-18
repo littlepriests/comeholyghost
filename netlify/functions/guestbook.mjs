@@ -1,7 +1,7 @@
-import { getStore } from "@netlify/blobs";
 import { updateJSON } from "../lib/blob-update.mjs";
 import { json, preflight, readPayload } from "../lib/http.mjs";
 import { isPreviewDeploy } from "../lib/preview-guard.mjs";
+import { openStore } from "../lib/stores.mjs";
 
 const STORE_NAME = "guestbook";
 const ENTRIES_KEY = "entries";
@@ -42,7 +42,7 @@ export default async (request) => {
         });
     }
 
-    const store = getStore({ name: STORE_NAME, consistency: "strong" });
+    const store = await openStore(STORE_NAME);
 
     if (request.method === "GET") {
         return json(200, { entries: asEntries(await store.get(ENTRIES_KEY, { type: "json" })) });

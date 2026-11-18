@@ -178,8 +178,8 @@ body.home .page__logo-slot .page__logo {
     margin-bottom: 3rem;
 }
 
-/* —— Mobile homepage (aligns with player simple chrome @ 44.99rem) —— */
-@media (max-width: 44.99rem) { /* matches CSS mobile breakpoint */
+/* —— Mobile homepage —— */
+@media (--mobile) {
     .home-banner img {
         width: 100%;
         height: 100%;

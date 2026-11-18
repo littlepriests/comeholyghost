@@ -71,7 +71,7 @@ main[tabindex="-1"]:focus {
 }
 
 /* Ghost cursor extras (site-cursor-fx.js): soft ♡ on click + idle bubbles.
-   Move trail is gold stars (cursor-effects.html / starCursor). */
+   Move trail is gold stars (cursor-trail.js / starCursor). */
 .site-cursor-hearts {
     position: fixed;
     left: 0;

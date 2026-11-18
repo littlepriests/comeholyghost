@@ -1,6 +1,13 @@
+import { PAGE, emit } from "../lib/site.js";
+
 /**
  * Same-site navigation that swaps #page-root and leaves the player (and its
  * <audio>) in place. Any failure falls back to a full page load.
+ *
+ * Only #page-root, the page's stylesheets, the title, and the body class
+ * carry over. Everything else in <head> and outside #page-root stays from the
+ * first page loaded, so it must be the same on every page; anything one page
+ * needs goes inside #page-root (tests/e2e/behavior.spec.mjs checks this).
  */
 export function defineNav(s) {
     let navToken = 0;
@@ -67,29 +74,12 @@ export function defineNav(s) {
         target.focus({ preventScroll: true });
     }
 
-    function afterSwap(root, fromPop) {
-        const home = document.body.classList.contains("home");
-        if (home) {
-            requestAnimationFrame(() => {
-                if (window.__site && typeof window.__site.revealHomeBanner === "function") window.__site.revealHomeBanner();
-            });
-            s.chromeClosed = false;
-        }
-        s.applyPlayerChrome();
-        if (window.__site && typeof window.__site.refreshStarReadingVoids === "function") {
-            // Re-measure across the next frames and once more after late image/font layout.
-            requestAnimationFrame(() => {
-                window.__site.refreshStarReadingVoids();
-                requestAnimationFrame(() => {
-                    window.__site.refreshStarReadingVoids();
-                    window.setTimeout(window.__site.refreshStarReadingVoids, 200);
-                });
-            });
-        }
+    function afterSwap(root) {
         const target = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
         if (target) target.scrollIntoView();
         else window.scrollTo(0, 0);
         focusMain(root);
+        emit(PAGE);
         requestAnimationFrame(() => root.classList.remove("is-page-pending"));
     }
 
@@ -115,12 +105,14 @@ export function defineNav(s) {
                         const current = document.getElementById("page-root");
                         const next = document.importNode(incoming, true);
                         next.classList.add("is-page-pending");
+                        window.__site.page.abort();
+                        window.__site.page = new AbortController();
                         current.replaceWith(next);
                         document.title = doc.title;
                         document.body.className = doc.body.className;
                         if (!fromPop) history.pushState({ player: true }, "", href);
                         runScripts(next, href);
-                        afterSwap(next, fromPop);
+                        afterSwap(next);
                     });
             })
             .catch(() => {

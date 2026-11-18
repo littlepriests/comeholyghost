@@ -1,13 +1,13 @@
 {{- /*
   One footer for every layout. The row is a three-slot dock, laid out by
-  assets/css/footer-dock.css and spaced and fitted by assets/js/footer-dock.js
+  assets/css/footer-dock.css and spaced and fitted by assets/js/layout.js
   the same way on every page. Pages differ only in what fills each slot:
 
     home:   Sango | visitor counter | Kagura
     others: yeti  |                 | Grundo
 
   To move a piece, change its slot below. "lead" is the one slot that stays
-  on a phone, where it shares a row with the player and the ↑ (player/place.js).
+  on a phone, where it shares a row with the player and the ↑ (layout.js).
   The player parks on the dock's bottom line on every page.
 */ -}}
 {{- $page := .page -}}
