@@ -3,9 +3,11 @@
     {{ partial "js.html" "home" }}
   Output is a classic IIFE: SPA nav (player/nav.js) re-runs scripts inside
   #page-root by re-adding their src, and a module script only runs once per URL.
+  `import * as params from "@params"` gives { media } (assets/css/media.css).
 */ -}}
 {{- with resources.Get (printf "js/%s.js" .) }}
-{{- $js := . | js.Build (dict "format" "iife" "target" "es2020") | minify | fingerprint }}
+{{- $params := dict "media" (partialCached "media-queries.html" "media") -}}
+{{- $js := . | js.Build (dict "format" "iife" "target" "es2020" "params" $params) | minify | fingerprint }}
 <script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}"></script>
 {{- else }}
 {{- errorf "js.html: assets/js/%s.js not found" . }}

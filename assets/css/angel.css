@@ -163,7 +163,7 @@ body.home .ascii-angel__cta-art {
     display: none;
 }
 
-@media (max-width: 52rem) {
+@media (--no-clouds) {
     .home-clouds {
         display: none;
     }
@@ -531,7 +531,7 @@ body.home .ascii-angel__cta-art {
     }
 }
 
-@media (max-width: 44.99rem) { /* matches CSS mobile breakpoint */
+@media (--mobile) {
     .home-main .ascii-angel {
         margin: 1.25rem auto 1.75rem;
         padding: 1.1rem 0 2.25rem;
@@ -547,7 +547,7 @@ body.home .ascii-angel__cta-art {
 }
 
 /* After base CTA rules so these win the cascade on narrow screens. */
-@media (max-width: 52rem) {
+@media (--no-clouds) {
     body.home .ascii-angel__cta-art {
         display: block; /* restore from desktop display:none */
         opacity: 1;

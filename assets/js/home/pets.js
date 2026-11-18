@@ -1,4 +1,8 @@
-export function initHomePets() {
+import { mq } from "../lib/media.js";
+import { pageSignal, requestLayout } from "../lib/site.js";
+
+/** Visitor counter and the dock pets. placeDecor re-places the homepage clouds (home/clouds.js). */
+export function initHomePets({ placeDecor }) {
     let apiUrl = "/api/visitors";
     let countKey = "pd-visitor-count";
     let seenKey = "pd-visitor-seen";
@@ -45,8 +49,8 @@ export function initHomePets() {
         try {
             localStorage.setItem(countKey, String(n));
         } catch (error) {}
-        // An extra digit widens the ticker; resize makes footer-dock.js refit the row.
-        window.dispatchEvent(new Event("resize"));
+        // An extra digit widens the ticker; layout.js refits the row.
+        requestLayout();
     }
 
     function applyCount(next, withFx) {
@@ -198,11 +202,7 @@ export function initHomePets() {
         setKaguraStrip("walk");
         park.appendChild(kagura);
         kagura.classList.add("is-idle");
-        if (window.__site && typeof window.__site.placeHomeDecor === "function") {
-            requestAnimationFrame(function () {
-                window.__site.placeHomeDecor();
-            });
-        }
+        requestAnimationFrame(placeDecor);
     }
 
     function setSangoIdle() {
@@ -302,7 +302,7 @@ export function initHomePets() {
 
     function playAttackThenBump() {
         if (!pending || finishing) return;
-        let narrow = window.matchMedia("(max-width: 44.99rem)").matches; // matches CSS mobile breakpoint
+        let narrow = mq("mobile").matches;
         if (reduceMotion || narrow || !kagura || !dock || !park) {
             commitBump(true);
             if (!reduceMotion && !narrow) parkKaguraIdle();
@@ -410,8 +410,9 @@ export function initHomePets() {
         return;
     }
 
-    window.addEventListener("pagehide", onLeave);
-    document.addEventListener("click", onSameSiteNav, true);
+    let signal = pageSignal();
+    window.addEventListener("pagehide", onLeave, { signal: signal });
+    document.addEventListener("click", onSameSiteNav, { capture: true, signal: signal });
 
     if (!ticker || typeof IntersectionObserver !== "function") {
         triggerOnce();

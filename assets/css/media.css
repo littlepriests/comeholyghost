@@ -1,0 +1,18 @@
+/*
+  Named media queries: the only place a breakpoint is written down.
+
+  Sheets use them as `@media (--mobile) { … }` (Media Queries 5 syntax).
+  layouts/partials/css-resource.html swaps the name for the query when it
+  builds each sheet, and fails the build on a name that isn't defined here.
+  JS gets the same names: `mq("mobile")` from assets/js/lib/media.js.
+  Templates (img `sizes`) read them from partial "media-queries.html".
+
+  This file is a definitions list, not a stylesheet; no page links it.
+*/
+
+/* Phone layout: one column, player and ↑ in the side gutters. */
+@custom-media --mobile (max-width: 44.99rem);
+@custom-media --desktop (min-width: 45rem);
+
+/* Homepage: too narrow for the clouds around the ASCII angel. */
+@custom-media --no-clouds (max-width: 52rem);

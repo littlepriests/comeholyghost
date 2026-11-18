@@ -1,7 +1,11 @@
+import { mq } from "../lib/media.js";
+import { LAYOUT, PAGE, on } from "../lib/site.js";
+
 /** Hides stars behind the reading column and fills the read-me sword-figure pocket. */
 export function bindStarVoids(starsHost) {
+    let mobile = mq("mobile");
     let reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let narrow = window.matchMedia("(max-width: 44.99rem)").matches; // matches CSS mobile breakpoint
+    let narrow = mobile.matches;
 
     function clearReadingMask() {
         starsHost.classList.remove("is-reading-masked");
@@ -134,7 +138,7 @@ export function bindStarVoids(starsHost) {
             return;
         }
 
-        let narrowNow = window.matchMedia("(max-width: 44.99rem)").matches;
+        let narrowNow = mobile.matches;
         // Read-me masks from the h1 down so the pocket above stays starry;
         // everything else masks the whole column.
         let swordPage = !!document.querySelector(".sword-figure");
@@ -207,12 +211,16 @@ export function bindStarVoids(starsHost) {
         });
     }
 
-    if (window.__site) window.__site.refreshStarReadingVoids = voidBehindArticleBodies;
-    voidBehindArticleBodies();
-    window.addEventListener("resize", scheduleVoids);
+    // Late images and fonts move the column after the page appears.
+    function settleVoids() {
+        voidBehindArticleBodies();
+        window.setTimeout(voidBehindArticleBodies, 120);
+        window.setTimeout(voidBehindArticleBodies, 480);
+    }
+
+    settleVoids();
+    on(LAYOUT, scheduleVoids);
+    on(PAGE, settleVoids);
     window.addEventListener("scroll", scheduleVoids, { passive: true });
     window.addEventListener("load", voidBehindArticleBodies);
-    // Late images and fonts move the column after first paint.
-    window.setTimeout(voidBehindArticleBodies, 120);
-    window.setTimeout(voidBehindArticleBodies, 480);
 }

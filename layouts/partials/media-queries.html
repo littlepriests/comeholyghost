@@ -1,0 +1,13 @@
+{{- /*
+  The named media queries in assets/css/media.css, as a dict from name
+  ("mobile") to query. Call through partialCached "media-queries.html" "media".
+*/ -}}
+{{- $defs := dict -}}
+{{- with resources.Get "css/media.css" -}}
+  {{- range findRESubmatch `@custom-media\s+--([\w-]+)\s+([^;]+);` .Content -}}
+    {{- $defs = merge $defs (dict (index . 1) (strings.TrimSpace (index . 2))) -}}
+  {{- end -}}
+{{- else -}}
+  {{- errorf "media-queries.html: assets/css/media.css not found" -}}
+{{- end -}}
+{{- return $defs -}}

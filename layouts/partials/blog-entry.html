@@ -54,7 +54,7 @@
             data-full="{{ $full }}"
             {{- with $set.fullAvif }} data-full-avif="{{ . }}"{{ end }}
             aria-label="{{ if $caption }}view larger: {{ $caption | plainify }}{{ else }}view larger image{{ end }}">
-            {{ partial "responsive-img.html" (dict "set" $set "src" $full "alt" ($caption | default .Title | plainify) "sizes" "(min-width: 45rem) 36rem, 100vw") }}
+            {{ partial "responsive-img.html" (dict "set" $set "src" $full "alt" ($caption | default .Title | plainify) "sizes" (printf "%s 36rem, 100vw" (partialCached "media-queries.html" "media").desktop)) }}
         </button>
         {{- with $caption }}
         <figcaption class="blog-entry__caption">{{ . | $.RenderString }}</figcaption>

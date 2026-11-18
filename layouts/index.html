@@ -23,22 +23,11 @@
 {{- $bannerSrc := index $bannerPool 0 -}}
 <head>
     {{- partial "head.html" . -}}
-    {{ $home := slice (resources.Get "css/home.css") (resources.Get "css/angel.css") (resources.Get "css/dock.css") (resources.Get "css/retro.css") | resources.Concat "css/home.css" | minify | fingerprint }}
+    {{- $homeSheets := slice -}}
+    {{- range slice "home" "angel" "dock" "retro" }}{{ $homeSheets = $homeSheets | append (partial "css-resource.html" .) }}{{ end -}}
+    {{ $home := $homeSheets | resources.Concat "css/home-bundle.css" | minify | fingerprint }}
     <link rel="stylesheet" href="{{ $home.RelPermalink }}" integrity="{{ $home.Data.Integrity }}">
     <link rel="preload" as="image" href="{{ $bannerSrc }}" fetchpriority="high">
-    {{- /* Title look comes only from [params.home] title*; home.css holds the fallbacks. */ -}}
-    {{- $t := .Site.Params.home -}}
-    {{- if or $t.titleFont $t.titleFontLine2 $t.titleColor $t.titleColorLine2 $t.titleHighlight }}
-    <style>
-      body.home .home-site-title {
-        {{- with $t.titleFont }}--home-title-font: {{ . | safeCSS }};{{ end }}
-        {{- with $t.titleFontLine2 }}--home-title-font-2: {{ . | safeCSS }};{{ end }}
-        {{- with $t.titleColor }}--home-title-color: {{ . | safeCSS }};{{ end }}
-        {{- with $t.titleColorLine2 }}--home-title-color-2: {{ . | safeCSS }};{{ end }}
-        {{- with $t.titleHighlight }}--home-title-highlight: {{ . | safeCSS }};{{ end }}
-      }
-    </style>
-    {{- end }}
 </head>
 <body class="home">
     <div id="page-root" class="home-root">
@@ -77,7 +66,16 @@
    \  .    '.       .'/
     '.  '  . `'---'`.'
 jgs   `'-..._____.-`</pre>
-            <p class="home-site-title">
+            {{- /* Title look comes only from [params.home] title*; home.css holds the fallbacks.
+                   Inline on the element, not in <head>, so SPA nav home carries it. */ -}}
+            {{- $t := .Site.Params.home -}}
+            {{- $look := slice -}}
+            {{- with $t.titleFont }}{{ $look = $look | append (printf "--home-title-font: %s" .) }}{{ end -}}
+            {{- with $t.titleFontLine2 }}{{ $look = $look | append (printf "--home-title-font-2: %s" .) }}{{ end -}}
+            {{- with $t.titleColor }}{{ $look = $look | append (printf "--home-title-color: %s" .) }}{{ end -}}
+            {{- with $t.titleColorLine2 }}{{ $look = $look | append (printf "--home-title-color-2: %s" .) }}{{ end -}}
+            {{- with $t.titleHighlight }}{{ $look = $look | append (printf "--home-title-highlight: %s" .) }}{{ end }}
+            <p class="home-site-title"{{ with $look }} style="{{ delimit . "; " | safeCSS }}"{{ end }}>
                 {{- with $line1 }}<span class="home-site-title__line">{{ . }}</span>{{ end -}}
                 {{- with $line2 }}<span class="home-site-title__line home-site-title__line--2">{{ . }}</span>{{ end -}}
             </p>
@@ -96,7 +94,6 @@ jgs   `'-..._____.-`</pre>
         {{- partial "site-footer.html" (dict "page" . "variant" "home") }}
     </div>
     {{- partial "home-clouds.html" . -}}
-    {{ partial "js.html" "footer-dock" }}
     {{ partial "js.html" "home" }}
     {{ partial "js.html" "article-media" }}
     </div>

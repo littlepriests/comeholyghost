@@ -122,7 +122,7 @@
     }
 }
 
-@media (max-width: 44.99rem) {
+@media (--mobile) {
     .sword-figure {
         width: min(100%, 11rem);
         margin-bottom: 1.25rem;

@@ -27,6 +27,10 @@ import fs from "node:fs";
 import path from "node:path";
 import readline from "node:readline";
 import { fileURLToPath } from "node:url";
+import {
+  isCaseOnlySpellingAlert,
+  isSpellingCheck,
+} from "./vale-typos.mjs";
 
 /** Parallel `vale fix` workers (spelling suggestions are the slow part). */
 const VALE_FIX_CONCURRENCY = 8;
@@ -342,11 +346,6 @@ function acceptToVocab(alert, which) {
   return word;
 }
 
-function isSpellingCheck(alert) {
-  const check = String(alert?.Check ?? "");
-  return check === "Vale.Spelling" || /\.Spelling$/i.test(check);
-}
-
 /** Cache key: spelling suggestions depend on Check + Match, not span. */
 function suggestionCacheKey(alert) {
   return `${alert.Check}\0${alert.Match}\0${alert.Action?.Name ?? ""}`;
@@ -436,29 +435,14 @@ async function prefetchSuggestions(alerts) {
   process.stdout.write(" done\n");
 }
 
-/**
- * House style is lowercase; Vale often flags "illinois" because the dictionary
- * has "Illinois". Drop those. Keep real typos ("conrete" → "concrete").
- * Pass suggestions when already resolved to avoid extra work.
- */
-function isCaseOnlySpellingAlert(alert, suggestions) {
-  if (!isSpellingCheck(alert)) return false;
-  const match = String(alert.Match ?? "");
-  if (!match) return false;
-  let sugs = suggestions;
-  if (!sugs) {
-    if (Array.isArray(alert.Suggestions) && alert.Suggestions.length > 0) {
-      sugs = alert.Suggestions;
-    } else {
-      sugs = suggestionCache.get(suggestionCacheKey(alert)) ?? [];
-    }
+/** Suggestions already fetched for this alert, including an empty list. */
+function resolvedSuggestions(alert) {
+  const key = suggestionCacheKey(alert);
+  if (suggestionCache.has(key)) return suggestionCache.get(key);
+  if (Array.isArray(alert.Suggestions) && alert.Suggestions.length > 0) {
+    return alert.Suggestions;
   }
-  if (!sugs.length) return false;
-  const lower = match.toLowerCase();
-  return sugs.some((s) => {
-    const t = String(s);
-    return t.toLowerCase() === lower && t !== match;
-  });
+  return [];
 }
 
 function parseValeJson(relFiles) {
@@ -500,7 +484,7 @@ async function collectFixableAlerts(relFiles) {
   );
   await prefetchSuggestions(withAction.map((x) => x.alert));
   return withAction.filter(
-    ({ alert }) => !isCaseOnlySpellingAlert(alert),
+    ({ alert }) => !isCaseOnlySpellingAlert(alert, resolvedSuggestions(alert)),
   );
 }
 
@@ -517,7 +501,7 @@ async function runValeFiltered(relFiles) {
   let caseOnly = 0;
   const kept = [];
   for (const item of all) {
-    if (isCaseOnlySpellingAlert(item.alert)) {
+    if (isCaseOnlySpellingAlert(item.alert, resolvedSuggestions(item.alert))) {
       caseOnly++;
       continue;
     }

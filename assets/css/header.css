@@ -152,7 +152,7 @@
 }
 
 /* Phone: Misdreavus | links | Pancham as bookends; links go 2-up when they fit. */
-@media (max-width: 44.99rem) {
+@media (--mobile) {
     .main-nav {
         --nav-logo-w: 36px;
         --nav-logo-h: 75px;

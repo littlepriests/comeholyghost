@@ -1,7 +1,7 @@
-import { getStore } from "@netlify/blobs";
 import { updateJSON } from "../lib/blob-update.mjs";
 import { json, preflight } from "../lib/http.mjs";
 import { isPreviewDeploy } from "../lib/preview-guard.mjs";
+import { openStore } from "../lib/stores.mjs";
 
 const STORE_NAME = "visitors";
 const COUNT_KEY = "count";
@@ -27,7 +27,7 @@ export default async (request) => {
         return json(405, { error: "Method not allowed." });
     }
 
-    const store = getStore({ name: STORE_NAME, consistency: "strong" });
+    const store = await openStore(STORE_NAME);
 
     if (request.method === "GET") {
         return json(200, { count: toCount(await store.get(COUNT_KEY, { type: "json" })) });

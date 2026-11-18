@@ -23,12 +23,22 @@ export function cleanEmail(value) {
         .toLowerCase();
 }
 
-/** JSON body, else form fields. Throws when the body can't be read. */
+/**
+ * The request body as a plain object: JSON, form fields, or a bare
+ * urlencoded body (RFC 8058 one-click unsubscribe POSTs may send no content
+ * type). An empty body, or JSON that isn't an object, is {}. Throws when the
+ * body can't be read or parsed.
+ */
 export async function readPayload(request) {
     const contentType = request.headers.get("content-type") || "";
     if (contentType.includes("application/json")) {
-        return request.json();
+        const data = await request.json();
+        return data && typeof data === "object" && !Array.isArray(data) ? data : {};
     }
-    const form = await request.formData();
-    return Object.fromEntries(form.entries());
+    if (contentType.includes("application/x-www-form-urlencoded") || contentType.includes("multipart/form-data")) {
+        const form = await request.formData();
+        return Object.fromEntries(form.entries());
+    }
+    const text = await request.text();
+    return text.includes("=") ? Object.fromEntries(new URLSearchParams(text).entries()) : {};
 }

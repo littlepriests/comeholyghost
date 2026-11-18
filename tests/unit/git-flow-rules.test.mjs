@@ -5,6 +5,7 @@ import {
     batchAcceptHasWords,
     findSecretPaths,
     judgeCheckRuns,
+    judgePreviewCommit,
     judgePrChecks,
     mmddyy,
     parseMachineFlags,
@@ -60,6 +61,42 @@ test("deploy gate: gh pr checks output", () => {
     assert.equal(judgePrChecks(1, "netlify\tpending").ok, false);
     assert.equal(judgePrChecks(1, "vale\tfail").ok, false);
     assert.equal(judgePrChecks(1, "netlify\tpass\nvale\tfail").ok, false, "a non-zero exit always blocks");
+});
+
+const green = [{ name: "tests", status: "completed", conclusion: "success" }];
+
+test("deploy gate: no release PR", () => {
+    const base = { statusOk: true, runsOk: true, runs: green };
+    assert.equal(judgePreviewCommit({ ...base, state: "success", total: 1 }).ok, true);
+    assert.equal(
+        judgePreviewCommit({ ...base, state: "pending", total: 0 }).ok,
+        true,
+        "no legacy statuses, check runs are green"
+    );
+    assert.equal(judgePreviewCommit({ ...base, state: "pending", total: 2 }).ok, false);
+    assert.equal(judgePreviewCommit({ ...base, state: "failure", total: 1 }).ok, false);
+    assert.equal(judgePreviewCommit({ ...base, state: "error", total: 1 }).ok, false);
+    assert.equal(judgePreviewCommit({ ...base, statusOk: false, state: "success", total: 1 }).ok, false);
+    assert.equal(judgePreviewCommit({ ...base, state: "success", total: 1, runsOk: false }).ok, false);
+    assert.equal(
+        judgePreviewCommit({ ...base, state: "pending", total: 0, runs: [] }).ok,
+        false,
+        "nothing has reported yet"
+    );
+    assert.equal(
+        judgePreviewCommit({ ...base, state: "success", total: 1, runs: [] }).ok,
+        true,
+        "legacy success with no check-run system stays clear"
+    );
+    assert.equal(
+        judgePreviewCommit({
+            ...base,
+            state: "success",
+            total: 1,
+            runs: [{ name: "tests", status: "in_progress", conclusion: null }],
+        }).ok,
+        false
+    );
 });
 
 test("deploy gate: commit check runs", () => {
