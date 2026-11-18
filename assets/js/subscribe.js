@@ -1,6 +1,6 @@
 (function () {
-    if (window.__siteSubscribe) return;
-    window.__siteSubscribe = true;
+    if (window.__site && window.__site.subscribeReady) return;
+    if (window.__site) window.__site.subscribeReady = true;
 
     let dialog = document.querySelector("[data-subscribe-dialog]");
     if (!dialog || typeof dialog.showModal !== "function") return;

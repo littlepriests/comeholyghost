@@ -23,7 +23,7 @@
 {{- $bannerSrc := index $bannerPool 0 -}}
 <head>
     {{- partial "head.html" . -}}
-    {{ $home := slice (resources.Get "css/home.css") (resources.Get "css/retro.css") | resources.Concat "css/home.css" | minify | fingerprint }}
+    {{ $home := slice (resources.Get "css/home.css") (resources.Get "css/angel.css") (resources.Get "css/dock.css") (resources.Get "css/retro.css") | resources.Concat "css/home.css" | minify | fingerprint }}
     <link rel="stylesheet" href="{{ $home.RelPermalink }}" integrity="{{ $home.Data.Integrity }}">
     <link rel="preload" as="image" href="{{ $bannerSrc }}" fetchpriority="high">
     {{- /* Title look comes only from [params.home] title*; home.css holds the fallbacks. */ -}}

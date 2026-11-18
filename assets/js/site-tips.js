@@ -1,7 +1,7 @@
 /* Floating label for .site-tip[data-tip]; follows the pointer, or sits over the element on keyboard focus. */
 (function () {
-    if (window.__siteTips) return;
-    window.__siteTips = true;
+    if (window.__site && window.__site.tipsReady) return;
+    if (window.__site) window.__site.tipsReady = true;
 
     // Up and to the right of the pointer so the custom cursor doesn't cover it.
     let OFFSET_X = 16;

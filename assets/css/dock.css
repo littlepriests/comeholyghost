@@ -1,0 +1,374 @@
+/*
+  Homepage dock: Sango (left), visitor ticker (center), Kagura (right),
+  and the Hiraikotsu boomerang projectile.
+  Loaded as part of the home page bundle (layouts/index.html).
+  Companion files: angel.css (angel figure/clouds), home.css (layout/banner/moon).
+*/
+
+/* Top padding and the bottom line come from assets/css/site-shell.css. */
+.home-footer {
+    text-align: center;
+}
+
+/* Scales the dock row as one unit so pets + ticker never spill.
+   Clip X only — Y stays visible so Kagura's attack frames aren't cut. */
+.home-footer__dock-fit {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    margin-top: 0.75rem;
+    overflow-x: clip;
+    height: calc(var(--home-dock-h, 4.5rem) * var(--home-dock-scale, 1));
+}
+
+/* Ticker is the centered core; Sango and Kagura mirror it. */
+.home-dock {
+    --home-dock-gap: 1.25rem;
+    --home-pet-scale: 2.1;
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: end;
+    column-gap: var(--home-dock-gap);
+    min-height: 4.5rem;
+    width: 100%;
+    transform: scale(var(--home-dock-scale, 1));
+    transform-origin: center bottom;
+}
+
+/* Desktop: dock spans the full shell width; the player bar sits in the right gutter. */
+
+/* Park pads: left = Sango, right = Kagura after the slash. */
+.home-dock__pet {
+    position: relative;
+    flex: none;
+    width: calc(25px * var(--home-pet-scale));
+    height: calc(42px * var(--home-pet-scale));
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.home-dock__pet--left {
+    grid-column: 1;
+    justify-self: end;
+    height: calc(47px * var(--home-pet-scale));
+}
+
+.home-dock .ticker {
+    grid-column: 2;
+    justify-self: center;
+}
+
+/* Wrapper stays in the markup for JS; its children sit on the dock grid. */
+.home-dock__after {
+    display: contents;
+}
+
+.home-dock__pet--right {
+    grid-column: 3;
+    justify-self: start;
+}
+
+.home-dock__pet[hidden] {
+    display: none !important; /* fights UA stylesheet */
+}
+
+.ticker {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    line-height: 1;
+    overflow: visible;
+    z-index: 1;
+}
+
+.ticker.is-attacking .ticker__count {
+    box-shadow: 0 0 14px color-mix(in srgb, var(--highlight) 45%, transparent);
+}
+
+/* Kagura walks on the dock baseline (feet share the player/ticker ground). */
+.dock-kagura {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    top: auto;
+    z-index: 5;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    will-change: transform, opacity;
+    line-height: 0;
+}
+
+.dock-kagura .sprite-anim.is-scale-3 {
+    transform-origin: bottom center;
+}
+
+/* Attack / travel: full size. Idle walk: ~30% smaller. */
+.dock-kagura.is-traveling .sprite-anim.is-scale-3,
+.dock-kagura.is-attacking .sprite-anim.is-scale-3 {
+    transform: scale(3);
+}
+
+.dock-kagura.is-traveling,
+.dock-kagura.is-attacking,
+.dock-kagura.is-idle,
+.dock-kagura.is-down {
+    opacity: 1;
+    visibility: visible;
+}
+
+.dock-kagura.is-attacking {
+    /* Duration is set inline to match slashMs; this is the fallback curve. */
+    transition: transform 2.6s cubic-bezier(0.33, 0.12, 0.2, 1);
+    filter: drop-shadow(0 0 8px color-mix(in srgb, #fff 35%, var(--highlight) 45%));
+}
+
+.dock-kagura.is-idle,
+.dock-kagura.is-down {
+    position: relative;
+    left: auto;
+    top: auto;
+    bottom: auto;
+    transform: none !important; /* overrides JS inline transform */
+    filter: none;
+    transition: none;
+}
+
+.dock-kagura__strip {
+    display: none;
+    line-height: 0;
+}
+
+.dock-kagura__strip.is-active {
+    display: block;
+}
+
+.dock-kagura__strip--attack .sprite-anim {
+    /* Loop the wind slash for the whole travel; last frame stays real (not blank). */
+    animation-iteration-count: infinite;
+    /* Prefer the vortex frames so the gust reads while she crosses. */
+    animation-duration: 1.1s;
+}
+
+.dock-kagura:not(.is-attacking):not(.is-idle):not(.is-down) .dock-kagura__strip--attack .sprite-anim {
+    animation-play-state: paused;
+}
+
+.dock-kagura.is-idle .dock-kagura__strip--walk .sprite-anim {
+    animation-iteration-count: infinite;
+    animation-timing-function: steps(var(--sprite-frames, 6), end);
+}
+
+.dock-kagura.is-down .dock-kagura__strip--down .sprite-anim {
+    animation-name: sprite-anim-play-hold;
+    animation-timing-function: steps(var(--sprite-steps, 1), end);
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+}
+
+.dock-kagura.is-idle .sprite-anim.is-scale-3,
+.dock-kagura.is-down .sprite-anim.is-scale-3 {
+    transform: scale(2.1);
+}
+
+/* Sango parks left of the ticker; click to fling Hiraikotsu at Kagura. */
+.dock-sango {
+    position: relative;
+    display: block;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    line-height: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.dock-sango:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--highlight) 70%, transparent);
+    outline-offset: 3px;
+}
+
+.dock-sango .sprite-anim.is-scale-3 {
+    transform: scale(2.1);
+    transform-origin: bottom center;
+}
+
+.dock-sango.is-attacking .sprite-anim.is-scale-3 {
+    transform: scale(2.4);
+}
+
+.dock-sango__strip {
+    display: none;
+    line-height: 0;
+}
+
+.dock-sango__strip.is-active {
+    display: block;
+}
+
+.dock-sango.is-idle .dock-sango__strip--idle .sprite-anim {
+    animation-iteration-count: infinite;
+}
+
+.dock-sango.is-attacking .dock-sango__strip--attack .sprite-anim {
+    animation-name: sprite-anim-play-hold;
+    animation-timing-function: steps(var(--sprite-steps, 1), end);
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+}
+
+.dock-sango.is-busy {
+    pointer-events: none;
+    cursor: default;
+}
+
+/* Flying Hiraikotsu (spinning projectile cells from the Sango sheet). */
+.dock-boomerang {
+    position: absolute;
+    left: 0;
+    bottom: 0.35rem;
+    z-index: 6;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    line-height: 0;
+    will-change: transform, opacity;
+}
+
+.dock-boomerang.is-flying {
+    opacity: 1;
+    visibility: visible;
+    transition: transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.dock-boomerang.is-returning {
+    opacity: 1;
+    visibility: visible;
+    transition: transform 0.65s cubic-bezier(0.33, 0.12, 0.2, 1);
+}
+
+.dock-boomerang .sprite-anim.is-scale-2 {
+    transform: scale(2);
+    transform-origin: bottom center;
+}
+
+.ticker__count {
+    margin: 0;
+    padding: 0.35rem 0.55rem;
+    background: var(--chip-bg);
+    color: var(--chip-fg);
+    border: 1px solid var(--chip-border);
+    font-family: var(--chip-font);
+    letter-spacing: 0.2em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+    transition: color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ticker__count.is-bump {
+    animation: ticker-bump 0.7s ease;
+}
+
+.ticker__count.is-milestone {
+    color: var(--logo);
+    border-color: color-mix(in srgb, var(--logo) 55%, transparent);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--logo) 35%, transparent);
+}
+
+.ticker__pop {
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    margin-left: 0.4rem;
+    color: var(--highlight);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-40%);
+}
+
+.ticker__pop.is-show {
+    animation: ticker-pop 1.1s ease forwards;
+}
+
+@keyframes ticker-bump {
+    0% {
+        transform: scale(1);
+    }
+    35% {
+        transform: scale(1.08);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes ticker-pop {
+    0% {
+        opacity: 0;
+        transform: translateY(10%);
+    }
+    20% {
+        opacity: 1;
+        transform: translateY(-40%);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-110%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ticker__count.is-bump,
+    .ticker__pop.is-show {
+        animation: none;
+    }
+
+    .ticker__pop.is-show {
+        opacity: 1;
+    }
+
+    .dock-kagura,
+    .dock-sango,
+    .dock-boomerang {
+        display: none;
+    }
+}
+
+@media (max-width: 44.99rem) { /* matches CSS mobile breakpoint */
+    /* Pets need the desktop gutter. The counter stays; player.js centers the row. */
+    .home-dock__pet {
+        display: none;
+    }
+
+    .home-footer__dock-fit {
+        justify-content: flex-start;
+        height: auto;
+        margin-top: 0;
+        padding: 0;
+    }
+
+    .home-dock {
+        display: flex;
+        justify-content: flex-start;
+        width: auto;
+        min-height: 0;
+        transform: none;
+    }
+
+    .ticker__count {
+        box-sizing: border-box;
+        display: inline-flex;
+        align-items: center;
+        height: 1.65rem;
+        padding: 0 0.45rem;
+        font-size: 0.85rem;
+        line-height: 1;
+        letter-spacing: 0.06em;
+    }
+}

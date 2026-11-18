@@ -17,21 +17,6 @@
                 {{- block "main" . }}{{- end }}
             </main>
 
-            <section class="page__aside">
-                {{- partial "about.html" . -}}
-                {{- /* No hairline when the about block is empty chrome. */ -}}
-                {{- $about := .Site.Params.about -}}
-                {{- $hasAbout := or $about.title $about.description $about.logo $about.logo_image -}}
-                {{- $hasSocial := false -}}
-                {{- with .Site.Params.socialLinks }}{{ $hasSocial = gt (len .) 0 }}{{ end -}}
-                {{- if or $hasAbout $hasSocial }}
-                <hr>
-                {{- end }}
-                <div class="aside__content">
-                    {{- block "aside" . }}{{- end }}
-                </div>
-            </section>
-
             {{- partial "site-footer.html" (dict "page" . "class" "page__footer") }}
 
         </div>

@@ -1,7 +1,7 @@
 /** Twinkling dots and the sparse ASCII stars in the gutters. */
 export function paintStarfield(starsHost) {
     let reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let narrow = window.matchMedia("(max-width: 44.99rem)").matches;
+    let narrow = window.matchMedia("(max-width: 44.99rem)").matches; // matches CSS mobile breakpoint
     let total = reduceMotion ? 40 : narrow ? 55 : 110;
     let positions = [];
     let minDist = narrow ? 4.2 : 3.8;

@@ -198,9 +198,9 @@ export function initHomePets() {
         setKaguraStrip("walk");
         park.appendChild(kagura);
         kagura.classList.add("is-idle");
-        if (typeof window.placeHomeDecor === "function") {
+        if (window.__site && typeof window.__site.placeHomeDecor === "function") {
             requestAnimationFrame(function () {
-                window.placeHomeDecor();
+                window.__site.placeHomeDecor();
             });
         }
     }
@@ -302,7 +302,7 @@ export function initHomePets() {
 
     function playAttackThenBump() {
         if (!pending || finishing) return;
-        let narrow = window.matchMedia("(max-width: 44.99rem)").matches;
+        let narrow = window.matchMedia("(max-width: 44.99rem)").matches; // matches CSS mobile breakpoint
         if (reduceMotion || narrow || !kagura || !dock || !park) {
             commitBump(true);
             if (!reduceMotion && !narrow) parkKaguraIdle();

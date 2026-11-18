@@ -1,7 +1,7 @@
 /**
  * Scales the footer dock (Sango, ticker, Kagura) as one unit to the available
  * width so the row never wraps or overflows. Window listeners call
- * window.__homeFitDock, which each run re-points at its own closure.
+ * window.__site.homeFitDock, which each run re-points at its own closure.
  */
 export function initHomeDock(windowBound) {
     let dockFit = document.querySelector("[data-home-dock-fit]");
@@ -76,19 +76,19 @@ export function initHomeDock(windowBound) {
     }
 
     function runFit() {
-        if (typeof window.__homeFitDock === "function") window.__homeFitDock();
+        if (window.__site && typeof window.__site.homeFitDock === "function") window.__site.homeFitDock();
     }
 
-    if (window.__homeDockObserver) {
-        window.__homeDockObserver.disconnect();
-        window.__homeDockObserver = null;
+    if (window.__site && window.__site.homeDockObserver) {
+        window.__site.homeDockObserver.disconnect();
+        window.__site.homeDockObserver = null;
     }
-    window.__homeFitDock = dockFit && dock ? fitHomeDock : null;
+    if (window.__site) window.__site.homeFitDock = dockFit && dock ? fitHomeDock : null;
     if (dockFit && dock) {
         fitHomeDock();
-        if (typeof ResizeObserver === "function") {
-            window.__homeDockObserver = new ResizeObserver(fitHomeDock);
-            window.__homeDockObserver.observe(dockFit);
+        if (typeof ResizeObserver === "function" && window.__site) {
+            window.__site.homeDockObserver = new ResizeObserver(fitHomeDock);
+            window.__site.homeDockObserver.observe(dockFit);
         }
     }
     if (!windowBound) {

@@ -113,8 +113,8 @@
         setError("");
 
         let data = new FormData(form);
-        let name = String(data.get("name") || "").trim().slice(0, 80);
-        let message = String(data.get("message") || "").trim().slice(0, 500);
+        let name = String(data.get("name") || "").trim().slice(0, 80);       // MAX_NAME = 80  — must match netlify/functions/guestbook.mjs
+        let message = String(data.get("message") || "").trim().slice(0, 500); // MAX_MESSAGE = 500 — must match netlify/functions/guestbook.mjs
         let website = String(data.get("website") || "").trim();
 
         if (!name && !message) {

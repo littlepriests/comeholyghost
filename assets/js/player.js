@@ -7,8 +7,8 @@ const player = document.getElementById("site-player");
 const bar = player && player.querySelector("[data-player-bar]");
 // The player lives outside #page-root, so SPA swaps never re-run this file;
 // the flag only guards against a second copy of the script on one page.
-if (bar && !window.__sitePlayer) {
-    window.__sitePlayer = true;
+if (bar && !window.__site.playerReady) {
+    window.__site.playerReady = true;
     const q = (selector) => player.querySelector(selector);
     const s = {
         player,
@@ -20,7 +20,7 @@ if (bar && !window.__sitePlayer) {
         playWhenReady: false,
         trackTitle: "",
         chromeClosed: false,
-        mobileQuery: window.matchMedia("(max-width: 44.99rem)"),
+        mobileQuery: window.matchMedia("(max-width: 44.99rem)"), // matches CSS mobile breakpoint
         playlistRemote: player.getAttribute("data-playlist") || "",
         playlistLocal: "/audio/playlist.json",
 

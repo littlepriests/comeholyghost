@@ -3,11 +3,6 @@
   hugo.toml [params.fonts] in head.html; blog articles switch to
   --font-article in article-reading.css.
 */
-:root {
-    /* Older rules still say --font-monospace. It is the site face. */
-    --font-monospace: var(--font-site, "Fira Mono", ui-monospace, monospace);
-}
-
 body {
     font-family: var(--font-site, "Fira Mono", ui-monospace, monospace);
     font-size: 16px;
@@ -127,8 +122,7 @@ blockquote,
 .blog-entry__caption,
 .article-figure__caption,
 .content__body td,
-.content__body th,
-.page__aside {
+.content__body th {
     text-wrap: pretty;
 }
 
@@ -205,13 +199,23 @@ blockquote::before {
 }
 
 /* Code */
-pre,
-code, 
+code,
 kbd,
 samp {
-    background: var(--inner-bg) !important;
-    font-family: var(--font-monospace);
+    background: var(--inner-bg);
+    font-family: var(--font-site);
     color: var(--off-fg);
+}
+
+pre {
+    font-family: var(--font-site);
+    color: var(--off-fg);
+}
+
+/* Code blocks in reading areas get the dark background. */
+.content__body pre,
+.page__body pre {
+    background: var(--inner-bg);
 }
 
 pre {

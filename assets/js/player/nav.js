@@ -71,18 +71,18 @@ export function defineNav(s) {
         const home = document.body.classList.contains("home");
         if (home) {
             requestAnimationFrame(() => {
-                if (typeof window.revealHomeBanner === "function") window.revealHomeBanner();
+                if (window.__site && typeof window.__site.revealHomeBanner === "function") window.__site.revealHomeBanner();
             });
             s.chromeClosed = false;
         }
         s.applyPlayerChrome();
-        if (typeof window.refreshStarReadingVoids === "function") {
+        if (window.__site && typeof window.__site.refreshStarReadingVoids === "function") {
             // Re-measure across the next frames and once more after late image/font layout.
             requestAnimationFrame(() => {
-                window.refreshStarReadingVoids();
+                window.__site.refreshStarReadingVoids();
                 requestAnimationFrame(() => {
-                    window.refreshStarReadingVoids();
-                    window.setTimeout(window.refreshStarReadingVoids, 200);
+                    window.__site.refreshStarReadingVoids();
+                    window.setTimeout(window.__site.refreshStarReadingVoids, 200);
                 });
             });
         }

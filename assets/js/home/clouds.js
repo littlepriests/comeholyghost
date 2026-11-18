@@ -233,22 +233,22 @@ export function initHomeClouds(windowBound) {
         placeClouds();
         clearStarsBehindClouds();
     }
-    window.placeHomeDecor = placeDecor;
-    window.__homeClearStars = clearStarsBehindClouds;
+    if (window.__site) window.__site.placeHomeDecor = placeDecor;
+    if (window.__site) window.__site.homeClearStars = clearStarsBehindClouds;
     placeDecor();
     if (!windowBound) {
         window.addEventListener("resize", function () {
-            window.placeHomeDecor();
+            if (window.__site && typeof window.__site.placeHomeDecor === "function") window.__site.placeHomeDecor();
         });
         window.addEventListener("load", function () {
-            window.placeHomeDecor();
+            if (window.__site && typeof window.__site.placeHomeDecor === "function") window.__site.placeHomeDecor();
         });
         let starFrame = 0;
         window.addEventListener("scroll", function () {
             if (starFrame) return;
             starFrame = requestAnimationFrame(function () {
                 starFrame = 0;
-                window.__homeClearStars();
+                if (window.__site && typeof window.__site.homeClearStars === "function") window.__site.homeClearStars();
             });
         }, { passive: true });
     }

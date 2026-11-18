@@ -25,35 +25,12 @@
                         {{- partial "sprite.html" (merge . (dict "fps" 8 "alt" "" "scale" "")) -}}
                     </span>
                     {{- end }}
-                    {{- /* Hand-tuned spill paths for the back-to-top stomp (player.css .is-stomp). */ -}}
+                    {{- /* Hand-tuned spill paths for the back-to-top stomp (player.css .is-stomp).
+                         Paths live in data/player/hearts.yaml. */ -}}
                     <span class="player-dock-pet__hearts" data-player-dock-hearts>
-                        <span class="player-dock-pet__heart is-bright" style="--dx:0rem;--lift:-1.6rem;--dx2:0.2rem;--fall:4.8rem;--hd:0s;--hspurt:1.55s;--rot:4deg">♡</span>
-                        <span class="player-dock-pet__heart is-bright" style="--dx:-0.8rem;--lift:-1.9rem;--dx2:-1.4rem;--fall:5.2rem;--hd:0.03s;--hspurt:1.65s;--rot:-12deg">♡</span>
-                        <span class="player-dock-pet__heart is-bright" style="--dx:0.8rem;--lift:-1.9rem;--dx2:1.4rem;--fall:5.2rem;--hd:0.03s;--hspurt:1.65s;--rot:12deg">♡</span>
-                        <span class="player-dock-pet__heart" style="--dx:-1.6rem;--lift:-1.4rem;--dx2:-2.6rem;--fall:5.6rem;--hd:0.06s;--hspurt:1.7s;--rot:-22deg">♡</span>
-                        <span class="player-dock-pet__heart" style="--dx:1.6rem;--lift:-1.4rem;--dx2:2.6rem;--fall:5.6rem;--hd:0.06s;--hspurt:1.7s;--rot:22deg">♡</span>
-                        <span class="player-dock-pet__heart" style="--dx:-2.4rem;--lift:-1.1rem;--dx2:-3.6rem;--fall:6rem;--hd:0.1s;--hspurt:1.8s;--rot:-32deg">♡</span>
-                        <span class="player-dock-pet__heart" style="--dx:2.4rem;--lift:-1.1rem;--dx2:3.6rem;--fall:6rem;--hd:0.1s;--hspurt:1.8s;--rot:32deg">♡</span>
-                        <span class="player-dock-pet__heart is-bright" style="--dx:-0.3rem;--lift:-2.2rem;--dx2:-0.8rem;--fall:6.4rem;--hd:0.08s;--hspurt:1.75s;--rot:-6deg">♡</span>
-                        <span class="player-dock-pet__heart is-bright" style="--dx:0.3rem;--lift:-2.2rem;--dx2:0.8rem;--fall:6.4rem;--hd:0.08s;--hspurt:1.75s;--rot:6deg">♡</span>
-                        <span class="player-dock-pet__heart" style="--dx:-3.1rem;--lift:-0.7rem;--dx2:-4.4rem;--fall:6.8rem;--hd:0.14s;--hspurt:1.9s;--rot:-40deg">♡</span>
-                        <span class="player-dock-pet__heart" style="--dx:3.1rem;--lift:-0.7rem;--dx2:4.4rem;--fall:6.8rem;--hd:0.14s;--hspurt:1.9s;--rot:40deg">♡</span>
-                        <span class="player-dock-pet__heart" style="--dx:-1.1rem;--lift:-1.7rem;--dx2:-2.1rem;--fall:7.2rem;--hd:0.18s;--hspurt:1.85s;--rot:-16deg">♡</span>
-                        <span class="player-dock-pet__heart" style="--dx:1.1rem;--lift:-1.7rem;--dx2:2.1rem;--fall:7.2rem;--hd:0.18s;--hspurt:1.85s;--rot:16deg">♡</span>
-                        <span class="player-dock-pet__heart is-bright" style="--dx:-2rem;--lift:-1.5rem;--dx2:-3.2rem;--fall:7.6rem;--hd:0.22s;--hspurt:2s;--rot:-26deg">♡</span>
-                        <span class="player-dock-pet__heart is-bright" style="--dx:2rem;--lift:-1.5rem;--dx2:3.2rem;--fall:7.6rem;--hd:0.22s;--hspurt:2s;--rot:26deg">♡</span>
-                        <span class="player-dock-pet__heart" style="--dx:0rem;--lift:-1.2rem;--dx2:-0.4rem;--fall:8rem;--hd:0.26s;--hspurt:2.05s;--rot:-3deg">♡</span>
-                        <span class="player-dock-pet__heart" style="--dx:-3.6rem;--lift:-0.4rem;--dx2:-5rem;--fall:7.8rem;--hd:0.2s;--hspurt:2.1s;--rot:-48deg">♡</span>
-                        <span class="player-dock-pet__heart" style="--dx:3.6rem;--lift:-0.4rem;--dx2:5rem;--fall:7.8rem;--hd:0.2s;--hspurt:2.1s;--rot:48deg">♡</span>
-                        <span class="player-dock-pet__heart" style="--dx:-0.6rem;--lift:-2rem;--dx2:-1.8rem;--fall:8.4rem;--hd:0.3s;--hspurt:2.15s;--rot:-10deg">♡</span>
-                        <span class="player-dock-pet__heart" style="--dx:0.6rem;--lift:-2rem;--dx2:1.8rem;--fall:8.4rem;--hd:0.3s;--hspurt:2.15s;--rot:10deg">♡</span>
-                        <span class="player-dock-pet__heart is-bright" style="--dx:-2.7rem;--lift:-1rem;--dx2:-4.2rem;--fall:8.8rem;--hd:0.34s;--hspurt:2.2s;--rot:-36deg">♡</span>
-                        <span class="player-dock-pet__heart is-bright" style="--dx:2.7rem;--lift:-1rem;--dx2:4.2rem;--fall:8.8rem;--hd:0.34s;--hspurt:2.2s;--rot:36deg">♡</span>
-                        <span class="player-dock-pet__heart" style="--dx:-1.8rem;--lift:-0.9rem;--dx2:-3rem;--fall:9.2rem;--hd:0.38s;--hspurt:2.25s;--rot:-20deg">♡</span>
-                        <span class="player-dock-pet__heart" style="--dx:1.8rem;--lift:-0.9rem;--dx2:3rem;--fall:9.2rem;--hd:0.38s;--hspurt:2.25s;--rot:20deg">♡</span>
-                        <span class="player-dock-pet__heart" style="--dx:0.1rem;--lift:-1.8rem;--dx2:0.6rem;--fall:9.6rem;--hd:0.42s;--hspurt:2.3s;--rot:8deg">♡</span>
-                        <span class="player-dock-pet__heart is-bright" style="--dx:-4rem;--lift:-0.2rem;--dx2:-5.6rem;--fall:8.6rem;--hd:0.28s;--hspurt:2.15s;--rot:-55deg">♡</span>
-                        <span class="player-dock-pet__heart is-bright" style="--dx:4rem;--lift:-0.2rem;--dx2:5.6rem;--fall:8.6rem;--hd:0.28s;--hspurt:2.15s;--rot:55deg">♡</span>
+                        {{- range (hugo.Data).player.hearts -}}
+                        <span class="player-dock-pet__heart{{ if .bright }} is-bright{{ end }}" style="--dx:{{ .dx }};--lift:{{ .lift }};--dx2:{{ .dx2 }};--fall:{{ .fall }};--hd:{{ .hd }};--hspurt:{{ .hspurt }};--rot:{{ .rot }}">♡</span>
+                        {{- end }}
                     </span>
                 </div>
                 {{- end }}

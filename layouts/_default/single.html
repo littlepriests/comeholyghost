@@ -26,20 +26,3 @@
     <footer class="content__footer"></footer>
 {{ end }}
 
-{{ define "aside" }}
-    {{ if .Params.description }}<p>{{ .Params.description }}</p>{{ end }}
-    {{- /* Date still sorts the post; hide_date = true only drops the aside line. */ -}}
-    {{- $showDate := and .Date (not .Params.hide_date) -}}
-    {{ if or .Params.author $showDate }}
-        <p>
-            {{ if .Params.author }}By {{ .Params.author }}{{ if $showDate }}, {{ end }}{{ end }}
-            {{ if $showDate }}{{ .Date.Format "2006-01-02" }}{{ end }}
-        </p>
-    {{ end }}
-
-    {{ if and (.Params.toc) (.TableOfContents) }}
-	    <hr>
-	    On this page:
-	    {{ .TableOfContents }}
-    {{ end }}
-{{ end }}

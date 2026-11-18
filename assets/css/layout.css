@@ -1,15 +1,21 @@
 /*
   One shell for every layout (.page, photobook, guestbook, homepage):
-  the 53rem middle column, then the content column plus the aside gutter.
-  Header and footer span the shell; everything else sits in the content
-  column, and .page__aside takes the gutter. --page-gutter is the only side
+  a single centered column, max-width --middle-column (default 53rem).
+  Header and footer span the shell. --page-gutter is the only side
   inset: on a phone it is wide enough to hold the stacked player and ↑.
+  Tokens: --page-gutter → --middle-column → shell width, player edge,
+  backdrop sizing all read --middle-column. Override it on body.* to
+  give a specific page a different column width with everything in sync.
+
+  Mobile breakpoint: 44.99rem (< 45rem). Used here and mirrored across
+  player.css, header.css, home.css, stars.css, backdrop.css, sword.css,
+  site-shell.css, gallery.css, sprites.css, blog-index.css, guestbook.css,
+  and in JS: player.js, site-cursor-fx.js, stars/field.js, stars/voids.js,
+  home/pets.js. Change all together if ever updated.
 */
 :root {
     --page-gutter: 1.25rem;
     --middle-column: min(53rem, calc(100vw - 2 * var(--page-gutter)));
-    --aside-width: 275px;
-    --aside-gap: 1.5rem;
 }
 
 body {
@@ -39,26 +45,9 @@ body {
     overflow-wrap: break-word;
 }
 
-.page__aside {
-    color: var(--off-fg);
-}
-
 @media (min-width: 45rem) {
-    .site-shell {
-        grid-template-columns: minmax(0, 1fr) var(--aside-width);
-        column-gap: var(--aside-gap);
-    }
-
-    .site-shell > :not(header, footer, .page__aside) {
-        grid-column: 1;
-    }
-
     .site-shell > main {
         overflow-x: clip;
-    }
-
-    .page__aside {
-        text-align: center;
     }
 }
 

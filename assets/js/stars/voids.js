@@ -1,7 +1,7 @@
 /** Hides stars behind the reading column and fills the read-me sword-figure pocket. */
 export function bindStarVoids(starsHost) {
     let reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let narrow = window.matchMedia("(max-width: 44.99rem)").matches;
+    let narrow = window.matchMedia("(max-width: 44.99rem)").matches; // matches CSS mobile breakpoint
 
     function clearReadingMask() {
         starsHost.classList.remove("is-reading-masked");
@@ -207,7 +207,7 @@ export function bindStarVoids(starsHost) {
         });
     }
 
-    window.refreshStarReadingVoids = voidBehindArticleBodies;
+    if (window.__site) window.__site.refreshStarReadingVoids = voidBehindArticleBodies;
     voidBehindArticleBodies();
     window.addEventListener("resize", scheduleVoids);
     window.addEventListener("scroll", scheduleVoids, { passive: true });

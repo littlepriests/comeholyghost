@@ -5,7 +5,7 @@
  */
 (function () {
   let mqReduce = window.matchMedia("(prefers-reduced-motion: reduce)");
-  let mqNarrow = window.matchMedia("(max-width: 44.99rem)");
+  let mqNarrow = window.matchMedia("(max-width: 44.99rem)"); // matches CSS mobile breakpoint
   let mqCoarse = window.matchMedia("(pointer: coarse)");
 
   function allowed() {
