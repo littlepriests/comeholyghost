@@ -67,10 +67,20 @@ test("the player floats while reading and parks on the footer line at the end", 
     await page.goto("/blog/crossroad-beauty/");
     await settle(page);
     const player = page.locator("#site-player");
+    const title = page.locator("[data-player-title]");
     await expect(player).not.toHaveClass(/site-player--parked/);
+    await expect(title).toBeHidden();
 
     await scrollToEnd(page);
     await expect(player).toHaveClass(/site-player--parked/);
+    await expect(title).toBeVisible();
+    await expect.poll(() => page.evaluate(() => {
+        const box = (sel) => document.querySelector(sel).getBoundingClientRect();
+        const label = box("[data-player-title]");
+        const buttons = box(".player-chrome__buttons");
+        const dx = Math.abs((label.left + label.right) / 2 - (buttons.left + buttons.right) / 2);
+        return label.bottom <= buttons.top + 1 && dx < 2;
+    })).toBe(true);
     // Every width: bar (left gutter), then the footer lead, then the ↑ (right gutter).
     await expect.poll(() => page.evaluate(() => {
         const box = (sel) => document.querySelector(sel).getBoundingClientRect();
