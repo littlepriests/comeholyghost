@@ -91,6 +91,58 @@ test("the player floats while reading and parks on the footer line at the end", 
     }), { timeout: 3000 }).toBe(true);
 });
 
+test("a page swap puts the player in place without sliding it across the page", async ({ page }) => {
+    await page.goto("/read-me/");
+    await settle(page);
+    await scrollToEnd(page);
+    await expect(page.locator("#site-player")).toHaveClass(/site-player--parked/);
+
+    // Sample every frame after the click. The bar may jump, but it may not
+    // move while the slide transition is on (that is the bounce).
+    const frames = await page.evaluate(() => new Promise((resolve) => {
+        const player = document.getElementById("site-player");
+        const bar = player.querySelector("[data-player-bar]");
+        const seen = [];
+        const start = performance.now();
+        const tick = () => {
+            const box = bar.getBoundingClientRect();
+            seen.push({ live: player.classList.contains("site-player--live"), x: box.left, y: box.top, path: location.pathname });
+            if (performance.now() - start < 900) requestAnimationFrame(tick);
+            else resolve(seen);
+        };
+        requestAnimationFrame(tick);
+        [...document.querySelectorAll("a")].find((a) => a.pathname === "/blog/").click();
+    }));
+
+    expect(frames.some((f) => f.path === "/blog/")).toBe(true);
+    const swapped = frames.filter((f) => f.path === "/blog/");
+    expect(swapped[0].live).toBe(false);
+    for (let i = 1; i < swapped.length; i++) {
+        const a = swapped[i - 1];
+        const b = swapped[i];
+        if (a.live && b.live) {
+            expect(Math.abs(a.x - b.x) + Math.abs(a.y - b.y)).toBeLessThan(0.5);
+        }
+    }
+});
+
+test("the writing index reserves its thumbnails' space before they load", async ({ page }) => {
+    // Held back so the page is laid out the way it is on a slow connection.
+    let release;
+    const gate = new Promise((resolve) => { release = resolve; });
+    await page.route(/\/blog\/.*\.(webp|avif)$/, async (route) => {
+        await gate;
+        await route.continue().catch(() => {});
+    });
+    await page.goto("/blog/", { waitUntil: "domcontentloaded" });
+    const thumb = page.locator(".blog-entry__thumb picture img").first();
+    await expect.poll(() => thumb.evaluate((img) => img.complete)).toBe(false);
+    const box = await thumb.boundingBox();
+    release();
+    expect(box.height).toBeGreaterThan(100);
+    expect(box.width).toBeGreaterThan(100);
+});
+
 test("the ↑ button appears after scrolling and returns to the top", async ({ page }) => {
     await page.goto("/blog/crossroad-beauty/");
     await settle(page);

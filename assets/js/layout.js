@@ -27,7 +27,8 @@ const desktop = mq("desktop");
 const MIN_SCALE = 0.55;
 let parkLineY = 0;
 let floatGap = 0;
-let placed = false;
+let holding = false;
+let holdTimer = 0;
 let running = false;
 let again = false;
 let dockObserver = null;
@@ -130,7 +131,29 @@ function placePlayer({ player, footer, dock, root }) {
     player.style.setProperty("--player-lift", lift + "px");
     // player.css sets bottom to --player-float minus --player-lift.
     floatGap = (parseFloat(getComputedStyle(player).bottom) || 0) + lift;
+    // A re-measure while the page is still settling keeps the slide off.
+    if (holding) holdTransition();
     syncParked();
+}
+
+/*
+ * Snap, don't slide, while a page is still settling. The first paint and a
+ * same-site swap are measured before images and fonts have their final size,
+ * so the first answer can be wrong and the next one fixes it. With the
+ * transition on, that fix is a slide across the page. The slide comes back
+ * once placement has been quiet for a moment.
+ */
+function holdTransition() {
+    const player = document.getElementById("site-player");
+    if (!player) return;
+    holding = true;
+    player.classList.remove("site-player--live");
+    window.clearTimeout(holdTimer);
+    holdTimer = window.setTimeout(() => {
+        holding = false;
+        const current = document.getElementById("site-player");
+        if (current) current.classList.add("site-player--live");
+    }, 300);
 }
 
 function syncParked() {
@@ -138,11 +161,6 @@ function syncParked() {
     if (!player) return;
     const parked = window.scrollY + window.innerHeight - floatGap >= parkLineY - 1;
     player.classList.toggle("site-player--parked", parked);
-    // The first placement is not animated; only later moves are.
-    if (!placed) {
-        placed = true;
-        requestAnimationFrame(() => requestAnimationFrame(() => player.classList.add("site-player--live")));
-    }
 }
 
 /* Synchronous, so a size change and its re-measure land in the same frame.
@@ -177,6 +195,7 @@ if (!window.__site.layoutReady) {
     window.__site.layoutReady = true;
     on(RELAYOUT, run);
     on(PAGE, () => {
+        holdTransition();
         observeDock();
         run();
     });
@@ -185,6 +204,8 @@ if (!window.__site.layoutReady) {
     window.addEventListener("scroll", syncParked, { passive: true });
     if (typeof ResizeObserver === "function") new ResizeObserver(run).observe(document.documentElement);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(run, () => {});
+    window.__site.holdPlayerTransition = holdTransition;
     observeDock();
+    holdTransition();
     run();
 }

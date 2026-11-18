@@ -75,9 +75,12 @@ export function defineNav(s) {
     }
 
     function afterSwap(root) {
+        // Scroll first: the park test reads scrollY, and the old page's offset means nothing here.
         const target = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
         if (target) target.scrollIntoView();
         else window.scrollTo(0, 0);
+        // Before site:page measures, so the bar snaps to the new page instead of sliding from the old one.
+        if (typeof window.__site.holdPlayerTransition === "function") window.__site.holdPlayerTransition();
         focusMain(root);
         emit(PAGE);
         requestAnimationFrame(() => root.classList.remove("is-page-pending"));
