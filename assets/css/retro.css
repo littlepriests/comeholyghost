@@ -4,15 +4,6 @@
   Sitewide stars live in stars.css / stars.js. Star cursor trail is layouts/partials/cursor-effects.html.
 */
 
-body.home .retro-media,
-body.home .article-photo__thumb {
-    position: relative;
-    display: block;
-    max-width: 100%;
-    isolation: isolate;
-    overflow: hidden;
-}
-
 /* Banner width is the shared content column; keep the sparkle stage only. */
 body.home .home-banner {
     position: relative;
@@ -21,17 +12,7 @@ body.home .home-banner {
     overflow: hidden;
 }
 
-body.home .retro-media picture,
-body.home .article-photo__thumb picture {
-    display: block;
-    width: 100%;
-}
-
-body.home .retro-media > img,
-body.home .retro-media picture img,
-body.home .home-banner > img,
-body.home .article-photo__thumb > img,
-body.home .article-photo__thumb picture img {
+body.home .home-banner > img {
     display: block;
     width: 100%;
     max-width: 100%;

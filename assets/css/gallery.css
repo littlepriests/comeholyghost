@@ -2,11 +2,10 @@
     .gallery {
         grid-template-columns: repeat(auto-fill, minmax(6.75rem, 1fr));
         gap: 0.55rem;
-        justify-content: center;
     }
 }
 
-.gallery-page h1::before {
+.layout-gallery h1::before {
     content: none;
 }
 
@@ -20,7 +19,8 @@
     margin: 0;
     padding: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fill, 9.5rem);
+    /* Fluid tracks fill the column edge to edge (fixed tracks leave the slack on the right). */
+    grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
     gap: 0.75rem;
 }
 

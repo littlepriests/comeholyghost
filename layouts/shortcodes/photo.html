@@ -4,33 +4,16 @@
   {{< photo src="photo.png" caption="Hello" >}}
   {{< photo src="photo.png" alt="Hello" tip="fun hover" >}}Caption{{< /photo >}}
 
-  The file in the post folder is not published. The page gets 480 and 1200
-  (AVIF, then WebP). Click opens the 1600 copy.
+  Markup lives in partials/article-photo.html.
 */ -}}
 {{- $src := .Get "src" | default (.Get 0) -}}
 {{- if not $src -}}
   {{- errorf "photo shortcode on %q: missing src" .Page.Path -}}
 {{- end -}}
-{{- $alt := .Get "alt" | default "" -}}
-{{- $tip := .Get "tip" | default "" -}}
-{{- $caption := .Get "caption" | default (strings.TrimSpace .Inner) -}}
-{{- $img := partial "image-resource.html" (dict "page" .Page "src" $src) -}}
-{{- $set := dict -}}
-{{- $full := $src | relURL -}}
-{{- if and $img (ge $img.Width 1) -}}
-  {{- $set = partial "image-set.html" (dict "res" $img "widths" (slice 480 1200) "lightbox" true) -}}
-  {{- $full = $set.full -}}
-{{- else if $img -}}
-  {{- $full = $img.RelPermalink -}}
-{{- end -}}
-{{- if and (not $alt) $caption -}}
-  {{- $alt = $caption | plainify -}}
-{{- end -}}
-<figure class="article-photo">
-  <button type="button" class="article-photo__thumb{{ with $tip }} site-tip{{ end }}" data-article-photo data-full="{{ $full }}"{{ with $set.fullAvif }} data-full-avif="{{ . }}"{{ end }}{{ with $tip }} data-tip="{{ . }}"{{ end }} aria-label="{{ if $alt }}View larger: {{ $alt }}{{ else }}View larger image{{ end }}">
-    {{ partial "responsive-img.html" (dict "set" $set "src" $full "alt" $alt "sizes" "(min-width: 28rem) 28rem, 100vw") }}
-  </button>
-  {{- with $caption }}
-  <figcaption class="article-figure__caption">{{ . | $.Page.RenderString }}</figcaption>
-  {{- end }}
-</figure>
+{{- partial "article-photo.html" (dict
+  "page" .Page
+  "src" $src
+  "alt" (.Get "alt")
+  "tip" (.Get "tip")
+  "caption" (.Get "caption" | default (strings.TrimSpace .Inner))
+) -}}

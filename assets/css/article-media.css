@@ -1,39 +1,22 @@
-/* Article figures + click-to-expand photos */
+/*
+  Body photos, sitewide (head.html bundle), so any page body renders them the
+  same. Smaller than the column, centered in it; click opens the full image.
+*/
 
-.article-figure,
 .article-photo {
+    width: min(100%, 28rem);
     margin: 1.25rem auto;
     padding: 0;
-    max-width: 100%;
     text-align: center;
 }
 
-.article-figure {
-    width: min(100%, 40rem);
+.article-photo-grid {
+    width: min(100%, 32rem);
 }
 
-.article-figure__frame {
-    display: block;
-    width: 100%;
-}
-
-.article-figure__frame picture,
 .article-photo__thumb picture {
     display: block;
     width: 100%;
-}
-
-.article-figure__frame > img,
-.article-figure__frame picture img {
-    display: block;
-    width: 100%;
-    height: auto;
-    margin: 0 auto;
-}
-
-/* Bigger than gallery tiles (~9.5rem), smaller than full column */
-.article-photo {
-    width: min(100%, 28rem);
 }
 
 .article-photo__thumb {
@@ -74,7 +57,6 @@
 .article-photo-grid {
     margin: 1.5rem auto;
     padding: 0;
-    width: min(100%, 36rem);
     text-align: center;
 }
 

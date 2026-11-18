@@ -136,7 +136,6 @@ TOML between `+++` fences (YAML `---` also works). Fields this site cares about:
 | `toc` | no | **Off by default.** Set `toc = true` only if you want “On this page” in the aside. Omit it (or `false`) to hide the ToC |
 | `author` | no | Optional byline in the aside |
 | `[[buttons]]` | no | **Off by default.** Each `[[buttons]]` block adds one labeled link after the body. Delete those blocks to drop the row |
-| `back_to_top` | no | `true` shows a centered ⌃ under the body that smooth-scrolls to the top (use instead of bottom buttons if you want) |
 | `[_build]` | no | Hugo build options — unlisted / never render (see **Hide a post** below) |
 | `[[resources]]` | no | Optional metadata for a page resource (e.g. `title` used as caption fallback) |
 
@@ -207,13 +206,8 @@ icon = "fa-solid fa-book"
 
 Delete every `[[buttons]]` block on the page. The inline `{{< button ... >}}` shortcode is separate and only appears where you place it in the markdown.
 
-### Back-to-top chevron instead
+There is no per-page back-to-top control. The player's ↑ is the same on every page.
 
-```toml
-back_to_top = true
-```
-
-Renders a quiet ⌃ under the article; click smooth-scrolls to the top of the page.
 Example resource title:
 
 ```toml
@@ -253,9 +247,9 @@ Self-closing form is fine when there is no inner body: `{{< photo src="x.png" />
 | `caption` | Under the image; plain form becomes `alt` if `alt` is omitted |
 | `alt` | Explicit alt text |
 
-### `figcaption` — full-width figure + caption
+### `figcaption` — same as `photo`
 
-Same params as `photo`, but full column width and **no** click-to-expand.
+Kept as a name only. It renders the same figure as `photo` (one size, centered, click to enlarge), through `layouts/partials/article-photo.html`.
 
 ```
 {{< figcaption src="wide.png" caption="installation view" />}}
@@ -323,7 +317,7 @@ Short version: cook a horizontal strip PNG → `static/images/sprites/` → add 
 
 `icon` is optional: short name (`book`, `heart`, `github`, …) or legacy `fa-solid fa-book` (mapped). Inline SVG — no Font Awesome CDN.
 
-Or attach a row after the whole post via front matter (`[[buttons]]` — omit entirely if you don’t want it). For a scroll-up control instead, use `back_to_top = true` (see Front matter above).
+Or attach a row after the whole post via front matter (`[[buttons]]` — omit entirely if you don’t want it).
 
 ## Videos
 
@@ -360,13 +354,17 @@ Keep files small; giant uploads hurt Netlify deploys and first paint.
 
 ## Images that are not shortcodes
 
-Plain markdown images still work:
+Plain markdown images work and behave exactly like `photo`:
 
 ```markdown
-![alt text](cover.png)
+![alt text](cover.png "optional caption")
 ```
 
-They get a light `retro-media` wrapper from the render hook but **not** the click-to-expand lightbox. Prefer `photo` / `photo-grid` / `figcaption` for gallery-style posts.
+An image on its own line goes through the same partial as `photo` (`layouts/partials/article-photo.html`), so it is the same size, centered, and opens the lightbox. The quoted title becomes the caption. This needs `wrapStandAloneImageWithinParagraph = false` in `hugo.toml`.
+
+An image inside a sentence stays inline at text height (`.inline-media`), with no lightbox.
+
+Raw `<img>` in HTML opts out of all of this. It only gets `max-width: 100%`.
 
 ## Checklist before you publish
 

@@ -63,17 +63,22 @@ test("clicking Sango throws the boomerang and knocks Kagura down, then both reco
     await expect(sango).not.toHaveClass(/is-busy/, { timeout: 6000 });
 });
 
-test("the player floats while reading and parks on the footer line at the end", async ({ page }, testInfo) => {
+test("the player floats while reading and parks on the footer line at the end", async ({ page }) => {
     await page.goto("/blog/crossroad-beauty/");
     await settle(page);
     const player = page.locator("#site-player");
-    await expect(player).toHaveClass(/site-player--floating/);
+    await expect(player).not.toHaveClass(/site-player--parked/);
 
     await scrollToEnd(page);
-    await expect(player).not.toHaveClass(/site-player--floating/);
-    if (isPhone(testInfo)) {
-        await expect(player).toHaveClass(/site-player--row/);
-    }
+    await expect(player).toHaveClass(/site-player--parked/);
+    // Every width: bar (left gutter), then the footer lead, then the ↑ (right gutter).
+    await expect.poll(() => page.evaluate(() => {
+        const box = (sel) => document.querySelector(sel).getBoundingClientRect();
+        const bar = box("[data-player-bar]");
+        const lead = box("[data-footer-lead]");
+        const up = box("[data-player-back-top]");
+        return bar.right <= lead.left && lead.right <= up.left;
+    }), { timeout: 3000 }).toBe(true);
 });
 
 test("the ↑ button appears after scrolling and returns to the top", async ({ page }) => {

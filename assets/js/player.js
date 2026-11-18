@@ -32,9 +32,6 @@ if (bar && !window.__site.playerReady) {
         labelText: q("[data-player-title-text]"),
         toggleIconPlay: q("[data-player-icon-play]"),
         toggleIconPlaying: q("[data-player-icon-playing]"),
-        dockIdle: q("[data-player-dock-idle]"),
-        dockKick: q("[data-player-dock-kick]"),
-        dockHearts: q("[data-player-dock-hearts]"),
         backTopBtn: q("[data-player-back-top]"),
         BACK_TOP_MIN_SCROLL: 160,
 
@@ -47,7 +44,6 @@ if (bar && !window.__site.playerReady) {
         parkLineY: 0,
         floatGap: 0,
     };
-    s.dockKickStrip = s.dockKick ? s.dockKick.querySelector(".sprite-anim") : null;
     s.audio.preload = "metadata";
     player.appendChild(s.audio);
 
@@ -103,7 +99,7 @@ if (bar && !window.__site.playerReady) {
     s.applyPlayerChrome();
     window.addEventListener("scroll", s.onScroll, { passive: true });
     // Phone toolbars change innerHeight without resizing <html>.
-    window.addEventListener("resize", s.syncFloating);
+    window.addEventListener("resize", s.syncParked);
     if (typeof ResizeObserver === "function") {
         new ResizeObserver(() => s.placeOnFooter()).observe(document.documentElement);
     } else {

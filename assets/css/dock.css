@@ -1,45 +1,13 @@
 /*
-  Homepage dock: Sango (left), visitor ticker (center), Kagura (right),
-  and the Hiraikotsu boomerang projectile.
+  Homepage footer pets: Sango (left slot), visitor ticker (center slot),
+  Kagura (right slot), and the Hiraikotsu boomerang projectile.
   Loaded as part of the home page bundle (layouts/index.html).
-  Companion files: angel.css (angel figure/clouds), home.css (layout/banner/moon).
+  The slots, spacing, and fit are the sitewide footer dock (footer-dock.css).
 */
 
-/* Top padding and the bottom line come from assets/css/site-shell.css. */
-.home-footer {
-    text-align: center;
-}
-
-/* Scales the dock row as one unit so pets + ticker never spill.
-   Clip X only — Y stays visible so Kagura's attack frames aren't cut. */
-.home-footer__dock-fit {
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    margin-top: 0.75rem;
-    overflow-x: clip;
-    height: calc(var(--home-dock-h, 4.5rem) * var(--home-dock-scale, 1));
-}
-
-/* Ticker is the centered core; Sango and Kagura mirror it. */
-.home-dock {
-    --home-dock-gap: 1.25rem;
+/* Pads reserve each pet's painted size: Sango idle-left, Kagura parked after the slash. */
+.dock-pad {
     --home-pet-scale: 2.1;
-    position: relative;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    align-items: end;
-    column-gap: var(--home-dock-gap);
-    min-height: 4.5rem;
-    width: 100%;
-    transform: scale(var(--home-dock-scale, 1));
-    transform-origin: center bottom;
-}
-
-/* Desktop: dock spans the full shell width; the player bar sits in the right gutter. */
-
-/* Park pads: left = Sango, right = Kagura after the slash. */
-.home-dock__pet {
     position: relative;
     flex: none;
     width: calc(25px * var(--home-pet-scale));
@@ -49,29 +17,8 @@
     justify-content: center;
 }
 
-.home-dock__pet--left {
-    grid-column: 1;
-    justify-self: end;
+.dock-pad--sango {
     height: calc(47px * var(--home-pet-scale));
-}
-
-.home-dock .ticker {
-    grid-column: 2;
-    justify-self: center;
-}
-
-/* Wrapper stays in the markup for JS; its children sit on the dock grid. */
-.home-dock__after {
-    display: contents;
-}
-
-.home-dock__pet--right {
-    grid-column: 3;
-    justify-self: start;
-}
-
-.home-dock__pet[hidden] {
-    display: none !important; /* fights UA stylesheet */
 }
 
 .ticker {
@@ -341,26 +288,7 @@
 }
 
 @media (max-width: 44.99rem) { /* matches CSS mobile breakpoint */
-    /* Pets need the desktop gutter. The counter stays; player.js centers the row. */
-    .home-dock__pet {
-        display: none;
-    }
-
-    .home-footer__dock-fit {
-        justify-content: flex-start;
-        height: auto;
-        margin-top: 0;
-        padding: 0;
-    }
-
-    .home-dock {
-        display: flex;
-        justify-content: flex-start;
-        width: auto;
-        min-height: 0;
-        transform: none;
-    }
-
+    /* The pets' slots are hidden (footer-dock.css); the counter is the lead. */
     .ticker__count {
         box-sizing: border-box;
         display: inline-flex;

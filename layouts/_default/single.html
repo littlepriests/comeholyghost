@@ -1,5 +1,4 @@
 {{ define "main" }}
-    {{- partial "css.html" "article-media" }}
     {{- if eq .Section "blog" }}
     {{- partial "css.html" "article-reading" }}
     {{- end }}
@@ -12,17 +11,6 @@
     <div class="content__body">
         {{ .Content }}
         {{- partial "page-buttons.html" . -}}
-        {{- if .Params.back_to_top }}
-        <p class="back-to-top">
-            <a
-                class="back-to-top__link site-tip"
-                href="#page-root"
-                aria-label="{{ partial "tip-text.html" (dict "key" "back_to_top" "fallback" "back to top") }}"
-                data-tip="{{ partial "tip-text.html" (dict "key" "back_to_top" "fallback" "back to top") }}"
-                onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">⌃</a>
-        </p>
-        {{- end }}
     </div>
-    <footer class="content__footer"></footer>
 {{ end }}
 

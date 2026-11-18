@@ -4,16 +4,9 @@
   Dock (Sango/Kagura/ticker) lives in dock.css.
   Sparkle frame + retro styles live in retro.css.
 
-  One token drives the whole page. body.home narrows --middle-column so the
-  homepage shell, header/nav, banner, title row, main, dock, and player bar
-  all share one column width (~608px) without any per-element overrides.
-  The nav needs ≈590px at fit-content; 38rem gives it comfortable room.
-  To resize the homepage: change the rem value here only.
+  The homepage uses the sitewide column (--middle-column, layout.css) like
+  every other page; banner, title row, main, and dock all fill it.
 */
-
-body.home {
-    --middle-column: min(38rem, calc(100vw - 2 * var(--page-gutter)));
-}
 
 .home-root {
     position: relative;
@@ -169,13 +162,6 @@ body.home pre.ascii-moon::-webkit-scrollbar {
     margin-bottom: 0.5rem;
 }
 
-/* Nav is fit-content (~590px) in a 608px shell; auto margins absorb the gap. */
-.home-header .main-nav {
-    margin-left: auto;
-    margin-right: auto;
-}
-
-
 body.home .page__logo-slot {
     position: relative;
     flex: 0 0 auto;
@@ -190,25 +176,6 @@ body.home .page__logo-slot .page__logo {
 .home-main {
     margin-top: 0;
     margin-bottom: 3rem;
-}
-
-.home-footer__extra {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 1rem;
-    margin-top: 1.25rem;
-}
-
-.home-footer__extra p {
-    margin: 0;
-}
-
-.home-footer__extra img {
-    display: block;
-    max-width: 8rem;
-    height: auto;
 }
 
 /* —— Mobile homepage (aligns with player simple chrome @ 44.99rem) —— */

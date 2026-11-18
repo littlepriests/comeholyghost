@@ -1,67 +1,47 @@
-<!DOCTYPE html>
-<html lang="{{- site.Language.Lang -}}">
-<head>
-    {{- partial "head.html" . -}}
-    {{- partial "css.html" (slice "gallery" "article-media") }}
-</head>
-<body class="gallery-page">
-    <div id="page-root">
-    <div class="gallery-wrap site-shell">
-        <header class="gallery-header">
-            {{- partial "header.html" . -}}
-        </header>
+{{ define "main" }}
+    {{- partial "css.html" "gallery" }}
+    <h1>{{ .Title }}</h1>
+    {{ with .Content }}<div class="gallery-intro">{{ . }}</div>{{ end }}
+    {{- partial "page-buttons.html" . -}}
 
-        <main>
-            <h1>{{ .Title }}</h1>
-            {{ with .Content }}<div class="gallery-intro">{{ . }}</div>{{ end }}
-            {{- partial "page-buttons.html" . -}}
+    {{ $items := slice }}
+    {{ range where site.RegularPages "Section" "blog" }}
+        {{ $post := . }}
+        {{ range .Resources.ByType "image" }}
+            {{ $items = $items | append (dict "post" $post "img" .) }}
+        {{ end }}
+    {{ end }}
 
-            {{ $items := slice }}
-            {{ range where site.RegularPages "Section" "blog" }}
-                {{ $post := . }}
-                {{ range .Resources.ByType "image" }}
-                    {{ $items = $items | append (dict "post" $post "img" .) }}
-                {{ end }}
-            {{ end }}
-
-            {{ with $items }}
-            <ul class="gallery">
-                {{ range . }}
-                {{ $img := .img }}
-                {{ $post := .post }}
-                {{ $set := dict }}
-                {{ $full := "" }}
-                {{ if ne $img.MediaType.SubType "svg" }}
-                    {{/* Square crop for the 9.5rem tile. Click opens the uncropped 1600. */}}
-                    {{ $set = partial "image-set.html" (dict "res" $img "widths" (slice 480) "crop" "square" "lightbox" true) }}
-                    {{ $full = $set.full }}
-                {{ else }}
-                    {{ $full = $img.RelPermalink }}
-                {{ end }}
-                {{ $alt := $post.Title }}
-                {{ with $img.Title }}{{ $alt = . }}{{ end }}
-                <li>
-                    <button
-                        type="button"
-                        class="gallery__item"
-                        data-article-photo
-                        data-full="{{ $full }}"
-                        {{ with $set.fullAvif }}data-full-avif="{{ . }}"{{ end }}
-                        aria-label="View larger: {{ $alt }}">
-                        {{ partial "responsive-img.html" (dict "set" $set "src" $full "alt" $alt "sizes" "(max-width: 44.99rem) 7rem, 9.5rem") }}
-                    </button>
-                </li>
-                {{ end }}
-            </ul>
-            {{ else }}
-            <p class="gallery-empty">No images yet. Add pictures next to a post in <code>content/blog</code>.</p>
-            {{ end }}
-        </main>
-
-        {{- partial "site-footer.html" (dict "page" .) }}
-    </div>
-    {{ partial "js.html" "article-media" }}
-    </div>
-    {{- partial "site-chrome.html" . }}
-</body>
-</html>
+    {{ with $items }}
+    <ul class="gallery">
+        {{ range . }}
+        {{ $img := .img }}
+        {{ $post := .post }}
+        {{ $set := dict }}
+        {{ $full := "" }}
+        {{ if ne $img.MediaType.SubType "svg" }}
+            {{/* Square crop for the tile. Click opens the uncropped 1600. */}}
+            {{ $set = partial "image-set.html" (dict "res" $img "widths" (slice 480) "crop" "square" "lightbox" true) }}
+            {{ $full = $set.full }}
+        {{ else }}
+            {{ $full = $img.RelPermalink }}
+        {{ end }}
+        {{ $alt := $post.Title }}
+        {{ with $img.Title }}{{ $alt = . }}{{ end }}
+        <li>
+            <button
+                type="button"
+                class="gallery__item"
+                data-article-photo
+                data-full="{{ $full }}"
+                {{ with $set.fullAvif }}data-full-avif="{{ . }}"{{ end }}
+                aria-label="View larger: {{ $alt }}">
+                {{ partial "responsive-img.html" (dict "set" $set "src" $full "alt" $alt "sizes" "(max-width: 44.99rem) 7rem, 9.5rem") }}
+            </button>
+        </li>
+        {{ end }}
+    </ul>
+    {{ else }}
+    <p class="gallery-empty">No images yet. Add pictures next to a post in <code>content/blog</code>.</p>
+    {{ end }}
+{{ end }}

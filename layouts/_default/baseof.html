@@ -5,7 +5,7 @@
         {{- partial "head.html" . -}}
     </head>
 
-    <body class="{{ with .Section }}section-{{ . }} {{ end }}kind-{{ .Kind }}">
+    <body class="{{ with .Section }}section-{{ . }} {{ end }}{{ with .Layout }}layout-{{ . }} {{ end }}kind-{{ .Kind }}">
         <div id="page-root">
         <div class="page site-shell">
 
@@ -17,10 +17,11 @@
                 {{- block "main" . }}{{- end }}
             </main>
 
-            {{- partial "site-footer.html" (dict "page" . "class" "page__footer") }}
+            {{- partial "site-footer.html" (dict "page" .) }}
 
         </div>
-        {{- /* Inside #page-root so same-site nav (which only swaps that node) loads the lightbox. */ -}}
+        {{- /* Inside #page-root so same-site nav (which only swaps that node) runs these again. */ -}}
+        {{ partial "js.html" "footer-dock" }}
         {{ partial "js.html" "article-media" }}
         </div>
         {{- partial "site-chrome.html" . }}

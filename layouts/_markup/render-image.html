@@ -1,16 +1,26 @@
+{{- /*
+  An image on its own line is a photo: partials/article-photo.html, with the
+  markdown title as the caption. An image inside a sentence stays inline.
+  Block detection needs wrapStandAloneImageWithinParagraph = false (hugo.toml).
+*/ -}}
+{{- $id := .Destination | path.Base | anchorize -}}
+{{- if .IsBlock -}}
+{{- partial "article-photo.html" (dict "page" .Page "src" .Destination "alt" .PlainText "caption" .Title "id" $id) -}}
+{{- else -}}
 {{- $res := partial "image-resource.html" (dict "page" .Page "src" .Destination) -}}
 {{- if not $res }}{{ $res = partial "image-resource.html" (dict "page" .Page "src" (.Destination | path.Base)) }}{{ end -}}
 {{- $set := dict -}}
 {{- $fallback := .Destination | safeURL -}}
 {{- if and $res (ge $res.Width 1) -}}
-  {{- $set = partial "image-set.html" (dict "res" $res "widths" (slice 800 1280)) -}}
+  {{- $set = partial "image-set.html" (dict "res" $res "widths" (slice 480 800)) -}}
 {{- else if $res -}}
   {{- $fallback = $res.RelPermalink -}}
 {{- end -}}
-<span class="retro-media">
+<span class="inline-media">
 {{- if or $set.src $res -}}
-  {{ partial "responsive-img.html" (dict "set" $set "src" $fallback "alt" .PlainText "title" .Title "id" (.Destination | path.Base | anchorize) "sizes" "(min-width: 40rem) 40rem, 100vw") }}
+  {{ partial "responsive-img.html" (dict "set" $set "src" $fallback "alt" .PlainText "title" .Title "id" $id "sizes" "(min-width: 45rem) 28rem, calc(100vw - 5rem)") }}
 {{- else -}}
-<img id="{{ .Destination | path.Base | anchorize }}" src="{{ .Destination | safeURL }}" alt="{{ .PlainText }}"{{ with .Title }} title="{{ . }}"{{ end }} loading="lazy" decoding="async">
+<img id="{{ $id }}" src="{{ .Destination | safeURL }}" alt="{{ .PlainText }}"{{ with .Title }} title="{{ . }}"{{ end }} loading="lazy" decoding="async">
 {{- end -}}
 </span>
+{{- end -}}

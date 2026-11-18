@@ -5,12 +5,12 @@ export function initHomePets() {
     let digits = document.querySelector("[data-visitor-count]");
     let pop = document.querySelector("[data-visitor-pop]");
     let ticker = document.querySelector("[data-visitor-ticker]");
-    let dock = document.querySelector("[data-home-dock]");
-    let park = document.querySelector('[data-dock-pet="right"]');
+    let dock = document.querySelector("[data-footer-dock]");
+    let park = document.querySelector('[data-dock-pad="kagura"]');
     let kagura = document.querySelector("[data-visitor-kagura]");
     let sango = document.querySelector("[data-dock-sango]");
     let boomerang = document.querySelector("[data-dock-boomerang]");
-    let leftPark = document.querySelector('[data-dock-pet="left"]');
+    let leftPark = document.querySelector('[data-dock-pad="sango"]');
     let kAttackStrip = kagura && kagura.querySelector(".dock-kagura__strip--attack");
     let kWalkStrip = kagura && kagura.querySelector(".dock-kagura__strip--walk");
     let kDownStrip = kagura && kagura.querySelector(".dock-kagura__strip--down");
@@ -45,7 +45,7 @@ export function initHomePets() {
         try {
             localStorage.setItem(countKey, String(n));
         } catch (error) {}
-        // An extra digit widens the ticker; resize makes dock.js refit the row.
+        // An extra digit widens the ticker; resize makes footer-dock.js refit the row.
         window.dispatchEvent(new Event("resize"));
     }
 

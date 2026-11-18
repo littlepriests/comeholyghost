@@ -1,23 +1,29 @@
 /**
- * The bar is position: sticky at the bottom of the window ("floating") until the
- * footer line scrolls into view, then rests on that line ("parked"). The footer
- * line is the dock row on the homepage and the footer's padding edge elsewhere.
- * On phones, once parked, the footer lead (counter or yeti), the bar, and ↑ are
- * laid out as one centered row by placeFooterRow().
+ * The track rides the page the way the ↑ does: --player-float above the window
+ * bottom ("floating") until the footer line scrolls into view, then it rests on
+ * that line ("parked"). The footer line is the bottom of the footer dock, on
+ * every page and at every width. The bar sits at the top of the window while
+ * floating and moves to the footer's left gutter when parked; this file only
+ * decides which, and player.css does the placing and the transition.
  */
 export function definePlace(s) {
     s.syncBackTop = function () {
-        if (s.backTopBtn) s.backTopBtn.hidden = s.chromeClosed || window.scrollY < s.BACK_TOP_MIN_SCROLL;
+        if (s.backTopBtn) s.backTopBtn.classList.toggle("is-away", s.chromeClosed || window.scrollY < s.BACK_TOP_MIN_SCROLL);
     };
 
-    s.syncFloating = function () {
-        let floating = window.scrollY + window.innerHeight - s.floatGap < s.parkLineY - 1;
-        s.player.classList.toggle("site-player--floating", floating);
+    s.syncParked = function () {
+        let parked = window.scrollY + window.innerHeight - s.floatGap >= s.parkLineY - 1;
+        s.player.classList.toggle("site-player--parked", parked);
+        // The first placement is not animated; only later moves are.
+        if (!s.placed) {
+            s.placed = true;
+            requestAnimationFrame(() => requestAnimationFrame(() => s.player.classList.add("site-player--live")));
+        }
     };
 
     s.onScroll = function () {
         s.syncBackTop();
-        s.syncFloating();
+        s.syncParked();
     };
 
     s.setChromeClosed = function (closed) {
@@ -30,18 +36,18 @@ export function definePlace(s) {
         if (s.reopenBtn) s.reopenBtn.hidden = !s.chromeClosed;
         s.syncBackTop();
         s.placeOnFooter();
+        // The footer keeps its slots clear of the bar, whose width just changed.
+        if (window.__site && typeof window.__site.fitFooterDock === "function") window.__site.fitFooterDock();
     };
 
     s.placeOnFooter = function () {
         let footer = document.querySelector("[data-site-footer]");
         let root = document.getElementById("page-root");
         let shell = footer && footer.closest(".site-shell");
+        let dock = footer && footer.querySelector("[data-footer-dock]");
         let lift = 0;
-        if (footer && root && shell) {
-            let dock = footer.querySelector("[data-home-dock]");
-            let line = dock
-                ? dock.getBoundingClientRect().bottom
-                : footer.getBoundingClientRect().bottom - (parseFloat(getComputedStyle(footer).paddingBottom) || 0);
+        if (dock && root && shell) {
+            let line = dock.getBoundingClientRect().bottom;
             // The sticky track starts after #page-root; the shell's bottom margin
             // collapses through #page-root onto it, so add it back.
             let spot = root.getBoundingClientRect().bottom + (parseFloat(getComputedStyle(shell).marginBottom) || 0);
@@ -52,60 +58,6 @@ export function definePlace(s) {
         s.player.style.setProperty("--player-lift", lift + "px");
         // player.css sets bottom to --player-float minus --player-lift.
         s.floatGap = (parseFloat(getComputedStyle(s.player).bottom) || 0) + lift;
-        s.syncFloating();
-        s.placeFooterRow(footer);
-    };
-
-    s.cssPx = function (value) {
-        if (!value) return 0;
-        value = String(value).trim();
-        if (value.slice(-3) === "rem") {
-            return parseFloat(value) * parseFloat(getComputedStyle(document.documentElement).fontSize);
-        }
-        return parseFloat(value) || 0;
-    };
-
-    s.placeFooterRow = function (footer) {
-        let shifter = footer && footer.querySelector("[data-home-dock], .page-footer__skifree");
-        let title = s.player.querySelector(".player-title");
-        if (!s.isMobileViewport() || !footer || !shifter) {
-            s.player.classList.remove("site-player--row");
-            s.player.style.removeProperty("--player-left");
-            s.player.style.removeProperty("--back-top-left");
-            if (shifter) shifter.style.marginLeft = "";
-            if (title) title.style.width = "";
-            return;
-        }
-        // Reset before measuring; hidden buttons keep their slots, so the bar is
-        // the same width floating or parked.
-        if (title) title.style.width = "";
-        shifter.style.marginLeft = "0px";
-        let visual = shifter.querySelector("[data-visitor-count]") || shifter.querySelector(".sprite-anim") || shifter;
-        let vis = visual.getBoundingClientRect();
-        let foot = footer.getBoundingClientRect();
-        let leadW = Math.max(vis.width, s.cssPx(getComputedStyle(footer).getPropertyValue("--footer-lead-w")));
-        let playerW = s.bar.getBoundingClientRect().width;
-        let upW = s.cssPx(getComputedStyle(s.player).getPropertyValue("--player-back-top-size")) || 26;
-        let prefer = s.cssPx(getComputedStyle(footer).getPropertyValue("--footer-row-gap")) || 20;
-        let minGap = 8;
-        let slack = foot.width - leadW - playerW - upW;
-        // Too narrow for the row: shrink the track title (it marquees) before the gaps.
-        if (title && slack < minGap * 2) {
-            let titleW = title.getBoundingClientRect().width;
-            title.style.width = Math.max(24, Math.floor(titleW - (minGap * 2 - slack))) + "px";
-            playerW = s.bar.getBoundingClientRect().width;
-            slack = foot.width - leadW - playerW - upW;
-        }
-        let gap = Math.max(0, Math.min(prefer, slack / 2));
-        let group = leadW + playerW + upW + gap * 2;
-        let start = foot.left + (foot.width - group) / 2;
-        let nudge = visual.closest(".page-footer__skifree")
-            ? s.cssPx(getComputedStyle(footer).getPropertyValue("--footer-yeti-nudge"))
-            : 0;
-        shifter.style.marginLeft = Math.round(start + (leadW - vis.width) / 2 - nudge - vis.left) + "px";
-        let playerLeft = Math.round(start + leadW + gap);
-        s.player.style.setProperty("--player-left", playerLeft + "px");
-        s.player.style.setProperty("--back-top-left", Math.round(playerLeft + playerW + gap) + "px");
-        s.player.classList.add("site-player--row");
+        s.syncParked();
     };
 }

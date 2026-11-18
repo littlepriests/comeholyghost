@@ -1,26 +1,55 @@
 /*
-  One player on every page. Desktop: Grundo above the stop button, 1rem in
-  from the page's right edge. The ↑ sits halfway between the skip button
-  and the window edge on desktop. On a phone, while floating, play/pause
-  sits in the right gutter the same distance from the top of the screen as
-  the ↑ sits from the bottom; once parked, the counter or yeti, the bar,
-  and the ↑ share the footer row. The ↑ slot stays reserved.
+  One player on every page, with the same behavior everywhere. The bar and the
+  ↑ are mirrors of each other:
+
+    ↑    sits in the "↑ column" (a strip in the right gutter), --player-float
+         above the window bottom, and rides the page onto the footer line.
+    bar  while you read (floating) docks in that same column, --player-float
+         below the window top, and shows only play. At the end of the page
+         (parked) it moves to the footer's left gutter, mirrored: stop is
+         centered on the mirrored ↑ column, play and skip beside it, the
+         bottom edge on the footer line like the ↑.
+
+  Both placements are offsets inside the same sticky track, so moving between
+  them is one CSS transition (.site-player--live), with no JS animation.
+  Hidden controls keep their slots. Phone: the same placements with smaller
+  circles. Every glyph is --player-glyph-fill of its circle. Grundo is a
+  footer pet (footer-dock.css).
 
   #site-player is a zero-height sticky track after #page-root. The browser
   floats it --player-float above the window bottom and lets it ride the page
   once the footer line arrives; player.js only measures --player-lift (page
   end to footer line) when the layout changes, never on scroll.
 */
+html,
+body {
+    /* Hidden controls keep their slots and can sit past the window edge. */
+    overflow-x: clip;
+}
+
 #site-player {
-    /* 100% of the track = the window without its scrollbar.
-       The player is site-wide chrome; it uses the SITEWIDE column (53rem)
-       directly so it stays at the same viewport position on every page.
-       Do NOT use var(--middle-column) here — the homepage overrides that
-       to 38rem, which would cause the bar to jump 120px on every navigation. */
-    --player-edge-right: calc((100% - min(53rem, calc(100vw - 2 * var(--page-gutter)))) / 2 + 1rem);
-    --player-float: 1rem;
-    --player-back-top-size: 1.65rem;
+    /* 100% of the track = the window without its scrollbar. --middle-column
+       is the same on every page, so the bar holds still across SPA nav. A
+       window too narrow for the gutter slides the buttons inside the column,
+       but never so far that the ↑ (centered in this edge) leaves the window. */
+    --player-button-size: 2rem;
     --player-button-gap: 0.25rem;
+    --player-buttons-w: calc(3 * var(--player-button-size) + 2 * var(--player-button-gap));
+    --player-back-top-size: 1.65rem;
+    /* Every player glyph (play, pause, stop, skip, ↑) is this fraction of its
+       circle's diameter, so all of them have the same ring of empty space.
+       The icons' viewBoxes are cropped to their artwork (icon.html). */
+    --player-glyph-fill: 0.4;
+    --player-edge-right: max(calc(var(--player-back-top-size) + 1rem), calc((100% - var(--middle-column)) / 2 - var(--player-buttons-w)));
+    /* The ↑ column: its center is this far from the window's right edge. The
+       parked bar mirrors it, this far from the left edge. */
+    --player-col-x: calc(var(--player-edge-right) / 2);
+    --player-float: 1rem;
+    /* What the bar anchors on: play's center while floating, stop's center
+       (the middle button) when parked. The closed ♡ anchors on itself. */
+    --player-bar-h: var(--player-button-size);
+    --player-float-anchor: calc(var(--player-button-size) / 2);
+    --player-park-anchor: calc(1.5 * var(--player-button-size) + var(--player-button-gap));
     position: sticky;
     bottom: calc(var(--player-float) - var(--player-lift, 0px));
     translate: 0 calc(-1 * var(--player-lift, 0px));
@@ -29,14 +58,36 @@
     pointer-events: none;
 }
 
+#site-player.site-player--closed {
+    --player-bar-h: 1.5rem;
+    --player-float-anchor: 0.75rem;
+    --player-park-anchor: 0.75rem;
+}
+
+/* Floating (the default, so the first paint is right): top of the window, in
+   the ↑ column. The track sits --player-float above the window bottom, so
+   this offset puts the bar's top the same distance below the window top; the
+   lift translate cancels out of the visual position. */
 #site-player .player-bar {
     position: absolute;
-    right: var(--player-edge-right);
-    bottom: 0;
+    left: calc(100% - var(--player-col-x) - var(--player-float-anchor));
+    bottom: calc(100dvh - 2 * var(--player-float) - var(--player-bar-h));
     display: flex;
     align-items: center;
     gap: 0.65rem;
-    pointer-events: auto;
+    /* Hidden controls keep their slots; only the buttons take the pointer. */
+    pointer-events: none;
+}
+
+/* Parked: on the footer line, mirrored to the left gutter. */
+#site-player.site-player--parked .player-bar {
+    left: max(0.5rem, calc(var(--player-col-x) - var(--player-park-anchor)));
+    bottom: 0;
+}
+
+/* Moving between the two is animated, but never on the first paint. */
+#site-player.site-player--live .player-bar {
+    transition: left 0.5s cubic-bezier(0.3, 0.7, 0.2, 1), bottom 0.5s cubic-bezier(0.3, 0.7, 0.2, 1);
 }
 
 #site-player [hidden],
@@ -51,14 +102,9 @@
     gap: 0.65rem;
 }
 
-#site-player .player-chrome__dock {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-}
-
 #site-player .player-title {
+    /* Not shown yet: the track title moves above the parked player next. */
+    display: none;
     margin: 0;
     width: 4.25rem;
     overflow: hidden;
@@ -95,13 +141,17 @@
 }
 
 #site-player button {
+    /* The circle's diameter; the ↑ sets its own. */
+    --player-d: var(--player-button-size);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2rem;
-    height: 2rem;
+    box-sizing: border-box;
+    width: var(--player-d);
+    height: var(--player-d);
     margin: 0;
     padding: 0;
+    pointer-events: auto;
     font-family: var(--chip-font);
     font-weight: 600;
     color: var(--chip-fg);
@@ -117,10 +167,29 @@
     box-shadow: var(--chip-glow);
 }
 
-#site-player button i,
+/* While audio is playing, the toggle breathes so the button reads as on. */
+#site-player [data-player-toggle].is-playing {
+    animation: player-playing-pulse 2.8s ease-in-out infinite;
+}
+
+@keyframes player-playing-pulse {
+    0%,
+    100% {
+        box-shadow: 0 0 0 transparent;
+    }
+    50% {
+        box-shadow: 0 0 14px color-mix(in srgb, var(--highlight) 70%, transparent);
+    }
+}
+
 #site-player button .site-icon {
-    font-size: 0.75rem;
-    line-height: 1;
+    display: block;
+    flex: none;
+    width: calc(var(--player-glyph-fill) * var(--player-d));
+    height: calc(var(--player-glyph-fill) * var(--player-d));
+    /* Moves a mark whose weight isn't its box's center onto the circle's center.
+       transform, not the translate property: the stylesheet minifier drops that. */
+    transform: translate(calc(var(--glyph-nudge-x, 0) * 100%), calc(var(--glyph-nudge-y, 0) * 100%));
 }
 
 #site-player [data-player-toggle] .player-toggle-icon {
@@ -131,24 +200,24 @@
 }
 
 #site-player .player-back-top {
+    --player-d: var(--player-back-top-size);
     position: absolute;
-    right: calc(var(--player-edge-right) / 2 - var(--player-back-top-size) / 2);
+    right: calc(var(--player-col-x) - var(--player-back-top-size) / 2);
     bottom: 0;
     z-index: 2;
-    pointer-events: auto;
-    width: var(--player-back-top-size);
-    height: var(--player-back-top-size);
-    font-size: 1rem;
-    font-weight: 600;
-    line-height: 1;
     border-radius: 50%;
     opacity: 1;
-    box-sizing: border-box;
 }
 
-#site-player .player-back-top span {
-    display: block;
-    line-height: 1;
+/* Until you have scrolled a little. Not [hidden], so its box stays measurable
+   (footer-dock.js keeps the pets clear of it). */
+#site-player .player-back-top.is-away {
+    opacity: 0;
+    visibility: hidden;
+}
+
+#site-player .player-back-top {
+    transition: opacity 0.2s ease, visibility 0.2s, border-color 0.15s, box-shadow 0.15s;
 }
 
 #site-player .player-back-top:is(:hover, :focus-visible) {
@@ -184,65 +253,8 @@ body {
     position: relative;
 }
 
-/* Dock pet (Grundo) — above the stop button on desktop. */
-#site-player .player-dock-pet {
-    --dock-pet-size: 100px;
-    display: none;
-    align-items: flex-end;
-    justify-content: center;
-    flex: none;
-    position: relative;
-    line-height: 0;
-    width: var(--dock-pet-size);
-    height: var(--dock-pet-size);
-    pointer-events: auto;
-    cursor: help;
-}
-
-#site-player .player-dock-pet__strip {
-    display: block;
-    position: absolute;
-    left: 50%;
-    bottom: 0;
-    line-height: 0;
-    /* Native cell is 56px tall; scale() needs a unitless ratio (px/px). */
-    transform: translateX(-50%) scale(calc(var(--dock-pet-size) / 56px));
-    transform-origin: bottom center;
-}
-
-#site-player .player-dock-pet__strip .sprite-anim {
-    display: block;
-}
-
-/* Idle is a one-frame static PNG (.is-static). Kick stays frozen until click. */
-#site-player .player-dock-pet__strip--kick .sprite-anim:not(.is-kick-play) {
-    animation: none !important;
-    background-position: 0 0 !important;
-}
-
-/* Kick is a one-shot; restart by toggling .is-kick-play in JS. */
-#site-player .player-dock-pet__strip--kick .sprite-anim.is-kick-play {
-    animation-name: sprite-anim-play-hold;
-    animation-duration: calc(var(--sprite-frames, 2) / var(--sprite-fps, 8) * 1s);
-    animation-timing-function: steps(var(--sprite-steps, 1), end);
-    animation-iteration-count: 1;
-    animation-fill-mode: forwards;
-}
-
-/* Hearts spill from Grundo's feet on the back-to-top stomp. */
-#site-player .player-dock-pet__hearts {
-    position: absolute;
-    left: 50%;
-    bottom: 0.15rem;
-    width: 0;
-    height: 0;
-    overflow: visible;
-    pointer-events: none;
-    z-index: 6;
-}
-
-/* Each heart's path (--dx, --lift, --dx2, --fall) is set inline in player.html. */
-#site-player .player-dock-pet__heart {
+/* Grundo's hearts (footer/grundo.html). Each heart's path (--dx, --lift, --dx2, --fall) is set inline. */
+.footer-grundo__heart {
     position: absolute;
     left: 0;
     top: 0;
@@ -262,7 +274,7 @@ body {
     will-change: transform, opacity;
 }
 
-#site-player .player-dock-pet__heart.is-bright {
+.footer-grundo__heart.is-bright {
     color: var(--heart-bright);
     font-size: 1.2rem;
     text-shadow:
@@ -273,7 +285,7 @@ body {
         0 0 40px rgb(255 40 80 / 0.55);
 }
 
-#site-player .player-dock-pet__hearts.is-stomp .player-dock-pet__heart {
+.footer-grundo__hearts.is-stomp .footer-grundo__heart {
     animation: player-dock-heart-spill var(--hspurt, 1.8s) cubic-bezier(0.2, 0.75, 0.2, 1) var(--hd, 0s) 1 both;
 }
 
@@ -342,7 +354,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    #site-player .player-dock-pet__hearts.is-stomp .player-dock-pet__heart {
+    .footer-grundo__hearts.is-stomp .footer-grundo__heart {
         animation: none;
         opacity: 0;
     }
@@ -417,87 +429,47 @@ body {
     }
 }
 
-@media (min-width: 45rem) {
-    /* Desktop, every page: Grundo sits above the stop button. */
-    #site-player .player-chrome {
-        flex-direction: column;
-        gap: 0.15rem;
+/* Every page, every width: while floating only play/pause (and the ↑) show;
+   stop and skip appear as the bar settles into the footer. visibility keeps
+   their slots, so the bar is the same size either way. */
+#site-player :is([data-player-stop], [data-player-skip]) {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s;
+}
+
+#site-player.site-player--parked :is([data-player-stop], [data-player-skip]) {
+    opacity: 1;
+    visibility: visible;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #site-player.site-player--live .player-bar,
+    #site-player .player-back-top,
+    #site-player :is([data-player-stop], [data-player-skip]) {
+        transition: none;
     }
 
-    #site-player .player-chrome__dock {
-        display: grid;
-        grid-template-columns: auto auto;
-        justify-items: center;
-        align-items: end;
-        gap: 0.15rem 0.35rem;
-    }
-
-    /* Button column, so the pet stands on the stop button (middle of the three). */
-    #site-player .player-dock-pet {
-        display: flex;
-        grid-area: 1 / 2;
-    }
-
-    #site-player .player-title {
-        grid-area: 2 / 1;
-    }
-
-    #site-player .player-chrome__buttons {
-        grid-area: 2 / 2;
+    #site-player [data-player-toggle].is-playing {
+        animation: none;
+        box-shadow: 0 0 8px color-mix(in srgb, var(--highlight) 45%, transparent);
     }
 }
 
-/* Phone: player circles match the ↑. While floating, play/pause mirrors to
-   the top of the screen and the ↑ keeps the bottom corner. Parked, JS lays
-   out the footer row (.site-player--row). */
+/* Phone: the same placements, floating and parked, with smaller circles
+   (matching the ↑) and the ↑ column centered in the right page gutter. The
+   parked bar's mirror spot is past the window edge there, so it holds at the
+   same 0.5rem clamp a narrow desktop window uses. */
 @media (max-width: 44.99rem) {
-    html,
-    body {
-        overflow-x: clip;
-    }
-
     #site-player {
-        /* Right edge of the column centered in the right page gutter. */
-        --player-column-right: calc((var(--page-gutter) - var(--player-back-top-size)) / 2);
+        --player-col-x: calc(var(--page-gutter) / 2);
+        --player-button-size: var(--player-back-top-size);
         --player-float: max(0.75rem, env(safe-area-inset-bottom));
         z-index: 40;
     }
 
     #site-player .player-bar {
-        right: var(--player-column-right);
         gap: 0.5rem;
-    }
-
-    #site-player .player-back-top {
-        right: var(--player-column-right);
-        bottom: 0;
-    }
-
-    /* Stop and skip keep their slots while hidden (so the bar's width never
-       changes); push them past the window edge so play lands in the column.
-       The track already sits --player-float above the window bottom, so this
-       bottom offset puts play's top edge that same distance below the window
-       top. The lift translate cancels out of the visual position. The hidden
-       title must not catch taps on the text beside it. */
-    #site-player.site-player--floating:not(.site-player--closed) .player-bar {
-        bottom: calc(100dvh - 2 * var(--player-float) - var(--player-back-top-size));
-        right: calc(var(--player-column-right) - 2 * (var(--player-back-top-size) + var(--player-button-gap)));
-        pointer-events: none;
-    }
-
-    #site-player.site-player--floating:not(.site-player--closed) [data-player-toggle] {
-        pointer-events: auto;
-    }
-
-    #site-player.site-player--row:not(.site-player--floating) .player-bar {
-        left: var(--player-left);
-        right: auto;
-    }
-
-    #site-player.site-player--row:not(.site-player--floating) .player-back-top {
-        left: var(--back-top-left);
-        right: auto;
-        bottom: 0;
     }
 
     #site-player.site-player--closed .player-bar {
@@ -506,40 +478,5 @@ body {
 
     #site-player .player-chrome {
         gap: 0.5rem;
-    }
-
-    #site-player button:not(.player-reopen, .player-back-top) {
-        box-sizing: border-box;
-        width: var(--player-back-top-size);
-        height: var(--player-back-top-size);
-    }
-
-    /* While floating only play/pause (and the ↑) show. */
-    #site-player :is(.player-title, [data-player-stop], [data-player-skip]) {
-        transition: opacity 0.2s ease, visibility 0.2s;
-    }
-
-    #site-player.site-player--floating :is(.player-title, [data-player-stop], [data-player-skip]) {
-        opacity: 0;
-        visibility: hidden;
-    }
-}
-
-@media (max-width: 44.99rem) and (prefers-reduced-motion: reduce) {
-    #site-player :is(.player-title, [data-player-stop], [data-player-skip]) {
-        transition: none;
-    }
-}
-
-/* ── Desktop: minimal bar on /blog/ article pages while floating ──────────────
-   Same principle as the mobile floating rule: only play/pause is visible
-   while reading. The full bar (Grundo, title, back, stop, skip) returns
-   when the player parks in the footer row at the end of the article.
-   display:none collapses the 2×2 grid cells so no blank box is left behind
-   (visibility:hidden would preserve the 100px Grundo height). */
-@media (min-width: 45rem) {
-    body.section-blog.kind-page #site-player.site-player--floating .player-dock-pet,
-    body.section-blog.kind-page #site-player.site-player--floating :is(.player-title, [data-player-back], [data-player-stop], [data-player-skip]) {
-        display: none;
     }
 }

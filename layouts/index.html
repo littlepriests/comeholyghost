@@ -93,9 +93,10 @@ jgs   `'-..._____.-`</pre>
             {{- partial "page-buttons.html" . -}}
         </main>
 
-        {{- partial "site-footer.html" (dict "page" . "variant" "home" "class" "home-footer") }}
+        {{- partial "site-footer.html" (dict "page" . "variant" "home") }}
     </div>
     {{- partial "home-clouds.html" . -}}
+    {{ partial "js.html" "footer-dock" }}
     {{ partial "js.html" "home" }}
     {{ partial "js.html" "article-media" }}
     </div>

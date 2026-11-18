@@ -1,4 +1,4 @@
-/* Main menu: Misdreavus | links (last link + Pancham glued). */
+/* Main menu: Misdreavus | links (last link + Pancham glued). Centered in the column on every page. */
 
 .main-nav {
     /* Native Misdreavus frame (50×100); Pancham centers in the same row height. */
@@ -15,6 +15,7 @@
     width: fit-content;
     max-width: 100%;
     min-width: 0;
+    margin-inline: auto;
     box-sizing: border-box;
 }
 

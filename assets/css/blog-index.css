@@ -3,7 +3,6 @@
 .blog-index {
     font-family: var(--font-site, "Fira Mono", ui-monospace, monospace);
     text-transform: lowercase;
-    max-width: 36rem;
 }
 
 .blog-index__heading {
@@ -140,10 +139,6 @@
 }
 
 @media (max-width: 44.99rem) {
-    .blog-index {
-        max-width: 100%;
-    }
-
     .blog-entry__figure {
         max-width: 100%;
     }

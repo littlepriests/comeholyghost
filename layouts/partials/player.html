@@ -1,8 +1,11 @@
 {{- /*
-  Grundo beside the player. Idle 42×56, kick 46×56, no scale (native pixels). Desktop only, from 45rem.
+  One player on every page: play / stop / skip, and the ↑. The bar and the ↑
+  are mirrors. The ↑ sits in the right gutter at the bottom; the bar docks in
+  that same column at the top while you read (only play shows), and at the end
+  of the page moves to the footer's left gutter with stop on the mirrored ↑
+  spot and play and skip beside it. The track title is not shown yet.
+  Grundo is a footer pet now (footer/grundo.html), not part of the player.
 */ -}}
-{{- $idle := partial "sprite-by-id.html" "grundo-idle" -}}
-{{- $kick := partial "sprite-by-id.html" "grundo-kick" -}}
 <div id="site-player"{{ with site.Params.player.playlist }} data-playlist="{{ . }}"{{ end }}>
     <div class="player-bar" data-player-bar>
         {{- $reopenTip := partial "tip-text.html" (dict "key" "player_reopen" "fallback" "show player") -}}
@@ -10,62 +13,36 @@
             <span aria-hidden="true">♡</span>
         </button>
         <div class="player-chrome" data-player-chrome>
-            <div class="player-chrome__dock">
-                {{- if or $idle $kick }}
-                {{- $grundoTip := partial "tip-text.html" (dict "key" "grundo" "fallback" "") -}}
-                <div class="player-dock-pet{{ with $grundoTip }} site-tip{{ end }}" data-player-dock-pet{{ with $grundoTip }} data-tip="{{ . }}"{{ end }} aria-hidden="true">
-                    {{- with $idle }}
-                    <span class="player-dock-pet__strip player-dock-pet__strip--idle" data-player-dock-idle>
-                        {{- partial "sprite.html" (merge . (dict "frames" 1 "fps" 1 "alt" "" "scale" "")) -}}
+            <p class="player-title" data-player-title><span data-player-title-text>Playlist</span></p>
+            {{- $playTip := partial "tip-text.html" (dict "key" "player_play" "fallback" "play") -}}
+            {{- $stopTip := partial "tip-text.html" (dict "key" "player_stop" "fallback" "hide player") -}}
+            {{- $skipTip := partial "tip-text.html" (dict "key" "player_skip" "fallback" "skip") -}}
+            <div class="player-chrome__buttons">
+                <button type="button" class="site-tip" data-player-toggle aria-label="{{ $playTip }}" data-tip="{{ $playTip }}">
+                    <span class="player-toggle-icon player-toggle-icon--play" data-player-icon-play aria-hidden="true">
+                        {{ partial "icon.html" (dict "name" "play") }}
                     </span>
-                    {{- end }}
-                    {{- with $kick }}
-                    <span class="player-dock-pet__strip player-dock-pet__strip--kick" data-player-dock-kick hidden>
-                        {{- /* Hidden + static until click adds .is-kick-play for one cycle. */ -}}
-                        {{- partial "sprite.html" (merge . (dict "fps" 8 "alt" "" "scale" "")) -}}
+                    <span class="player-toggle-icon player-toggle-icon--playing" data-player-icon-playing hidden aria-hidden="true">
+                        {{ partial "icon.html" (dict "name" "volume") }}
                     </span>
-                    {{- end }}
-                    {{- /* Hand-tuned spill paths for the back-to-top stomp (player.css .is-stomp).
-                         Paths live in data/player/hearts.yaml. */ -}}
-                    <span class="player-dock-pet__hearts" data-player-dock-hearts>
-                        {{- range (hugo.Data).player.hearts -}}
-                        <span class="player-dock-pet__heart{{ if .bright }} is-bright{{ end }}" style="--dx:{{ .dx }};--lift:{{ .lift }};--dx2:{{ .dx2 }};--fall:{{ .fall }};--hd:{{ .hd }};--hspurt:{{ .hspurt }};--rot:{{ .rot }}">♡</span>
-                        {{- end }}
-                    </span>
-                </div>
-                {{- end }}
-                <p class="player-title" data-player-title><span data-player-title-text>Playlist</span></p>
-                {{- $playTip := partial "tip-text.html" (dict "key" "player_play" "fallback" "play") -}}
-                {{- $stopTip := partial "tip-text.html" (dict "key" "player_stop" "fallback" "hide player") -}}
-                {{- $skipTip := partial "tip-text.html" (dict "key" "player_skip" "fallback" "skip") -}}
-                <div class="player-chrome__buttons">
-                    <button type="button" class="site-tip" data-player-toggle aria-label="{{ $playTip }}" data-tip="{{ $playTip }}">
-                        <span class="player-toggle-icon player-toggle-icon--play" data-player-icon-play aria-hidden="true">
-                            {{ partial "icon.html" (dict "name" "play") }}
-                        </span>
-                        <span class="player-toggle-icon player-toggle-icon--playing" data-player-icon-playing hidden aria-hidden="true">
-                            {{ partial "icon.html" (dict "name" "volume") }}
-                        </span>
-                    </button>
-                    <button type="button" class="site-tip" data-player-stop aria-label="{{ $stopTip }}" data-tip="{{ $stopTip }}">
-                        {{ partial "icon.html" (dict "name" "stop") }}
-                    </button>
-                    <button type="button" class="site-tip" data-player-skip aria-label="{{ $skipTip }}" data-tip="{{ $skipTip }}">
-                        {{ partial "icon.html" (dict "name" "forward") }}
-                    </button>
-                </div>
+                </button>
+                <button type="button" class="site-tip" data-player-stop aria-label="{{ $stopTip }}" data-tip="{{ $stopTip }}">
+                    {{ partial "icon.html" (dict "name" "stop") }}
+                </button>
+                <button type="button" class="site-tip" data-player-skip aria-label="{{ $skipTip }}" data-tip="{{ $skipTip }}">
+                    {{ partial "icon.html" (dict "name" "forward") }}
+                </button>
             </div>
         </div>
     </div>
     {{- $backTip := partial "tip-text.html" (dict "key" "player_back_top" "fallback" "back to top") -}}
     <button
         type="button"
-        class="player-back-top site-tip"
+        class="player-back-top site-tip is-away"
         data-player-back-top
         aria-label="{{ $backTip }}"
-        data-tip="{{ $backTip }}"
-        hidden>
-        <span aria-hidden="true">↑</span>
+        data-tip="{{ $backTip }}">
+        {{ partial "icon.html" (dict "name" "up") }}
     </button>
 </div>
 {{ partial "js.html" "player" }}

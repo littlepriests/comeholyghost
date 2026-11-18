@@ -1,45 +1,61 @@
 /**
- * Back-to-top sequence. Desktop: Grundo kicks, hearts spill from the dock, a
- * page-wide heart fountain starts, then the page scrolls. Phones and reduced
- * motion skip straight to the fountain (or the scroll).
+ * Back-to-top sequence. If Grundo (footer/grundo.html, the right footer slot on
+ * inner pages) is on screen, he kicks and hearts spill from his feet; then a
+ * page-wide heart fountain starts and the page scrolls. Otherwise (homepage,
+ * phones, reading mid-page, reduced motion) it goes straight to the fountain
+ * (or the scroll). Grundo is looked up on each use because SPA nav swaps the footer.
  */
 export function definePet(s) {
     s.isMobileViewport = function () {
         return s.mobileQuery.matches;
     };
 
+    s.grundo = function () {
+        let el = document.querySelector("[data-footer-grundo]");
+        if (!el) return null;
+        let kick = el.querySelector("[data-grundo-kick]");
+        return {
+            el: el,
+            idle: el.querySelector("[data-grundo-idle]"),
+            kick: kick,
+            kickStrip: kick && kick.querySelector(".sprite-anim"),
+            hearts: el.querySelector("[data-grundo-hearts]"),
+        };
+    };
+
     s.showDockIdle = function () {
         s.dockPetKicking = false;
         window.clearTimeout(s.dockPetTimer);
-        if (s.dockIdle) s.dockIdle.removeAttribute("hidden");
-        if (s.dockKick) s.dockKick.setAttribute("hidden", "");
-        if (s.dockKickStrip) s.dockKickStrip.classList.remove("is-kick-play");
+        let g = s.grundo();
+        if (!g) return;
+        if (g.idle) g.idle.removeAttribute("hidden");
+        if (g.kick) g.kick.setAttribute("hidden", "");
+        if (g.kickStrip) g.kickStrip.classList.remove("is-kick-play");
     };
 
-    s.dockKickTiming = function () {
+    s.dockKickTiming = function (g) {
         let fps = 8;
         let frames = 3;
         try {
-            if (s.dockKickStrip) {
-                fps = parseFloat(getComputedStyle(s.dockKickStrip).getPropertyValue("--sprite-fps")) || 8;
-                frames = parseFloat(getComputedStyle(s.dockKickStrip).getPropertyValue("--sprite-frames")) || 3;
+            if (g.kickStrip) {
+                fps = parseFloat(getComputedStyle(g.kickStrip).getPropertyValue("--sprite-fps")) || 8;
+                frames = parseFloat(getComputedStyle(g.kickStrip).getPropertyValue("--sprite-frames")) || 3;
             }
         } catch (error) {}
         return { fps: fps, frames: frames };
     };
 
-    s.playDockKickThenIdle = function (onIdle) {
-        if (!s.dockIdle || !s.dockKick) return;
+    s.playDockKickThenIdle = function (g, onIdle) {
         window.clearTimeout(s.dockPetTimer);
         s.dockPetKicking = true;
-        s.dockIdle.setAttribute("hidden", "");
-        s.dockKick.removeAttribute("hidden");
-        if (s.dockKickStrip) {
-            s.dockKickStrip.classList.remove("is-kick-play");
-            void s.dockKickStrip.offsetWidth; // reflow so the animation restarts
-            s.dockKickStrip.classList.add("is-kick-play");
+        g.idle.setAttribute("hidden", "");
+        g.kick.removeAttribute("hidden");
+        if (g.kickStrip) {
+            g.kickStrip.classList.remove("is-kick-play");
+            void g.kickStrip.offsetWidth; // reflow so the animation restarts
+            g.kickStrip.classList.add("is-kick-play");
         }
-        let timing = s.dockKickTiming();
+        let timing = s.dockKickTiming(g);
         // One kick cycle plus a short hold on the last frame.
         let kickMs = Math.max(320, Math.round((timing.frames / timing.fps) * 1000) + 120);
         s.dockPetTimer = window.setTimeout(function () {
@@ -49,7 +65,6 @@ export function definePet(s) {
     };
 
     s.syncDockPet = function () {
-        if (!s.dockIdle && !s.dockKick) return;
         // Don't clobber an in-progress kick (pauseMedia + audio "pause" both call show).
         if (!s.dockPetKicking) s.showDockIdle();
     };
@@ -62,15 +77,14 @@ export function definePet(s) {
         }
     };
 
-    s.burstDockHearts = function () {
-        if (!s.dockHearts) return;
-        if (s.prefersReducedMotion()) return;
+    s.burstDockHearts = function (g) {
+        if (!g.hearts || s.prefersReducedMotion()) return;
         window.clearTimeout(s.dockHeartsTimer);
-        s.dockHearts.classList.remove("is-stomp");
-        void s.dockHearts.offsetWidth; // reflow so the animation restarts
-        s.dockHearts.classList.add("is-stomp");
+        g.hearts.classList.remove("is-stomp");
+        void g.hearts.offsetWidth; // reflow so the animation restarts
+        g.hearts.classList.add("is-stomp");
         s.dockHeartsTimer = window.setTimeout(function () {
-            s.dockHearts.classList.remove("is-stomp");
+            g.hearts.classList.remove("is-stomp");
         }, 2800);
     };
 
@@ -116,27 +130,29 @@ export function definePet(s) {
         }, 3400);
     };
 
+    /** Grundo kicks only when he is rendered (CSS hides him below 45rem) and in the window. */
+    s.grundoOnScreen = function (g) {
+        if (!g || !g.idle || !g.kick || !g.el.getClientRects().length) return false;
+        let box = g.el.getBoundingClientRect();
+        return box.bottom > 0 && box.top < window.innerHeight;
+    };
+
     s.stompDockPetThen = function (done) {
         let finish = typeof done === "function" ? done : function () {};
-        // Grundo's dock is desktop-only (CSS shows it at >= 45rem); the ↑ only
-        // exists while the chrome is open, so no closed-state check is needed.
-        let canStomp = !s.isMobileViewport()
-            && s.dockIdle
-            && s.dockKick
-            && !s.prefersReducedMotion();
+        let g = s.grundo();
 
         function afterPet() {
             s.burstPageHeartsThen(finish);
         }
 
-        if (!canStomp) {
+        if (!s.grundoOnScreen(g) || s.prefersReducedMotion()) {
             afterPet();
             return;
         }
         window.clearTimeout(s.dockHeartsTimer);
-        if (s.dockHearts) s.dockHearts.classList.remove("is-stomp");
-        s.playDockKickThenIdle(function () {
-            s.burstDockHearts();
+        if (g.hearts) g.hearts.classList.remove("is-stomp");
+        s.playDockKickThenIdle(g, function () {
+            s.burstDockHearts(g);
             window.setTimeout(afterPet, 200);
         });
     };

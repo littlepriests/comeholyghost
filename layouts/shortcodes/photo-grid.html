@@ -45,7 +45,7 @@
         data-full="{{ $full }}"
         {{- with $set.fullAvif }} data-full-avif="{{ . }}"{{ end }}
         aria-label="View larger: {{ $alt }}">
-        {{ partial "responsive-img.html" (dict "set" $set "src" $full "alt" $alt "sizes" "(min-width: 36rem) 17rem, 46vw") }}
+        {{ partial "responsive-img.html" (dict "set" $set "src" $full "alt" $alt "sizes" "(min-width: 45rem) 15rem, calc(50vw - 3rem)") }}
       </button>
     {{- end -}}
   </div>

@@ -5,7 +5,7 @@ export function initHomeClouds(windowBound) {
     function placeClouds() {
         if (!root || !page) return;
         let angel = document.querySelector(".ascii-angel");
-        let footer = document.querySelector(".home-footer");
+        let footer = document.querySelector("[data-site-footer]");
         let cloudsWrap = document.querySelector(".home-clouds");
         if (!angel || !footer) return;
 

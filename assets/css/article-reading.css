@@ -3,14 +3,12 @@
   Faces come from :root --font-article (hugo.toml [params.fonts]). Sizes stay
   the site's (typography.css) so articles read at the same scale as every page.
 
-  The 40rem max-width is the reading column inside the wider --middle-column
-  shell (53rem). Figures use margin:auto; they must center in this column,
-  not the shell, or they drift right of the prose at full width.
+  The reading measure is the sitewide column (--middle-column, layout.css).
+  Do not cap the prose inside it; a capped block sits flush left.
 */
 
 .section-blog .content__header,
 .section-blog .content__body {
-    max-width: 40rem;
     font-family: var(--font-article, "Montserrat", sans-serif);
     line-height: 1.65;
     letter-spacing: .55px;

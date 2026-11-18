@@ -288,3 +288,15 @@ img {
     max-width: 100%;
     height: auto;
 }
+
+/* An image inside a sentence (render-image.html). Standalone images are .article-photo. */
+.inline-media {
+    display: inline;
+}
+
+.inline-media img {
+    display: inline;
+    max-height: 1.5em;
+    width: auto;
+    vertical-align: middle;
+}

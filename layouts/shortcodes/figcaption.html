@@ -1,35 +1,17 @@
 {{- /*
-  Figure with caption under the image.
+  Same figure as photo (partials/article-photo.html): one size, centered,
+  click to enlarge. Kept so older posts that use this name still build.
 
   {{< figcaption src="photo.png" caption="Hello" >}}
   {{< figcaption src="photo.png" alt="Hello" >}}Caption text{{< /figcaption >}}
-
-  src may be a page resource, or a path under assets/ (images/nongrid/…).
-  Those are published at 800 and 1280. The file you dropped is not.
 */ -}}
 {{- $src := .Get "src" | default (.Get 0) -}}
 {{- if not $src -}}
   {{- errorf "figcaption shortcode on %q: missing src" .Page.Path -}}
 {{- end -}}
-{{- $alt := .Get "alt" | default "" -}}
-{{- $caption := .Get "caption" | default (strings.TrimSpace .Inner) -}}
-{{- $img := partial "image-resource.html" (dict "page" .Page "src" $src) -}}
-{{- $set := dict -}}
-{{- $href := $src | relURL -}}
-{{- if and $img (ge $img.Width 1) -}}
-  {{- $set = partial "image-set.html" (dict "res" $img "widths" (slice 800 1280)) -}}
-  {{- $href = $set.src -}}
-{{- else if $img -}}
-  {{- $href = $img.RelPermalink -}}
-{{- end -}}
-{{- if and (not $alt) $caption -}}
-  {{- $alt = $caption | plainify -}}
-{{- end -}}
-<figure class="article-figure">
-  <div class="article-figure__frame">
-    {{ partial "responsive-img.html" (dict "set" $set "src" $href "alt" $alt "sizes" "(min-width: 40rem) 40rem, 100vw") }}
-  </div>
-  {{- with $caption }}
-  <figcaption class="article-figure__caption">{{ . | $.Page.RenderString }}</figcaption>
-  {{- end }}
-</figure>
+{{- partial "article-photo.html" (dict
+  "page" .Page
+  "src" $src
+  "alt" (.Get "alt")
+  "caption" (.Get "caption" | default (strings.TrimSpace .Inner))
+) -}}

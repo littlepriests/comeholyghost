@@ -1,11 +1,18 @@
 /*
-  One shell for every layout (.page, photobook, guestbook, homepage):
-  a single centered column, max-width --middle-column (default 53rem).
-  Header and footer span the shell. --page-gutter is the only side
-  inset: on a phone it is wide enough to hold the stacked player and ↑.
-  Tokens: --page-gutter → --middle-column → shell width, player edge,
-  backdrop sizing all read --middle-column. Override it on body.* to
-  give a specific page a different column width with everything in sync.
+  Page model, every layout (baseof.html pages and the homepage):
+
+    | gutter |  header  nav centered in the column   | gutter          |
+    |        |  main    fills the column; images,    |                 |
+    |        |          figures, and grids center    |                 |
+    |        |  footer  lead centered (yeti or dock) | player  ↑       |
+
+  --middle-column is the one width. No page overrides it, so the column,
+  nav, footer, and player sit in the same place on every page and SPA nav
+  never shifts them. Anything narrower inside the column centers with
+  margin-inline: auto; nothing caps a block and leaves it flush left.
+  --page-gutter is the only side inset: on a phone it is wide enough to hold
+  the stacked player and ↑. Player edge (player.css) and corner backdrop
+  sizing (backdrop.css) read --middle-column too.
 
   Mobile breakpoint: 44.99rem (< 45rem). Used here and mirrored across
   player.css, header.css, home.css, stars.css, backdrop.css, sword.css,
@@ -15,7 +22,7 @@
 */
 :root {
     --page-gutter: 1.25rem;
-    --middle-column: min(53rem, calc(100vw - 2 * var(--page-gutter)));
+    --middle-column: min(38rem, calc(100vw - 2 * var(--page-gutter)));
 }
 
 body {
@@ -35,10 +42,6 @@ body {
 
 .site-shell > * {
     min-width: 0;
-}
-
-.site-shell > :is(header, footer) {
-    grid-column: 1 / -1;
 }
 
 .page__body {

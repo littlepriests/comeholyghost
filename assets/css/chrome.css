@@ -1,4 +1,4 @@
-/* Sitewide chrome: SPA page fade, hover tips, back-to-top link. Type lives in typography.css. */
+/* Sitewide chrome: SPA page fade, hover tips, cursor extras. Type lives in typography.css. */
 
 /* SPA nav (player/nav.js): hidden while the incoming page's CSS and fonts load. */
 #page-root.is-page-pending {
@@ -68,28 +68,6 @@ main[tabindex="-1"]:focus {
     .site-tip-float {
         transition: none;
     }
-}
-
-/* Optional end-of-article control: front matter back_to_top = true */
-.back-to-top {
-    margin: 1.75rem 0 0;
-    padding: 0;
-    text-align: center;
-}
-
-.back-to-top__link {
-    display: inline-block;
-    padding: 0.35rem 0.65rem;
-    color: var(--link, #7ec8ff);
-    font-size: 1.35rem;
-    line-height: 1;
-    text-decoration: none;
-    opacity: 0.75;
-}
-
-.back-to-top__link:hover {
-    color: var(--hover, #ffd749);
-    opacity: 1;
 }
 
 /* Ghost cursor extras (site-cursor-fx.js): soft ♡ on click + idle bubbles.

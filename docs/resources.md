@@ -32,7 +32,7 @@ Credits / provenance:
 - Clouds (`.ascii-cloud`): small version of the top cloud on [emojicombos.com/cloud-ascii-art](https://emojicombos.com/cloud-ascii-art). Placed around the ASCII angel (top over halo/wing, `# ♡` gap pair, lower flanks, smaller nest under the cat). Nest shows “sign the guestbook!” on angel hover; `home.js` voids twinkling stars behind cloud boxes.
 - Kagura / Misdreavus / Sango / SkiFree strips: fan-use test assets; publishers own the art (see Sprite animations).
 
-1. ~~**Mobile player chrome**~~ — Done. Under `44.99rem` the player is the same bar without Grundo (`applyPlayerChrome()` in `player.js`). `[x]` hides it behind a ♡ without changing play/pause. Remote playlist fetch falls back to `/audio/playlist.json`.
+1. ~~**Mobile player chrome**~~ — Done. Under `44.99rem` the player is the same bar (`applyPlayerChrome()` in `player.js`). `[x]` hides it behind a ♡ without changing play/pause. Remote playlist fetch falls back to `/audio/playlist.json`.
 1b. ~~**Mobile layout pass**~~ — Done. Owner OK on phone layout; remaining polish is orphan/widow avoidance (CSS `text-wrap` — see Typography).
 2. ~~**Desktop player + sticky header**~~ — Dropped. Current footer player behavior is what the owner wants; do not reopen.
 3. ~~**First-paint flicker (follow-up)**~~ — Done / no longer reproducing. SPA stylesheet wait, banner pending-until-decode, font preload, backdrop fade, `fonts-ready` gate. Banner still picks one image per homepage **render** from `bannerDir` (shuffle in Hugo — refresh or SPA re-enter home to see another); it is not a timed slideshow.
@@ -57,7 +57,7 @@ Horizontal strip sheets under `static/images/sprites/`, driven by CSS `steps()` 
 
 `id` (or the first positional arg) must match a `[[params.sprites]]` entry. Unknown ids render a visible missing marker. Optional `scale` overrides that entry’s default. Shortcode: `layouts/shortcodes/sprite.html` → partial `layouts/partials/sprite.html`.
 
-Home nav button: set `[params.home] logoSprite = "misdreavus"` (a sprite `id`). That replaces the green `[title] $` chip with the floating strip; clear `logoSprite` to get the chip back. Markup is `layouts/partials/header.html`. Homepage dock pets (Sango / Kagura / boomerang) are wired in `layouts/index.html` + `assets/js/home.js`, not the shortcode.
+Home nav button: set `[params.home] logoSprite = "misdreavus"` (a sprite `id`). That replaces the green `[title] $` chip with the floating strip; clear `logoSprite` to get the chip back. Markup is `layouts/partials/header.html`. Footer pets (Sango / Kagura / boomerang on the homepage, the yeti and Grundo elsewhere) are partials in `layouts/partials/footer/`, placed in the footer dock by `layouts/partials/site-footer.html`, not the shortcode.
 
 ### Add or refresh a strip
 
@@ -84,7 +84,7 @@ Nav and in-site list links should stay **relative** (`relURL` / `relLangURL` / `
 
 ## Atmosphere (stars)
 
-Twinkling starfield is sitewide: `layouts/partials/stars.html` (outside `#page-root` so SPA nav keeps it), `assets/css/stars.css`, `assets/js/stars.js` (`stars/field.js` paints the field, `stars/voids.js` punches the reading hole). Linked from `head.html`. Homepage visitor ticker stays in `assets/js/home.js`. On non-home pages, `stars.js` punches one CSS mask hole in `.home-stars` over `.page__body` (title + prose + figures), so stars and their glows never sit behind article text. The starfield is fixed and the page scrolls under it, so the hole is redrawn on scroll and resize (once per frame). Header, footer, gutters, and aside keep the sky. The homepage has no hole at any width. Below 45rem the ASCII stars are not drawn. SPA nav re-runs `refreshStarReadingVoids` from `player.js`.
+Twinkling starfield is sitewide: `layouts/partials/stars.html` (outside `#page-root` so SPA nav keeps it), `assets/css/stars.css`, `assets/js/stars.js` (`stars/field.js` paints the field, `stars/voids.js` punches the reading hole). Linked from `head.html`. Homepage visitor ticker stays in `assets/js/home.js`. On non-home pages, `stars.js` punches one CSS mask hole in `.home-stars` over `.page__body` (title + prose + figures), so stars and their glows never sit behind article text. The starfield is fixed and the page scrolls under it, so the hole is redrawn on scroll and resize (once per frame). Header, footer, and gutters keep the sky. The homepage has no hole at any width. Below 45rem the ASCII stars are not drawn. SPA nav re-runs `refreshStarReadingVoids` from `player.js`.
 
 ## Read-me email CTA
 
@@ -94,9 +94,9 @@ The read-me sword figure (`sword_figure = true`) is the mailto link: clicking it
 
 `sword_figure = true` on read-me loads `layouts/partials/sword-figure.html` before the h1 (image from `[params.backdrop.bottom-right]`). Centered hero; ♡ fountain on hover (`assets/css/sword.css`). Not shown on the homepage.
 
-## Aside meta (date / author / ToC)
+## Aside meta (removed)
 
-Article front matter in the right column (`.page__aside`) **scrolls with the page** — not sticky. `assets/css/layout.css` no longer carries Risotto’s sticky aside rule. Hide only the date line with front matter `hide_date = true` (keep `date` for sort order). ToC still needs `toc = true`.
+The right-hand aside (date / author / ToC) was removed so articles center in the column. The date shows on the writing-index card. `hide_date`, `toc`, and `author` front matter no longer render on the article page.
 
 ## Fonts (site vs blog articles)
 
@@ -121,9 +121,9 @@ Self-host a new face: drop WOFF2 under `static/fonts/`, add its `@font-face` to 
 
 One source of truth: `assets/css/`. Hugo concatenates, minifies, and fingerprints it, so there are no `?v=` bumps for CSS.
 
-- **Sitewide bundle** (`css/site.<hash>.css`, built in `layouts/partials/head.html`): fonts, tokens, typography, layout, header, logo, about, chrome, site-shell, subscribe, stars, sprites, backdrop, sword, buttons. Order matters — later files win ties.
+- **Sitewide bundle** (`css/site.<hash>.css`, built in `layouts/partials/head.html`): fonts, tokens, typography, layout, header, logo, chrome, site-shell, subscribe, stars, sprites, backdrop, sword, buttons, article-media. Order matters — later files win ties.
 - **Homepage bundle** (`layouts/index.html`): `home.css` + `retro.css`.
-- **Page sheets** via `{{ partial "css.html" "name" }}` (or a slice of names): `article-media`, `article-reading` (blog posts), `blog-index`, `gallery`, `guestbook`. Put that call inside the layout's `main` block so same-site navigation picks it up.
+- **Page sheets** via `{{ partial "css.html" "name" }}` (or a slice of names): `article-reading` (blog posts), `blog-index`, `gallery`, `guestbook`. Put that call inside the layout's `main` block so same-site navigation picks it up.
 - **Player:** `assets/css/player.css` stays its own file, linked right after the bundle in `head.html` via `css.html`, so it wins ties with the bundle.
 - Colors: `assets/css/tokens.css` holds the raw base16 hex values and the jobs (`--bg`, `--fg`, `--link`, …) — edit there.
 
@@ -159,7 +159,18 @@ CSS is fingerprinted, so edits ship without a version bump.
 
 ## Footer SkiFree
 
-Wherever `$ echo $LANG` used to sit (`layouts/partials/footer.html`), the `skifree-yeti` strip plays instead (9 native-width frames, 3 fps, scale 2). Every layout renders its footer through `layouts/partials/site-footer.html` (shared padding and bottom line in `assets/css/site-shell.css`; the page grid is `.site-shell` in `assets/css/layout.css`). Baseof pages, gallery, and guestbook use the `page` variant (yeti + copyright); the homepage uses the `home` variant (dock + `[params.home.footer]` extras, no yeti). Re-slice with `node scripts/slice-skifree.mjs` if the sheet changes.
+The `skifree-yeti` strip (`layouts/partials/footer/yeti.html`; 9 native-width frames, 3 fps, scale 2) is the left slot of the footer dock on every page except the homepage. The "subscribe" word sits beside him on every page (`[params.subscribe] yetiIcon` defaults to `word`, `yetiIconPos` to `right`); hover only brightens it. Re-slice with `node scripts/slice-skifree.mjs` if the sheet changes.
+
+### Footer dock
+
+Every layout renders its footer through `layouts/partials/site-footer.html`: the band (padding, phone row, extras, copyright) is `assets/css/site-shell.css`, and inside it one row of three slots, left / center / right, is `assets/css/footer-dock.css` + `assets/js/footer-dock.js`. The same code lays out, spaces, and fits that row on every page; pages differ only in what fills each slot, set in one `dict` at the top of `site-footer.html`:
+
+| Page | Left | Center | Right | Lead (phone) |
+| --- | --- | --- | --- | --- |
+| Homepage | Sango (`footer/sango.html`) | visitor counter (`footer/counter.html`) | Kagura (`footer/kagura.html`) | center |
+| Every other page | yeti (`footer/yeti.html`) | empty | Grundo (`footer/grundo.html`) | left |
+
+To move a piece, change its slot there. Both side slots take the wider one's width so their centers mirror around the center slot, and `footer-dock.js` pads the center so they spread to halfway between the center and the furthest spot that still stays in the column and clear of the player. The row scales as one unit (`--footer-dock-scale`, floor 0.55) so it never wraps. Slot content reserves its own painted size (scaled sprites paint outside their layout box). Below 45rem only the lead slot shows, centered like the desktop center slot. The player parks on the dock's bottom line on every page and at every width, in the left gutter (see Player). `footer-dock.js` keeps the row clear of the ↑ and of the parked bar (`playerSpots()`). `[params.home.footer]` extras render under the dock on the homepage only; `copyright` in `hugo.toml` renders under it on every page when set.
 
 Writing index (`/blog/`): one page listing all posts (not infinite scroll). `layouts/blog/list.html` ranges `.Pages` directly, so there is no pagination config in `hugo.toml` — no subpage tabs unless you wire Hugo pagination later.
 
@@ -204,14 +215,14 @@ Sizes the layout actually uses. `1rem` is 16px unless the browser's default font
 
 - Cursor image: 32×32. Hotspot `x` and `y` are pixels from the top left. The starter arrow is `0` `0`.
 - Banner file: the starter SVG is 1200×280. On the page it fills the content column, and its height follows the picture, capped at 16rem. The empty frame is at least 8rem tall.
-- Every page (homepage, writing, articles, photobook, guestbook): one `.site-shell` grid in `assets/css/layout.css`, at most 53rem wide (`--middle-column`), with the same top and bottom margin everywhere. At 45rem and wider the header and footer span the full shell, and the body stays in the content column. The aside column is `--aside-width` (275px) with `--aside-gap` (1.5rem). Sidebar matter (date, etc.) sits in that column on writing pages; the homepage, photobook, and guestbook leave it empty so the player has the same gutter. Homepage banner, title, prose, and dock sit in the content column. Body is clipped so images don’t spill into the aside. The only side inset is `--page-gutter` (1.25rem a side on desktop, 2.5rem on phones, where it holds the floating player). `body` has no margin, so the gradient runs edge to edge on every page. Below 45rem the player uses that same footer park.
-- Gallery tiles: 9.5rem square. Each thumb is a 480px center crop. Click opens the uncropped 1600 copy.
-- Homepage player: the same footer stack as the other pages (Grundo over the stop button, ↑ below), on the dock baseline and at the same page edge. Sango, the ticker, and Kagura stay centered in the content column. Below 45rem the pets are hidden. On a phone the counter, the player, and the ↑ share one centered footer row once parked; while floating, play / pause mirrors to the top of the right gutter and the ↑ keeps the bottom corner. The homepage counter, the player buttons, and the ↑ share one chip theme (`--chip-bg`, `--chip-fg`, `--chip-border`, `--chip-font` in `assets/css/tokens.css`). Phone nav: Misdreavus and Pancham are bookends, with the links centered between them (two per row when they fit).
-- Atmosphere: `.home-stars` via `layouts/partials/stars.html` / `assets/js/stars.js` (~153 CSS dots + ~5 sparse Joan-style `\/` ASCII stars in the side gutters, away from text). Homepage moon is Joan G. Stark’s “man in the moon” (`.ascii-moon`, `jgs` kept) in `.home-title-row` beside the centered site title. First homepage session only: when the visitor ticker scrolls into view, large Kagura attacks across the dock with feet on the ticker baseline, the count bumps mid-slash with `+1` (Sango in `.home-dock__pet--left` stays idle), then Kagura crossfades to a ~30% smaller `kagura-walk` and parks in `.home-dock__pet--right` (`assets/js/home.js`). Returning visits keep Kagura idle-walking right and Sango idle left. Click Sango to play `sango-attack`; mid-swing knocks Kagura into `kagura-down`, then she gets back up to walk; Sango returns to idle when the attack strip finishes (Hiraikotsu home). If they leave without seeing the attack, the count still bumps once with no park. Counts 10 / 100 / 1000 also get a green milestone glow.
+- Page model, every page (homepage, writing, articles, photobook, guestbook, read-me): one centered `.site-shell` column in `assets/css/layout.css`, 38rem wide (`--middle-column`), with equal gutters. No page overrides that width, so the nav, column, footer, and player sit in the same place on every page and SPA nav never shifts them. To resize the site, change that one value. Header: the nav is centered in the column. Main: content fills the column. Images, figures, photo grids, and Markdown images center in it; prose and form controls stay left-aligned. Footer: one three-slot dock centered in the column on every page (Sango / ticker / Kagura on the homepage, yeti / empty / Grundo elsewhere; see Footer dock), and the player buttons sit in the right gutter flush with the column edge, with the ↑ halfway to the window edge. The photobook and guestbook use `baseof.html` like every other inner page (body class `layout-<name>`). The only side inset is `--page-gutter` (1.25rem a side on desktop, 2.5rem on phones, where it holds the floating player). `body` has no margin, so the gradient runs edge to edge on every page. Below 45rem the player uses that same footer park.
+- Gallery tiles: square, fluid (at least 8.5rem, four across on desktop) so the grid fills the column edge to edge. Each thumb is a 480px center crop. Click opens the uncropped 1600 copy.
+- Homepage player: the same player as every other page, on the dock baseline and at the same page edge. Sango, the ticker, and Kagura fill the footer dock's three slots. Below 45rem the pets are hidden. On a phone the counter, the player, and the ↑ share one centered footer row once parked; while floating, play / pause mirrors to the top of the right gutter and the ↑ keeps the bottom corner. The homepage counter, the player buttons, and the ↑ share one chip theme (`--chip-bg`, `--chip-fg`, `--chip-border`, `--chip-font` in `assets/css/tokens.css`). Phone nav: Misdreavus and Pancham are bookends, with the links centered between them (two per row when they fit).
+- Atmosphere: `.home-stars` via `layouts/partials/stars.html` / `assets/js/stars.js` (~153 CSS dots + ~5 sparse Joan-style `\/` ASCII stars in the side gutters, away from text). Homepage moon is Joan G. Stark’s “man in the moon” (`.ascii-moon`, `jgs` kept) in `.home-title-row` beside the centered site title. First homepage session only: when the visitor ticker scrolls into view, large Kagura attacks across the dock with feet on the ticker baseline, the count bumps mid-slash with `+1` (Sango in her pad, `.dock-pad--sango`, stays idle), then Kagura crossfades to a ~30% smaller `kagura-walk` and parks in `.dock-pad--kagura` (`assets/js/home/pets.js`). Returning visits keep Kagura idle-walking right and Sango idle left. Click Sango to play `sango-attack`; mid-swing knocks Kagura into `kagura-down`, then she gets back up to walk; Sango returns to idle when the attack strip finishes (Hiraikotsu home). If they leave without seeing the attack, the count still bumps once with no park. Counts 10 / 100 / 1000 also get a green milestone glow.
 - Media polish: `assets/css/retro.css` adds twinkling corner sparkles on the **homepage banner only** — not gallery, article, or writing-index thumbs. No border, no purple wash, no scanlines.
 - Favicons: `layouts/partials/head.html` links `favicon.ico`, `favicon-32x32.png`, `favicon-16x16.png`, `apple-touch-icon.png`, and `site.webmanifest` from `static/` when they exist. They are all in the repo now (cat + hearts). `site.webmanifest` still has an empty `name` / `short_name` and white theme colors.
 - Backdrop: fixed corner caps use `maxwidth` / `maxheight` in `hugo.toml`. Bottom-right image feeds read-me `.sword-figure` (`layouts/partials/sword-figure.html`) and is never emitted as `.site-backdrop`. Other corners still use `layouts/partials/backdrop.html`; SPA home adopt also strips any leftover bottom-right corner node.
-- Homepage dock: `.home-footer__dock-fit` + `fitHomeDock()` in `home.js` scale pets and ticker as one row (`--home-dock-scale`) so the footer never wraps or spills; floor 0.55. Desktop adds equal padding on the counter sides so Sango and Kagura sit halfway between the counter and the furthest spot that still stays inside the text column and halfway from Kagura to the player. Below 45rem the pets are hidden and the counter stays left, clear of the player. The first-visit slash is skipped there; the count still bumps.
+- Homepage dock: the sitewide footer dock (see Footer dock) with Sango, the ticker, and Kagura in its slots. Below 45rem the pets are hidden and the counter is the lead. The first-visit slash is skipped there; the count still bumps.
 
 ## Cursor
 
@@ -314,7 +325,9 @@ The look is `assets/css/buttons.css`, part of the sitewide bundle.
 
 ## Article media shortcodes
 
-Posts and pages can embed framed pictures without raw HTML. Both shortcodes live under `layouts/shortcodes/`. Styles are `assets/css/article-media.css`; the photo lightbox is `assets/js/article-media.js`. The script tag sits inside `#page-root` (home, base layout, gallery) so same-site navigation, which only swaps that node, still loads it.
+Posts and pages can embed framed pictures without raw HTML. The shortcodes live under `layouts/shortcodes/`. `photo`, `figcaption`, and a markdown image on its own line all render through one partial, `layouts/partials/article-photo.html`, so a picture looks and behaves the same on any page that renders a body (articles, read-me, guestbook, homepage, section lists, unsubscribe). Styles are `assets/css/article-media.css`, part of the sitewide bundle so no layout has to remember to load it. The photo lightbox is `assets/js/article-media.js`. The script tag sits inside `#page-root` (home and base layout) so same-site navigation, which only swaps that node, still loads it.
+
+Only raw `<img>` HTML opts out (it gets `max-width: 100%` and nothing else). An image inside a sentence stays inline at text height.
 
 Put the image next to the markdown as a **page resource** (same folder as `index.md`, or listed in front matter `[[resources]]`), or use a path under `static/` (for example `images/foo.png`).
 
@@ -334,9 +347,9 @@ Centered medium thumbnail with the retro frame. Click opens the full image.
 
 Example in-tree: `content/blog/crossroad-beauty/index.md`.
 
-### `figcaption` — full-width figure with caption
+### `figcaption` — same as `photo`
 
-Same framing and caption rules as `photo`, but the image displays at normal article width (no click-to-expand).
+Kept as a name only; it renders the same figure as `photo` (28rem, centered, click to enlarge).
 
 ```
 {{< figcaption src="photo.png" caption="Hello" >}}
@@ -414,11 +427,11 @@ Do not put secrets, API tokens, or maintainer-only paths into `content/` or `sta
 
 ## Background image
 
-Each corner of the window can hold its own picture. The pictures stay fixed on the homepage only (`body:not(.home) .site-backdrop` hides them on inner pages, and every corner is hidden below 45rem). The middle column is held between them: every page is at most 53rem (`--middle-column` in `assets/css/layout.css`). Corner pictures use the space outside that column. They also shrink on a short window so about 20rem of vertical room stays between the top and bottom pictures. They never grow past `maxwidth` and `maxheight`, and a file smaller than the slot stays at its own size.
+Each corner of the window can hold its own picture. The pictures stay fixed on the homepage only (`body:not(.home) .site-backdrop` hides them on inner pages, and every corner is hidden below 45rem). The middle column is held between them: every page is 38rem wide (`--middle-column` in `assets/css/layout.css`). Corner pictures use the space outside that column. They also shrink on a short window so about 20rem of vertical room stays between the top and bottom pictures. They never grow past `maxwidth` and `maxheight`, and a file smaller than the slot stays at its own size.
 
-The writing sits in the content column beside the 275px aside. When the window is too narrow for both the column and the pictures, the pictures shrink first. The column keeps its width until the window itself is narrower.
+When the window is too narrow for both the column and the pictures, the pictures shrink first. The column keeps its width until the window itself is narrower.
 
-On the homepage, the header, writing column, and footer are transparent so the mesh gradient shows through behind the writing. Corner pictures stay fully opaque and size against the same 53rem column. Inner pages paint the header, aside, and footer solid `var(--bg)`.
+The header, column, and footer are transparent so the gradient shows through behind the writing. Corner pictures stay fully opaque and size against the same column.
 
 The four blocks are `[params.backdrop.bottom-right]`, `[params.backdrop.bottom-left]`, `[params.backdrop.top-right]`, and `[params.backdrop.top-left]`. They use the same fields. This is the bottom-right block; the other three match it.
 
@@ -550,13 +563,13 @@ npm run newsletter:send -- --slug my-post   # force one (needs Resend env)
 
 ## Player
 
-One chrome: HTML `<audio>` owns play / pause / stop / skip / auto-next and survives same-site navigation. The footer row is one centered group: a lead (the visitor count on the homepage, the yeti on other pages), the bar, and the ↑. `assets/css/site-shell.css` names the slots (`--footer-lead-w`, `--footer-row-gap`, `--footer-row-h`, `--footer-pad-bottom`) and `placeFooterRow()` in `assets/js/player/place.js` measures them. The bar floats until that row is on screen. On a phone only play/pause shows while it floats, so the bar never covers the text, and the yeti stays its native size with the "subscribe" label above him. Stop and skip keep their slots while hidden, so the bar's width does not change. Grundo (`grundo-idle`) is desktop-only and kicks only for the ↑ (stomp, then the ♡ spill and page hearts); the other buttons leave him idle. Stop hides the bar behind a green ♡ and does not autoplay on reopen. The ↑ appears after a short scroll. Long titles scroll inside a fixed slot (`is-marquee`). The homepage dock is its own 3-column grid (Sango, ticker, Kagura) in `home.css`; below 45rem those pets are hidden. The player lives outside `#page-root`. Same-site clicks swap `#page-root` and leave the player in place. A new tab, an external link, or a page with no `#page-root` loads a fresh document and the music stops.
+One chrome: HTML `<audio>` owns play / pause / stop / skip / auto-next and survives same-site navigation. The footer is the footer dock (see Footer dock), with the parked bar to its left and the ↑ to its right. The bar and the ↑ are mirrors. The ↑ sits in a column in the right gutter (`--player-col-x`, its center's distance from the window edge), `--player-float` above the window bottom. While you read, the bar floats in that same column at the top of the window, `--player-float` below the window top, and only play/pause shows. When the footer line arrives it moves to the footer's left gutter: stop is centered on the mirrored column (`--player-col-x` from the left edge), play and skip sit either side, and its bottom edge is on the footer line like the ↑'s. Both placements are offsets inside the same sticky track (`.site-player--parked` picks the second), and the move is one CSS transition that is switched on after the first paint (`.site-player--live`). On every page and at every width stop and skip fade in once parked; they keep their slots while hidden, so the bar's width does not change. The track title is hidden for now and will sit above the parked bar. Closed, the ♡ follows the same two spots. Windows too narrow for the mirror (narrow desktop, every phone) clamp the parked bar to 0.5rem from the left edge. Phones use the same placements and the same footer: bar on the left, the lead slot (yeti, or the counter on the homepage) centered at desktop size, ↑ on the right, all on the footer line; `footer-dock.js` shrinks the row only if it would run into the bar or the ↑. Glyphs: every player glyph (play, pause, stop, skip, ↑) is `--player-glyph-fill` (0.4) of its own circle's diameter, so they share one ring of empty space. The icons in `layouts/partials/icon.html` (`play`, `volume`, `stop`, `forward`, `up`) have square viewBoxes cropped to their artwork for that; change the one value to resize them all. Play and skip are triangles, so their weight sits left of the box; each carries `--glyph-nudge-x` and the one glyph rule shifts it onto the circle's center. The toggle gets `.is-playing` while music plays, which breathes a slow glow (`player-playing-pulse`); reduced motion keeps a steady glow instead. Grundo is not part of the player: he is the right slot of the footer dock on inner pages (`layouts/partials/footer/grundo.html`), desktop-only. The ↑ makes him kick (stomp, then the ♡ spill) when he is on screen, then the page hearts rise and the page scrolls; elsewhere it goes straight to the page hearts. Stop hides the bar behind a green ♡ and does not autoplay on reopen. The ↑ sits in the same place on every page and appears after a 160px scroll. Long titles scroll inside a fixed slot (`is-marquee`). The footer row itself is the footer dock (see Footer dock). The player lives outside `#page-root`. Same-site clicks swap `#page-root` and leave the player in place. A new tab, an external link, or a page with no `#page-root` loads a fresh document and the music stops.
 
 Files:
 
-- `layouts/partials/player.html` — icon buttons and Grundo
-- `assets/css/player.css` — position and look
-- `assets/js/player.js` — wires `assets/js/player/` (playback, Grundo, footer placement, page swap)
+- `layouts/partials/player.html` — title and icon buttons, plus the ↑
+- `assets/css/player.css` — position and look, and the ↑ heart effects
+- `assets/js/player.js` — wires `assets/js/player/` (playback, the ↑ stomp, footer placement, page swap)
 - `static/audio/playlist.json` — local fallback list (`[]` until you add tracks or point the fetch at a remote list)
 
 Every layout that should keep music playing must wrap its page in `<div id="page-root">` and include `{{ partial "player.html" . }}` after that wrapper. Those layouts today are `layouts/index.html`, `layouts/_default/baseof.html`, `layouts/_default/gallery.html`, and `layouts/_default/guestbook.html`.

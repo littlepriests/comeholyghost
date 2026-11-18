@@ -1,0 +1,129 @@
+/*
+  The footer dock on every page (layouts/partials/site-footer.html): three
+  slots on one grid. The center slot is centered in the column and the side
+  slots mirror it. assets/js/footer-dock.js pads the center so the side slots
+  spread out, and scales the row as one unit (--footer-dock-scale) so it never
+  wraps or spills, and keeps it between the parked player (left gutter) and the
+  ↑ (right gutter). Below 45rem only the lead slot shows, the same way.
+
+  Scaled sprites paint outside their layout box, so each slot's content
+  reserves its painted size (dock.css pads, the yeti, Grundo). A slot then
+  keeps its size whatever state its sprite is in.
+*/
+
+/* Clip X only; Y stays visible so tall frames (Kagura's attack) aren't cut. */
+.footer-dock-fit {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    margin-top: 0.75rem;
+    overflow-x: clip;
+    height: calc(var(--footer-dock-h, 4.5rem) * var(--footer-dock-scale, 1));
+}
+
+.footer-dock {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: end;
+    column-gap: 1.25rem;
+    width: 100%;
+    transform: scale(var(--footer-dock-scale, 1));
+    transform-origin: center bottom;
+}
+
+.footer-dock__slot {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+/* footer-dock.js sets --footer-side-w to the wider side slot. */
+.footer-dock__slot--left,
+.footer-dock__slot--right {
+    min-width: var(--footer-side-w, auto);
+}
+
+.footer-dock__slot--left {
+    justify-self: end;
+}
+
+.footer-dock__slot--center {
+    justify-self: center;
+}
+
+.footer-dock__slot--right {
+    justify-self: start;
+}
+
+/* Grundo (footer/grundo.html). Native cell is 56px tall, drawn into --grundo-size. */
+.footer-grundo {
+    --grundo-size: 100px;
+    position: relative;
+    flex: none;
+    width: var(--grundo-size);
+    height: var(--grundo-size);
+    line-height: 0;
+    cursor: help;
+}
+
+.footer-grundo__strip {
+    display: block;
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    line-height: 0;
+    /* scale() needs a unitless ratio (px/px). */
+    transform: translateX(-50%) scale(calc(var(--grundo-size) / 56px));
+    transform-origin: bottom center;
+}
+
+.footer-grundo__strip[hidden] {
+    display: none;
+}
+
+.footer-grundo__strip .sprite-anim {
+    display: block;
+}
+
+/* Idle is a one-frame static PNG (.is-static). Kick stays frozen until the stomp. */
+.footer-grundo__strip--kick .sprite-anim:not(.is-kick-play) {
+    animation: none !important;
+    background-position: 0 0 !important;
+}
+
+/* Kick is a one-shot; player/pet.js restarts it by toggling .is-kick-play. */
+.footer-grundo__strip--kick .sprite-anim.is-kick-play {
+    animation-name: sprite-anim-play-hold;
+    animation-duration: calc(var(--sprite-frames, 2) / var(--sprite-fps, 8) * 1s);
+    animation-timing-function: steps(var(--sprite-steps, 1), end);
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+}
+
+/* Hearts spill from his feet on the stomp; the heart look and keyframes are in player.css. */
+.footer-grundo__hearts {
+    position: absolute;
+    left: 50%;
+    bottom: 0.15rem;
+    width: 0;
+    height: 0;
+    overflow: visible;
+    pointer-events: none;
+    z-index: 6;
+}
+
+/* Phone: only the lead slot, centered in the column like the desktop center
+   slot, at desktop size (footer-dock.js scales it only to stay clear of the
+   player). */
+@media (max-width: 44.99rem) { /* matches CSS mobile breakpoint */
+    .footer-dock__slot:not([data-footer-lead]) {
+        display: none;
+    }
+
+    .footer-dock {
+        display: flex;
+        justify-content: center;
+    }
+}
