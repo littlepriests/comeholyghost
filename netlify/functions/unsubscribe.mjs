@@ -1,4 +1,4 @@
-import { EMAIL_RE, cleanEmail, json, preflight } from "../lib/http.mjs";
+import { EMAIL_RE, cleanEmail, json, preflight, readPayload } from "../lib/http.mjs";
 import { isPreviewDeploy } from "../lib/preview-guard.mjs";
 import {
     errorMessage,
@@ -45,24 +45,10 @@ export default async (request) => {
         return json(405, { error: "Method not allowed." });
     }
 
-    let payload = {};
-    const contentType = request.headers.get("content-type") || "";
+    // One-click POSTs carry the email and token in the query, so an unreadable body still works.
+    let payload;
     try {
-        if (contentType.includes("application/json")) {
-            payload = await request.json();
-        } else if (
-            contentType.includes("application/x-www-form-urlencoded") ||
-            contentType.includes("multipart/form-data")
-        ) {
-            const form = await request.formData();
-            payload = Object.fromEntries(form.entries());
-        } else {
-            // RFC 8058 one-click POSTs may omit the content type; the email is in the query.
-            const text = await request.text();
-            if (text && text.includes("=")) {
-                payload = Object.fromEntries(new URLSearchParams(text).entries());
-            }
-        }
+        payload = await readPayload(request);
     } catch (error) {
         payload = {};
     }

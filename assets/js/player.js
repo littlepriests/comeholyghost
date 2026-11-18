@@ -1,3 +1,5 @@
+import { mq } from "./lib/media.js";
+import { PAGE, on } from "./lib/site.js";
 import { defineNav } from "./player/nav.js";
 import { definePet } from "./player/pet.js";
 import { definePlace } from "./player/place.js";
@@ -20,7 +22,7 @@ if (bar && !window.__site.playerReady) {
         playWhenReady: false,
         trackTitle: "",
         chromeClosed: false,
-        mobileQuery: window.matchMedia("(max-width: 44.99rem)"), // matches CSS mobile breakpoint
+        mobileQuery: mq("mobile"),
         playlistRemote: player.getAttribute("data-playlist") || "",
         playlistLocal: "/audio/playlist.json",
 
@@ -40,9 +42,6 @@ if (bar && !window.__site.playerReady) {
         dockPetKicking: false,
         pageHeartsTimer: 0,
         pageHeartsLayer: null,
-        // Page y of the footer line and the float offset, set by placeOnFooter().
-        parkLineY: 0,
-        floatGap: 0,
     };
     s.audio.preload = "metadata";
     player.appendChild(s.audio);
@@ -96,19 +95,14 @@ if (bar && !window.__site.playerReady) {
     s.audio.addEventListener("ended", () => s.load(s.index + 1, true));
 
     // Show the chrome before the playlist arrives; a slow fetch must not hide it.
-    // The first placement is not animated; see holdTransition().
-    s.holdTransition();
     s.applyPlayerChrome();
     window.addEventListener("scroll", s.onScroll, { passive: true });
-    // Phone toolbars change innerHeight without resizing <html>.
-    window.addEventListener("resize", s.syncParked);
-    if (typeof ResizeObserver === "function") {
-        new ResizeObserver(() => s.placeOnFooter()).observe(document.documentElement);
-    } else {
-        window.addEventListener("resize", s.placeOnFooter);
-        window.addEventListener("load", s.placeOnFooter);
-    }
     s.mobileQuery.addEventListener("change", s.applyPlayerChrome);
+    // Arriving home always shows the player again.
+    on(PAGE, () => {
+        if (document.body.classList.contains("home")) s.chromeClosed = false;
+        s.applyPlayerChrome();
+    });
 
     s.loadPlaylist()
         .catch((error) => {

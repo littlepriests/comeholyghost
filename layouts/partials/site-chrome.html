@@ -1,11 +1,15 @@
-{{- /* Outside #page-root: SPA nav never replaces these, and their scripts run once. */ -}}
+{{- /*
+  Outside #page-root: SPA nav never replaces these, and their scripts run
+  once. That makes this the same on every page; a script here that only
+  belongs on some pages checks the body class itself and listens for
+  site:page (assets/js/lib/site.js).
+*/ -}}
 {{ partial "stars.html" . }}
 {{ partial "backdrop.html" . }}
 {{ partial "player.html" . }}
+{{ partial "js.html" "layout" }}
 {{ partial "subscribe-dialog.html" . }}
-{{- if .IsHome }}
-{{ partial "cursor-effects.html" . }}
-{{- end }}
+{{ partial "js.html" "cursor-trail" }}
 {{- /* Click hearts and idle bubbles belong to the custom cursor; the script gates itself to desktop. */ -}}
 {{- with .Site.Params.cursor.image }}
 {{- $cursorFile := printf "static/%s" (strings.TrimPrefix "/" .) -}}

@@ -44,7 +44,7 @@
    The yeti stays his native 32×43 (desktop draws him at scale 2). His art
    sits right of center in the frame, so the translate, paint only, puts him
    on the slot's center. */
-@media (max-width: 44.99rem) {
+@media (--mobile) {
     .site-footer {
         overflow-wrap: anywhere;
     }

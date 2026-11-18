@@ -117,7 +117,7 @@
     filter: brightness(1.12);
 }
 
-@media (max-width: 44.99rem) {
+@media (--mobile) {
     .page__logo-inner--sprite .sprite-anim {
         transform: translateY(-50%) scale(0.69);
         transform-origin: center left;

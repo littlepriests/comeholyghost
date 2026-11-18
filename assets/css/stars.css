@@ -149,7 +149,7 @@
 }
 
 /* ASCII stars are placed for the desktop gutters. */
-@media (max-width: 44.99rem) {
+@media (--mobile) {
     .home-stars__ascii-star {
         display: none;
     }

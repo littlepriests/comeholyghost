@@ -20,8 +20,9 @@
 
   #site-player is a zero-height sticky track after #page-root. The browser
   floats it --player-float above the window bottom and lets it ride the page
-  once the footer line arrives; player.js only measures --player-lift (page
-  end to footer line) when the layout changes, never on scroll.
+  once the footer line arrives; assets/js/layout.js only measures
+  --player-lift (page end to footer line) when the layout changes, never on
+  scroll.
 */
 html,
 body {
@@ -52,6 +53,9 @@ body {
     --player-bar-h: var(--player-button-size);
     --player-float-anchor: calc(var(--player-button-size) / 2);
     --player-park-anchor: calc(1.5 * var(--player-button-size) + var(--player-button-gap));
+    /* The parked bar's left edge: its anchor on the mirrored ↑ column,
+       clamped 0.5rem from the window edge. */
+    --player-park-left: max(0.5rem, calc(var(--player-col-x) - var(--player-park-anchor)));
     position: sticky;
     bottom: calc(var(--player-float) - var(--player-lift, 0px));
     translate: 0 calc(-1 * var(--player-lift, 0px));
@@ -83,8 +87,20 @@ body {
 
 /* Parked: on the footer line, mirrored to the left gutter. */
 #site-player.site-player--parked .player-bar {
-    left: max(0.5rem, calc(var(--player-col-x) - var(--player-park-anchor)));
+    left: var(--player-park-left);
     bottom: 0;
+}
+
+/* Sits where the parked bar's left edge goes, floating or not, so layout.js
+   can keep the footer clear of the bar without repeating the formula. */
+#site-player .player-park-probe {
+    position: absolute;
+    left: var(--player-park-left);
+    bottom: 0;
+    width: 0;
+    height: 0;
+    visibility: hidden;
+    pointer-events: none;
 }
 
 /* Moving between the two is animated, but never on the first paint. */
@@ -236,7 +252,7 @@ body {
 }
 
 /* Until you have scrolled a little. Not [hidden], so its box stays measurable
-   (footer-dock.js keeps the pets clear of it). */
+   (layout.js keeps the footer slots clear of it). */
 #site-player .player-back-top.is-away {
     opacity: 0;
     visibility: hidden;
@@ -496,7 +512,7 @@ body {
    (matching the ↑) and the ↑ column centered in the right page gutter. The
    parked bar's mirror spot is past the window edge there, so it holds at the
    same 0.5rem clamp a narrow desktop window uses. */
-@media (max-width: 44.99rem) {
+@media (--mobile) {
     #site-player {
         --player-col-x: calc(var(--page-gutter) / 2);
         --player-button-size: var(--player-back-top-size);

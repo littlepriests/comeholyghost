@@ -1,7 +1,7 @@
 /*
   GeoCities vibe, modern restraint.
   Corner sparkles: homepage banner only — never gallery, article, or index thumbs.
-  Sitewide stars live in stars.css / stars.js. Star cursor trail is layouts/partials/cursor-effects.html.
+  Sitewide stars live in stars.css / stars.js. Star cursor trail is assets/js/cursor-trail.js.
 */
 
 /* Banner width is the shared content column; keep the sparkle stage only. */

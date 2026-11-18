@@ -28,7 +28,7 @@
 {{- end -}}
 <figure class="article-photo"{{ with .id }} id="{{ . }}"{{ end }}>
   <button type="button" class="article-photo__thumb{{ with $tip }} site-tip{{ end }}" data-article-photo data-full="{{ $full }}"{{ with $set.fullAvif }} data-full-avif="{{ . }}"{{ end }}{{ with $tip }} data-tip="{{ . }}"{{ end }} aria-label="{{ if $alt }}View larger: {{ $alt }}{{ else }}View larger image{{ end }}">
-    {{ partial "responsive-img.html" (dict "set" $set "src" $full "alt" $alt "sizes" "(min-width: 45rem) 28rem, calc(100vw - 5rem)") }}
+    {{ partial "responsive-img.html" (dict "set" $set "src" $full "alt" $alt "sizes" (printf "%s 28rem, calc(100vw - 5rem)" (partialCached "media-queries.html" "media").desktop)) }}
   </button>
   {{- with $caption }}
   <figcaption class="article-figure__caption">{{ . | $page.RenderString }}</figcaption>

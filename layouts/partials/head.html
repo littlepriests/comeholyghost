@@ -26,26 +26,11 @@
   Sitewide bundle; list order is cascade order. player.css stays a separate
   sheet. Page-only sheets come from partial "css.html" in their layouts.
 */ -}}
-{{ $site := slice
-  (resources.Get "css/fonts.css")
-  (resources.Get "css/tokens.css")
-  (resources.Get "css/typography.css")
-  (resources.Get "css/layout.css")
-  (resources.Get "css/header.css")
-  (resources.Get "css/logo.css")
-  (resources.Get "css/chrome.css")
-  (resources.Get "css/site-shell.css")
-  (resources.Get "css/footer-dock.css")
-  (resources.Get "css/subscribe.css")
-  (resources.Get "css/stars.css")
-  (resources.Get "css/sprites.css")
-  (resources.Get "css/backdrop.css")
-  (resources.Get "css/sword.css")
-  (resources.Get "css/buttons.css")
-  (resources.Get "css/article-media.css")
-| resources.Concat "css/site.css"
-| minify
-| fingerprint }}
+{{- $sheets := slice -}}
+{{- range slice "fonts" "tokens" "typography" "layout" "header" "logo" "chrome" "site-shell" "footer-dock" "subscribe" "stars" "sprites" "backdrop" "sword" "buttons" "article-media" -}}
+  {{- $sheets = $sheets | append (partial "css-resource.html" .) -}}
+{{- end -}}
+{{ $site := $sheets | resources.Concat "css/site.css" | minify | fingerprint }}
 <link rel="stylesheet" href="{{ $site.RelPermalink }}" integrity="{{ $site.Data.Integrity }}">
 {{ partial "css.html" "player" }}
 {{ if os.FileExists "static/favicon.ico" }}<link rel="icon" href="{{ "favicon.ico" | absURL }}">{{ end }}

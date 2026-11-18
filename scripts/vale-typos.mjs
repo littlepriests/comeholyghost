@@ -28,7 +28,7 @@ export function isSpellingCheck(alert) {
   return check === "Vale.Spelling" || /\.Spelling$/i.test(check);
 }
 
-/** True when every useful suggestion is the same letters in another case. */
+/** True when one suggestion is the same letters in another case. */
 export function isCaseOnlySpellingAlert(alert, suggestions) {
   if (!isSpellingCheck(alert)) return false;
   const match = String(alert.Match ?? "");

@@ -1,4 +1,4 @@
-@media (max-width: 44.99rem) {
+@media (--mobile) {
     .guestbook__form input,
     .guestbook__form textarea,
     .guestbook__form button {

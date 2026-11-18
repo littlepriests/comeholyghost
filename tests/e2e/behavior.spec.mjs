@@ -210,10 +210,53 @@ test("the unsubscribe page does nothing without the link from the email", async 
     expect(api.filter((c) => c.path === "/api/unsubscribe")).toHaveLength(0);
 });
 
+const PAGES = ["/", "/blog/", "/blog/crossroad-beauty/", "/gallery/", "/guestbook/", "/read-me/", "/unsubscribe/"];
+
+test("every page has the same head scripts and styles and the same chrome outside #page-root", async ({ page }, testInfo) => {
+    // SPA nav keeps those from the first page loaded, so a page-only one would go missing or linger.
+    test.skip(isPhone(testInfo), "markup check; one run is enough");
+    await page.goto("/unsubscribe/");
+    const shapes = await page.evaluate(async (paths) => {
+        const out = [];
+        for (const path of paths) {
+            const doc = new DOMParser().parseFromString(await (await fetch(path)).text(), "text/html");
+            out.push({
+                path,
+                head: [...doc.head.querySelectorAll("style, script")].map((node) => node.outerHTML),
+                chrome: [...doc.body.children].filter((node) => node.id !== "page-root").map((node) => node.outerHTML),
+            });
+        }
+        return out;
+    }, PAGES);
+    const [first, ...rest] = shapes;
+    for (const shape of rest) {
+        expect(shape.head, `${shape.path} <head> vs ${first.path}`).toEqual(first.head);
+        expect(shape.chrome, `${shape.path} chrome vs ${first.path}`).toEqual(first.chrome);
+    }
+});
+
+test("the star trail follows the pointer on the homepage only, however you get there", async ({ page }, testInfo) => {
+    test.skip(isPhone(testInfo), "the trail is desktop-only");
+    const trail = page.locator("body > canvas");
+    await page.goto("/blog/");
+    await settle(page);
+    await page.evaluate(() => (window.__noReload = true));
+    await expect(trail).toHaveCount(0);
+
+    await page.getByRole("link", { name: "i wanna go home" }).click();
+    await expect(page.locator("body")).toHaveClass(/\bhome\b/);
+    await expect(trail).toHaveCount(1);
+
+    await page.getByRole("link", { name: "writing" }).first().click();
+    await expect(page).toHaveURL(/\/blog\/$/);
+    await expect(trail).toHaveCount(0);
+    expect(await page.evaluate(() => window.__noReload)).toBe(true);
+});
+
 test("no page logs a script error", async ({ page }) => {
     const errors = [];
     page.on("pageerror", (err) => errors.push(err.message));
-    for (const path of ["/", "/blog/", "/blog/crossroad-beauty/", "/gallery/", "/guestbook/", "/read-me/", "/unsubscribe/"]) {
+    for (const path of PAGES) {
         await page.goto(path);
         await settle(page);
     }

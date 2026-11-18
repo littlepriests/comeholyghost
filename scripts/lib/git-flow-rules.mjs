@@ -78,6 +78,43 @@ export function judgePrChecks(exitStatus, output) {
   return { ok: true, detail: out || "all checks passed" };
 }
 
+/**
+ * No release PR is open. May this preview commit ship?
+ * `statusOk` / `runsOk` are false when that GitHub call failed.
+ * A legacy combined status of pending with total 0 has nothing to say;
+ * check runs decide. A failed read never counts as green.
+ * Pending with zero statuses and zero check runs means nothing has
+ * reported yet, so it blocks. A successful status with an empty
+ * check-run list stays clear.
+ */
+export function judgePreviewCommit({ statusOk, state, total, runsOk, runs }) {
+  if (!statusOk) {
+    return { ok: false, detail: "Could not read the preview commit status." };
+  }
+  const normalized = String(state ?? "").trim();
+  const noLegacy = normalized === "pending" && total === 0;
+  if (normalized === "failure" || normalized === "error") {
+    return { ok: false, detail: `preview commit status: ${normalized}` };
+  }
+  if (normalized === "pending" && !noLegacy) {
+    return { ok: false, detail: "preview commit status: pending" };
+  }
+  if (normalized !== "success" && !noLegacy) {
+    return {
+      ok: false,
+      detail: `preview commit status: ${normalized || "unknown"}`,
+    };
+  }
+  if (!runsOk) {
+    return { ok: false, detail: "Could not read preview check runs." };
+  }
+  const list = Array.isArray(runs) ? runs : [];
+  if (noLegacy && list.length === 0) {
+    return { ok: false, detail: "No check runs reported on preview yet." };
+  }
+  return judgeCheckRuns(list);
+}
+
 /** Check runs from the GitHub API: [{ name, status, conclusion }]. */
 export function judgeCheckRuns(list) {
   if (!list.length) {

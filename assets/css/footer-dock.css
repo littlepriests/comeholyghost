@@ -1,7 +1,7 @@
 /*
   The footer dock on every page (layouts/partials/site-footer.html): three
   slots on one grid. The center slot is centered in the column and the side
-  slots mirror it. assets/js/footer-dock.js pads the center so the side slots
+  slots mirror it. assets/js/layout.js pads the center so the side slots
   spread out, and scales the row as one unit (--footer-dock-scale) so it never
   wraps or spills, and keeps it between the parked player (left gutter) and the
   ↑ (right gutter). Below 45rem only the lead slot shows, the same way.
@@ -39,7 +39,7 @@
     justify-content: center;
 }
 
-/* footer-dock.js sets --footer-side-w to the wider side slot. */
+/* layout.js sets --footer-side-w to the wider side slot. */
 .footer-dock__slot--left,
 .footer-dock__slot--right {
     min-width: var(--footer-side-w, auto);
@@ -115,9 +115,9 @@
 }
 
 /* Phone: only the lead slot, centered in the column like the desktop center
-   slot, at desktop size (footer-dock.js scales it only to stay clear of the
+   slot, at desktop size (layout.js scales it only to stay clear of the
    player). */
-@media (max-width: 44.99rem) { /* matches CSS mobile breakpoint */
+@media (--mobile) {
     .footer-dock__slot:not([data-footer-lead]) {
         display: none;
     }

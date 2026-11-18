@@ -1,4 +1,7 @@
-export function initHomeClouds(windowBound) {
+import { LAYOUT, on, pageSignal } from "../lib/site.js";
+
+/** Places the clouds around the angel and clears stars behind them. Returns the placer. */
+export function initHomeClouds() {
     let page = document.querySelector(".home-page");
     let root = document.querySelector(".home-root");
 
@@ -233,23 +236,18 @@ export function initHomeClouds(windowBound) {
         placeClouds();
         clearStarsBehindClouds();
     }
-    if (window.__site) window.__site.placeHomeDecor = placeDecor;
-    if (window.__site) window.__site.homeClearStars = clearStarsBehindClouds;
     placeDecor();
-    if (!windowBound) {
-        window.addEventListener("resize", function () {
-            if (window.__site && typeof window.__site.placeHomeDecor === "function") window.__site.placeHomeDecor();
+    let signal = pageSignal();
+    // layout.js emits site:layout after every resize, font load, and dock refit.
+    on(LAYOUT, placeDecor, { signal: signal });
+    window.addEventListener("load", placeDecor, { signal: signal });
+    let starFrame = 0;
+    window.addEventListener("scroll", function () {
+        if (starFrame) return;
+        starFrame = requestAnimationFrame(function () {
+            starFrame = 0;
+            clearStarsBehindClouds();
         });
-        window.addEventListener("load", function () {
-            if (window.__site && typeof window.__site.placeHomeDecor === "function") window.__site.placeHomeDecor();
-        });
-        let starFrame = 0;
-        window.addEventListener("scroll", function () {
-            if (starFrame) return;
-            starFrame = requestAnimationFrame(function () {
-                starFrame = 0;
-                if (window.__site && typeof window.__site.homeClearStars === "function") window.__site.homeClearStars();
-            });
-        }, { passive: true });
-    }
+    }, { passive: true, signal: signal });
+    return placeDecor;
 }

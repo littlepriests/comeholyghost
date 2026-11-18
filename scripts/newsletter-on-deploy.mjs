@@ -25,6 +25,7 @@ import {
     sendPostBroadcast
 } from "../netlify/lib/resend.mjs";
 import { DEFAULT_ORIGIN } from "../netlify/lib/site.mjs";
+import { openStore } from "../netlify/lib/stores.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const LOCAL_LEDGER = path.join(ROOT, ".newsletter-sent.json");
@@ -43,8 +44,7 @@ function onNetlify() {
 async function getBlobStore() {
     if (!onNetlify()) return null;
     try {
-        const { getStore } = await import("@netlify/blobs");
-        return getStore({ name: "newsletter", consistency: "strong" });
+        return await openStore("newsletter");
     } catch (error) {
         console.warn("[newsletter] blobs unavailable:", error && error.message);
         return null;

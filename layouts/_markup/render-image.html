@@ -18,7 +18,7 @@
 {{- end -}}
 <span class="inline-media">
 {{- if or $set.src $res -}}
-  {{ partial "responsive-img.html" (dict "set" $set "src" $fallback "alt" .PlainText "title" .Title "id" $id "sizes" "(min-width: 45rem) 28rem, calc(100vw - 5rem)") }}
+  {{ partial "responsive-img.html" (dict "set" $set "src" $fallback "alt" .PlainText "title" .Title "id" $id "sizes" (printf "%s 28rem, calc(100vw - 5rem)" (partialCached "media-queries.html" "media").desktop)) }}
 {{- else -}}
 <img id="{{ $id }}" src="{{ .Destination | safeURL }}" alt="{{ .PlainText }}"{{ with .Title }} title="{{ . }}"{{ end }} loading="lazy" decoding="async">
 {{- end -}}

@@ -4,7 +4,7 @@ Measured with Playwright at 1440×900 and 390×844 on `/`, `/blog/`, `/blog/cros
 
 ## Status after the footer-dock rework
 
-Every page now uses one three-slot footer dock (`site-footer.html`, `footer-dock.css`, `footer-dock.js`), with only the slot contents differing. Grundo moved out of the player into the right slot on inner pages, the floating player is play-only on every page, and the per-page `back_to_top` ⌃ is gone. Measured after: the bar sits on the dock line (0px) and play is at the same x floating and parked on every page; the side slots mirror around the column center (±102px homepage, ±96px elsewhere); desktop band 159px homepage, 160px elsewhere.
+Every page now uses one three-slot footer dock (`site-footer.html`, `footer-dock.css`, measured by `layout.js`, which replaced `footer-dock.js` and the measuring half of `place.js`), with only the slot contents differing. Grundo moved out of the player into the right slot on inner pages, the floating player is play-only on every page, and the per-page `back_to_top` ⌃ is gone. Measured after: the bar sits on the dock line (0px) and play is at the same x floating and parked on every page; the side slots mirror around the column center (±102px homepage, ±96px elsewhere); desktop band 159px homepage, 160px elsewhere.
 
 - Resolved: 1 (copyright now renders on every page when set; extras stay homepage-only by design), 2, 4, 5, 6, 8, 11, 12, 16. 13 is down to `site-shell.css` (band), `footer-dock.css` (slots, Grundo), `dock.css` (homepage pets), and `subscribe.css` (yeti look).
 - Still open: 3 (space above the footer), 7 (phone lead needs JS to center), 14 (homepage has its own shell template), 15 (short pages don't pin the footer).

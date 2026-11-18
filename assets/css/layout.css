@@ -14,11 +14,8 @@
   the stacked player and ↑. Player edge (player.css) and corner backdrop
   sizing (backdrop.css) read --middle-column too.
 
-  Mobile breakpoint: 44.99rem (< 45rem). Used here and mirrored across
-  player.css, header.css, home.css, stars.css, backdrop.css, sword.css,
-  site-shell.css, gallery.css, sprites.css, blog-index.css, guestbook.css,
-  and in JS: player.js, site-cursor-fx.js, stars/field.js, stars/voids.js,
-  home/pets.js. Change all together if ever updated.
+  Breakpoints are named in assets/css/media.css (@media (--mobile),
+  @media (--desktop)); CSS, JS, and img sizes all read them from there.
 */
 :root {
     --page-gutter: 1.25rem;
@@ -48,13 +45,13 @@ body {
     overflow-wrap: break-word;
 }
 
-@media (min-width: 45rem) {
+@media (--desktop) {
     .site-shell > main {
         overflow-x: clip;
     }
 }
 
-@media (max-width: 44.99rem) {
+@media (--mobile) {
     :root {
         --page-gutter: 2.5rem;
     }

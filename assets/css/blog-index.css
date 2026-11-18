@@ -158,7 +158,7 @@
     color: var(--link, #7ec8ff);
 }
 
-@media (max-width: 44.99rem) {
+@media (--mobile) {
     .blog-entry__figure {
         max-width: 100%;
     }

@@ -26,5 +26,4 @@ export function initHomeBanner() {
         }
     }
     revealHomeBanner();
-    if (window.__site) window.__site.revealHomeBanner = revealHomeBanner;
 }
