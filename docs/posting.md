@@ -1,4 +1,4 @@
-# Posting blog posts (multimedia)
+﻿# Posting blog posts (multimedia)
 
 How to write and ship a post on this site: folder layout, front matter, shortcodes, sprites, and video. Maintainer chrome (player, stars, Netlify) lives in `docs/resources.md` — this file is for **content**.
 
@@ -38,30 +38,39 @@ content/blog/<slug>/
 ```
 
 - **Page resources** = files next to `index.md`. Reference them by filename in shortcodes (`src="cover.webp"`).
-- **`static/` paths** also work (`src="images/foo.webp"` → `static/images/foo.webp`), but keeping media with the post is easier to move/delete later.
+- **`assets/` paths** (`src="images/nongrid/photo.webp"`) are processed with the post photos and the original is not published. Shared pictures that should not join the photobook live in `assets/images/nongrid/`.
+- **`static/` paths** are copied as-is (`src="images/foo.webp"` → `static/images/foo.webp`). Use that only for a file that should be served unchanged.
 - Photobook (`/gallery/`) auto-picks **image** page resources from every blog post. If it should appear in the photobook, put it in the post folder.
 
-### Image size (masters)
+### Image size
 
-Prefer **WebP** (or compressed JPEG) under ~300–500 KB for article masters so the repo stays small. Blog bundles set `publishResources = false`, so the build does not publish that master. `photo` serves a 1400px WebP and a 1600px click-to-expand WebP; `photo-grid` uses an 800px tile and the same 1600px expand; `figcaption` and the writing-index preview use their own resized WebP. Keep the source file reasonable so Hugo has less to resize.
+Drop one JPEG or WebP in the post folder, at about 1600px on the long side. That file stays in git and is not published (`publishResources = false`). `layouts/partials/image-set.html` publishes the copies the layout uses: AVIF first, WebP as the fallback. A single photo is 480 and 1200 on the page and 1600 on click. A grid tile is 480 and 800. A gallery tile is a 480 square. The click-to-expand file is the 1600 copy.
 
-**In-place recompress (keep the repo lean):** drop camera files into the post folder, then:
+A commit refuses a file whose long edge is over 2000px or whose size is over 1.5MB. Export a smaller copy. `corn compress content/blog/your-post` can do that resize (long edge 2000, WebP q82). It is optional. It is not the quality setting for the site. `--force` re-encodes a file that was already compressed and can soften it. Use `--dry-run` first.
+
+### Corn CLI (Writer vs Ship)
+
+Same `corn` binary; two machine profiles:
+
+| Profile | Machine | Commands |
+| --- | --- | --- |
+| **Writer** | personal / writing | `run`, `edit`, `md`, `compress`, `email` |
+| **Ship** | deploy / git+Netlify box | Writer cmds + `update`, `branch`, `add`, `push`, `deploy` |
+
+One-time install (PowerShell, any cwd):
 
 ```text
-corn compress content/blog/your-post
+powershell -File scripts/install-corn.ps1
+. $PROFILE
+npm install --prefix scripts
+corn help
 ```
 
-Default path is `content/blog`. Converts `.jpg`/`.png` → lossy WebP (long edge 2000, q82), stamps EXIF `Software=comeholyghost-corn`, and rewrites nearby markdown `src=` names.
+Without install: from the repo root `.\corn help` or `node scripts\corn.mjs help`.
 
-- **Default:** compress JPG/PNG and **oversized/unmarked** WebP; skip corn-marked files and lean unmarked WebP (≤512 KB and within edge).
-- **`corn compress --new`:** same rules, but only files **new to git** (not on `HEAD`).
-- **`--force`:** recompress even corn-marked WebP (opt-in; can soften).
+A commit checks staged images under `content/`. A file over 2000px on the long edge, or over 1.5MB, stops the commit. Smaller files pass with nothing to do.
 
-Use `--dry-run` first. One-time alias install (PowerShell, any cwd): `powershell -ExecutionPolicy Bypass -File scripts/install-corn.ps1` — or from the repo root run `.\corn compress …`.
-
-A commit runs that same check on staged images under `content/`. If `corn compress` would still change one, the commit stops. Corn-marked WebPs and already-small unmarked WebPs pass with nothing to do.
-
-Writing-index (`/blog/`) preview: shows near-full size with `object-fit: contain` (no crop/stretch). Oversized masters are Fit-capped in `layouts/partials/blog-entry.html`; on-page max width/height live in `assets/css/blog-index.css`. Adjust those when a card looks too big or too small — details in `docs/resources.md`.
+Writing-index (`/blog/`) preview: shows the picture with `object-fit: contain` (no crop/stretch). The card image is 480 and 1200 from `image-set.html`. On-page max width and height live in `assets/css/blog-index.css`. Adjust those when a card looks too big or too small — details in `docs/resources.md`.
 
 ### Local preview (`corn run`)
 
@@ -78,29 +87,31 @@ Runs `hugo server -D --disableFastRender --navigateToChanged` from the repo root
 Vale (`vale.ini` + `styles/wraith`) plus `tools/be-density` (be-verb share). Requires `vale` on PATH. **Only markdown under `content/`** — never `docs/` or the rest of the repo.
 
 ```text
-corn edit                         # all content/**/*.md
+corn edit                         # prompt: content/blog/<name> + Vale picker
+corn edit --all                   # all content/**/*.md + picker
+corn edit --report --blog/post    # report-only Vale (no picker)
 corn edit --read-me.md            # content/read-me.md
 corn edit --blog/your-post        # that post folder
 corn edit content/blog/your-post  # same (must stay under content/)
-corn edit --review --blog/post    # y/n (or 1–N) each fixable Vale alert
 ```
 
-First run may `vale sync` package styles. Flags: `--vale-only`, `--density-only`, `--skip-sync`, `--review`.
+First run may `vale sync` package styles. Flags: `--all`, `--vale-only`, `--density-only`, `--skip-sync`, `--report` (report-only). `--fix` / `--review` still work but are the default.
 
-`--review` walks alerts that have a Vale `Action` (replace / edit / suggest / …), prompts per alert, and writes chosen fixes into the markdown. Keys: `y`/`Enter` apply, `1–N` pick, `n` skip once, `i` ignore that match for the rest of the run (all repeats; for spelling, possessives share the stem — `amaral` also ignores `amaral's`, but not bare plural `amarals`, and not non-spelling/grammar alerts), `q` quit. Needs a real terminal (TTY).
+Default `corn edit` walks alerts that have a Vale `Action` (replace / edit / suggest / …), prompts per alert, and writes chosen fixes into the markdown. Keys: `y`/`Enter` apply, `1–N` pick, `n` skip once, `i` ignore that match for the rest of the run (all repeats; for spelling, possessives share the stem — `amaral` also ignores `amaral's`, but not bare plural `amarals`, and not non-spelling/grammar alerts), `a` accept into the batch Vale list (`styles/config/vocabularies/Batch/accept.txt`, committed with the PR, cleared on `preview` by `corn deploy` after that batch is on `main`), `p` accept into the permanent Site list (`styles/config/vocabularies/Site/accept.txt`), `q` quit. Needs a real terminal (TTY); use `--report` otherwise.
 
-`corn edit` (and `--review`) drop spelling alerts that only differ by case (`illinois` vs `Illinois`) so house-style lowercase isn’t treated as a typo. Real misspellings still flag.
+`corn edit` drops spelling alerts that only differ by case (`illinois` vs `Illinois`) so house-style lowercase isn’t treated as a typo. Real misspellings still flag.
 
 ### Markdown structure (`corn md`)
 
-`markdownlint-cli2` (config: `.markdownlint-cli2.yaml`) plus an 80-column prose wrap that leaves Hugo shortcodes, front matter, fences, tables, lists, headings, HTML/`<pre>`/braille ASCII, and markdown links/URLs alone. **Only `content/`.** Style/spelling stay with `corn edit`. Prefer `--wrap-only` or a dry-run before `--fix` on link-heavy pages (footnotes).
+`markdownlint-cli2` (config: `.markdownlint-cli2.yaml`) plus an 80-column prose wrap that leaves Hugo shortcodes, front matter, fences, tables, lists, headings, HTML/`<pre>`/braille ASCII, and markdown links/URLs alone. **Only `content/`.** Style/spelling stay with `corn edit` — `corn md --fix` does **not** open the Vale picker.
 
 Whitespace / lists (fixable with `--fix`): unordered markers are `-`, nested lists indent with 2 spaces (no tabs), strip stray trailing spaces (exactly two spaces still OK for a hard break), collapse extra blank lines, one space after list markers.
 
 ```text
-corn md                         # lint + report lines over 80
+corn md                         # prompt: content/blog/<name>
+corn md --all                   # lint all content/**/*.md
 corn md --blog/your-post
-corn md --fix --blog/your-post  # wrap to 80 + markdownlint --fix
+corn md --fix --blog/your-post  # wrap to 80 + markdownlint --fix (not Vale)
 corn md --wrap-only …
 corn md --lint-only …
 corn md --dry-run --fix …
@@ -125,7 +136,6 @@ TOML between `+++` fences (YAML `---` also works). Fields this site cares about:
 | `toc` | no | **Off by default.** Set `toc = true` only if you want “On this page” in the aside. Omit it (or `false`) to hide the ToC |
 | `author` | no | Optional byline in the aside |
 | `[[buttons]]` | no | **Off by default.** Each `[[buttons]]` block adds one labeled link after the body. Delete those blocks to drop the row |
-| `back_to_top` | no | `true` shows a centered ⌃ under the body that smooth-scrolls to the top (use instead of bottom buttons if you want) |
 | `[_build]` | no | Hugo build options — unlisted / never render (see **Hide a post** below) |
 | `[[resources]]` | no | Optional metadata for a page resource (e.g. `title` used as caption fallback) |
 
@@ -196,13 +206,8 @@ icon = "fa-solid fa-book"
 
 Delete every `[[buttons]]` block on the page. The inline `{{< button ... >}}` shortcode is separate and only appears where you place it in the markdown.
 
-### Back-to-top chevron instead
+There is no per-page back-to-top control. The player's ↑ is the same on every page.
 
-```toml
-back_to_top = true
-```
-
-Renders a quiet ⌃ under the article; click smooth-scrolls to the top of the page.
 Example resource title:
 
 ```toml
@@ -225,7 +230,7 @@ Raw HTML in markdown works when you need it, but prefer shortcodes for pictures 
 
 ## Shortcodes (site-specific)
 
-All live under `layouts/shortcodes/`. Styles: `assets/css/article-media.css`. Lightbox: `static/js/article-media.js`.
+All live under `layouts/shortcodes/`. Styles: `assets/css/article-media.css`. Lightbox: `assets/js/article-media.js`.
 
 Self-closing form is fine when there is no inner body: `{{< photo src="x.png" />}}`.
 
@@ -242,9 +247,9 @@ Self-closing form is fine when there is no inner body: `{{< photo src="x.png" />
 | `caption` | Under the image; plain form becomes `alt` if `alt` is omitted |
 | `alt` | Explicit alt text |
 
-### `figcaption` — full-width figure + caption
+### `figcaption` — same as `photo`
 
-Same params as `photo`, but full column width and **no** click-to-expand.
+Kept as a name only. It renders the same figure as `photo` (one size, centered, click to enlarge), through `layouts/partials/article-photo.html`.
 
 ```
 {{< figcaption src="wide.png" caption="installation view" />}}
@@ -312,7 +317,7 @@ Short version: cook a horizontal strip PNG → `static/images/sprites/` → add 
 
 `icon` is optional: short name (`book`, `heart`, `github`, …) or legacy `fa-solid fa-book` (mapped). Inline SVG — no Font Awesome CDN.
 
-Or attach a row after the whole post via front matter (`[[buttons]]` — omit entirely if you don’t want it). For a scroll-up control instead, use `back_to_top = true` (see Front matter above).
+Or attach a row after the whole post via front matter (`[[buttons]]` — omit entirely if you don’t want it).
 
 ## Videos
 
@@ -349,13 +354,17 @@ Keep files small; giant uploads hurt Netlify deploys and first paint.
 
 ## Images that are not shortcodes
 
-Plain markdown images still work:
+Plain markdown images work and behave exactly like `photo`:
 
 ```markdown
-![alt text](cover.png)
+![alt text](cover.png "optional caption")
 ```
 
-They get a light `retro-media` wrapper from the render hook but **not** the click-to-expand lightbox. Prefer `photo` / `photo-grid` / `figcaption` for gallery-style posts.
+An image on its own line goes through the same partial as `photo` (`layouts/partials/article-photo.html`), so it is the same size, centered, and opens the lightbox. The quoted title becomes the caption. This needs `wrapStandAloneImageWithinParagraph = false` in `hugo.toml`.
+
+An image inside a sentence stays inline at text height (`.inline-media`), with no lightbox.
+
+Raw `<img>` in HTML opts out of all of this. It only gets `max-width: 100%`.
 
 ## Checklist before you publish
 

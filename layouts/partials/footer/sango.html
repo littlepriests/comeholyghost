@@ -1,0 +1,28 @@
+{{- /*
+  Homepage, left slot. Idle 27×40 @3 (paints 81×120). Attack 48×47 @3 (144×141).
+  Boomerang 45×40 @2 (90×80); home/pets.js moves it onto the dock to throw it.
+*/ -}}
+{{- $sIdle := partial "sprite-by-id.html" "sango-idle" -}}
+{{- $sAttack := partial "sprite-by-id.html" "sango-attack" -}}
+{{- $sBoom := partial "sprite-by-id.html" "sango-boomerang" -}}
+{{- $x3 := dict "alt" "" "scale" "3" -}}
+{{- $sangoTip := partial "tip-text.html" (dict "key" "sango" "fallback" "sango") -}}
+<div class="dock-pad dock-pad--sango" data-dock-pad="sango">
+    <button type="button" class="dock-sango is-idle site-tip" data-dock-sango aria-label="{{ $sangoTip }}" data-tip="{{ $sangoTip }}">
+        {{- with $sIdle -}}
+        <span class="dock-sango__strip dock-sango__strip--idle is-active">
+            {{- partial "sprite.html" (merge . $x3) -}}
+        </span>
+        {{- end -}}
+        {{- with $sAttack -}}
+        <span class="dock-sango__strip dock-sango__strip--attack">
+            {{- partial "sprite.html" (merge . $x3) -}}
+        </span>
+        {{- end -}}
+    </button>
+</div>
+{{- with $sBoom -}}
+<span class="dock-boomerang" data-dock-boomerang aria-hidden="true">
+    {{- partial "sprite.html" (merge . (dict "alt" "" "scale" "2")) -}}
+</span>
+{{- end -}}

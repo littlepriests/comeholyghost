@@ -5,7 +5,7 @@
         {{- partial "head.html" . -}}
     </head>
 
-    <body class="{{ with .Section }}section-{{ . }} {{ end }}kind-{{ .Kind }}">
+    <body class="{{ with .Section }}section-{{ . }} {{ end }}{{ with .Layout }}layout-{{ . }} {{ end }}kind-{{ .Kind }}">
         <div id="page-root">
         <div class="page site-shell">
 
@@ -13,30 +13,15 @@
                 {{- partial "header.html" . -}}
             </header>
 
-            <section class="page__body">
+            <main class="page__body">
                 {{- block "main" . }}{{- end }}
-            </section>
+            </main>
 
-            <section class="page__aside">
-                {{- partial "about.html" . -}}
-                {{- /* No hairline when the about block is empty chrome. */ -}}
-                {{- $about := .Site.Params.about -}}
-                {{- $hasAbout := or $about.title $about.description $about.logo $about.logo_image -}}
-                {{- $hasSocial := false -}}
-                {{- with .Site.Params.socialLinks }}{{ $hasSocial = gt (len .) 0 }}{{ end -}}
-                {{- if or $hasAbout $hasSocial }}
-                <hr>
-                {{- end }}
-                <div class="aside__content">
-                    {{- block "aside" . }}{{- end }}
-                </div>
-            </section>
-
-            {{- partial "site-footer.html" (dict "page" . "class" "page__footer") }}
+            {{- partial "site-footer.html" (dict "page" .) }}
 
         </div>
-        {{- /* Inside #page-root so same-site nav (which only swaps that node) loads the lightbox. */ -}}
-        <script src="{{ "js/article-media.js" | relURL }}?v=2"></script>
+        {{- /* Inside #page-root so same-site nav (which only swaps that node) runs these again. */ -}}
+        {{ partial "js.html" "article-media" }}
         </div>
         {{- partial "site-chrome.html" . }}
     </body>

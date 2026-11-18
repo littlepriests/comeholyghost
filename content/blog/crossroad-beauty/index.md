@@ -64,7 +64,7 @@ amaral-el-gran-muro-sheesh.webp
 
 {{< photo src="pulitzer-tadao-ando.webp" caption="water court @ pulitzer arts foundation, st louis, MO, designed by tadao ando" />}}
 
-another neat thing: japanese architect  [tadao ando](https://www.instagram.com/tadao_ando_ando/?hl=en) designed the pulitzer building. i usually love concrete, but i'm not sure my immediate reaction was "love" while i walked from room to room. the concrete appeared soft, supple, but i still managed to feel cold and sterile inside it. not a place i'd want to hang out at all day. next time we go in i'll have to pay more attention and read up on [ando's approach to design](https://artic.contentdm.oclc.org/digital/collection/caohp/id/40). would i feel differently on a sunnier day? i wonder how amaral felt about concrete...
+another neat thing: japanese architect [tadao ando](https://www.instagram.com/tadao_ando_ando/?hl=en) designed the pulitzer building. i usually love concrete, but i'm not sure my immediate reaction was "love" while i walked from room to room. the concrete appeared soft, supple, but i still managed to feel cold and sterile inside it. not a place i'd want to hang out at all day. next time we go in i'll have to pay more attention and read up on [ando's approach to design](https://artic.contentdm.oclc.org/digital/collection/caohp/id/40). would i feel differently on a sunnier day? i wonder how amaral felt about concrete...
 
 ## 33.9 single (f) seeking hammered dulcimer
 

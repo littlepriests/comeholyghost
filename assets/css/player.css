@@ -1,0 +1,534 @@
+/*
+  One player on every page, with the same behavior everywhere. The bar and the
+  ↑ are mirrors of each other:
+
+    ↑    sits in the "↑ column" (a strip in the right gutter), --player-float
+         above the window bottom, and rides the page onto the footer line.
+    bar  while you read (floating) docks in that same column, --player-float
+         below the window top, and shows only play. At the end of the page
+         (parked) it moves to the footer's left gutter, mirrored: stop is
+         centered on the mirrored ↑ column, play and skip beside it, the
+         bottom edge on the footer line like the ↑. The track title sits above
+         that parked bar, the same width as the button row, and stays hidden
+         while the bar is floating.
+
+  Both placements are offsets inside the same sticky track, so moving between
+  them is one CSS transition (.site-player--live), with no JS animation.
+  Hidden controls keep their slots. Phone: the same placements with smaller
+  circles. Every glyph is --player-glyph-fill of its circle. Grundo is a
+  footer pet (footer-dock.css).
+
+  #site-player is a zero-height sticky track after #page-root. The browser
+  floats it --player-float above the window bottom and lets it ride the page
+  once the footer line arrives; assets/js/layout.js only measures
+  --player-lift (page end to footer line) when the layout changes, never on
+  scroll.
+*/
+html,
+body {
+    /* Hidden controls keep their slots and can sit past the window edge. */
+    overflow-x: clip;
+}
+
+#site-player {
+    /* 100% of the track = the window without its scrollbar. --middle-column
+       is the same on every page, so the bar holds still across SPA nav. A
+       window too narrow for the gutter slides the buttons inside the column,
+       but never so far that the ↑ (centered in this edge) leaves the window. */
+    --player-button-size: 2rem;
+    --player-button-gap: 0.25rem;
+    --player-buttons-w: calc(3 * var(--player-button-size) + 2 * var(--player-button-gap));
+    --player-back-top-size: 1.65rem;
+    /* Every player glyph (play, pause, stop, skip, ↑) is this fraction of its
+       circle's diameter, so all of them have the same ring of empty space.
+       The icons' viewBoxes are cropped to their artwork (icon.html). */
+    --player-glyph-fill: 0.4;
+    --player-edge-right: max(calc(var(--player-back-top-size) + 1rem), calc((100% - var(--middle-column)) / 2 - var(--player-buttons-w)));
+    /* The ↑ column: its center is this far from the window's right edge. The
+       parked bar mirrors it, this far from the left edge. */
+    --player-col-x: calc(var(--player-edge-right) / 2);
+    --player-float: 1rem;
+    /* What the bar anchors on: play's center while floating, stop's center
+       (the middle button) when parked. The closed ♡ anchors on itself. */
+    --player-bar-h: var(--player-button-size);
+    --player-float-anchor: calc(var(--player-button-size) / 2);
+    --player-park-anchor: calc(1.5 * var(--player-button-size) + var(--player-button-gap));
+    /* The parked bar's left edge: its anchor on the mirrored ↑ column,
+       clamped 0.5rem from the window edge. */
+    --player-park-left: max(0.5rem, calc(var(--player-col-x) - var(--player-park-anchor)));
+    position: sticky;
+    bottom: calc(var(--player-float) - var(--player-lift, 0px));
+    translate: 0 calc(-1 * var(--player-lift, 0px));
+    z-index: 30;
+    height: 0;
+    pointer-events: none;
+}
+
+#site-player.site-player--closed {
+    --player-bar-h: 1.5rem;
+    --player-float-anchor: 0.75rem;
+    --player-park-anchor: 0.75rem;
+}
+
+/* Floating (the default, so the first paint is right): top of the window, in
+   the ↑ column. The track sits --player-float above the window bottom, so
+   this offset puts the bar's top the same distance below the window top; the
+   lift translate cancels out of the visual position. */
+#site-player .player-bar {
+    position: absolute;
+    left: calc(100% - var(--player-col-x) - var(--player-float-anchor));
+    bottom: calc(100dvh - 2 * var(--player-float) - var(--player-bar-h));
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    /* Hidden controls keep their slots; only the buttons take the pointer. */
+    pointer-events: none;
+}
+
+/* Parked: on the footer line, mirrored to the left gutter. */
+#site-player.site-player--parked .player-bar {
+    left: var(--player-park-left);
+    bottom: 0;
+}
+
+/* Sits where the parked bar's left edge goes, floating or not, so layout.js
+   can keep the footer clear of the bar without repeating the formula. */
+#site-player .player-park-probe {
+    position: absolute;
+    left: var(--player-park-left);
+    bottom: 0;
+    width: 0;
+    height: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* Moving between the two is animated, but never on the first paint. */
+#site-player.site-player--live .player-bar {
+    transition: left 0.5s cubic-bezier(0.3, 0.7, 0.2, 1), bottom 0.5s cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+
+#site-player [hidden],
+#site-player.site-player--closed .player-chrome {
+    display: none !important;
+}
+
+#site-player .player-chrome {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+/* Above the button row, and only once the bar has parked. Absolute, so it
+   never changes the bar's box (the placement math keys off that). It fades in
+   after the move and drops out as soon as the bar leaves the footer. */
+#site-player .player-title {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 0.55rem);
+    width: var(--player-buttons-w);
+    margin: 0 0 0 calc(var(--player-buttons-w) / -2);
+    overflow: hidden;
+    white-space: nowrap;
+    text-align: center;
+    pointer-events: none;
+    color: var(--highlight);
+    font-family: var(--chip-font);
+    font-size: 0.72rem;
+    line-height: 1.2;
+    text-shadow: 0 0 8px color-mix(in srgb, var(--highlight) 40%, transparent);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.12s ease, visibility 0.12s;
+}
+
+#site-player.site-player--parked .player-title {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.25s ease 0.4s, visibility 0.25s 0.4s;
+}
+
+#site-player .player-title [data-player-title-text] {
+    display: inline-block;
+    will-change: transform;
+}
+
+#site-player .player-title.is-marquee {
+    /* Fade only the trailing edge, so the start of the name stays readable. */
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 0.7rem), transparent);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 0.7rem), transparent);
+}
+
+#site-player .player-title.is-marquee [data-player-title-text] {
+    padding-right: 1.5rem;
+    animation: player-title-marquee 9s linear infinite;
+}
+
+@keyframes player-title-marquee {
+    0%,
+    12% {
+        transform: translateX(0);
+    }
+    88%,
+    100% {
+        transform: translateX(var(--marquee-distance, 0px));
+    }
+}
+
+#site-player .player-chrome__buttons {
+    display: flex;
+    align-items: center;
+    gap: var(--player-button-gap);
+}
+
+#site-player button {
+    /* The circle's diameter; the ↑ sets its own. */
+    --player-d: var(--player-button-size);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: var(--player-d);
+    height: var(--player-d);
+    margin: 0;
+    padding: 0;
+    pointer-events: auto;
+    font-family: var(--chip-font);
+    font-weight: 600;
+    color: var(--chip-fg);
+    background: var(--chip-bg);
+    border: 1px solid var(--chip-border);
+    border-radius: 999px;
+    cursor: pointer;
+}
+
+#site-player button:hover {
+    color: var(--chip-fg);
+    border-color: var(--chip-border-hot);
+    box-shadow: var(--chip-glow);
+}
+
+/* While audio is playing, the toggle breathes so the button reads as on. */
+#site-player [data-player-toggle].is-playing {
+    animation: player-playing-pulse 2.8s ease-in-out infinite;
+}
+
+@keyframes player-playing-pulse {
+    0%,
+    100% {
+        box-shadow: 0 0 0 transparent;
+    }
+    50% {
+        box-shadow: 0 0 14px color-mix(in srgb, var(--highlight) 70%, transparent);
+    }
+}
+
+#site-player button .site-icon {
+    display: block;
+    flex: none;
+    width: calc(var(--player-glyph-fill) * var(--player-d));
+    height: calc(var(--player-glyph-fill) * var(--player-d));
+    /* Moves a mark whose weight isn't its box's center onto the circle's center.
+       transform, not the translate property: the stylesheet minifier drops that. */
+    transform: translate(calc(var(--glyph-nudge-x, 0) * 100%), calc(var(--glyph-nudge-y, 0) * 100%));
+}
+
+#site-player [data-player-toggle] .player-toggle-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;
+}
+
+#site-player .player-back-top {
+    --player-d: var(--player-back-top-size);
+    position: absolute;
+    right: calc(var(--player-col-x) - var(--player-back-top-size) / 2);
+    bottom: 0;
+    z-index: 2;
+    border-radius: 50%;
+    opacity: 1;
+}
+
+/* Until you have scrolled a little. Not [hidden], so its box stays measurable
+   (layout.js keeps the footer slots clear of it). */
+#site-player .player-back-top.is-away {
+    opacity: 0;
+    visibility: hidden;
+}
+
+#site-player .player-back-top {
+    transition: opacity 0.2s ease, visibility 0.2s, border-color 0.15s, box-shadow 0.15s;
+}
+
+#site-player .player-back-top:is(:hover, :focus-visible) {
+    color: var(--chip-fg);
+    background: var(--chip-bg);
+    border-color: var(--chip-border-hot);
+    box-shadow: var(--chip-glow);
+    opacity: 1;
+    text-shadow: none;
+}
+
+#site-player .player-reopen {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.95rem;
+    line-height: 1;
+    color: var(--logo, #18ff6d);
+    background: transparent;
+    border: 0;
+    opacity: 0.9;
+}
+
+#site-player .player-reopen:hover {
+    color: var(--logo, #18ff6d);
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    opacity: 1;
+    text-shadow: 0 0 8px color-mix(in srgb, var(--logo, #18ff6d) 55%, transparent);
+}
+
+body {
+    position: relative;
+}
+
+/* Grundo's hearts (footer/grundo.html). Each heart's path (--dx, --lift, --dx2, --fall) is set inline. */
+.footer-grundo__heart {
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin: 0;
+    pointer-events: none;
+    font-family: var(--font-site);
+    font-size: 0.95rem;
+    line-height: 1;
+    color: var(--heart);
+    text-shadow:
+        0 0 4px #ff6b81,
+        0 0 10px #ff1744,
+        0 0 18px rgb(255 20 60 / 0.75),
+        0 0 28px rgb(255 20 60 / 0.45);
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.35);
+    will-change: transform, opacity;
+}
+
+.footer-grundo__heart.is-bright {
+    color: var(--heart-bright);
+    font-size: 1.2rem;
+    text-shadow:
+        0 0 5px #fff,
+        0 0 10px var(--heart),
+        0 0 18px #ff1744,
+        0 0 28px rgb(255 20 60 / 0.9),
+        0 0 40px rgb(255 40 80 / 0.55);
+}
+
+.footer-grundo__hearts.is-stomp .footer-grundo__heart {
+    animation: player-dock-heart-spill var(--hspurt, 1.8s) cubic-bezier(0.2, 0.75, 0.2, 1) var(--hd, 0s) 1 both;
+}
+
+/* Pop up from the stomp, then pour outward and down. */
+@keyframes player-dock-heart-spill {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.2) rotate(0deg);
+        filter: brightness(1.2);
+    }
+    6% {
+        opacity: 1;
+        transform:
+            translate(
+                calc(-50% + var(--dx, 0rem) * 0.35),
+                calc(-50% + var(--lift, -1.2rem) * 0.55)
+            )
+            scale(1.35)
+            rotate(calc(var(--rot, 0deg) * 0.2));
+        filter: brightness(1.7);
+    }
+    18% {
+        opacity: 1;
+        transform:
+            translate(
+                calc(-50% + var(--dx, 0rem)),
+                calc(-50% + var(--lift, -1.2rem))
+            )
+            scale(1.15)
+            rotate(calc(var(--rot, 0deg) * 0.55));
+        filter: brightness(1.45);
+    }
+    42% {
+        opacity: 0.95;
+        transform:
+            translate(
+                calc(-50% + var(--dx2, var(--dx, 0rem)) * 0.55),
+                calc(-50% + var(--lift, -1.2rem) * 0.15 + var(--fall, 5rem) * 0.35)
+            )
+            scale(1)
+            rotate(var(--rot, 0deg));
+        filter: brightness(1.25);
+    }
+    72% {
+        opacity: 0.7;
+        transform:
+            translate(
+                calc(-50% + var(--dx2, var(--dx, 0rem)) * 0.85),
+                calc(-50% + var(--fall, 5rem) * 0.75)
+            )
+            scale(0.85)
+            rotate(calc(var(--rot, 0deg) * 1.25));
+        filter: brightness(1.05);
+    }
+    100% {
+        opacity: 0;
+        transform:
+            translate(
+                calc(-50% + var(--dx2, var(--dx, 0rem))),
+                calc(-50% + var(--fall, 5rem))
+            )
+            scale(0.35)
+            rotate(calc(var(--rot, 0deg) * 1.6));
+        filter: brightness(0.9);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .footer-grundo__hearts.is-stomp .footer-grundo__heart {
+        animation: none;
+        opacity: 0;
+    }
+}
+
+/* Full-page hearts rising on back-to-top; spawned by player/pet.js on every viewport. */
+.player-page-hearts {
+    position: fixed;
+    inset: 0;
+    z-index: 12000;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.player-page-hearts__heart {
+    position: absolute;
+    left: var(--x, 50%);
+    bottom: -1.5rem;
+    margin: 0;
+    font-family: var(--font-site);
+    font-size: calc(0.85rem * var(--scale, 1));
+    line-height: 1;
+    color: var(--heart);
+    text-shadow:
+        0 0 4px #ff6b81,
+        0 0 10px #ff1744,
+        0 0 18px rgb(255 20 60 / 0.7);
+    opacity: 0;
+    transform: translate(-50%, 0) scale(var(--scale, 1));
+    animation: player-page-heart-rise var(--dur, 2s) cubic-bezier(0.22, 0.7, 0.25, 1) var(--delay, 0s) 1 both;
+    will-change: transform, opacity;
+}
+
+.player-page-hearts__heart.is-bright {
+    color: var(--heart-bright);
+    font-size: calc(1.15rem * var(--scale, 1));
+    text-shadow:
+        0 0 5px #fff,
+        0 0 10px var(--heart),
+        0 0 20px #ff1744,
+        0 0 32px rgb(255 40 80 / 0.55);
+}
+
+@keyframes player-page-heart-rise {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, 0) scale(calc(var(--scale, 1) * 0.4));
+    }
+    10% {
+        opacity: 1;
+        transform:
+            translate(calc(-50% + var(--drift, 0px) * 0.15), -12vh)
+            scale(calc(var(--scale, 1) * 1.15));
+    }
+    55% {
+        opacity: 0.95;
+        transform:
+            translate(calc(-50% + var(--drift, 0px) * 0.7), -58vh)
+            scale(var(--scale, 1));
+    }
+    100% {
+        opacity: 0;
+        transform:
+            translate(calc(-50% + var(--drift, 0px)), -112vh)
+            scale(calc(var(--scale, 1) * 0.55));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .player-page-hearts {
+        display: none;
+    }
+}
+
+/* Every page, every width: while floating only play/pause (and the ↑) show;
+   stop and skip appear as the bar settles into the footer. visibility keeps
+   their slots, so the bar is the same size either way. */
+#site-player :is([data-player-stop], [data-player-skip]) {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s;
+}
+
+#site-player.site-player--parked :is([data-player-stop], [data-player-skip]) {
+    opacity: 1;
+    visibility: visible;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #site-player.site-player--live .player-bar,
+    #site-player .player-back-top,
+    #site-player .player-title,
+    #site-player.site-player--parked .player-title,
+    #site-player :is([data-player-stop], [data-player-skip]) {
+        transition: none;
+    }
+
+    #site-player .player-title.is-marquee {
+        mask-image: none;
+    }
+
+    #site-player .player-title.is-marquee [data-player-title-text] {
+        animation: none;
+    }
+
+    #site-player [data-player-toggle].is-playing {
+        animation: none;
+        box-shadow: 0 0 8px color-mix(in srgb, var(--highlight) 45%, transparent);
+    }
+}
+
+/* Phone: the same placements, floating and parked, with smaller circles
+   (matching the ↑) and the ↑ column centered in the right page gutter. The
+   parked bar's mirror spot is past the window edge there, so it holds at the
+   same 0.5rem clamp a narrow desktop window uses. */
+@media (--mobile) {
+    #site-player {
+        --player-col-x: calc(var(--page-gutter) / 2);
+        --player-button-size: var(--player-back-top-size);
+        --player-float: max(0.75rem, env(safe-area-inset-bottom));
+        z-index: 40;
+    }
+
+    #site-player .player-bar {
+        gap: 0.5rem;
+    }
+
+    #site-player.site-player--closed .player-bar {
+        gap: 0;
+    }
+
+    #site-player .player-chrome {
+        gap: 0.5rem;
+    }
+}

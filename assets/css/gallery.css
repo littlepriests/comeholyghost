@@ -1,12 +1,11 @@
-@media (max-width: 44.99rem) {
+@media (--mobile) {
     .gallery {
         grid-template-columns: repeat(auto-fill, minmax(6.75rem, 1fr));
         gap: 0.55rem;
-        justify-content: center;
     }
 }
 
-.gallery-page h1::before {
+.layout-gallery h1::before {
     content: none;
 }
 
@@ -20,7 +19,8 @@
     margin: 0;
     padding: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fill, 9.5rem);
+    /* Fluid tracks fill the column edge to edge (fixed tracks leave the slack on the right). */
+    grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
     gap: 0.75rem;
 }
 
@@ -46,6 +46,12 @@
 .gallery__item:focus-visible {
     outline: 2px solid var(--highlight, #18ff6d);
     outline-offset: 2px;
+}
+
+.gallery picture {
+    position: absolute;
+    inset: 0;
+    display: block;
 }
 
 /* Crop to the square — never stretch oddly sized sources. */

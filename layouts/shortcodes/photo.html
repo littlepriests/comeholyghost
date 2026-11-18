@@ -4,41 +4,16 @@
   {{< photo src="photo.png" caption="Hello" >}}
   {{< photo src="photo.png" alt="Hello" tip="fun hover" >}}Caption{{< /photo >}}
 
-  Page resources: display thumb is Fit 1400x webp q75; lightbox is Fit 1600x webp q70.
-  The master stays in the repo and is not published.
+  Markup lives in partials/article-photo.html.
 */ -}}
 {{- $src := .Get "src" | default (.Get 0) -}}
 {{- if not $src -}}
   {{- errorf "photo shortcode on %q: missing src" .Page.Path -}}
 {{- end -}}
-{{- $alt := .Get "alt" | default "" -}}
-{{- $tip := .Get "tip" | default "" -}}
-{{- $caption := .Get "caption" | default (strings.TrimSpace .Inner) -}}
-{{- $img := false -}}
-{{- with .Page.Resources.GetMatch $src -}}
-  {{- $img = . -}}
-{{- end -}}
-{{- $thumb := $src | relURL -}}
-{{- $full := $thumb -}}
-{{- if $img -}}
-  {{- if ge $img.Width 1 -}}
-    {{- $disp := $img.Fit "1400x1400 webp q75" -}}
-    {{- $large := $img.Fit "1600x1600 webp q70" -}}
-    {{- $thumb = $disp.RelPermalink -}}
-    {{- $full = $large.RelPermalink -}}
-  {{- else -}}
-    {{- $thumb = $img.RelPermalink -}}
-    {{- $full = $thumb -}}
-  {{- end -}}
-{{- end -}}
-{{- if and (not $alt) $caption -}}
-  {{- $alt = $caption | plainify -}}
-{{- end -}}
-<figure class="article-photo">
-  <button type="button" class="article-photo__thumb{{ with $tip }} site-tip{{ end }}" data-article-photo data-full="{{ $full }}"{{ with $tip }} data-tip="{{ . }}"{{ end }} aria-label="{{ if $alt }}View larger: {{ $alt }}{{ else }}View larger image{{ end }}">
-    <img src="{{ $thumb }}" alt="{{ $alt }}" loading="lazy" decoding="async">
-  </button>
-  {{- with $caption }}
-  <figcaption class="article-figure__caption">{{ . | $.Page.RenderString }}</figcaption>
-  {{- end }}
-</figure>
+{{- partial "article-photo.html" (dict
+  "page" .Page
+  "src" $src
+  "alt" (.Get "alt")
+  "tip" (.Get "tip")
+  "caption" (.Get "caption" | default (strings.TrimSpace .Inner))
+) -}}

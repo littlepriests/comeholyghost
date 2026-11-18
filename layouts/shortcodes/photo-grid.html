@@ -8,9 +8,9 @@
   weaving-infinite-gold.png
   {{< /photo-grid >}}
 
-  One image path per line (page resource or static/ path). Optional caption=.
-  Page-resource tiles: Fit 800x webp q75 thumb; lightbox Fit 1600x webp q70.
-  The master stays in the repo and is not published.
+  One image path per line (page resource or assets/ path). Optional caption=.
+  Tiles are 480 and 800. Click opens the 1600 copy. The file in the post
+  folder is not published.
 */ -}}
 {{- $caption := .Get "caption" | default "" -}}
 {{- $raw := split .Inner "\n" -}}
@@ -28,22 +28,14 @@
 <figure class="article-photo-grid" data-count="{{ $n }}">
   <div class="article-photo-grid__tiles">
     {{- range $i, $src := $srcs -}}
-      {{- $img := false -}}
-      {{- with $.Page.Resources.GetMatch $src -}}
-        {{- $img = . -}}
-      {{- end -}}
-      {{- $thumb := $src | relURL -}}
-      {{- $full := $thumb -}}
-      {{- if $img -}}
-        {{- if ge $img.Width 1 -}}
-          {{- $disp := $img.Fit "800x800 webp q75" -}}
-          {{- $large := $img.Fit "1600x1600 webp q70" -}}
-          {{- $thumb = $disp.RelPermalink -}}
-          {{- $full = $large.RelPermalink -}}
-        {{- else -}}
-          {{- $thumb = $img.RelPermalink -}}
-          {{- $full = $thumb -}}
-        {{- end -}}
+      {{- $img := partial "image-resource.html" (dict "page" $.Page "src" $src) -}}
+      {{- $set := dict -}}
+      {{- $full := $src | relURL -}}
+      {{- if and $img (ge $img.Width 1) -}}
+        {{- $set = partial "image-set.html" (dict "res" $img "widths" (slice 480 800) "lightbox" true) -}}
+        {{- $full = $set.full -}}
+      {{- else if $img -}}
+        {{- $full = $img.RelPermalink -}}
       {{- end -}}
       {{- $alt := printf "%s (%d)" ($caption | default "photo" | plainify) (add $i 1) -}}
       <button
@@ -51,8 +43,9 @@
         class="article-photo-grid__item"
         data-article-photo
         data-full="{{ $full }}"
+        {{- with $set.fullAvif }} data-full-avif="{{ . }}"{{ end }}
         aria-label="View larger: {{ $alt }}">
-        <img src="{{ $thumb }}" alt="{{ $alt }}" loading="lazy" decoding="async">
+        {{ partial "responsive-img.html" (dict "set" $set "src" $full "alt" $alt "sizes" (printf "%s 15rem, calc(50vw - 3rem)" (partialCached "media-queries.html" "media").desktop)) }}
       </button>
     {{- end -}}
   </div>

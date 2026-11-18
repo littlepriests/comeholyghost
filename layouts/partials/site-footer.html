@@ -1,15 +1,34 @@
 {{- /*
-  One footer for every layout: same top padding and band (assets/css/site-shell.css).
-  variant "home": homepage dock + [params.home.footer] extras, no yeti row.
-  variant "page": yeti + copyright; the player parks in this band on every page (player.js).
+  One footer for every layout. The row is a three-slot dock, laid out by
+  assets/css/footer-dock.css and spaced and fitted by assets/js/layout.js
+  the same way on every page. Pages differ only in what fills each slot:
+
+    home:   Sango | visitor counter | Kagura
+    others: yeti  |                 | Grundo
+
+  To move a piece, change its slot below. "lead" is the one slot that stays
+  on a phone, where it shares a row with the player and the ↑ (layout.js).
+  The player parks on the dock's bottom line on every page.
 */ -}}
 {{- $page := .page -}}
-{{- $variant := .variant | default "page" -}}
-<footer class="site-footer site-footer--{{ $variant }}{{ with .class }} {{ . }}{{ end }}" data-site-footer>
-    {{- if eq $variant "home" }}
-    {{- partial "home-dock.html" $page -}}
+{{- $home := eq .variant "home" -}}
+{{- $fill := dict "left" "footer/yeti.html" "center" "" "right" "footer/grundo.html" "lead" "left" -}}
+{{- if $home -}}
+  {{- $fill = dict "left" "footer/sango.html" "center" "footer/counter.html" "right" "footer/kagura.html" "lead" "center" -}}
+{{- end -}}
+<footer class="site-footer" data-site-footer>
+    <div class="footer-dock-fit" data-footer-dock-fit>
+        <div class="footer-dock" data-footer-dock>
+            {{- range slice "left" "center" "right" }}
+            <div class="footer-dock__slot footer-dock__slot--{{ . }}" data-footer-slot="{{ . }}"{{ if eq . $fill.lead }} data-footer-lead{{ end }}>
+                {{- with index $fill . }}{{ partial . $page }}{{ end -}}
+            </div>
+            {{- end }}
+        </div>
+    </div>
+    {{- if $home }}
     {{- with $page.Site.Params.home.footer }}
-    <div class="home-footer__extra">
+    <div class="site-footer__extra">
         {{- range . }}
         {{- if eq .kind "image" }}
         {{- if .url }}
@@ -27,7 +46,8 @@
         {{- end }}
     </div>
     {{- end }}
-    {{- else }}
-    {{- partial "footer.html" $page -}}
+    {{- end }}
+    {{- with $page.Site.Copyright }}
+    <p class="copyright">{{ . | markdownify }}</p>
     {{- end }}
 </footer>

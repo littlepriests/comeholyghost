@@ -1,19 +1,15 @@
-import { getStore } from "@netlify/blobs";
+import { updateJSON } from "../lib/blob-update.mjs";
 import { json, preflight } from "../lib/http.mjs";
 import { isPreviewDeploy } from "../lib/preview-guard.mjs";
+import { openStore } from "../lib/stores.mjs";
 
 const STORE_NAME = "visitors";
 const COUNT_KEY = "count";
 
-async function readCount(store) {
-    const value = await store.get(COUNT_KEY, { type: "json" });
-    if (typeof value === "number" && Number.isFinite(value) && value >= 0) {
-        return Math.floor(value);
-    }
-    if (value && typeof value.count === "number" && Number.isFinite(value.count)) {
-        return Math.max(0, Math.floor(value.count));
-    }
-    return 0;
+/** Accepts a bare number or the older { count } shape. */
+function toCount(value) {
+    const raw = value && typeof value === "object" ? value.count : value;
+    return typeof raw === "number" && Number.isFinite(raw) && raw >= 0 ? Math.floor(raw) : 0;
 }
 
 export default async (request) => {
@@ -21,7 +17,6 @@ export default async (request) => {
         return preflight("GET, POST, OPTIONS");
     }
 
-    // Deploy preview / branch: no Blobs reads/writes (production counter stays clean).
     if (isPreviewDeploy()) {
         if (request.method === "GET") {
             return json(200, { count: 0, preview: true });
@@ -32,22 +27,24 @@ export default async (request) => {
         return json(405, { error: "Method not allowed." });
     }
 
-    const store = getStore({ name: STORE_NAME, consistency: "strong" });
+    const store = await openStore(STORE_NAME);
 
     if (request.method === "GET") {
-        return json(200, { count: await readCount(store) });
+        return json(200, { count: toCount(await store.get(COUNT_KEY, { type: "json" })) });
     }
 
     if (request.method !== "POST") {
         return json(405, { error: "Method not allowed." });
     }
 
-    // Fun GeoCities counter: one atomic-ish bump per POST. Browser sessionStorage
-    // keeps a single tab from spamming; this is not hardened anti-bot.
-    const current = await readCount(store);
-    const next = current + 1;
-    await store.setJSON(COUNT_KEY, next);
-    return json(200, { count: next });
+    // One bump per POST. The browser's sessionStorage flag is the only
+    // per-visitor limit; this is a toy counter, not bot-proof.
+    try {
+        const next = await updateJSON(store, COUNT_KEY, (value) => toCount(value) + 1);
+        return json(200, { count: next });
+    } catch (error) {
+        return json(503, { error: "Counter is busy. Try again." });
+    }
 };
 
 export const config = {

@@ -5,13 +5,7 @@
     line-height: 0;
 }
 
-/* Stabbed-girl figure is .sword-figure on read-me (sword.css), not a fixed corner. */
-
-.site-backdrop[data-anchor="bottom-right"] {
-    right: var(--backdrop-x);
-    bottom: var(--backdrop-y);
-}
-
+/* No bottom-right corner: that image is the read-me .sword-figure (sword.css). */
 .site-backdrop[data-anchor="bottom-left"] {
     left: var(--backdrop-x);
     bottom: var(--backdrop-y);
@@ -52,7 +46,7 @@
 
 
 /* Phones have no side gutter, so the corner pictures would sit on the writing. */
-@media (max-width: 44.99rem) {
+@media (--mobile) {
     .site-backdrop {
         display: none;
     }
@@ -63,11 +57,7 @@
     z-index: 1;
 }
 
-/*
-  Sitewide vertical gradient:
-  top = charcoal near-black, easing into the palette purple (--bg / #31263E)
-  and a touch of --inner-bg / #44355B at the bottom.
-*/
+/* Sitewide gradient: near-black at the top, easing into --bg, a touch of --inner-bg at the bottom. */
 body {
     --grad-charcoal: #121014;
     --grad-purple: var(--bg);
@@ -86,8 +76,8 @@ body {
     background-size: cover;
 }
 
-/* Fixed backgrounds leave light “body” bands on mobile Safari / Chrome. */
-@media (max-width: 44.99rem) {
+/* background-attachment: fixed leaves light bands on mobile Safari and Chrome. */
+@media (--mobile) {
     body {
         background-attachment: scroll;
         background-size: 100% auto;
@@ -106,11 +96,7 @@ body {
     }
 }
 
+/* Corner art is homepage-only; the markup stays sitewide so SPA nav back home still has it. */
 body:not(.home) .site-backdrop {
     display: none;
-}
-
-/* Bottom-right image is reserved for .sword-figure on read-me. */
-body.home .site-backdrop[data-anchor="bottom-right"] {
-    display: none !important;
 }

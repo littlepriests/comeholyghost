@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{- site.Language.Lang -}}">
-{{- /* Banner pick in Hugo so first paint is already the chosen file (no JS src swap). */ -}}
+{{- /* Hugo picks the banner so it can be preloaded; home/banner.js only reveals it once decoded. A new pick needs a rebuild. */ -}}
 {{- $bannerFallback := .Site.Params.home.banner | default "images/banner.svg" -}}
 {{- $bannerDir := .Site.Params.home.bannerDir | default "" -}}
 {{- $bannerAlt := .Site.Params.home.bannerAlt | default "Site banner" -}}
@@ -23,34 +23,23 @@
 {{- $bannerSrc := index $bannerPool 0 -}}
 <head>
     {{- partial "head.html" . -}}
-    {{ $home := slice (resources.Get "css/home.css") (resources.Get "css/retro.css") | resources.Concat "css/home.css" | minify | fingerprint }}
+    {{- $homeSheets := slice -}}
+    {{- range slice "home" "angel" "dock" "retro" }}{{ $homeSheets = $homeSheets | append (partial "css-resource.html" .) }}{{ end -}}
+    {{ $home := $homeSheets | resources.Concat "css/home-bundle.css" | minify | fingerprint }}
     <link rel="stylesheet" href="{{ $home.RelPermalink }}" integrity="{{ $home.Data.Integrity }}">
     <link rel="preload" as="image" href="{{ $bannerSrc }}" fetchpriority="high">
-    <link rel="preload" href="{{ "fonts/DotMatrixNarrow.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
-    {{- /* Title look comes only from [params.home] title*; home.css holds the fallbacks. */ -}}
-    {{- $t := .Site.Params.home -}}
-    {{- if or $t.titleFont $t.titleFontLine2 $t.titleColor $t.titleColorLine2 $t.titleHighlight }}
-    <style>
-      body.home .home-site-title {
-        {{- with $t.titleFont }}--home-title-font: {{ . | safeCSS }};{{ end }}
-        {{- with $t.titleFontLine2 }}--home-title-font-2: {{ . | safeCSS }};{{ end }}
-        {{- with $t.titleColor }}--home-title-color: {{ . | safeCSS }};{{ end }}
-        {{- with $t.titleColorLine2 }}--home-title-color-2: {{ . | safeCSS }};{{ end }}
-        {{- with $t.titleHighlight }}--home-title-highlight: {{ . | safeCSS }};{{ end }}
-      }
-    </style>
-    {{- end }}
 </head>
 <body class="home">
     <div id="page-root" class="home-root">
     <div class="home-page site-shell">
-        {{- /* Chosen above in <head> (shuffle + preload). Decode-gated reveal is home.js. */ -}}
-        <div class="home-banner is-pending">
+        {{- $bannerW := .Site.Params.home.bannerWidth | default 1200 -}}
+        {{- $bannerH := .Site.Params.home.bannerHeight | default 280 -}}
+        <div class="home-banner is-pending" style="--home-banner-ratio: {{ $bannerW }} / {{ $bannerH }}">
             <img
                 src="{{ $bannerSrc }}"
                 alt="{{ $bannerAlt }}"
-                width="1200"
-                height="280"
+                width="{{ $bannerW }}"
+                height="{{ $bannerH }}"
                 fetchpriority="high"
                 decoding="async"
                 data-home-banner>
@@ -77,7 +66,16 @@
    \  .    '.       .'/
     '.  '  . `'---'`.'
 jgs   `'-..._____.-`</pre>
-            <p class="home-site-title">
+            {{- /* Title look comes only from [params.home] title*; home.css holds the fallbacks.
+                   Inline on the element, not in <head>, so SPA nav home carries it. */ -}}
+            {{- $t := .Site.Params.home -}}
+            {{- $look := slice -}}
+            {{- with $t.titleFont }}{{ $look = $look | append (printf "--home-title-font: %s" .) }}{{ end -}}
+            {{- with $t.titleFontLine2 }}{{ $look = $look | append (printf "--home-title-font-2: %s" .) }}{{ end -}}
+            {{- with $t.titleColor }}{{ $look = $look | append (printf "--home-title-color: %s" .) }}{{ end -}}
+            {{- with $t.titleColorLine2 }}{{ $look = $look | append (printf "--home-title-color-2: %s" .) }}{{ end -}}
+            {{- with $t.titleHighlight }}{{ $look = $look | append (printf "--home-title-highlight: %s" .) }}{{ end }}
+            <p class="home-site-title"{{ with $look }} style="{{ delimit . "; " | safeCSS }}"{{ end }}>
                 {{- with $line1 }}<span class="home-site-title__line">{{ . }}</span>{{ end -}}
                 {{- with $line2 }}<span class="home-site-title__line home-site-title__line--2">{{ . }}</span>{{ end -}}
             </p>
@@ -93,11 +91,11 @@ jgs   `'-..._____.-`</pre>
             {{- partial "page-buttons.html" . -}}
         </main>
 
-        {{- partial "site-footer.html" (dict "page" . "variant" "home" "class" "home-footer") }}
+        {{- partial "site-footer.html" (dict "page" . "variant" "home") }}
     </div>
     {{- partial "home-clouds.html" . -}}
-    <script src="{{ "js/home.js" | relURL }}?v=62"></script>
-    <script src="{{ "js/article-media.js" | relURL }}?v=2"></script>
+    {{ partial "js.html" "home" }}
+    {{ partial "js.html" "article-media" }}
     </div>
     {{- partial "site-chrome.html" . }}
 </body>

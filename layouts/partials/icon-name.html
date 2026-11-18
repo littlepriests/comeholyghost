@@ -1,6 +1,7 @@
 {{- /*
-  Normalize icon param (short name or legacy FA class) → short name, or empty.
-  Returns via return (Hugo 0.167+) or print for {{ $n := partial ... }}
+  Icon param (short name, or a Font Awesome class from older front matter) →
+  short name for icon.html, or "" for an unmapped fa-* class.
+    {{ $n := partial "icon-name.html" "fa-brands fa-github" }}
 */ -}}
 {{- $icon := . -}}
 {{- $name := $icon -}}

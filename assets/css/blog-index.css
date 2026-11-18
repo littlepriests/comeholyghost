@@ -1,9 +1,8 @@
-/* Writing index (/blog/): vajra-style feed — title, date, thumb + caption, summary. */
+/* Writing index (/blog/): one entry per post — title, date, thumb + caption, summary. */
 
 .blog-index {
-    font-family: "Fira Mono", var(--font-monospace, ui-monospace, monospace);
+    font-family: var(--font-site, "Fira Mono", ui-monospace, monospace);
     text-transform: lowercase;
-    max-width: 36rem;
 }
 
 .blog-index__heading {
@@ -11,7 +10,7 @@
     font-family: inherit;
     font-size: 1.2rem;
     font-weight: 600;
-    color: #ffd749;
+    color: var(--title);
     text-transform: lowercase;
 }
 
@@ -66,7 +65,7 @@
   Index thumb size knobs:
   - .blog-entry__figure max-width = column cap for the preview
   - img max-height = vertical cap (object-fit: contain — no crop/stretch)
-  Hugo Fit caps live in layouts/partials/blog-entry.html ($previewMaxW/H).
+  Published widths live in layouts/partials/image-set.html.
 */
 .blog-entry__figure {
     margin: 0 auto 1rem;
@@ -88,12 +87,37 @@
     -webkit-appearance: none;
 }
 
-.blog-entry__thumb > img {
+.blog-entry__thumb picture {
+    display: block;
+}
+
+/*
+  The thumb's box is known before the file loads: --img-w / --img-h come from
+  the published copy (blog-entry.html). Width is the largest the height cap
+  allows, so the page does not grow when the image arrives (the player parks
+  and unparks off the page height). Without them it stays width: auto.
+*/
+.blog-entry__thumb {
+    --thumb-max-h: 28rem;
+}
+
+/* The button holds the width (its percentage resolves against the figure; on
+   the image it would collapse the shrink-wrapped button to nothing). */
+.blog-entry__thumb[style*="--img-w"] {
+    width: min(100%, calc(var(--thumb-max-h) * var(--img-w) / var(--img-h)));
+}
+
+.blog-entry__thumb[style*="--img-w"] picture img {
+    width: 100%;
+}
+
+.blog-entry__thumb > img,
+.blog-entry__thumb picture img {
     display: block;
     width: auto;
     max-width: 100%;
     height: auto;
-    max-height: 28rem;
+    max-height: var(--thumb-max-h);
     margin: 0 auto;
     object-fit: contain;
     object-position: center;
@@ -101,14 +125,17 @@
 }
 
 .blog-entry__caption {
-    margin: 0.4rem 0 0;
-    padding: 0;
+    margin: 0.45rem 0 0;
+    padding: 0 0.15rem;
     font-family: inherit;
-    font-size: 0.8rem;
+    font-size: 0.72rem;
+    font-weight: 400;
     font-style: italic;
-    line-height: 1.35;
-    color: var(--off-fg, #d8d8d8);
+    letter-spacing: 0.02em;
+    line-height: 1.4;
+    color: color-mix(in srgb, var(--off-fg, #d8d8d8) 72%, var(--muted, #9a93a8));
     text-transform: lowercase;
+    opacity: 0.92;
 }
 
 .blog-entry__summary {
@@ -131,16 +158,12 @@
     color: var(--link, #7ec8ff);
 }
 
-@media (max-width: 44.99rem) {
-    .blog-index {
-        max-width: 100%;
-    }
-
+@media (--mobile) {
     .blog-entry__figure {
         max-width: 100%;
     }
 
-    .blog-entry__thumb > img {
-        max-height: 18rem;
+    .blog-entry__thumb {
+        --thumb-max-h: 18rem;
     }
 }

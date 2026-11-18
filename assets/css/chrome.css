@@ -1,9 +1,14 @@
-/* Sitewide chrome: SPA page fade, hover tips, back-to-top link. Type lives in typography.css. */
+/* Sitewide chrome: SPA page fade, hover tips, cursor extras. Type lives in typography.css. */
 
-/* SPA nav: hold the outgoing/incoming page briefly while new CSS settles. */
+/* SPA nav (player/nav.js): hidden while the incoming page's CSS and fonts load. */
 #page-root.is-page-pending {
     opacity: 0;
     pointer-events: none;
+}
+
+/* nav.js focuses <main> after a swap for screen readers; no ring on a non-control. */
+main[tabindex="-1"]:focus {
+    outline: none;
 }
 
 #page-root {
@@ -23,7 +28,7 @@
 }
 
 /*
-  Hover tip: .site-tip[data-tip] + floating layer from static/js/site-tips.js.
+  Hover tip: .site-tip[data-tip] + floating layer from assets/js/site-tips.js.
   Follows the pointer (ahead of the cursor). Copy lives in data/tips.yaml.
   z-index above sprites, images, and the back-to-top heart layer.
 */
@@ -65,24 +70,134 @@
     }
 }
 
-/* Optional end-of-article control: front matter back_to_top = true */
-.back-to-top {
-    margin: 1.75rem 0 0;
-    padding: 0;
-    text-align: center;
+/* Ghost cursor extras (site-cursor-fx.js): soft ♡ on click + idle bubbles.
+   Move trail is gold stars (cursor-trail.js / starCursor). */
+.site-cursor-hearts {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 0;
+    z-index: 13500;
+    pointer-events: none;
+    overflow: visible;
 }
 
-.back-to-top__link {
-    display: inline-block;
-    padding: 0.35rem 0.65rem;
-    color: var(--link, #7ec8ff);
-    font-size: 1.35rem;
+/* Same hues as the sword hearts, softer. Burst distance (--dx/--dy) comes from site-cursor-fx.js. */
+.site-cursor-hearts__heart {
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin: 0;
+    font-family: var(--font-site, ui-monospace, monospace);
+    font-size: calc(0.75rem * var(--scale, 1));
     line-height: 1;
-    text-decoration: none;
-    opacity: 0.75;
+    color: color-mix(in srgb, var(--heart) 70%, transparent);
+    text-shadow: 0 0 4px rgb(255 107 129 / 0.35);
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.35);
+    animation: site-cursor-heart-pop 1.55s cubic-bezier(0.12, 0.7, 0.25, 1) var(--hd, 0s) 1 both;
 }
 
-.back-to-top__link:hover {
-    color: var(--hover, #ffd749);
-    opacity: 1;
+.site-cursor-hearts__heart.is-bright {
+    color: color-mix(in srgb, var(--heart-bright) 75%, transparent);
+    font-size: calc(0.85rem * var(--scale, 1));
+    text-shadow: 0 0 5px rgb(255 107 129 / 0.4);
+}
+
+@keyframes site-cursor-heart-pop {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.25) rotate(0deg);
+    }
+    10% {
+        opacity: 0.55;
+        transform:
+            translate(
+                calc(-50% + var(--dx, 0px) * 0.2),
+                calc(-50% + var(--dy, 0px) * 0.2)
+            )
+            scale(calc(var(--scale, 1) * 1.05))
+            rotate(var(--rot, 0deg));
+    }
+    70% {
+        opacity: 0.35;
+        transform:
+            translate(
+                calc(-50% + var(--dx, 0px) * 0.85),
+                calc(-50% + var(--dy, 0px) * 0.85)
+            )
+            scale(var(--scale, 1))
+            rotate(var(--rot, 0deg));
+    }
+    100% {
+        opacity: 0;
+        transform:
+            translate(
+                calc(-50% + var(--dx, 0px)),
+                calc(-50% + var(--dy, 0px))
+            )
+            scale(calc(var(--scale, 1) * 0.65))
+            rotate(var(--rot, 0deg));
+    }
+}
+
+.site-cursor-bubbles {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 0;
+    z-index: 13400;
+    pointer-events: none;
+    overflow: visible;
+}
+
+.site-cursor-bubbles__bubble {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: calc(0.45rem * var(--scale, 1));
+    height: calc(0.45rem * var(--scale, 1));
+    margin: 0;
+    border-radius: 50%;
+    box-sizing: border-box;
+    background: rgb(230 241 247 / 0.55);
+    border: 1px solid rgb(58 146 197 / 0.7);
+    box-shadow: 0 0 4px rgb(179 220 255 / 0.35);
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.4);
+    animation: site-cursor-bubble 0.85s ease-out var(--hd, 0s) 1 both;
+}
+
+@keyframes site-cursor-bubble {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.3);
+    }
+    20% {
+        opacity: 0.85;
+        transform:
+            translate(
+                calc(-50% + var(--dx, 0px) * 0.35),
+                calc(-50% + var(--dy, 0px) * 0.35)
+            )
+            scale(calc(var(--scale, 1) * 1.05));
+    }
+    100% {
+        opacity: 0;
+        transform:
+            translate(
+                calc(-50% + var(--dx, 0px)),
+                calc(-50% + var(--dy, 0px))
+            )
+            scale(var(--scale, 1));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .site-cursor-hearts,
+    .site-cursor-bubbles {
+        display: none;
+    }
 }

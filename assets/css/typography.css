@@ -3,11 +3,6 @@
   hugo.toml [params.fonts] in head.html; blog articles switch to
   --font-article in article-reading.css.
 */
-:root {
-    /* Legacy name still read by player.css and a few component sheets. */
-    --font-monospace: "Fira Mono", monospace;
-}
-
 body {
     font-family: var(--font-site, "Fira Mono", ui-monospace, monospace);
     font-size: 16px;
@@ -15,7 +10,24 @@ body {
     color: var(--fg);
 }
 
-/* Headings — page title gold, h2+ link blue, stepped sizes so levels read apart */
+/*
+  Avoid lone last words in CSS rather than by editing prose: balance for
+  headings and short display lines, pretty for body blocks. Safari and
+  Firefox support is partial, so a lone word can still appear there.
+*/
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.blog-index__heading,
+.blog-entry__title,
+.home-site-title__line {
+    text-wrap: balance;
+}
+
+/* h1 is --title, h2–h6 --link; sizes step so levels read apart. */
 h1, 
 h2, 
 h3, 
@@ -26,10 +38,9 @@ h6 {
     font-weight: 600;
     color: var(--link);
     line-height: 1.35;
-    text-wrap: balance;
 }
 
-h1 { font-size: 1.45rem; color: #ffd749; }
+h1 { font-size: 1.45rem; color: var(--title); }
 h2 { font-size: 1.28rem; }
 h3 { font-size: 1.14rem; }
 h4 { font-size: 1.06rem; }
@@ -72,7 +83,7 @@ h6:before {
 }
 
 h1:before {
-    color: color-mix(in srgb, #ffd749 55%, var(--muted));
+    color: color-mix(in srgb, var(--title) 55%, var(--muted));
 }
 
 h1:first-child {
@@ -102,11 +113,16 @@ h1:first-child {
     margin-top: 0.4rem;
 }
 
-/* Paragraphs. pretty keeps a lone word off the last line where supported. */
+/* Body-ish blocks: keep a lone word off the last line where supported. */
 p,
 li,
 figcaption,
-blockquote {
+blockquote,
+.blog-entry__summary,
+.blog-entry__caption,
+.article-figure__caption,
+.content__body td,
+.content__body th {
     text-wrap: pretty;
 }
 
@@ -183,13 +199,23 @@ blockquote::before {
 }
 
 /* Code */
-pre,
-code, 
+code,
 kbd,
 samp {
-    background: var(--inner-bg) !important;
-    font-family: var(--font-monospace);
+    background: var(--inner-bg);
+    font-family: var(--font-site);
     color: var(--off-fg);
+}
+
+pre {
+    font-family: var(--font-site);
+    color: var(--off-fg);
+}
+
+/* Code blocks in reading areas get the dark background. */
+.content__body pre,
+.page__body pre {
+    background: var(--inner-bg);
 }
 
 pre {
@@ -261,4 +287,16 @@ th {
 img {
     max-width: 100%;
     height: auto;
+}
+
+/* An image inside a sentence (render-image.html). Standalone images are .article-photo. */
+.inline-media {
+    display: inline;
+}
+
+.inline-media img {
+    display: inline;
+    max-height: 1.5em;
+    width: auto;
+    vertical-align: middle;
 }

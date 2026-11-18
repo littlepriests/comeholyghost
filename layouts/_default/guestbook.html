@@ -1,46 +1,27 @@
-<!DOCTYPE html>
-<html lang="{{- site.Language.Lang -}}">
-<head>
-    {{- partial "head.html" . -}}
+{{ define "main" }}
     {{- partial "css.html" "guestbook" }}
-</head>
-<body class="guestbook-page">
-    <div id="page-root">
-    <div class="guestbook-wrap site-shell">
-        <header class="guestbook-header">
-            {{- partial "header.html" . -}}
-        </header>
+    <h1>{{ .Title }}</h1>
+    <div class="guestbook-intro">{{ .Content }}</div>
+    {{- partial "page-buttons.html" . -}}
 
-        <main>
-            <h1>{{ .Title }}</h1>
-            <div class="guestbook-intro">{{ .Content }}</div>
-            {{- partial "page-buttons.html" . -}}
+    <form class="guestbook__form" data-guestbook-form>
+        <label>{{ hugo.Data.chrome.guestbook.name_label }}
+            <input type="text" name="name" maxlength="80" autocomplete="nickname">
+        </label>
+        <label>{{ hugo.Data.chrome.guestbook.message_label }}
+            <textarea name="message" maxlength="500" rows="4"></textarea>
+        </label>
+        <label class="site-hp" aria-hidden="true">Leave blank
+            <input type="text" name="website" tabindex="-1" autocomplete="off">
+        </label>
+        <p class="guestbook__error" data-guestbook-error hidden></p>
+        <p class="guestbook__status" data-guestbook-status hidden></p>
+        <button type="submit">{{ hugo.Data.chrome.guestbook.submit }}</button>
+    </form>
 
-            <form class="guestbook__form" data-guestbook-form>
-                <label>name
-                    <input type="text" name="name" maxlength="80" autocomplete="nickname">
-                </label>
-                <label>say anything...
-                    <textarea name="message" maxlength="500" rows="4"></textarea>
-                </label>
-                <label class="site-hp" aria-hidden="true">Leave blank
-                    <input type="text" name="website" tabindex="-1" autocomplete="off">
-                </label>
-                <p class="guestbook__error" data-guestbook-error hidden></p>
-                <p class="guestbook__status" data-guestbook-status hidden></p>
-                <button type="submit">≽(◉˕ ◉ ≼マ</button>
-            </form>
-
-            <section aria-label="Guestbook entries">
-                <h2>beautiful angels ˚₊‧꒰ა ♡ ໒꒱ ‧₊˚</h2>
-                <ol class="guestbook__entries" data-guestbook-list></ol>
-            </section>
-        </main>
-
-        {{- partial "site-footer.html" (dict "page" .) }}
-    </div>
-            <script src="{{ "js/guestbook.js" | relURL }}?v=2"></script>
-    </div>
-    {{- partial "site-chrome.html" . }}
-</body>
-</html>
+    <section aria-label="{{ hugo.Data.chrome.guestbook.entries_label }}">
+        <h2>{{ hugo.Data.chrome.guestbook.entries_heading }}</h2>
+        <ol class="guestbook__entries" data-guestbook-list></ol>
+    </section>
+    {{ partial "js.html" "guestbook" }}
+{{ end }}

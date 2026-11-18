@@ -1,32 +1,22 @@
-/* Article figures + click-to-expand photos */
+/*
+  Body photos, sitewide (head.html bundle), so any page body renders them the
+  same. Smaller than the column, centered in it; click opens the full image.
+*/
 
-.article-figure,
 .article-photo {
+    width: min(100%, 28rem);
     margin: 1.25rem auto;
     padding: 0;
-    max-width: 100%;
     text-align: center;
 }
 
-.article-figure {
-    width: min(100%, 40rem);
+.article-photo-grid {
+    width: min(100%, 32rem);
 }
 
-.article-figure__frame {
+.article-photo__thumb picture {
     display: block;
     width: 100%;
-}
-
-.article-figure__frame > img {
-    display: block;
-    width: 100%;
-    height: auto;
-    margin: 0 auto;
-}
-
-/* Bigger than gallery tiles (~9.5rem), smaller than full column */
-.article-photo {
-    width: min(100%, 28rem);
 }
 
 .article-photo__thumb {
@@ -41,7 +31,8 @@
     -webkit-appearance: none;
 }
 
-.article-photo__thumb > img {
+.article-photo__thumb > img,
+.article-photo__thumb picture img {
     display: block;
     width: 100%;
     height: auto;
@@ -49,20 +40,23 @@
 }
 
 .article-figure__caption {
-    margin: 0.45rem 0 0;
-    padding: 0 0.25rem;
-    color: var(--off-fg, #d8d8d8);
-    font-family: "Fira Mono", var(--font-monospace, ui-monospace, monospace);
-    font-size: 0.9rem;
-    line-height: 1.35;
+    margin: 0.55rem 0 0;
+    padding: 0 0.35rem;
+    color: color-mix(in srgb, var(--off-fg, #d8d8d8) 72%, var(--muted, #9a93a8));
+    font-family: var(--font-site, "Fira Mono", ui-monospace, monospace);
+    font-size: 0.78rem;
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: 0.02em;
+    line-height: 1.4;
     text-align: center;
+    opacity: 0.92;
 }
 
 /* Grouped photos: 2-up rows; odd leftover tile centered under. */
 .article-photo-grid {
     margin: 1.5rem auto;
     padding: 0;
-    width: min(100%, 36rem);
     text-align: center;
 }
 
@@ -97,7 +91,14 @@
     -webkit-appearance: none;
 }
 
-.article-photo-grid__item > img {
+.article-photo-grid__item picture {
+    position: absolute;
+    inset: 0;
+    display: block;
+}
+
+.article-photo-grid__item > img,
+.article-photo-grid__item picture img {
     position: absolute;
     inset: 0;
     display: block;
@@ -132,6 +133,10 @@
     position: relative;
     margin: 0;
     padding: 0;
+}
+
+.article-photo-lightbox__inner picture {
+    display: block;
 }
 
 .article-photo-lightbox__inner img,

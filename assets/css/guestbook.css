@@ -1,4 +1,4 @@
-@media (max-width: 44.99rem) {
+@media (--mobile) {
     .guestbook__form input,
     .guestbook__form textarea,
     .guestbook__form button {
@@ -6,8 +6,8 @@
     }
 }
 
-.guestbook-page h1::before,
-.guestbook-page h2::before {
+.layout-guestbook h1::before,
+.layout-guestbook h2::before {
     content: none;
 }
 

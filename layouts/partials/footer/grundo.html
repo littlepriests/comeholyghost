@@ -1,0 +1,29 @@
+{{- /*
+  Inner pages, right slot: Grundo. Idle 42×56, kick 46×56, drawn into a 100px
+  box. The ↑ makes him kick and spill hearts (player/pet.js) when he is on
+  screen. Hidden below 45rem with the other non-lead slots.
+*/ -}}
+{{- $idle := partial "sprite-by-id.html" "grundo-idle" -}}
+{{- $kick := partial "sprite-by-id.html" "grundo-kick" -}}
+{{- if or $idle $kick }}
+{{- $grundoTip := partial "tip-text.html" (dict "key" "grundo" "fallback" "") -}}
+<div class="footer-grundo{{ with $grundoTip }} site-tip{{ end }}" data-footer-grundo{{ with $grundoTip }} data-tip="{{ . }}"{{ end }} aria-hidden="true">
+    {{- with $idle }}
+    <span class="footer-grundo__strip footer-grundo__strip--idle" data-grundo-idle>
+        {{- partial "sprite.html" (merge . (dict "frames" 1 "fps" 1 "alt" "" "scale" "")) -}}
+    </span>
+    {{- end }}
+    {{- with $kick }}
+    <span class="footer-grundo__strip footer-grundo__strip--kick" data-grundo-kick hidden>
+        {{- /* Hidden + static until the stomp adds .is-kick-play for one cycle. */ -}}
+        {{- partial "sprite.html" (merge . (dict "fps" 8 "alt" "" "scale" "")) -}}
+    </span>
+    {{- end }}
+    {{- /* Hand-tuned spill paths for the stomp; paths live in data/player/hearts.yaml. */ -}}
+    <span class="footer-grundo__hearts" data-grundo-hearts>
+        {{- range (hugo.Data).player.hearts -}}
+        <span class="footer-grundo__heart{{ if .bright }} is-bright{{ end }}" style="--dx:{{ .dx }};--lift:{{ .lift }};--dx2:{{ .dx2 }};--fall:{{ .fall }};--hd:{{ .hd }};--hspurt:{{ .hspurt }};--rot:{{ .rot }}">♡</span>
+        {{- end }}
+    </span>
+</div>
+{{- end }}

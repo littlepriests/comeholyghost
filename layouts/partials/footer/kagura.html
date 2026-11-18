@@ -1,0 +1,30 @@
+{{- /*
+  Homepage, right slot. Attack 33×45 @3 (99×135). Walk 25×42 @3 (75×126).
+  Down 40×41 @3 (120×123). home/pets.js lifts her onto the dock for the slash,
+  then parks her back in this pad. It drives everything through the dock-kagura
+  class names, so swapping a sprite id changes the art, not the routine.
+*/ -}}
+{{- $kAttack := partial "sprite-by-id.html" "kagura-attack" -}}
+{{- $kWalk := partial "sprite-by-id.html" "kagura-walk" -}}
+{{- $kDown := partial "sprite-by-id.html" "kagura-down" -}}
+{{- $x3 := dict "alt" "" "scale" "3" -}}
+{{- $kaguraTip := partial "tip-text.html" (dict "key" "kagura" "fallback" "") -}}
+<div class="dock-pad dock-pad--kagura" data-dock-pad="kagura" aria-hidden="true">
+    <span class="dock-kagura{{ with $kaguraTip }} site-tip{{ end }}" data-visitor-kagura{{ with $kaguraTip }} data-tip="{{ . }}"{{ end }}>
+        {{- with $kAttack -}}
+        <span class="dock-kagura__strip dock-kagura__strip--attack is-active">
+            {{- partial "sprite.html" (merge . $x3) -}}
+        </span>
+        {{- end -}}
+        {{- with $kWalk -}}
+        <span class="dock-kagura__strip dock-kagura__strip--walk">
+            {{- partial "sprite.html" (merge . $x3) -}}
+        </span>
+        {{- end -}}
+        {{- with $kDown -}}
+        <span class="dock-kagura__strip dock-kagura__strip--down">
+            {{- partial "sprite.html" (merge . $x3) -}}
+        </span>
+        {{- end -}}
+    </span>
+</div>

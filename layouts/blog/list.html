@@ -1,5 +1,5 @@
 {{ define "main" }}
-    {{- partial "css.html" (slice "blog-index" "article-media") }}
+    {{- partial "css.html" "blog-index" }}
     <div class="blog-index">
         <h1 class="blog-index__heading" id="{{ .Title | urlize }}">{{ .Title | markdownify }}</h1>
 
@@ -16,6 +16,3 @@
     </div>
 {{ end }}
 
-{{ define "aside" }}
-    {{ if .Params.description }}<p>{{ .Params.description }}</p>{{ end }}
-{{ end }}

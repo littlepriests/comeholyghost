@@ -1,0 +1,25 @@
+{{- /*
+  Inner pages, left slot: the SkiFree yeti, which opens the subscribe dialog.
+  Frame 32×43 at scale 2 (paints 64×86); below 45rem site-shell.css clears the
+  transform so he stays 32×43. Badge side: [params.subscribe] yetiIconPos.
+*/ -}}
+{{- with partial "sprite-by-id.html" "skifree-yeti" }}
+{{- $yetiTip := partial "tip-text.html" (dict "key" "skifree" "fallback" "subscribe") -}}
+{{- $icon := site.Params.subscribe.yetiIcon | default "word" -}}
+{{- $pos := site.Params.subscribe.yetiIconPos | default "right" -}}
+{{- $isWord := or (eq $icon "word") (eq $icon "label") (eq $icon "subscribe") -}}
+<button
+  type="button"
+  class="page-footer__skifree site-tip{{ if $isWord }} page-footer__skifree--word{{ end }}"
+  data-subscribe-open
+  data-yeti-subscribe
+  data-tip="{{ $yetiTip }}"
+  aria-label="{{ $yetiTip }}">
+  <span class="page-footer__yeti-wrap page-footer__yeti-wrap--{{ $pos }}">
+    {{- partial "sprite.html" (merge . (dict "alt" "" "scale" "2")) -}}
+    <span class="page-footer__yeti-badge{{ if $isWord }} page-footer__yeti-badge--word{{ end }}" aria-hidden="true">
+      {{- partial "subscribe-icon.html" (dict "icon" $icon) -}}
+    </span>
+  </span>
+</button>
+{{- end -}}

@@ -117,10 +117,15 @@
     filter: brightness(1.12);
 }
 
-@media (max-width: 44.99rem) {
+@media (--mobile) {
     .page__logo-inner--sprite .sprite-anim {
         transform: translateY(-50%) scale(0.69);
         transform-origin: center left;
+    }
+
+    .main-nav__item--tail .nav-subscribe-pet {
+        transform: translate(-50%, -50%) scale(0.8);
+        transform-origin: center center;
     }
 }
 

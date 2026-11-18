@@ -4,18 +4,22 @@
  *
  * Only markdown under content/ is in scope.
  *
- *   corn edit                         all markdown under content/
+ *   corn edit                         prompt for content/blog/<name>
+ *   corn edit --all                   all markdown under content/
  *   corn edit --read-me.md            content/read-me.md
  *   corn edit --guestbook.md
  *   corn edit --blog/crossroad-beauty content/blog/crossroad-beauty/
  *   corn edit content/blog/foo        same, positional under content/
- *   corn edit --review …              walk fixable Vale alerts, y/n each
+ *   corn edit …                       Vale picker by default (same as --fix)
+ *   corn edit --report …              report-only Vale (no interactive picker)
  *
  * Options:
+ *   --all           Sweep every markdown file under content/ (skip blog prompt)
  *   --skip-sync     Do not run vale sync
  *   --vale-only     Skip be-density
  *   --density-only  Skip Vale
- *   --review        Interactive y/n (and numbered picks) for fixable alerts
+ *   --fix/--review  Explicit picker (default on; kept for clarity)
+ *   --report        Report-only Vale (old non-interactive default)
  *   --help
  */
 import { spawn, spawnSync } from "node:child_process";
@@ -23,6 +27,10 @@ import fs from "node:fs";
 import path from "node:path";
 import readline from "node:readline";
 import { fileURLToPath } from "node:url";
+import {
+  isCaseOnlySpellingAlert,
+  isSpellingCheck,
+} from "./vale-typos.mjs";
 
 /** Parallel `vale fix` workers (spelling suggestions are the slow part). */
 const VALE_FIX_CONCURRENCY = 8;
@@ -33,30 +41,37 @@ const densityDir = path.join(root, "tools", "be-density");
 const densityBin = path.join(densityDir, "be-density.mjs");
 
 const FIXED_FLAGS = new Set([
+  "--all",
   "--skip-sync",
   "--vale-only",
   "--density-only",
   "--review",
+  "--fix",
+  "--report",
   "--help",
   "-h",
 ]);
 
 function parseArgs(argv) {
   const opts = {
+    all: false,
     skipSync: false,
     valeOnly: false,
     densityOnly: false,
-    review: false,
+    /** Interactive Vale picker — default on; --report for report-only. */
+    review: true,
     help: false,
     /** @type {string[]} paths relative to content/ (posix) or absolute under content */
     targets: [],
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
-    if (a === "--skip-sync") opts.skipSync = true;
+    if (a === "--all") opts.all = true;
+    else if (a === "--skip-sync") opts.skipSync = true;
     else if (a === "--vale-only") opts.valeOnly = true;
     else if (a === "--density-only") opts.densityOnly = true;
-    else if (a === "--review") opts.review = true;
+    else if (a === "--review" || a === "--fix") opts.review = true;
+    else if (a === "--report") opts.review = false;
     else if (a === "--help" || a === "-h") opts.help = true;
     else if (a.startsWith("--") && !FIXED_FLAGS.has(a)) {
       // corn edit --read-me.md  →  content/read-me.md
@@ -70,6 +85,51 @@ function parseArgs(argv) {
     }
   }
   return opts;
+}
+
+/** Normalize a typed blog name into a content/-relative target (blog/…). */
+function normalizeBlogName(raw) {
+  let name = String(raw || "")
+    .trim()
+    .replace(/\\/g, "/")
+    .replace(/^\/+/, "");
+  if (!name) return "";
+  name = name.replace(/^(content\/)?blog\//, "");
+  name = name.replace(/\/+$/, "");
+  // Folder posts are usual; allow typing crossroad-beauty.md → crossroad-beauty
+  if (/\.mdx?$/i.test(name) && !name.includes("/")) {
+    name = name.replace(/\.mdx?$/i, "");
+  }
+  if (!name || name.includes("..")) {
+    throw new Error("Need a blog slug under content/blog/ (no ..).");
+  }
+  return `blog/${name}`;
+}
+
+function promptBlogTarget() {
+  return new Promise((resolve, reject) => {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+    rl.question("content/blog/<name>: ", (answer) => {
+      rl.close();
+      try {
+        const target = normalizeBlogName(answer);
+        if (!target) {
+          reject(
+            new Error(
+              "Empty name — type a post slug (e.g. crossroad-beauty) or pass --all.",
+            ),
+          );
+          return;
+        }
+        resolve(target);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  });
 }
 
 function whichVale() {
@@ -135,13 +195,20 @@ function resolveUnderContent(raw) {
   return abs;
 }
 
-function collectMarkdown(targets) {
+function collectMarkdown(targets, { all = false } = {}) {
   if (!fs.existsSync(contentRoot)) {
     throw new Error(`Missing content/ at ${contentRoot}`);
   }
 
-  if (targets.length === 0) {
+  if (all) {
+    if (targets.length) {
+      throw new Error("Pass --all alone, or pass a path — not both.");
+    }
     return walkMarkdown(contentRoot).sort();
+  }
+
+  if (targets.length === 0) {
+    throw new Error("No target — pass a path, --all, or answer the blog prompt.");
   }
 
   const files = [];
@@ -223,9 +290,60 @@ function ignoreLogLabel(alert) {
   return JSON.stringify(match);
 }
 
-function isSpellingCheck(alert) {
-  const check = String(alert?.Check ?? "");
-  return check === "Vale.Spelling" || /\.Spelling$/i.test(check);
+/**
+ * Vale vocabularies (vale.ini `Vocab = Site, Batch`). Both survive vale sync.
+ * Batch is the current preview batch. corn deploy clears it after preview is on main.
+ * Site is the permanent list.
+ */
+const BATCH_ACCEPT_NOTE =
+  "# Words for the current preview batch. corn deploy clears this after preview is on main.";
+
+const VOCAB_FILES = {
+  batch: path.join(root, "styles", "config", "vocabularies", "Batch", "accept.txt"),
+  site: path.join(root, "styles", "config", "vocabularies", "Site", "accept.txt"),
+};
+
+function readAcceptEntries(filePath) {
+  /** @type {string[]} */
+  const comments = [];
+  /** @type {string[]} */
+  const words = [];
+  if (!fs.existsSync(filePath)) return { comments, words };
+  for (const raw of fs.readFileSync(filePath, "utf8").split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line) continue;
+    if (line.startsWith("#")) comments.push(line);
+    else words.push(line);
+  }
+  return { comments, words };
+}
+
+/**
+ * Persist a Match (sorted, de-duped, lowercase stem for spelling; exact match
+ * otherwise). `which` is `batch` or `site`. Returns the word written.
+ */
+function acceptToVocab(alert, which) {
+  const filePath = VOCAB_FILES[which];
+  if (!filePath) throw new Error(`unknown vocab ${which}`);
+  const match = String(alert?.Match ?? "").trim();
+  if (!match) throw new Error("empty Match; nothing to accept");
+  const word = isSpellingCheck(alert)
+    ? possessiveStem(match).toLowerCase()
+    : match.toLowerCase();
+  if (!word) throw new Error("empty stem; nothing to accept");
+
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  const { comments, words } = readAcceptEntries(filePath);
+  const notes =
+    which === "batch" && !comments.some((c) => c.includes("preview batch"))
+      ? [BATCH_ACCEPT_NOTE, ...comments]
+      : comments;
+  const set = new Set(words.map((s) => s.toLowerCase()));
+  if (!set.has(word.toLowerCase())) words.push(word);
+  words.sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }));
+  const body = [...notes, ...words];
+  fs.writeFileSync(filePath, body.length ? `${body.join("\n")}\n` : "", "utf8");
+  return word;
 }
 
 /** Cache key: spelling suggestions depend on Check + Match, not span. */
@@ -317,29 +435,14 @@ async function prefetchSuggestions(alerts) {
   process.stdout.write(" done\n");
 }
 
-/**
- * House style is lowercase; Vale often flags "illinois" because the dictionary
- * has "Illinois". Drop those. Keep real typos ("conrete" → "concrete").
- * Pass suggestions when already resolved to avoid extra work.
- */
-function isCaseOnlySpellingAlert(alert, suggestions) {
-  if (!isSpellingCheck(alert)) return false;
-  const match = String(alert.Match ?? "");
-  if (!match) return false;
-  let sugs = suggestions;
-  if (!sugs) {
-    if (Array.isArray(alert.Suggestions) && alert.Suggestions.length > 0) {
-      sugs = alert.Suggestions;
-    } else {
-      sugs = suggestionCache.get(suggestionCacheKey(alert)) ?? [];
-    }
+/** Suggestions already fetched for this alert, including an empty list. */
+function resolvedSuggestions(alert) {
+  const key = suggestionCacheKey(alert);
+  if (suggestionCache.has(key)) return suggestionCache.get(key);
+  if (Array.isArray(alert.Suggestions) && alert.Suggestions.length > 0) {
+    return alert.Suggestions;
   }
-  if (!sugs.length) return false;
-  const lower = match.toLowerCase();
-  return sugs.some((s) => {
-    const t = String(s);
-    return t.toLowerCase() === lower && t !== match;
-  });
+  return [];
 }
 
 function parseValeJson(relFiles) {
@@ -381,7 +484,7 @@ async function collectFixableAlerts(relFiles) {
   );
   await prefetchSuggestions(withAction.map((x) => x.alert));
   return withAction.filter(
-    ({ alert }) => !isCaseOnlySpellingAlert(alert),
+    ({ alert }) => !isCaseOnlySpellingAlert(alert, resolvedSuggestions(alert)),
   );
 }
 
@@ -398,7 +501,7 @@ async function runValeFiltered(relFiles) {
   let caseOnly = 0;
   const kept = [];
   for (const item of all) {
-    if (isCaseOnlySpellingAlert(item.alert)) {
+    if (isCaseOnlySpellingAlert(item.alert, resolvedSuggestions(item.alert))) {
       caseOnly++;
       continue;
     }
@@ -475,7 +578,7 @@ function filterReviewQueue(queue, skipped, ignoredItems) {
 async function reviewFixable(relFiles) {
   if (!process.stdin.isTTY || !process.stdout.isTTY) {
     console.error(
-      "corn edit --review needs an interactive terminal (TTY). Use plain corn edit instead.",
+      "corn edit's Vale picker needs an interactive terminal (TTY). Pass --report for report-only.",
     );
     return 2;
   }
@@ -486,7 +589,25 @@ async function reviewFixable(relFiles) {
   let applied = 0;
   let skippedN = 0;
   let ignoredN = 0;
+  let acceptedN = 0;
   let quit = false;
+
+  function takeAccept(alert, which) {
+    try {
+      const word = acceptToVocab(alert, which);
+      ignoredItems.add(ignoreItemKey(alert));
+      acceptedN++;
+      const rel =
+        which === "site"
+          ? "styles/config/vocabularies/Site/accept.txt"
+          : "styles/config/vocabularies/Batch/accept.txt";
+      console.log(`  accepted ${JSON.stringify(word)} → ${rel}`);
+      return true;
+    } catch (err) {
+      console.error(`  accept failed: ${err.message}`);
+      return false;
+    }
+  }
 
   const rl = readline.createInterface({
     input: process.stdin,
@@ -500,6 +621,12 @@ Review fixable Vale alerts (Action set; case-only spelling already filtered).
   n / s       skip this one only
   i           ignore this match for the rest of this run (all repeats;
               spelling also covers possessives: amaral → amaral's)
+  a           accept into the batch list for this preview batch
+              (styles/config/vocabularies/Batch/accept.txt)
+              and ignore for the rest of this run
+  p           accept into the permanent Site list
+              (styles/config/vocabularies/Site/accept.txt)
+              and ignore for the rest of this run
   q           quit review
 `);
 
@@ -537,7 +664,7 @@ Review fixable Vale alerts (Action set; case-only spelling already filtered).
       if (suggestions.length === 0) {
         console.log("  (no auto-fix suggestion from vale fix)");
         const ans = (
-          await ask(rl, "  [Enter=skip, i=ignore match, q=quit] ")
+          await ask(rl, "  [Enter=skip, i=ignore, a=batch, p=permanent, q=quit] ")
         ).toLowerCase();
         if (ans === "q") {
           quit = true;
@@ -547,6 +674,13 @@ Review fixable Vale alerts (Action set; case-only spelling already filtered).
           ignoredItems.add(ignoreItemKey(alert));
           ignoredN++;
           console.log(`  ignoring ${ignoreLogLabel(alert)} for this run`);
+          continue;
+        }
+        if (ans === "a" || ans === "p") {
+          if (!takeAccept(alert, ans === "p" ? "site" : "batch")) {
+            skipped.add(key);
+            skippedN++;
+          }
           continue;
         }
         skipped.add(key);
@@ -564,8 +698,8 @@ Review fixable Vale alerts (Action set; case-only spelling already filtered).
 
       const hint =
         suggestions.length === 1
-          ? "y/Enter=apply, n=skip, i=ignore, q=quit"
-          : `1-${suggestions.length}=pick, n=skip, i=ignore, q=quit`;
+          ? "y/Enter=apply, n=skip, i=ignore, a=batch, p=permanent, q=quit"
+          : `1-${suggestions.length}=pick, n=skip, i=ignore, a=batch, p=permanent, q=quit`;
       const ans = (await ask(rl, `  [${hint}] `)).toLowerCase();
 
       if (ans === "q") {
@@ -576,6 +710,13 @@ Review fixable Vale alerts (Action set; case-only spelling already filtered).
         ignoredItems.add(ignoreItemKey(alert));
         ignoredN++;
         console.log(`  ignoring ${ignoreLogLabel(alert)} for this run`);
+        continue;
+      }
+      if (ans === "a" || ans === "p") {
+        if (!takeAccept(alert, ans === "p" ? "site" : "batch")) {
+          skipped.add(key);
+          skippedN++;
+        }
         continue;
       }
       if (ans === "n" || ans === "s") {
@@ -626,7 +767,7 @@ Review fixable Vale alerts (Action set; case-only spelling already filtered).
   }
 
   console.log(
-    `\nReview done: ${applied} applied, ${skippedN} skipped, ${ignoredN} ignore-item(s).`,
+    `\nReview done: ${applied} applied, ${skippedN} skipped, ${ignoredN} ignore-item(s), ${acceptedN} accepted.`,
   );
   return 0;
 }
@@ -644,31 +785,48 @@ async function main() {
     console.log(`Usage: corn edit [--name.md | path…] [options]
 
 Lint markdown under content/ only (Vale + be-density).
+Default: interactive Vale picker (same as former --fix).
 
-  corn edit                         all markdown under content/
+  corn edit                         prompt for content/blog/<name> + picker
+  corn edit --all                   all markdown under content/ + picker
+  corn edit --report --blog/post    report-only Vale (no picker)
   corn edit --read-me.md            content/read-me.md
   corn edit --blog/your-post        content/blog/your-post/
   corn edit content/blog/your-post  same (positional must stay under content/)
-  corn edit --review --blog/post    y/n each fixable Vale alert
 
+  --all            sweep all content markdown
   --skip-sync      skip vale sync
   --vale-only      Vale only
-  --density-only   be-density only
-  --review         interactive yes/no (or 1–N); i ignores a match for the run
+  --density-only   be-density only (implies no picker)
+  --fix/--review  explicit picker (default; optional)
+  --report         report-only Vale (not corn md --fix)
 
 Spelling alerts that only differ by case (illinois vs Illinois) are dropped;
 real typos stay.`);
     process.exit(0);
   }
 
-  if (opts.review && opts.densityOnly) {
-    console.error("corn edit --review cannot combine with --density-only (Vale only).");
+  if (opts.densityOnly) {
+    opts.review = false;
+  }
+
+  if (opts.all && opts.targets.length) {
+    console.error("Pass --all alone, or pass a path — not both.");
     process.exit(2);
+  }
+
+  if (!opts.all && opts.targets.length === 0) {
+    try {
+      opts.targets.push(await promptBlogTarget());
+    } catch (err) {
+      console.error(err.message);
+      process.exit(2);
+    }
   }
 
   let files;
   try {
-    files = collectMarkdown(opts.targets);
+    files = collectMarkdown(opts.targets, { all: opts.all });
   } catch (err) {
     console.error(err.message);
     process.exit(2);

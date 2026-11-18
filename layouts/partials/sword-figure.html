@@ -5,8 +5,9 @@
 {{ if and $image (fileExists $path) }}
 {{ $email := strings.TrimSpace (printf "%s" (site.Params.about.email | default "")) }}
 {{ $tip := partial "tip-text.html" (dict "key" "email" "fallback" "♡ email me ♡") }}
-{{/* Read-me hero: centered figure + ♡ fountain; mailto + tip when email is set.
-    Sitewide .home-stars fill the column above the h1 (void starts at .content__header). */}}
+{{/* Read-me hero (sword_figure = true), using the bottom-right backdrop image.
+    A mailto link when params.about.email is set. stars/voids.js keeps stars
+    in the pocket above the h1. */}}
 {{ if $email }}
 <a
     class="sword-figure site-tip"
@@ -18,7 +19,7 @@
 {{ end }}
     <img src="{{ $image | relURL }}" alt="">
     <span class="sword-figure__wound">
-        {{/* Fountain spray: strong up + wide left/right arcs. */}}
+        {{/* Hand-tuned paths: --dx/--dy end point, --hd delay, --hspurt duration (sword.css). */}}
         <span class="sword-figure__heart" style="--dx:0rem;--dy:-6.8rem;--hd:0s;--hspurt:1.2s;--rot:0deg">♡</span>
         <span class="sword-figure__heart" style="--dx:-1.4rem;--dy:-6.2rem;--hd:0.06s;--hspurt:1.25s;--rot:-12deg">♡</span>
         <span class="sword-figure__heart" style="--dx:1.4rem;--dy:-6.2rem;--hd:0.06s;--hspurt:1.25s;--rot:12deg">♡</span>

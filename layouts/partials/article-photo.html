@@ -1,0 +1,36 @@
+{{- /*
+  The one single-photo figure. The photo and figcaption shortcodes and
+  standalone markdown images (render-image.html) all render through this, so
+  every picture in a page body gets the same size, centering, and lightbox.
+
+  dict: page, src, alt, caption (markdown), tip, id.
+  src is a page resource or an assets/ path (images/nongrid/…); anything else
+  is used as a URL. The page gets 480 and 1200 (AVIF, then WebP). Click opens
+  the 1600 copy. The source file is not published.
+*/ -}}
+{{- $page := .page -}}
+{{- $src := .src -}}
+{{- $alt := .alt | default "" -}}
+{{- $caption := .caption | default "" -}}
+{{- $tip := .tip | default "" -}}
+{{- $img := partial "image-resource.html" (dict "page" $page "src" $src) -}}
+{{- if not $img }}{{ $img = partial "image-resource.html" (dict "page" $page "src" (path.Base $src)) }}{{ end -}}
+{{- $set := dict -}}
+{{- $full := $src | relURL -}}
+{{- if and $img (ge $img.Width 1) -}}
+  {{- $set = partial "image-set.html" (dict "res" $img "widths" (slice 480 1200) "lightbox" true) -}}
+  {{- $full = $set.full -}}
+{{- else if $img -}}
+  {{- $full = $img.RelPermalink -}}
+{{- end -}}
+{{- if and (not $alt) $caption -}}
+  {{- $alt = $caption | plainify -}}
+{{- end -}}
+<figure class="article-photo"{{ with .id }} id="{{ . }}"{{ end }}>
+  <button type="button" class="article-photo__thumb{{ with $tip }} site-tip{{ end }}" data-article-photo data-full="{{ $full }}"{{ with $set.fullAvif }} data-full-avif="{{ . }}"{{ end }}{{ with $tip }} data-tip="{{ . }}"{{ end }} aria-label="{{ if $alt }}View larger: {{ $alt }}{{ else }}View larger image{{ end }}">
+    {{ partial "responsive-img.html" (dict "set" $set "src" $full "alt" $alt "sizes" (printf "%s 28rem, calc(100vw - 5rem)" (partialCached "media-queries.html" "media").desktop)) }}
+  </button>
+  {{- with $caption }}
+  <figcaption class="article-figure__caption">{{ . | $page.RenderString }}</figcaption>
+  {{- end }}
+</figure>

@@ -1,15 +1,25 @@
 /*
-  One shell for every layout (.page, photobook, guestbook, homepage):
-  the 53rem middle column, then the content column plus the aside gutter.
-  Header and footer span the shell; everything else sits in the content
-  column, and .page__aside takes the gutter. --page-gutter is the only side
-  inset: on a phone it is wide enough to hold the stacked player and ↑.
+  Page model, every layout (baseof.html pages and the homepage):
+
+    | gutter |  header  nav centered in the column   | gutter          |
+    |        |  main    fills the column; images,    |                 |
+    |        |          figures, and grids center    |                 |
+    |        |  footer  lead centered (yeti or dock) | player  ↑       |
+
+  --middle-column is the one width. No page overrides it, so the column,
+  nav, footer, and player sit in the same place on every page and SPA nav
+  never shifts them. Anything narrower inside the column centers with
+  margin-inline: auto; nothing caps a block and leaves it flush left.
+  --page-gutter is the only side inset: on a phone it is wide enough to hold
+  the stacked player and ↑. Player edge (player.css) and corner backdrop
+  sizing (backdrop.css) read --middle-column too.
+
+  Breakpoints are named in assets/css/media.css (@media (--mobile),
+  @media (--desktop)); CSS, JS, and img sizes all read them from there.
 */
 :root {
     --page-gutter: 1.25rem;
-    --middle-column: min(53rem, calc(100vw - 2 * var(--page-gutter)));
-    --aside-width: 275px;
-    --aside-gap: 1.5rem;
+    --middle-column: min(38rem, calc(100vw - 2 * var(--page-gutter)));
 }
 
 body {
@@ -31,38 +41,17 @@ body {
     min-width: 0;
 }
 
-.site-shell > :is(header, footer) {
-    grid-column: 1 / -1;
-}
-
 .page__body {
     overflow-wrap: break-word;
 }
 
-.page__aside {
-    color: var(--off-fg);
-}
-
-@media (min-width: 45rem) {
-    .site-shell {
-        grid-template-columns: minmax(0, 1fr) var(--aside-width);
-        column-gap: var(--aside-gap);
-    }
-
-    .site-shell > :not(header, footer, .page__aside) {
-        grid-column: 1;
-    }
-
-    .site-shell > :is(.page__body, main) {
+@media (--desktop) {
+    .site-shell > main {
         overflow-x: clip;
     }
-
-    .page__aside {
-        text-align: center;
-    }
 }
 
-@media (max-width: 44.99rem) {
+@media (--mobile) {
     :root {
         --page-gutter: 2.5rem;
     }

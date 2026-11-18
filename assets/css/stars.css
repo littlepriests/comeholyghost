@@ -30,18 +30,18 @@
     animation-name: home-star-twinkle-bright;
 }
 
-/* Cleared when a cloud sits over this star (home.js). */
+/* Set by home/clouds.js when a cloud or the moon covers this star. */
 .home-stars__star.is-cloud-void,
 .home-stars__ascii-star.is-cloud-void {
-    visibility: hidden !important;
-    animation: none !important;
-    opacity: 0 !important;
+    visibility: hidden;
+    animation: none;
+    opacity: 0;
 }
 
 /*
   Inner pages: punch a hole in the starfield over the reading column so
-  soft glows cannot sit in letter gaps. Vars set by stars.js from .page__body
-  on scroll and resize. The homepage has no hole.
+  soft glows cannot sit in letter gaps. stars/voids.js sets the vars from the
+  column's rect on scroll and resize. The homepage has no hole.
 */
 .home-stars.is-reading-masked {
     -webkit-mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
@@ -59,13 +59,13 @@
 /* Sparse Joan G. Stark–style ASCII stars in quiet gaps (credit in docs/resources.md). */
 .home-stars__ascii-star {
     position: absolute;
-    margin: 0 !important;
-    padding: 0 !important;
+    margin: 0;
+    padding: 0;
     border: 0;
-    background: transparent !important;
+    background: transparent;
     transform: translate(-50%, -50%) scale(var(--glyph-scale, 1));
     transform-origin: center;
-    font-family: ui-monospace, "Cascadia Mono", "Segoe UI Mono", Menlo, Consolas, monospace;
+    font-family: var(--font-site);
     font-size: 0.55rem;
     line-height: 1.05;
     letter-spacing: 0;
@@ -149,7 +149,7 @@
 }
 
 /* ASCII stars are placed for the desktop gutters. */
-@media (max-width: 44.99rem) {
+@media (--mobile) {
     .home-stars__ascii-star {
         display: none;
     }

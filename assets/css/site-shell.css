@@ -1,6 +1,9 @@
 /*
-  Shared footer: layouts/partials/site-footer.html on every layout.
-  The page grid itself is .site-shell in assets/css/layout.css.
+  Shared footer band: layouts/partials/site-footer.html on every layout.
+  The page grid itself is .site-shell in assets/css/layout.css; the row of
+  slots inside the band is assets/css/footer-dock.css. The band's height is
+  its padding plus the dock, on every page; the player parks on the dock's
+  bottom line.
 */
 :root {
     --footer-pad-top: 1.5rem;
@@ -14,67 +17,45 @@
     padding-top: var(--footer-pad-top);
     padding-bottom: var(--footer-pad-bottom);
     color: var(--off-fg);
-}
-
-/* Yeti's own margin would stack on the shared footer padding. */
-.site-footer--page .page-footer__skifree {
-    margin: 0;
-    align-self: flex-start;
+    text-align: center;
 }
 
 .site-footer p {
     margin: 0;
 }
 
-.site-footer .copyright:empty {
-    display: none;
+/* [params.home.footer] extras, under the dock on the homepage. */
+.site-footer__extra {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.25rem;
 }
 
-/* Desktop: yeti, player, and ↑ (homepage: the dock row) share one bottom line. */
-@media (min-width: 45rem) {
-    .site-footer--page {
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-end;
-        min-height: calc(var(--footer-pad-top) + 100px + 0.15rem + 2rem + var(--footer-pad-bottom));
-    }
+.site-footer__extra img {
+    display: block;
+    max-width: 8rem;
+    height: auto;
 }
 
-/*
-  Phone, every page: once the player parks, one row of lead (counter or yeti),
-  player, and ↑. player.js gives the lead a --footer-lead-w slot, puts
-  --footer-row-gap between all three, and centers the group. Same band height everywhere.
-*/
-@media (max-width: 44.99rem) {
+/* Phone: the same band and dock as desktop; long copyright or extras wrap.
+   The yeti stays his native 32×43 (desktop draws him at scale 2). His art
+   sits right of center in the frame, so the translate, paint only, puts him
+   on the slot's center. */
+@media (--mobile) {
     .site-footer {
-        --footer-row-gap: 1.25rem;
-        --footer-lead-w: 2.25rem;
-        --footer-row-h: 43px;
-        /* Empty pixels in the 32px frame, plus the slack in the lead slot. */
-        --footer-yeti-nudge: 4px;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-end;
-        min-height: calc(var(--footer-pad-top) + var(--footer-row-h) + var(--footer-pad-bottom));
         overflow-wrap: anywhere;
     }
 
-    /* Native size (32×43) so the yeti weighs about the same as the counter. */
     .site-footer .page-footer__skifree {
+        width: auto;
         min-height: 0;
-        align-self: flex-start;
+        translate: -4px 0;
     }
 
     .site-footer .page-footer__yeti-wrap .sprite-anim {
         transform: none;
-    }
-
-    /* The label goes above him, so it stays out of the gap before the player. */
-    .site-footer .page-footer__yeti-wrap .page-footer__yeti-badge {
-        top: auto;
-        right: auto;
-        bottom: calc(100% + 0.25rem);
-        left: 50%;
-        transform: translateX(-50%);
     }
 }
