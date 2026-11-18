@@ -501,7 +501,7 @@ Pass the flag on `branch` / `add` / `push` / `deploy` (or answer the prompt). Th
 | `corn push` | Push current branch; open or reuse a PR **into `preview`**. |
 | `corn deploy` | If `preview` is ahead of `main` **and checks are green**, open/merge the release PR `preview` → `main`. `--pr-only` stops before merge; `--dry-run` prints intent. |
 
-You still **merge feature PRs into `preview` in GitHub** yourself. `corn deploy` only promotes already-merged preview work to production when checks pass — it does not auto-merge feature branches.
+You still **merge feature PRs into `preview` in GitHub** yourself. `corn deploy` only promotes already-merged preview work to production when checks pass — it does not auto-merge feature branches. A failed GitHub read stops the promote. With no release PR open, a legacy status of pending and zero statuses defers to check runs, and zero check runs in that case waits.
 
 **PR base must be `preview`.** GitHub’s default compare URL targets `main` (the default branch). Prefer `corn push`, or open `compare/preview...<branch>?expand=1`. Cadence: land many feature PRs on `preview` through the month; one `corn deploy` (`preview` → `main`) when you want production.
 

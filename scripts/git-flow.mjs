@@ -26,7 +26,7 @@ import {
   MACHINES,
   batchAcceptHasWords,
   findSecretPaths,
-  judgeCheckRuns,
+  judgePreviewCommit,
   judgePrChecks,
   mmddyy,
   parseMachineFlags,
@@ -147,7 +147,7 @@ function nextUpdateBranch() {
     .map((s) => s.trim().replace(new RegExp(`^${REMOTE}/`), ""))
     .filter(Boolean);
   const name = pickUpdateBranchName(base, new Set([...local, ...remote]));
-  if (!name) die("Too many update-* branches for today.");
+  if (!name) throw new Error("Too many update-* branches for today.");
   return name;
 }
 
@@ -175,8 +175,8 @@ function updatePreviewFromMain() {
     { allowFail: true, stdio: "inherit" }
   );
   if (r.status !== 0) {
-    die(
-      `Could not merge ${PRODUCTION} into ${INTEGRATION}. Resolve conflicts, then re-run.`
+    throw new Error(
+      `Could not merge ${PRODUCTION} into ${INTEGRATION}. You are on ${INTEGRATION} with that merge unfinished. Finish it (git commit) or abort it (git merge --abort) before re-running.`
     );
   }
   // Keep remote preview current when this machine can push it (no force).
@@ -246,7 +246,7 @@ function stashPop() {
     stdio: "inherit",
   });
   if (r.status !== 0) {
-    die(
+    throw new Error(
       "stash pop hit conflicts. Fix files, then `git add` / finish the merge.\n" +
         "If the stash entry remains: git stash list"
     );
@@ -300,11 +300,8 @@ async function cmdAdd(args = []) {
           stdio: "inherit",
         });
         if (merge.status !== 0) {
-          die(
-            `Merge from ${INTEGRATION} failed. Resolve conflicts, then re-run corn add.\n` +
-              (stashed
-                ? "Your work may still be in: git stash list (corn-add-sync)"
-                : "")
+          throw new Error(
+            `Merge from ${INTEGRATION} failed. Resolve the conflicts, then re-run corn add.`
           );
         }
       }
@@ -472,7 +469,7 @@ function previewChecksGreen() {
     return { ...judgePrChecks(checks.status, out), prNum };
   }
 
-  // No PR yet — inspect latest commit status on preview via API.
+  // No PR yet — legacy combined status, then check runs. A failed read blocks.
   const sha = gitOut("rev-parse", `${REMOTE}/${INTEGRATION}`);
   const rollup = run(
     "gh",
@@ -480,32 +477,43 @@ function previewChecksGreen() {
       "api",
       `repos/littlepriests/comeholyghost/commits/${sha}/status`,
       "--jq",
-      ".state"
+      "{state:.state,total:.total_count}"
     ],
     { allowFail: true }
   );
-  const state = (rollup.stdout || "").trim();
-  if (state === "success" || state === "") {
-    // Empty often means no legacy status API checks; Netlify may only use check-runs.
-    const runs = run(
-      "gh",
-      [
-        "api",
-        `repos/littlepriests/comeholyghost/commits/${sha}/check-runs`,
-        "--jq",
-        "[.check_runs[] | {name, status, conclusion}]"
-      ],
-      { allowFail: true }
-    );
-    let list = [];
-    try {
-      list = JSON.parse(runs.stdout || "[]");
-    } catch {
-      list = [];
-    }
-    return { ...judgeCheckRuns(list), prNum: null };
+  const runs = run(
+    "gh",
+    [
+      "api",
+      `repos/littlepriests/comeholyghost/commits/${sha}/check-runs`,
+      "--jq",
+      "[.check_runs[] | {name, status, conclusion}]"
+    ],
+    { allowFail: true }
+  );
+  const status = parseGhJson(rollup);
+  const list = parseGhJson(runs);
+  return {
+    ...judgePreviewCommit({
+      statusOk: status !== null && typeof status === "object" && !Array.isArray(status),
+      state: status && status.state,
+      total: status && status.total,
+      runsOk: Array.isArray(list),
+      runs: Array.isArray(list) ? list : [],
+    }),
+    prNum: null,
+  };
+}
+
+function parseGhJson(result) {
+  if (!result || result.status !== 0) return null;
+  const text = (result.stdout || "").trim();
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
   }
-  return { ok: false, detail: `preview commit status: ${state}`, prNum: null };
 }
 
 function batchAcceptText(rev) {
