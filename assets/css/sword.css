@@ -28,11 +28,12 @@
     pointer-events: none;
 }
 
-/* Particle origin: where the blade exits the figure. Re-tune left/top if the image changes. */
+/* Particle origin: where the blade exits the back. Re-tune left/top if the image changes.
+   Blade sits left of center (dress trails right); ~36.5% / 44% on backdrop-bottom-right.webp. */
 .sword-figure__wound {
     position: absolute;
-    left: 50%;
-    top: 42%;
+    left: 36.5%;
+    top: 44%;
     width: 0;
     height: 0;
     overflow: visible;
